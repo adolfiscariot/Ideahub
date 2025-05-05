@@ -1,41 +1,139 @@
+using api.Data;
+using api.Models;
+using api.Constants;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+//Cors allowed origins
+var AllowedOrigins = "AllowedOrigins";
+
+//1. Create the builder
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+//2. Add Services
+//2.1 Controllers Service
+builder.Services.AddControllers();
 
+//2.2 EF Core Service
+var connectionString = builder.Configuration.GetConnectionString("IdeahubString")
+    ?? throw new Exception("Connection String Not Found!");
+
+builder.Services.AddDbContext<IdeahubDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
+
+//2.3 Identity Service
+builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
+    {
+        //Password Settings
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        //User Settings
+        options.User.RequireUniqueEmail = true;
+        //Sign In Settings
+        options.SignIn.RequireConfirmedEmail = true;
+    })
+    .AddEntityFrameworkStores<IdeahubDbContext>()
+    .AddDefaultTokenProviders();
+
+//2.4 Authentication Service
+var JwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new Exception("JWT Key Not Found!");
+
+builder.Services.AddAuthentication(options => 
+{
+    //Use Jwt as default token for authentication & challenges
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            //Validate token issuer, audience and signature
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
+
+            ValidateLifetime = true
+        };
+    });
+
+//2.5 Authorization Service
+builder.Services.AddAuthorization(options =>
+{
+    //SuperAdmin only can access stuff
+    options.AddPolicy("SuperAdminOnly", policy =>
+        policy.RequireRole(RoleConstants.SuperAdmin));
+
+    //GroupAdmin (&SuperAdmin) can access stuff
+    options.AddPolicy("GroupAdminOnly", policy =>
+        policy.RequireAssertion(context => 
+            context.User.IsInRole(RoleConstants.SuperAdmin) ||
+            (context.User.IsInRole(RoleConstants.GroupAdmin) &&
+             context.User.HasClaim(c => c.Type == "GroupId")
+            )
+        )
+    );
+});
+
+//2.6 CORS Service
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(AllowedOrigins, policy =>
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+    );
+});
+
+//3. Build the app
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//Seed Roles at App Startup
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new [] {RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser};
+
+    foreach(var role in roles)
+    {
+        if(!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+
+//4. Add MiddleWare
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseMigrationsEndPoint();
+} else
+{ 
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
-
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseCors(AllowedOrigins);
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
+//5. Run the App
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

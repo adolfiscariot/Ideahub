@@ -10,7 +10,7 @@ public class Idea
     public int Id {get; set;}
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(256)]
     public string Title {get; set;} = string.Empty;
 
     [Required]
@@ -18,6 +18,9 @@ public class Idea
     public string Description {get; set;} = string.Empty;
 
     public bool IsPromotedToProject {get; set;}
+
+    public bool IsDeleted {get; set;} = false;
+    public DateTime? DeletedAt {get; set;}
     
     [Required]
     [DataType(DataType.DateTime)]
@@ -32,14 +35,14 @@ public class Idea
     
     [Required]
     [ForeignKey ("User")]
-    public int UserId {get; set;}
+    public string UserId {get; set;} = string.Empty;
     
     [Required]
     [ForeignKey ("Group")]
     public int GroupId {get; set;}
 
     //Navigation Properties
-    public User User {get; set;} = null!;
+    public IdeahubUser User {get; set;} = null!;
     public Group Group {get; set;} = null!;
     public ICollection<Project> Projects {get; set;} = new List<Project>();
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();

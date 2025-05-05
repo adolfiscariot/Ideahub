@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,6 +8,9 @@ namespace api.Models;
 public class Vote
 {
     public int Id {get; set;}
+
+    public bool IsDeleted {get; set;} = false;
+    public DateTime? DeletedAt {get; set;}
 
     [Required]
     [DataType (DataType.DateTime)]    
@@ -22,6 +26,6 @@ public class Vote
 
 
     //Navigation Properties
-    public User User {get; set;} = null!;
+    public IdeahubUser User {get; set;} = null!;
     public Idea Idea {get; set;} = null!;
 }

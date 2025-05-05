@@ -7,10 +7,10 @@ namespace api.Models;
 public class UserGroup 
 {
     [ForeignKey ("User")]
-    public string UserId {get; set;} = string.Empty;
+    public string? UserId {get; set;} = string.Empty;
 
     [ForeignKey ("Group")]
-    public int GroupId {get; set;}
+    public int? GroupId {get; set;}
 
     [Required]
     [DataType (DataType.DateTime)]
@@ -18,6 +18,6 @@ public class UserGroup
 
 
     //Navigation Properties
-    public User User {get; set;} = null!;
-    public Group Group {get; set;} = null!;
+    public IdeahubUser? User {get; set;} = null!;
+    public Group? Group {get; set;} = null!;
 }

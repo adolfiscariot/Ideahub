@@ -10,7 +10,7 @@ public class Project
     public int Id {get; set;}
 
     [Required]
-    [MaxLength (200)]
+    [MaxLength (256)]
     public string Title {get; set;} = string.Empty;
 
     [Required]
@@ -18,7 +18,7 @@ public class Project
     public string Description {get; set;} = string.Empty;
 
     [Required]
-    public ProjectStatus Status {get; set;} = ProjectStatus.Active;
+    public ProjectStatus Status {get; set;} = ProjectStatus.Planning;
 
     [Required]
     [DataType(DataType.DateTime)]
@@ -26,6 +26,9 @@ public class Project
 
     [DataType(DataType.DateTime)]
     public DateTime? EndedAt {get; set;}
+
+    public bool IsDeleted {get; set;} = false;
+    public DateTime? DeletedAt {get; set;}
 
     [Required]
     [ForeignKey ("CreatedByUser")]
@@ -36,17 +39,19 @@ public class Project
     public string OverseenByUserId {get; set;} = string.Empty;
 
     [Required]
+    [ForeignKey ("Idea")]
     public int IdeaId {get; set;}
 
     [Required]
+    [ForeignKey ("Group")]
     public int GroupId {get; set;}
 
 
     //Navigation Properties
     public Idea Idea {get; set;} = null!;
     public Group Group {get; set;} = null!;
-    public User CreatedByUser {get; set;} = null!;
-    public User OverseenByUser {get; set;} = null!;
+    public IdeahubUser CreatedByUser {get; set;} = null!;
+    public IdeahubUser OverseenByUser {get; set;} = null!;
 }
 
 public enum ProjectStatus
