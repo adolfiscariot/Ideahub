@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -96,6 +97,23 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()
     );
+});
+
+//2.7 Customizing ModelState Validation
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+                    .Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+        var response = ApiResponse.Fail("Model State Validation Failed", errors);
+
+        return new BadRequestObjectResult(response);
+    };
 });
 
 //3. Build the app
