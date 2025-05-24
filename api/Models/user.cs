@@ -25,5 +25,6 @@ public class IdeahubUser : IdentityUser
     public ICollection<Project> ProjectsCreated {get; set;} = new List<Project>();
     public ICollection<Project> ProjectsOverseen {get; set;} = new List<Project>();
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();
-    public ICollection<Group> GroupsCreated {get; set;}  = new List<Group>();    
+    public ICollection<Group> GroupsCreated {get; set;}  = new List<Group>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

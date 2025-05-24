@@ -12,13 +12,14 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Project> Projects {get; set;}
     public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
     public DbSet<Vote> Votes {get; set;}
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder); //ensure Identity's configurations are added before our own
 
         //Group configurations
-        builder.Entity<Group>(g => 
+        builder.Entity<Group>(g =>
         {
             g.HasKey(g => g.Id);
 
@@ -44,7 +45,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             g.Property(g => g.DeletedAt)
                 .HasColumnName("DeletedAt");
-            
+
             g.Property(g => g.IsDeletedBy)
                 .HasColumnName("DeletedByUserId");
 
@@ -74,7 +75,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.Property(i => i.Title)
                 .HasMaxLength(256)
                 .IsRequired();
-        
+
             i.Property(i => i.Description)
                 .IsRequired()
                 .HasColumnType("text");
@@ -84,14 +85,14 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             i.Property(i => i.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
-                .ValueGeneratedOnAdd(); 
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
 
             i.Property(i => i.UpdatedAt)
                 .IsRequired()
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
                 .ValueGeneratedOnAddOrUpdate();
-            
+
             i.Property(i => i.Status)
                 .IsRequired()
                 .HasMaxLength(24)
@@ -121,7 +122,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.HasMany(i => i.Votes)
                 .WithOne(v => v.Idea)
                 .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its votes go with it.
-        
+
             //Index
             i.HasIndex(i => i.Title);
             i.HasIndex(i => i.Status);
@@ -131,9 +132,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         });
 
         //Project Configuration
-        builder.Entity<Project>(p => 
+        builder.Entity<Project>(p =>
         {
-            p.HasKey(p=> p.Id);
+            p.HasKey(p => p.Id);
 
             //Properties
             p.Property(p => p.Title)
@@ -152,9 +153,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             p.Property(p => p.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
-                .ValueGeneratedOnAdd(); 
-            
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
             p.Property(p => p.EndedAt)
                 .HasColumnType("timestamp with time zone");
 
@@ -183,7 +184,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithMany(u => u.ProjectsOverseen)
                 .HasForeignKey(p => p.OverseenByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             //Indexes
             p.HasIndex(p => p.Title);
             p.HasIndex(p => p.Status);
@@ -199,9 +200,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             u.ToTable("Users");
 
             u.Property(u => u.CreatedAt)
-                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
-                .ValueGeneratedOnAdd(); 
-            
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
             u.Property(u => u.LastLoginAt)
                 .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
@@ -223,9 +224,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
 
         //UserGroup Configuration
-        builder.Entity<UserGroup>(ug => 
+        builder.Entity<UserGroup>(ug =>
         {
-            ug.HasKey(ug => new{ug.UserId, ug.GroupId});
+            ug.HasKey(ug => new { ug.UserId, ug.GroupId });
 
             //Properties
             ug.Property(ug => ug.JoinedAt)
@@ -279,9 +280,37 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .OnDelete(DeleteBehavior.Cascade); //User goes all their votes go with them
 
             //Indexes
-            v.HasIndex(v => new{v.UserId, v.IdeaId}).IsUnique(); //No duplicate votes for each idea
+            v.HasIndex(v => new { v.UserId, v.IdeaId }).IsUnique(); //No duplicate votes for each idea
         });
-        
+
+        //RefreshToken configuration
+        builder.Entity<RefreshToken>(rti =>
+        {
+            rti.HasKey(rti => rti.TokenId);
+
+            //Properties
+            rti.Property(rti => rti.Token)
+                .IsRequired();
+
+            rti.Property(rti => rti.RefreshTokenExpiry)
+                .IsRequired()
+                .HasColumnType("timestamp with time zone");
+
+            rti.Property(rti => rti.HasExpired)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            //Foreign key
+            rti.HasOne(rti => rti.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rti => rti.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //Index
+            rti.HasIndex(rti => rti.Token)
+                .IsUnique();
+        });
+
         //Rename Roles table
         builder.Entity<IdentityRole>(r =>
         {

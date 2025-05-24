@@ -1,5 +1,6 @@
 using api.Data;
 using api.Models;
+using api.Helpers;
 using api.Constants;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using api.Services;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -46,6 +49,9 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
 var JwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new Exception("JWT Key Not Found!");
 
+var JwtAuthority = builder.Configuration["JwtIssuer"]
+    ?? throw new Exception("Jwt Issuer Not Found");
+
 builder.Services.AddAuthentication(options => 
 {
     //Use Jwt as default token for authentication & challenges
@@ -55,6 +61,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
+        options.Authority = JwtAuthority;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             //Validate token issuer, audience and signature
@@ -115,6 +122,17 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return new BadRequestObjectResult(response);
     };
 });
+
+//2.8 Email Sender
+builder.Services.AddTransient<api.Helpers.EmailSender, EmailSender>();
+
+//2.9 Link the SendGridSettings class to the "SendGrid" user secrets
+builder.Services.Configure<SendGridSettings>(
+    builder.Configuration.GetSection("SendGrid"));
+
+//2.10 IToken Service
+builder.Services.AddScoped<ITokenService>();
+
 
 //3. Build the app
 var app = builder.Build();
