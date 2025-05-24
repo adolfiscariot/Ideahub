@@ -49,7 +49,7 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
 var JwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new Exception("JWT Key Not Found!");
 
-var JwtAuthority = builder.Configuration["JwtIssuer"]
+var JwtAuthority = builder.Configuration["Jwt:Issuer"]
     ?? throw new Exception("Jwt Issuer Not Found");
 
 builder.Services.AddAuthentication(options => 
@@ -62,6 +62,7 @@ builder.Services.AddAuthentication(options =>
     .AddJwtBearer(options =>
     {
         options.Authority = JwtAuthority;
+        options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             //Validate token issuer, audience and signature
@@ -124,14 +125,14 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 //2.8 Email Sender
-builder.Services.AddTransient<api.Helpers.EmailSender, EmailSender>();
+builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 //2.9 Link the SendGridSettings class to the "SendGrid" user secrets
 builder.Services.Configure<SendGridSettings>(
     builder.Configuration.GetSection("SendGrid"));
 
 //2.10 IToken Service
-builder.Services.AddScoped<ITokenService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
 //3. Build the app

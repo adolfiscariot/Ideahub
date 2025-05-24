@@ -2,7 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using api.Helpers;
 using api.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,9 +16,9 @@ public class TokenService : ITokenService
     //configuration to access user secrets
     private readonly IConfiguration _configuration;
     private readonly UserManager<IdeahubUser> _userManager;
-    private readonly Logger<TokenService> _logger;
+    private readonly ILogger<TokenService> _logger;
 
-    public TokenService(IConfiguration configuration, UserManager<IdeahubUser> userManager, Logger<TokenService> logger)
+    public TokenService(IConfiguration configuration, UserManager<IdeahubUser> userManager, ILogger<TokenService> logger)
     {
         _configuration = configuration;
         _userManager = userManager;
@@ -39,8 +41,14 @@ public class TokenService : ITokenService
 
         var roles = await _userManager.GetRolesAsync(user);
 
+        if (string.IsNullOrWhiteSpace(user.Email))
+        {
+            _logger.LogError("Email not found");
+            throw new Exception("Email not found") ;
+        }
+        
         //data to be used in the token's payload
-        var claims = new List<Claim>
+            var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Iss, JwtIssuer),
             new Claim(JwtRegisteredClaimNames.Aud, JwtAudience),
@@ -125,6 +133,9 @@ public class TokenService : ITokenService
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
+        var JwtKey = _configuration["Jwt:Key"]
+            ?? throw new Exception("JWT Key Not Found!");
+
         //define token validation parameters
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -136,7 +147,7 @@ public class TokenService : ITokenService
             ValidAudience = _configuration["Jwt:Audience"],
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
 
             ValidateLifetime = false //allow expired tokens
         };
@@ -151,10 +162,10 @@ public class TokenService : ITokenService
             _logger.LogInformation("Token Validated");
             return principal;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            _logger.LogWarning("Invalid token: {Message}", ex.Message);
-            return null;
+            _logger.LogWarning("Invalid token: {Message}", e.Message);
+            return null!; //Uses the null forgiving operator(!) aka "I know this is null but trust me its ok"
         }
     }
 

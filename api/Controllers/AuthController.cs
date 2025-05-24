@@ -106,7 +106,7 @@ public class AuthController : ControllerBase
             //if it fails rollback the registration
             catch (Exception e)
             {
-                _logger.LogError("Confirmation Email Not Sent");
+                _logger.LogError("Confirmation Email Not Sent: {Message}", e.Message);
                 await _userManager.DeleteAsync(user);
                 return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email", new List<string>()));
             }
@@ -191,6 +191,10 @@ public class AuthController : ControllerBase
             var message = $"Use this link to reconfirm your email: {confirmationLink}";
 
             //send token via email
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                return BadRequest(ApiResponse.Fail("Email not found", new List<string>()));
+            }
             await _emailSender.SendEmailAsync(
                 user.Email,
                 subject,
@@ -238,7 +242,7 @@ public class AuthController : ControllerBase
             //store refresh token
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
 
-            _logger.LogInformation("User {userEmail} just logged in", user.Email);
+            _logger.LogInformation("User {userEmail} just logged in at {time}", user.Email, DateTime.UtcNow);
 
             //if login succeeded return this
             return Ok(new TokenResponse
@@ -269,9 +273,17 @@ public class AuthController : ControllerBase
 
         //get claims from token
         var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
+        if (principal.Identity == null)
+        {
+            return BadRequest(ApiResponse.Fail("Couldn't get principal's identity from expired token", new List<string>()));
+        }
         var username = principal.Identity.Name;
 
         //use the username claim to validate token
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return BadRequest(ApiResponse.Fail("Couldn't get user's name", new List<string>()));
+        }
         var user = await _userManager.FindByNameAsync(username);
         if (user == null)
         {
@@ -327,15 +339,17 @@ public class AuthController : ControllerBase
             {
                 await _tokenService.RevokeRefreshTokenAsync(userId);
                 _logger.LogInformation("Revoked Refresh Token");
-            }
 
-            _logger.LogInformation("User logged out");
+                var user = await _userManager.FindByIdAsync(userId);
+                var userEmail = user?.Email ?? $"User with ID {userId}'s email not found";
+                _logger.LogInformation("User {userEmail} logged out", userEmail);
+            }
             return Ok(ApiResponse.Ok("User Logged Out"));
         }
         catch (Exception e)
         {
-            _logger.LogWarning("User logout failed!");
-            return StatusCode(500, ApiResponse.Fail($"Logout failed: {e}", new List<string>()));
+            _logger.LogError("User logout failed: {e}", e);
+            return StatusCode(500, ApiResponse.Fail("Logout failed", new List<string>()));
         }
     }
 }

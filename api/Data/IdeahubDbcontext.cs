@@ -300,6 +300,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            rti.HasQueryFilter(rti => !rti.User.IsDeleted); //if the user is deleted get rid of their refresh tokens too
+
             //Foreign key
             rti.HasOne(rti => rti.User)
                 .WithMany(u => u.RefreshTokens)
