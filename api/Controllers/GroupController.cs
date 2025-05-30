@@ -45,7 +45,7 @@ public class GroupController : ControllerBase
         if (user == null)
         {
             _logger.LogError("Group creation failed. User not found");
-           return BadRequest(ApiResponse.Fail("Group creation failed. User Not Found", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Group creation failed. User Not Found", new List<string>()));
         }
         //Create the group
         var group = new Group
@@ -87,7 +87,7 @@ public class GroupController : ControllerBase
     }
 
     //Delete Group
-    [Authorize(Policy="GroupAdminOnly")]
+    [Authorize(Policy = "GroupAdminOnly")]
     [HttpDelete("{groupId}")]
     public async Task<IActionResult> DeleteGroup(int groupId)
     {
@@ -261,5 +261,47 @@ public class GroupController : ControllerBase
             }),
             group.CreatedAt
         }));
+    }
+
+    //View group requests
+    [Authorize(Policy = "GroupAdminOnly")]
+    [HttpGet("view-requests")]
+    public async Task<IActionResult> ViewRequests(int groupId)
+    {
+        //Fetch user
+        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "User's email not found";
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            _logger.LogError("User Id is null and cant accept requests");
+            return NotFound(ApiResponse.Fail("User ID is null", new List<string>()));
+        }
+
+        //Fetch group
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null)
+        {
+            _logger.LogError("Group is null");
+            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+        }
+
+        //Check if user is group admin
+        var groupAdmin = group.CreatedByUserId;
+        if (userId != groupAdmin)
+        {
+            _logger.LogInformation("User is not group admin");
+            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
+        }
+
+        //show pending requests if they're not null
+        var pendingRequests = await _context.GroupMembershipRequests.Where(gmr => gmr.GroupId == groupId && gmr.Status.ToString() == "Pending").ToListAsync();
+        if (pendingRequests == null)
+        {
+            _logger.LogError("There are no pending requests for group: {groupName} from user {userEmail}", group.Name, userEmail);
+            return NotFound(ApiResponse.Fail("No pending requests", new List<string>()));
+        }
+
+        _logger.LogInformation("The following pending requests exist: {pendingRequests}", pendingRequests);
+        return Ok(ApiResponse.Ok("Pending requests found", pendingRequests));
     }
 }

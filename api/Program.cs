@@ -106,9 +106,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("GroupAdminOnly", policy =>
         policy.RequireAssertion(context => 
             context.User.IsInRole(RoleConstants.SuperAdmin) ||
-            (context.User.IsInRole(RoleConstants.GroupAdmin) &&
-             context.User.HasClaim(c => c.Type == "GroupId")  
-            )
+            context.User.IsInRole(RoleConstants.GroupAdmin)
         )
     );
 });

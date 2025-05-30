@@ -9,6 +9,7 @@ public class IdeahubDbContextFactory : IDesignTimeDbContextFactory<IdeahubDbCont
     {
         //manually configure iConfiguation to get connectionString env variable
         var configuration = new ConfigurationBuilder()
+                .AddUserSecrets<IdeahubDbContextFactory>()
                 .AddEnvironmentVariables()
                 .Build();
 
