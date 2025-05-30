@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using api.Services;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -49,8 +52,10 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
 var JwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new Exception("JWT Key Not Found!");
 
-var JwtAuthority = builder.Configuration["Jwt:Issuer"]
-    ?? throw new Exception("Jwt Issuer Not Found");
+//Convert key from hex string to byte array
+var key = JwtHexToBytes.FromHexToBytes(JwtKey);
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 builder.Services.AddAuthentication(options => 
 {
@@ -61,8 +66,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer(options =>
     {
-        options.Authority = JwtAuthority;
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = false; //SHOULD BE REMOVED EVENTUALLY
         options.TokenValidationParameters = new TokenValidationParameters
         {
             //Validate token issuer, audience and signature
@@ -73,9 +77,21 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = builder.Configuration["Jwt:Audience"],
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(key),
 
-            ValidateLifetime = true
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+
+            //Map the role claim type
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"Auth failed: {ctx.Exception}");
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -91,7 +107,7 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAssertion(context => 
             context.User.IsInRole(RoleConstants.SuperAdmin) ||
             (context.User.IsInRole(RoleConstants.GroupAdmin) &&
-             context.User.HasClaim(c => c.Type == "GroupId")
+             context.User.HasClaim(c => c.Type == "GroupId")  
             )
         )
     );

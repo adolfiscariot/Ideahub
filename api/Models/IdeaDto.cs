@@ -1,0 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace api.Models;
+
+public class IdeaDto
+{
+    [Required]
+    [MaxLength(256)]
+    public string Title {get; set;} = string.Empty;
+
+    [Required]
+    [Column (TypeName = "text")]
+    public string Description {get; set;} = string.Empty;
+
+}

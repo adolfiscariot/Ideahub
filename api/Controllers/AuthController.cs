@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Cryptography;
 using api.Data;
 using System.Runtime.Intrinsics.Arm;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
 
@@ -27,6 +29,7 @@ public class AuthController : ControllerBase
     private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
+    private readonly IdeahubDbContext _context;
     //constructor
     public AuthController(
         UserManager<IdeahubUser> userManager,
@@ -34,7 +37,8 @@ public class AuthController : ControllerBase
         ILogger<AuthController> logger,
         IEmailSender emailSender,
         IConfiguration configuration,
-        ITokenService tokenService
+        ITokenService tokenService,
+        IdeahubDbContext context
         )
     {
         _userManager = userManager;
@@ -43,6 +47,7 @@ public class AuthController : ControllerBase
         _emailSender = emailSender;
         _configuration = configuration;
         _tokenService = tokenService;
+        _context = context;
     }
 
 
@@ -222,7 +227,6 @@ public class AuthController : ControllerBase
             _logger.LogError($"Email {loginDto.Email} tried logging in with a non-existent email");
             return BadRequest(ApiResponse.Fail("Invalid Credentials", new List<string>()));
         }
-        ;
 
         //check email confirmation
         if (!user.EmailConfirmed)
@@ -242,15 +246,15 @@ public class AuthController : ControllerBase
             //store refresh token
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
 
-            _logger.LogInformation("User {userEmail} just logged in at {time}", user.Email, DateTime.UtcNow);
+            _logger.LogInformation("User {userEmail} just logged in at {time} GMT", user.Email, DateTime.UtcNow);
 
             //if login succeeded return this
-            return Ok(new TokenResponse
+            return Ok(ApiResponse.Ok("Successful login", new TokenResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
-            });
+            }));
         }
 
         //if login failed return this
@@ -258,41 +262,60 @@ public class AuthController : ControllerBase
         return BadRequest(ApiResponse.Fail("Username or Password is incorrect", new List<string>()));
     }
 
-    //refresh the token
+    //refresh the access token
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh(TokenResponse token)
+    public async Task<IActionResult> RefreshAccessToken(TokenResponse token)
     {
         if (token == null)
         {
+            _logger.LogError("The token provided in the method's argument is null");
             return BadRequest(ApiResponse.Fail("Invalid Access Token or Refresh Token", new List<string>()));
         }
 
-        //extract the tokens
-        string accessToken = token.AccessToken;
-        string refreshToken = token.RefreshToken;
-
-        //get claims from token
+        //get claims from expired token
         var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
         if (principal.Identity == null)
         {
+            _logger.LogError("Couldn't get principal's identity from expired token");
             return BadRequest(ApiResponse.Fail("Couldn't get principal's identity from expired token", new List<string>()));
         }
-        var username = principal.Identity.Name;
 
-        //use the username claim to validate token
-        if (string.IsNullOrWhiteSpace(username))
+        //Find the user based on the user id in the access token's payload
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
         {
-            return BadRequest(ApiResponse.Fail("Couldn't get user's name", new List<string>()));
+            _logger.LogError("User ID not found");
+            return BadRequest(ApiResponse.Fail("Couldn't get user's ID", new List<string>()));
         }
-        var user = await _userManager.FindByNameAsync(username);
+
+        //Eager loading of the user's refresh tokens
+        var user = await _userManager.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u=>u.Id == userId);
+
         if (user == null)
         {
+            _logger.LogError("User is null");
             return BadRequest(ApiResponse.Fail("Invalid access or refresh token", new List<string>()));
         }
-        //validate if refresh token is in user's refresh token list & its not expired
-        var storedRefreshToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == token.RefreshToken && !rt.HasExpired && rt.RefreshTokenExpiry > DateTime.UtcNow);
+
+        /***
+            The refresh token is encoded and hashed before being stored so we have to do the same
+            to the refresh token provided at login before comparing it to the stored token
+        ***/
+
+        var rawRefreshToken = token.RefreshToken;
+        var encodedRefreshToken  = Encoding.UTF8.GetBytes(rawRefreshToken);
+        var hashedRefreshToken = Convert.ToBase64String(SHA256.HashData(encodedRefreshToken));
+
+        var storedRefreshToken = user.RefreshTokens.FirstOrDefault(
+            rt => rt.Token == hashedRefreshToken
+            && !rt.HasExpired
+            && rt.RefreshTokenExpiry > DateTime.UtcNow);
+
+
         if (storedRefreshToken == null)
         {
+            _logger.LogError("There are no vaild stored refresh tokens");
             return BadRequest(ApiResponse.Fail("Invalid access or refresh token", new List<string>()));
         }
 
@@ -308,13 +331,15 @@ public class AuthController : ControllerBase
             UserId = user.Id
         };
 
+        _logger.LogInformation("New refresh token created");
+
         //add new refresh token to the user's list of refresh tokens and save changes
         user.RefreshTokens.Add(newRefreshToken);
         await _userManager.UpdateAsync(user);
 
 
         //create new access token then return it and the refresh token too
-        var newAccessToken = _tokenService.GenerateRefreshToken();
+        var newAccessToken = await _tokenService.CreateAccessTokenAsync(user);
 
         return Ok(new
         {
@@ -324,6 +349,7 @@ public class AuthController : ControllerBase
     }
 
     //logout route
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
@@ -335,15 +361,18 @@ public class AuthController : ControllerBase
 
             //revoke jwt token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null)
+            //var userId = User.FindFirstValue("sub");
+            if (userId == null)
             {
-                await _tokenService.RevokeRefreshTokenAsync(userId);
-                _logger.LogInformation("Revoked Refresh Token");
-
-                var user = await _userManager.FindByIdAsync(userId);
-                var userEmail = user?.Email ?? $"User with ID {userId}'s email not found";
-                _logger.LogInformation("User {userEmail} logged out", userEmail);
+                _logger.LogError("Logout failed. User Id not found");
+                return NotFound(ApiResponse.Fail("Logout failed. User Id not found", new List<string>()));    
             }
+            await _tokenService.RevokeRefreshTokenAsync(userId);
+            _logger.LogInformation("Revoked Refresh Token");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            var userEmail = user?.Email ?? $"User with ID {userId}'s email not found";
+            _logger.LogInformation("User {userEmail} logged out", userEmail);
             return Ok(ApiResponse.Ok("User Logged Out"));
         }
         catch (Exception e)

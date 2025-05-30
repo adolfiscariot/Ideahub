@@ -16,10 +16,10 @@ public class Group
         [Required]
         [Column(TypeName = "text")]
         public string Description {get; set;} = string.Empty;
-        
+
         [Required]
-        public bool IsActive {get; set;}
-        
+        public bool IsActive { get; set; } = true;
+
         [Required]
         public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
 
@@ -36,4 +36,5 @@ public class Group
         public ICollection<Idea> Ideas {get; set;} = new List<Idea>();
         public ICollection<Project> Projects {get; set;} = new List<Project>();
         public IdeahubUser CreatedByUser {get; set;} = null!;
+        public ICollection<GroupMembershipRequest> GroupMembershipRequests {get; set;} = new List<GroupMembershipRequest>();
 }

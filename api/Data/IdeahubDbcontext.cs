@@ -13,6 +13,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
     public DbSet<Vote> Votes {get; set;}
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -311,6 +312,41 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             //Index
             rti.HasIndex(rti => rti.Token)
                 .IsUnique();
+        });
+
+        builder.Entity<GroupMembershipRequest>(gmr =>
+        {
+            gmr.HasKey(gmr => gmr.Id);
+
+            //Properties
+            gmr.Property(gmr => gmr.Status)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(Status.Pending);
+
+            gmr.Property(gmr => gmr.RequestedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+            gmr.Property(gmr => gmr.AcceptedOrRejectedAt)
+                .HasColumnType("timestamp with time zone");
+
+            gmr.HasQueryFilter(gmr => !gmr.Group.IsDeleted); //don't show group membership requests if a group is deleted 
+
+            //Foreign Keys
+            gmr.HasOne(gmr => gmr.User)
+                .WithMany(u => u.GroupMembershipRequests)
+                .HasForeignKey(gmr => gmr.UserId)
+                .OnDelete(DeleteBehavior.Cascade); //if a user goes so does all their requests
+
+            gmr.HasOne(gmr => gmr.Group)
+                .WithMany(g => g.GroupMembershipRequests)
+                .HasForeignKey(gmr => gmr.GroupId)
+                .OnDelete(DeleteBehavior.Cascade); //if a group goes so does all its requests
+
+            //Index
+            gmr.HasIndex(gmr => gmr.UserId);
+
         });
 
         //Rename Roles table

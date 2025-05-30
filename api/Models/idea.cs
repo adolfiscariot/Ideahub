@@ -17,7 +17,7 @@ public class Idea
     [Column (TypeName = "text")]
     public string Description {get; set;} = string.Empty;
 
-    public bool IsPromotedToProject {get; set;}
+    public bool IsPromotedToProject { get; set; } = false;
 
     public bool IsDeleted {get; set;} = false;
     public DateTime? DeletedAt {get; set;}

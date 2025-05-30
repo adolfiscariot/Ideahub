@@ -31,6 +31,9 @@ public class TokenService : ITokenService
         var JwtKey = _configuration["Jwt:Key"]
             ?? throw new Exception("JWT Key Not Found!");
 
+        //Convert key from hex string to byte array
+        var secretKey = JwtHexToBytes.FromHexToBytes(JwtKey);
+
         var JwtIssuer = _configuration["Jwt:Issuer"]
             ?? throw new Exception("Jwt Issuer Not Found");
 
@@ -48,14 +51,14 @@ public class TokenService : ITokenService
         }
         
         //data to be used in the token's payload
-            var claims = new List<Claim>
+        var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.DisplayName),
             new Claim(JwtRegisteredClaimNames.Iss, JwtIssuer),
             new Claim(JwtRegisteredClaimNames.Aud, JwtAudience),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Name, user.DisplayName)
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         //add roles to claims
@@ -64,8 +67,8 @@ public class TokenService : ITokenService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        //create secret key for signing the token
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey));
+        //create secret key for signing the token. 
+        var key = new SymmetricSecurityKey(secretKey);
 
         //which algorithm to use with which key
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -112,7 +115,7 @@ public class TokenService : ITokenService
             throw new Exception("User Not Found");
         }
 
-        //if all is well hash the token
+        //if all is well hash the token 
         var encodedToken = Encoding.UTF8.GetBytes(refreshToken);
         var hashedToken = Convert.ToBase64String(
             SHA256.HashData(encodedToken)
@@ -123,7 +126,7 @@ public class TokenService : ITokenService
         {
             Token = hashedToken,
             TokenId = Guid.NewGuid().ToString(),
-            RefreshTokenExpiry = expiry,
+            RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
             HasExpired = false
         });
 
@@ -136,6 +139,9 @@ public class TokenService : ITokenService
         var JwtKey = _configuration["Jwt:Key"]
             ?? throw new Exception("JWT Key Not Found!");
 
+        //Convert hex string into byte array
+        var secretKey = JwtHexToBytes.FromHexToBytes(JwtKey);
+
         //define token validation parameters
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -147,7 +153,7 @@ public class TokenService : ITokenService
             ValidAudience = _configuration["Jwt:Audience"],
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey),
 
             ValidateLifetime = false //allow expired tokens
         };
@@ -183,3 +189,4 @@ public class TokenService : ITokenService
         }
     }
 }
+
