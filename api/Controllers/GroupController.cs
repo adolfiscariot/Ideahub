@@ -82,6 +82,11 @@ public class GroupController : ControllerBase
             }
             _logger.LogInformation("User {userEmail} made Group Admin", userEmail);
         }
+
+        //put the user in the group and save changes
+        await _context.UserGroups.AddAsync(new UserGroup { GroupId = group.Id, UserId = user.Id });
+        await _context.SaveChangesAsync();
+
         _logger.LogInformation("New group {groupName} created by {userEmail}", group.Name, userEmail);
         return Ok(ApiResponse.Ok($"New group {group.Name} created by {userEmail}"));
     }
@@ -107,13 +112,6 @@ public class GroupController : ControllerBase
         {
             _logger.LogError("Group with ID '{groupId}' not found", groupId);
             return BadRequest(ApiResponse.Fail("Group not found", new List<string>()));
-        }
-
-        //Check if user is group admin
-        if (userId != group.CreatedByUserId)
-        {
-            _logger.LogError("{userEmail} tried deleting '{groupName}' despite not being Admin", userEmail, group.Name);
-            return Unauthorized(ApiResponse.Fail("User is not the group admin", new List<string>()));
         }
 
         //Let user delete group if they're admin
@@ -283,14 +281,6 @@ public class GroupController : ControllerBase
         {
             _logger.LogError("Group is null");
             return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
-        }
-
-        //Check if user is group admin
-        var groupAdmin = group.CreatedByUserId;
-        if (userId != groupAdmin)
-        {
-            _logger.LogInformation("User is not group admin");
-            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
         }
 
         //show pending requests if they're not null

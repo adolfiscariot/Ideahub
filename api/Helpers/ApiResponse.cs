@@ -21,6 +21,13 @@ public class ApiResponse
         Data = data
     };
 
+    public static ApiResponse Fail(string message) => new() 
+    {
+        Status = false, 
+        Message = message, 
+    };
+
+    //overload the Fail method incase we need to return some errors
     public static ApiResponse Fail(string message, List<string>? errors) => new() 
     {
         Status = false, 
