@@ -36,7 +36,7 @@ public class GroupController : ControllerBase
 
         //Fetch user from database
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("Group creation failed. User ID not found.");
             return BadRequest(ApiResponse.Fail("Group creation failed. User ID Not Found", new List<string>()));
@@ -198,7 +198,7 @@ public class GroupController : ControllerBase
         //Get user info
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User not found");
             return NotFound(ApiResponse.Fail("User Not Found", new List<string>()));
@@ -271,7 +271,7 @@ public class GroupController : ControllerBase
         //Fetch user
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "User's email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null)
+        if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User Id is null and cant accept requests");
             return NotFound(ApiResponse.Fail("User ID is null", new List<string>()));
@@ -294,14 +294,141 @@ public class GroupController : ControllerBase
         }
 
         //show pending requests if they're not null
-        var pendingRequests = await _context.GroupMembershipRequests.Where(gmr => gmr.GroupId == groupId && gmr.Status.ToString() == "Pending").ToListAsync();
+        var pendingRequests = await _context.GroupMembershipRequests
+            .Where(gmr => gmr.GroupId == groupId && gmr.Status.ToString() == "Pending")
+            .ToListAsync();
         if (pendingRequests == null)
         {
             _logger.LogError("There are no pending requests for group: {groupName} from user {userEmail}", group.Name, userEmail);
             return NotFound(ApiResponse.Fail("No pending requests", new List<string>()));
         }
+        var req = new List<string>();
+        foreach (var request in pendingRequests)
+        {
+            _logger.LogInformation("Requests: {userId}", userId);
+            req.Add(userId);
+        }
 
-        _logger.LogInformation("The following pending requests exist: {pendingRequests}", pendingRequests);
-        return Ok(ApiResponse.Ok("Pending requests found", pendingRequests));
+        _logger.LogInformation("The group has {pendingRequestsCount} pending requests", pendingRequests.Count());
+        return Ok(ApiResponse.Ok($"{pendingRequests.Count()} Pending requests found", req));
+    }
+
+    //Accept user's requests
+    [Authorize(Policy = "GroupAdminOnly")]
+    [HttpPost("accept-request")]
+    public async Task<IActionResult> AcceptRequest(int groupId, string requestUserId)
+    {
+        //get group admin's id
+        var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(adminId))
+        {
+            _logger.LogError("Can't accept the request. User ID is null");
+            return Unauthorized(ApiResponse.Fail("User ID not found", new List<string>()));
+        }
+
+        //Find group
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null)
+        {
+            _logger.LogError("Group is null");
+            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+        }
+
+        //Validate group admin
+        var groupAdmin = group.CreatedByUserId;
+        if (adminId != groupAdmin)
+        {
+            _logger.LogInformation("User is not group admin");
+            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
+        }
+
+        //Fetch pending requests from a specific user
+        var userRequest = await _context.GroupMembershipRequests
+            .FirstOrDefaultAsync(gmr =>
+                gmr.GroupId == groupId
+                && gmr.UserId == requestUserId
+                && gmr.Status.ToString() == "Pending");
+
+        if (userRequest == null)
+        {
+            _logger.LogError("No pending user requests found");
+            return NotFound(ApiResponse.Fail("No pending user requests found", new List<string>()));
+        }
+
+        //Accept the request
+        userRequest.Status = Status.Approved;
+
+        //check if user is already in group
+        var isAMember = await _context.UserGroups
+            .AnyAsync(ug =>
+                ug.GroupId == groupId
+                && ug.UserId == requestUserId);
+
+        if (isAMember)
+        {
+            _logger.LogError("User {userEmail} is already a member of group: {groupName}",
+                User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+            return BadRequest(ApiResponse.Fail("User is already a member of the group", new List<string>()));
+        }
+
+        //Add user to group and save
+        _context.UserGroups.Add(new UserGroup{UserId = requestUserId, GroupId = groupId});
+        await _context.SaveChangesAsync();
+
+        _logger.LogError("User {userEmail} accepted to group: {groupName}",
+            User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+        return Ok(ApiResponse.Ok("User accepted to group"));
+    }
+
+    //Reject user's requests
+    [Authorize(Policy = "GroupAdminOnly")]
+    [HttpPost("reject-request")]
+    public async Task<IActionResult> RejectRequest(int groupId, string requestUserId)
+    {
+        //get group admin's id
+        var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(adminId))
+        {
+            _logger.LogError("Can't accept the request. User ID is null");
+            return Unauthorized(ApiResponse.Fail("User ID not found", new List<string>()));
+        }
+
+        //Find group
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group == null)
+        {
+            _logger.LogError("Group is null");
+            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+        }
+
+        //Validate group admin
+        var groupAdmin = group.CreatedByUserId;
+        if (adminId != groupAdmin)
+        {
+            _logger.LogInformation("User is not group admin");
+            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
+        }
+
+        //Fetch pending requests from a specific user
+        var userRequest = await _context.GroupMembershipRequests
+            .FirstOrDefaultAsync(gmr =>
+                gmr.GroupId == groupId
+                && gmr.UserId == requestUserId
+                && gmr.Status.ToString() == "Pending");
+
+        if (userRequest == null)
+        {
+            _logger.LogError("No pending user requests found");
+            return NotFound(ApiResponse.Fail("No pending user requests found", new List<string>()));
+        }
+
+        //Reject the request
+        userRequest.Status = Status.Rejected;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogError("User {userEmail} request rejected from group: {groupName}",
+            User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+        return Ok(ApiResponse.Ok("User request rejected"));
     }
 }
