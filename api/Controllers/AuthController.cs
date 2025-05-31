@@ -189,7 +189,7 @@ public class AuthController : ControllerBase
             var confirmationLink = Url.Action(
                 nameof(ConfirmEmail),
                 "Auth",
-                new { user.Id, token },
+                new { userId = user.Id, token },
                 Request.Scheme
             );
             var subject = "Email Reconfirmation";
@@ -206,7 +206,7 @@ public class AuthController : ControllerBase
                 message
             );
 
-            _logger.LogInformation("Account Confirmation Email Re-sent to {UserId}", user.Id);
+            _logger.LogInformation("Account Confirmation Email Re-sent to {UserEmail}", user.Email);
             return Ok(ApiResponse.Ok("Confirmation Email Re-sent"));
         }
         catch (Exception e)

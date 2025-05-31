@@ -305,8 +305,9 @@ public class GroupController : ControllerBase
         var req = new List<string>();
         foreach (var request in pendingRequests)
         {
-            _logger.LogInformation("Requests: {userId}", userId);
-            req.Add(userId);
+            var requestUserId = request.UserId;
+            _logger.LogInformation("Requests: {userId}", requestUserId);
+            req.Add(requestUserId);
         }
 
         _logger.LogInformation("The group has {pendingRequestsCount} pending requests", pendingRequests.Count());
@@ -375,7 +376,7 @@ public class GroupController : ControllerBase
         _context.UserGroups.Add(new UserGroup{UserId = requestUserId, GroupId = groupId});
         await _context.SaveChangesAsync();
 
-        _logger.LogError("User {userEmail} accepted to group: {groupName}",
+        _logger.LogInformation("User {userEmail} accepted to group: {groupName}",
             User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
         return Ok(ApiResponse.Ok("User accepted to group"));
     }
