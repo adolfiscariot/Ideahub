@@ -113,7 +113,7 @@ public class AuthController : ControllerBase
             {
                 _logger.LogError("Confirmation Email Not Sent: {Message}", e.Message);
                 await _userManager.DeleteAsync(user);
-                return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email", new List<string>()));
+                return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email"));
             }
 
             _logger.LogInformation("Account Registration email sent");
@@ -137,20 +137,20 @@ public class AuthController : ControllerBase
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
         {
             _logger.LogError("Token or user Id is null");
-            return BadRequest(ApiResponse.Fail("Invalid Credentials", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Invalid Credentials"));
         }
 
         //find user
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (user is null)
         {
-            return NotFound(ApiResponse.Fail("User Not Found", new List<string>()));
+            return NotFound(ApiResponse.Fail("User Not Found"));
         }
 
         //check if email has already been confirmed
         if (user.EmailConfirmed)
         {
-            return BadRequest(ApiResponse.Fail("Email already confirmed", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Email already confirmed"));
         }
 
         //otherwise confirm the email
@@ -166,18 +166,18 @@ public class AuthController : ControllerBase
     [HttpPost("resend-email")]
     public async Task<IActionResult> ResendEmail(string email)
     {
-        if (email == null)
+        if (email is null)
         {
             _logger.LogError("Empty email attempted to resend confirmation");
-            return BadRequest(ApiResponse.Fail("Email is required", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Email is required"));
         }
 
         //fetch user
         var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError("User Not Found");
-            return BadRequest(ApiResponse.Fail("User Not Found", new List<string>()));
+            return BadRequest(ApiResponse.Fail("User Not Found"));
         }
 
         try
@@ -198,7 +198,7 @@ public class AuthController : ControllerBase
             //send token via email
             if (string.IsNullOrWhiteSpace(user.Email))
             {
-                return BadRequest(ApiResponse.Fail("Email not found", new List<string>()));
+                return BadRequest(ApiResponse.Fail("Email not found"));
             }
             await _emailSender.SendEmailAsync(
                 user.Email,
@@ -212,7 +212,7 @@ public class AuthController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError("Error resending confirmation email to {UserEmail}: {e}", user.Email, e);
-            return StatusCode(500, ApiResponse.Fail("Failed to resend confirmation email", new List<string>()));
+            return StatusCode(500, ApiResponse.Fail("Failed to resend confirmation email"));
         }
 
     }
@@ -222,17 +222,17 @@ public class AuthController : ControllerBase
     {
         //find the user
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError($"Email {loginDto.Email} tried logging in with a non-existent email");
-            return BadRequest(ApiResponse.Fail("Invalid Credentials", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Invalid Credentials"));
         }
 
         //check email confirmation
         if (!user.EmailConfirmed)
         {
             _logger.LogWarning("Please confirm your email before logging in");
-            return BadRequest(ApiResponse.Fail("Please confirm your email before logging in", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Please confirm your email before logging in"));
         }
 
         //login the user
@@ -259,43 +259,43 @@ public class AuthController : ControllerBase
 
         //if login failed return this
         _logger.LogWarning($"Failed login attempt for user: {loginDto.Email}");
-        return BadRequest(ApiResponse.Fail("Username or Password is incorrect", new List<string>()));
+        return BadRequest(ApiResponse.Fail("Username or Password is incorrect"));
     }
 
     //refresh the access token
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshAccessToken(TokenResponse token)
     {
-        if (token == null)
+        if (token is null)
         {
             _logger.LogError("The token provided in the method's argument is null");
-            return BadRequest(ApiResponse.Fail("Invalid Access Token or Refresh Token", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Invalid Access Token or Refresh Token"));
         }
 
         //get claims from expired token
         var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
-        if (principal.Identity == null)
+        if (principal.Identity is null)
         {
             _logger.LogError("Couldn't get principal's identity from expired token");
-            return BadRequest(ApiResponse.Fail("Couldn't get principal's identity from expired token", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Couldn't get principal's identity from expired token"));
         }
 
         //Find the user based on the user id in the access token's payload
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userId == null)
+        if (userId is null)
         {
             _logger.LogError("User ID not found");
-            return BadRequest(ApiResponse.Fail("Couldn't get user's ID", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Couldn't get user's ID"));
         }
 
         //Eager loading of the user's refresh tokens
         var user = await _userManager.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u=>u.Id == userId);
 
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError("User is null");
-            return BadRequest(ApiResponse.Fail("Invalid access or refresh token", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Invalid access or refresh token"));
         }
 
         /***
@@ -313,10 +313,10 @@ public class AuthController : ControllerBase
             && rt.RefreshTokenExpiry > DateTime.UtcNow);
 
 
-        if (storedRefreshToken == null)
+        if (storedRefreshToken is null)
         {
             _logger.LogError("There are no vaild stored refresh tokens");
-            return BadRequest(ApiResponse.Fail("Invalid access or refresh token", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Invalid access or refresh token"));
         }
 
         //if refresh token exists and is valid, mark it as expired then create new one
@@ -362,10 +362,10 @@ public class AuthController : ControllerBase
             //revoke jwt token
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             //var userId = User.FindFirstValue("sub");
-            if (userId == null)
+            if (userId is null)
             {
                 _logger.LogError("Logout failed. User Id not found");
-                return NotFound(ApiResponse.Fail("Logout failed. User Id not found", new List<string>()));    
+                return NotFound(ApiResponse.Fail("Logout failed. User Id not found")); 
             }
             await _tokenService.RevokeRefreshTokenAsync(userId);
             _logger.LogInformation("Revoked Refresh Token");
@@ -378,7 +378,7 @@ public class AuthController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError("User logout failed: {e}", e);
-            return StatusCode(500, ApiResponse.Fail("Logout failed", new List<string>()));
+            return StatusCode(500, ApiResponse.Fail("Logout failed"));
         }
     }
 }

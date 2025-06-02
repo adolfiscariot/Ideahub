@@ -39,13 +39,13 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("Group creation failed. User ID not found.");
-            return BadRequest(ApiResponse.Fail("Group creation failed. User ID Not Found", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Group creation failed. User ID Not Found"));
         }
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError("Group creation failed. User not found");
-            return BadRequest(ApiResponse.Fail("Group creation failed. User Not Found", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Group creation failed. User Not Found"));
         }
         //Create the group
         var group = new Group
@@ -64,10 +64,10 @@ public class GroupController : ControllerBase
 
         //Change user's role to group admin
         var groupAdmin = await _roleManager.FindByNameAsync(RoleConstants.GroupAdmin);
-        if (groupAdmin == null)
+        if (groupAdmin is null)
         {
             _logger.LogError("Role 'Group Admin' doesn't exist");
-            return NotFound(ApiResponse.Fail("Group 'Group Admin' not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group 'Group Admin' not found"));
         }
 
         //Make user an admin if they're not one already
@@ -103,15 +103,15 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User not authenticated");
-            return Unauthorized(ApiResponse.Fail("User not authenticated", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
         }
 
         //Find the group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group with ID '{groupId}' not found", groupId);
-            return BadRequest(ApiResponse.Fail("Group not found", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Group not found"));
         }
 
         //Let user delete group if they're admin
@@ -131,7 +131,7 @@ public class GroupController : ControllerBase
         var groups = await _context.Groups.Select(g => new { g.Name, g.Description, g.CreatedByUser.DisplayName }).ToListAsync();
 
         //Check if groups exist
-        if (groups == null || !groups.Any())
+        if (groups is null || !groups.Any())
         {
             _logger.LogError("No groups found");
             return NotFound();
@@ -152,15 +152,15 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User not authenticated to join group");
-            return Unauthorized(ApiResponse.Fail("User not authenticated to join group", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User not authenticated to join group"));
         }
 
         //Get group info
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group not found for user to join");
-            return NotFound(ApiResponse.Fail("Group doesn't exist", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group doesn't exist"));
         }
         var groupName = group.Name;
 
@@ -171,7 +171,7 @@ public class GroupController : ControllerBase
         if (existingUser != null)
         {
             _logger.LogWarning("User {userEmail} made another request to join group {GroupName}", userEmail, groupName);
-            return BadRequest(ApiResponse.Fail("You already joined or requested to join this group", new List<string>()));
+            return BadRequest(ApiResponse.Fail("You already joined or requested to join this group"));
         }
 
         //If not create a request for them
@@ -199,30 +199,30 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User not found");
-            return NotFound(ApiResponse.Fail("User Not Found", new List<string>()));
+            return NotFound(ApiResponse.Fail("User Not Found"));
         }
 
         //Get group info
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group doesn't exist");
-            return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group not found"));
         }
         var groupName = group.Name;
 
         //Verify user is in group
         if (!_context.GroupMembershipRequests.Any(gmr => gmr.UserId == userId && gmr.GroupId == groupId))
         {
-            return BadRequest(ApiResponse.Fail("You can't leave a group you're not a part of", new List<string>()));
+            return BadRequest(ApiResponse.Fail("You can't leave a group you're not a part of"));
         }
 
         //Remove them and save the new changes
         var request = await _context.GroupMembershipRequests.FirstOrDefaultAsync(gmr => gmr.UserId == userId && gmr.GroupId == groupId);
-        if (request == null)
+        if (request is null)
         {
             _logger.LogWarning("Group Membership Request doesn't exist");
-            return BadRequest(ApiResponse.Fail("Group membership doesn't exist", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Group membership doesn't exist"));
         }
         _context.GroupMembershipRequests.Remove(request);
         await _context.SaveChangesAsync();
@@ -236,10 +236,10 @@ public class GroupController : ControllerBase
     public async Task<IActionResult> ViewGroup(int groupId)
     {
         var group = await _context.Groups.Include(g => g.CreatedByUser).FirstOrDefaultAsync(g => g.Id == groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group not found");
-            return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group not found"));
         }
 
         _logger.LogInformation("Group {groupName} found", group.Name);
@@ -272,25 +272,25 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User Id is null and cant accept requests");
-            return NotFound(ApiResponse.Fail("User ID is null", new List<string>()));
+            return NotFound(ApiResponse.Fail("User ID is null"));
         }
 
         //Fetch group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group is null");
-            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group is null"));
         }
 
         //show pending requests if they're not null
         var pendingRequests = await _context.GroupMembershipRequests
             .Where(gmr => gmr.GroupId == groupId && gmr.Status.ToString() == "Pending")
             .ToListAsync();
-        if (pendingRequests == null)
+        if (pendingRequests is null)
         {
             _logger.LogError("There are no pending requests for group: {groupName} from user {userEmail}", group.Name, userEmail);
-            return NotFound(ApiResponse.Fail("No pending requests", new List<string>()));
+            return NotFound(ApiResponse.Fail("No pending requests"));
         }
         var req = new List<string>();
         foreach (var request in pendingRequests)
@@ -314,15 +314,15 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(adminId))
         {
             _logger.LogError("Can't accept the request. User ID is null");
-            return Unauthorized(ApiResponse.Fail("User ID not found", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User ID not found"));
         }
 
         //Find group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group is null");
-            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group is null"));
         }
 
         //Validate group admin
@@ -330,7 +330,7 @@ public class GroupController : ControllerBase
         if (adminId != groupAdmin)
         {
             _logger.LogInformation("User is not group admin");
-            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
+            return BadRequest(ApiResponse.Fail("User is not group admin"));
         }
 
         //Fetch pending requests from a specific user
@@ -340,10 +340,10 @@ public class GroupController : ControllerBase
                 && gmr.UserId == requestUserId
                 && gmr.Status.ToString() == "Pending");
 
-        if (userRequest == null)
+        if (userRequest is null)
         {
             _logger.LogError("No pending user requests found");
-            return NotFound(ApiResponse.Fail("No pending user requests found", new List<string>()));
+            return NotFound(ApiResponse.Fail("No pending user requests found"));
         }
 
         //Accept the request
@@ -359,7 +359,7 @@ public class GroupController : ControllerBase
         {
             _logger.LogError("User {userEmail} is already a member of group: {groupName}",
                 User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
-            return BadRequest(ApiResponse.Fail("User is already a member of the group", new List<string>()));
+            return BadRequest(ApiResponse.Fail("User is already a member of the group"));
         }
 
         //Add user to group and save
@@ -381,15 +381,15 @@ public class GroupController : ControllerBase
         if (string.IsNullOrWhiteSpace(adminId))
         {
             _logger.LogError("Can't accept the request. User ID is null");
-            return Unauthorized(ApiResponse.Fail("User ID not found", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User ID not found"));
         }
 
         //Find group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group is null");
-            return NotFound(ApiResponse.Fail("Group is null", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group is null"));
         }
 
         //Validate group admin
@@ -397,7 +397,7 @@ public class GroupController : ControllerBase
         if (adminId != groupAdmin)
         {
             _logger.LogInformation("User is not group admin");
-            return BadRequest(ApiResponse.Fail("User is not group admin", new List<string>()));
+            return BadRequest(ApiResponse.Fail("User is not group admin"));
         }
 
         //Fetch pending requests from a specific user
@@ -407,10 +407,10 @@ public class GroupController : ControllerBase
                 && gmr.UserId == requestUserId
                 && gmr.Status.ToString() == "Pending");
 
-        if (userRequest == null)
+        if (userRequest is null)
         {
             _logger.LogError("No pending user requests found");
-            return NotFound(ApiResponse.Fail("No pending user requests found", new List<string>()));
+            return NotFound(ApiResponse.Fail("No pending user requests found"));
         }
 
         //Reject the request

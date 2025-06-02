@@ -38,22 +38,22 @@ public class IdeaController : ControllerBase
             if (string.IsNullOrWhiteSpace(userId))
             {
                 _logger.LogError("User id is null. Can't create a new idea");
-                return Unauthorized(ApiResponse.Fail("User Id is null", new List<string>()));
+                return Unauthorized(ApiResponse.Fail("User Id is null"));
             }
 
             //check if user is a group member
             var group = await _context.Groups.FindAsync(groupId);
-            if (group == null)
+            if (group is null)
             {
                 _logger.LogError("Group not found");
-                return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+                return NotFound(ApiResponse.Fail("Group not found"));
             }
 
             var isAMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
             if (!isAMember)
             {
                 _logger.LogError("User {userEmail} is not in group {groupName}", userEmail, group.Name);
-                return Unauthorized(ApiResponse.Fail("User not in group", new List<string>()));
+                return Unauthorized(ApiResponse.Fail("User not in group"));
             }
 
             //Create new idea
@@ -75,7 +75,7 @@ public class IdeaController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError("Failed to create idea {e}", e);
-            return BadRequest(ApiResponse.Fail("Failed to create idea", new List<string>()));
+            return BadRequest(ApiResponse.Fail("Failed to create idea"));
         }
     }
 
@@ -89,15 +89,15 @@ public class IdeaController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User Id not found");
-            return Unauthorized(ApiResponse.Fail("User Id not found", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User Id not found"));
         }
 
         //Fetch group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group not found");
-            return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group not found"));
         }
 
         //Ensure user is in group
@@ -105,7 +105,7 @@ public class IdeaController : ControllerBase
         if (!isAMember)
         {
             _logger.LogError("User {userEmail} isn't in the group {groupName}", userEmail, group.Name);
-            return NotFound(ApiResponse.Fail("User not in group", new List<string>()));
+            return NotFound(ApiResponse.Fail("User not in group"));
         }
 
         //Fetch ideas
@@ -113,13 +113,13 @@ public class IdeaController : ControllerBase
         if (ideas.Count == 0)
         {
             _logger.LogError("No ideas exist in group: {groupName}", group.Name);
-            return NotFound(ApiResponse.Fail("No ideas exist in group", new List<string>()));
+            return NotFound(ApiResponse.Fail("No ideas exist in group"));
         }
 
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new { idea.Title, idea.Description });
+            ideaDataToReturn.Add(new { idea.Title, idea.Description, idea.Group.Name});
         }
 
         _logger.LogInformation($"The {ideas.Count()} ideas in group {group.Name} are: ", ideaDataToReturn);
@@ -136,15 +136,15 @@ public class IdeaController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User Id not found");
-            return Unauthorized(ApiResponse.Fail("User Id not found", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User Id not found"));
         }
 
         //Fetch group
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group not found");
-            return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group not found"));
         }
 
         //Ensure user is in group
@@ -152,15 +152,18 @@ public class IdeaController : ControllerBase
         if (!isAMember)
         {
             _logger.LogError("User {userEmail} isn't in the group {groupName}", userEmail, group.Name);
-            return NotFound(ApiResponse.Fail("User not in group", new List<string>()));
+            return NotFound(ApiResponse.Fail("User not in group"));
         }
 
         //Fetch idea
-        var idea = await _context.Ideas.Include(i => i.User).Include(i => i.Group).FirstOrDefaultAsync(i => i.UserId == userId && i.GroupId == groupId);
-        if (idea == null)
+        var idea = await _context.Ideas
+            .Include(i => i.User)
+            .Include(i => i.Group)
+            .FirstOrDefaultAsync(i => i.Id == ideaId && i.GroupId == groupId);
+        if (idea is null)
         {
-            _logger.LogError("Idea not found");
-            return NotFound(ApiResponse.Fail("Idea not found", new List<string>()));
+            _logger.LogError("Idea with Id {ideaId} not found in group {groupName}", ideaId, group.Name);
+            return NotFound(ApiResponse.Fail("Idea not found"));
         }
 
         //Create a list of idea data to return
@@ -188,7 +191,7 @@ public class IdeaController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User id is null. Can't create a new idea");
-            return Unauthorized(ApiResponse.Fail("User Id is null", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User Id is null"));
         }
 
         //fetch idea if user is the idea author
@@ -197,10 +200,10 @@ public class IdeaController : ControllerBase
             .Include(i => i.Group)
             .Where(i => i.UserId == userId)
             .FirstOrDefaultAsync(i => i.Id == ideaId);
-        if (idea == null)
+        if (idea is null)
         {
             _logger.LogError("Idea not found");
-            return NotFound(ApiResponse.Fail("Idea not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Idea not found"));
         }
 
         //apply changes to the idea
@@ -224,11 +227,12 @@ public class IdeaController : ControllerBase
             else
             {
                 _logger.LogError("Invalid status string {statusString} provided for idea {idea}", ideaUpdateDto.Status, idea.Title);
-                return BadRequest(ApiResponse.Fail("Parsing failed. Invalid status string provided", new List<string>()));
+                return BadRequest(ApiResponse.Fail("Parsing failed. Invalid status string provided"));
             }
         }
 
         //create new idea details based on changes made
+        
         var updatedIdea = new IdeaDetailsDto
         {
             Title = idea.Title,
@@ -240,9 +244,11 @@ public class IdeaController : ControllerBase
         };
 
         //save it all
+        idea.UpdatedAt = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Idea updated");
+        _logger.LogInformation("Idea {ideaTitle} updated by {userEmail}", idea.Title, userEmail);
         return Ok(ApiResponse.Ok("Idea updated", updatedIdea));
     }
 
@@ -258,23 +264,23 @@ public class IdeaController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
         {
             _logger.LogError("User not authenticated");
-            return Unauthorized(ApiResponse.Fail("User not authenticated", new List<string>()));
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
         }
 
         //group info
         var group = await _context.Groups.FindAsync(groupId);
-        if (group == null)
+        if (group is null)
         {
             _logger.LogError("Group not found");
-            return NotFound(ApiResponse.Fail("Group not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Group not found"));
         }
 
         //Promote idea
         var idea = await _context.Ideas.FindAsync(ideaId);
-        if (idea == null)
+        if (idea is null)
         {
             _logger.LogError("No idea with ID {ideaId} was found", ideaId);
-            return NotFound(ApiResponse.Fail("Idea not found", new List<string>()));
+            return NotFound(ApiResponse.Fail("Idea not found"));
         }
         idea.IsPromotedToProject = true;
 
@@ -296,15 +302,15 @@ public class IdeaController : ControllerBase
             if (string.IsNullOrWhiteSpace(userId))
             {
                 _logger.LogError("User not authenticated");
-                return Unauthorized(ApiResponse.Fail("User not authenticated", new List<string>()));
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
             }
 
             //fetch idea if user is the idea author
             var idea = await _context.Ideas.Where(i => i.UserId == userId).FirstOrDefaultAsync(i => i.Id == ideaId);
-            if (idea == null)
+            if (idea is null)
             {
                 _logger.LogError("Idea not found");
-                return NotFound(ApiResponse.Fail("Idea not found", new List<string>()));
+                return NotFound(ApiResponse.Fail("Idea not found"));
             }
 
             //Let user delete group if they're admin
@@ -312,7 +318,7 @@ public class IdeaController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Idea '{ideaTitle}' has been deleted by '{userEmail}' ", idea.Title, userEmail);
-            return Ok(ApiResponse.Ok($"{idea.Title} has been deleted by {userEmail}"));
+            return Ok(ApiResponse.Ok("Idea deleted successfully"));
         }
         catch (Exception e)
         {

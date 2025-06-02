@@ -30,6 +30,9 @@ public class Project
     public bool IsDeleted {get; set;} = false;
     public DateTime? DeletedAt {get; set;}
 
+    [DataType(DataType.DateTime)]
+    public DateTime UpdatedAt {get; set;} = DateTime.UtcNow;
+
     [Required]
     [ForeignKey ("CreatedByUser")]
     public string CreatedByUserId {get; set;} = string.Empty;

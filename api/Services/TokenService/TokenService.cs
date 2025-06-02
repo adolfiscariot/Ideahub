@@ -109,7 +109,7 @@ public class TokenService : ITokenService
     {
         //check if user exists
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (user is null)
         {
             _logger.LogError("User Not Found");
             throw new Exception("User Not Found");
