@@ -246,7 +246,13 @@ public class AuthController : ControllerBase
             //store refresh token
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
 
-            _logger.LogInformation("User {userEmail} just logged in at {time} GMT", user.Email, DateTime.UtcNow);
+            //set login time
+            user.LastLoginAt = DateTime.UtcNow;
+
+            //save changes
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("User {userEmail} just logged in at {time} GMT", user.Email, user.LastLoginAt);
 
             //if login succeeded return this
             return Ok(ApiResponse.Ok("Successful login", new TokenResponse
