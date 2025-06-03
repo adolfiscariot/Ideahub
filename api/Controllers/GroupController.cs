@@ -235,7 +235,10 @@ public class GroupController : ControllerBase
     [HttpGet("{groupId}")]
     public async Task<IActionResult> ViewGroup(int groupId)
     {
-        var group = await _context.Groups.Include(g => g.CreatedByUser).FirstOrDefaultAsync(g => g.Id == groupId);
+        var group = await _context.Groups
+            .Include(g => g.CreatedByUser)
+            .Include(g => g.UserGroups)
+            .FirstOrDefaultAsync(g => g.Id == groupId);
         if (group is null)
         {
             _logger.LogError("Group not found");
@@ -363,7 +366,7 @@ public class GroupController : ControllerBase
         }
 
         //Add user to group and save
-        _context.UserGroups.Add(new UserGroup{UserId = requestUserId, GroupId = groupId});
+        _context.UserGroups.Add(new UserGroup { UserId = requestUserId, GroupId = groupId });
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("User {userEmail} accepted to group: {groupName}",
@@ -421,5 +424,34 @@ public class GroupController : ControllerBase
         _logger.LogError("User {userEmail} request rejected from group: {groupName}",
             User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
         return Ok(ApiResponse.Ok("User request rejected"));
+    }
+
+    //Get members of group
+    [HttpGet("get-members")]
+    public async Task<IActionResult> GetMembers(int groupId)
+    {
+        var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group is null)
+        {
+            _logger.LogError("Get Members: Group with id {groupId} not found", groupId);
+            return NotFound(ApiResponse.Fail("Group not found"));
+        }
+
+        //return members
+        var users = _context.UserGroups.Include(ug => ug.User).Where(g => g.GroupId == groupId).ToList();
+        if (users.Count == 0)
+        {
+            _logger.LogWarning("Get Members: Group {groupName} has no members", group.Name);
+            return Ok(ApiResponse.Fail("Group has no members"));
+        }
+
+        var membersList = users.Select(ug => new
+        {
+            UserName = ug.User?.DisplayName,
+            Email = ug.User?.Email,
+        }).ToList();
+
+        _logger.LogInformation("{memberCount} members found", membersList.Count);
+        return Ok(ApiResponse.Ok($"{membersList.Count} members found", membersList));
     }
 }
