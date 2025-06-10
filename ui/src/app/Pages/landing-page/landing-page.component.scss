@@ -1,11 +1,14 @@
-.header-bar{
-  background-color: red;
+.header-bar {
+  background-color: #efefef;
   padding: 20px 50px;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  position: fixed;
+  width: 100vw;
 }
 
-app-navbar{
+app-navbar {
   flex-grow: 1;
 }
