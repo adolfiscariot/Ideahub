@@ -1,0 +1,11 @@
+.header-bar{
+  background-color: red;
+  padding: 20px 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+app-navbar{
+  flex-grow: 1;
+}
