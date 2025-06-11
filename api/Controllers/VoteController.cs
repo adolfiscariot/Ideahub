@@ -99,6 +99,11 @@ public class VoteController : ControllerBase
                 _context.Votes.Add(vote);
                 await _context.SaveChangesAsync();
             }
+            
+            /**
+                The catch block below is responsible for returning a proper error message whenever
+                the user votes twice on the same idea which is not allowed.
+            **/
             catch (DbUpdateException e)
             {
                 if (e.InnerException is PostgresException)
