@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
-import { LandingPageButtonsComponent } from '../landing-page-buttons/landing-page-buttons.component';
+import { ButtonsComponent } from '../buttons/buttons.component';
 
 @Component({
   selector: 'app-navbar',
-  imports: [LandingPageButtonsComponent],
+  imports: [ButtonsComponent],
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
-export class NavbarComponent {}
+export class NavbarComponent {
+  date = new Date().getFullYear();
+}

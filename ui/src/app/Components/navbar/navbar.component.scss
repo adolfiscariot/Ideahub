@@ -1,3 +1,18 @@
+.navbar {
+  padding: 20px 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  position: fixed;
+  width: 80%;
+  top: 0;
+  left: 10%;
+  z-index: 100;
+  height: 70px;
+  gap: 30px;
+}
+
 .navbar-left {
   display: flex;
   justify-content: center;
@@ -8,32 +23,14 @@
   cursor: pointer;
 }
 
-.product-text:hover{
-    font-size: 1.3em;
-}
-
-.navbar {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  font-size: medium;
-  font-weight: medium;
-}
-
 .nav-items {
-  font-size: .9em;
+  font-size: 1em;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   padding: 0px;
   margin: 0px;
-  position: fixed;
-  left: 20%;
-}
-
-.nav-link {
-  font-size: 1em;
-  transition: color 0.2s ease-in-out;
+  cursor: pointer;
 }
 
 .navbar-right {
@@ -49,4 +46,7 @@
 .btn-signup{
     background-color: violet;
 }
+
+
+
 

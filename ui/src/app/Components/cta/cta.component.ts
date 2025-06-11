@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { LandingPageButtonsComponent } from '../landing-page-buttons/landing-page-buttons.component';
+import { ButtonsComponent } from '../buttons/buttons.component';
 
 @Component({
   selector: 'app-cta',
-  imports: [LandingPageButtonsComponent],
+  imports: [ButtonsComponent],
   standalone: true,
   templateUrl: './cta.component.html',
   styleUrl: './cta.component.scss'

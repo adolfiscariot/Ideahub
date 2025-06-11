@@ -5,7 +5,7 @@ import { CtaComponent } from '../../Components/cta/cta.component';
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [NavbarComponent, CtaComponent],
+  imports: [CtaComponent],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
 })

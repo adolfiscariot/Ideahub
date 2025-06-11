@@ -1,14 +1,15 @@
 import { Component, Input} from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-landing-page-buttons',
-  imports: [CommonModule],
+  selector: 'app-buttons',
+  imports: [CommonModule, RouterModule],
   standalone: true,
-  templateUrl: './landing-page-buttons.component.html',
-  styleUrl: './landing-page-buttons.component.scss',
+  templateUrl: './buttons.component.html',
+  styleUrl: './buttons.component.scss',
 })
-export class LandingPageButtonsComponent {
+export class ButtonsComponent {
   @Input() buttonText: string = '';
   @Input() buttonStyleClass: string = '';
 }
