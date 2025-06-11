@@ -5,6 +5,11 @@
 .product-text {
   font-weight: bold;
   font-size: 1.2em;
+  cursor: pointer;
+}
+
+.product-text:hover{
+    font-size: 1.3em;
 }
 
 .navbar {
@@ -16,11 +21,14 @@
 }
 
 .nav-items {
+  font-size: .9em;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0px;
   margin: 0px;
+  position: fixed;
+  left: 20%;
 }
 
 .nav-link {
@@ -35,4 +43,10 @@
   padding: 0px;
   margin: 0px;
   margin-left: auto;
+  gap: 20px;
 }
+
+.btn-signup{
+    background-color: violet;
+}
+

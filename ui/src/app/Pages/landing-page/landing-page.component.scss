@@ -1,5 +1,4 @@
 .header-bar {
-  background-color: #efefef;
   padding: 20px 50px;
   display: flex;
   justify-content: center;
@@ -7,8 +6,42 @@
   box-sizing: border-box;
   position: fixed;
   width: 100vw;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  height: 70px;
 }
 
 app-navbar {
   flex-grow: 1;
+}
+
+.landing-page-body{
+  box-sizing: border-box;
+  margin-top:70px;
+  height: calc(100vh - 70px - 30px); //The whole screen minus the header and footer heights
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.landing-page-body app-cta{
+  text-align: center;
+}
+
+.footer-bar{
+  margin-top: auto;
+  padding:0px;
+  z-index: 100;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  width: 100vw;
+}
+
+.footer-text{
+  font-size: .9em;
+  text-align: center;
 }

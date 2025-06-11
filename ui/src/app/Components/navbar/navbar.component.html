@@ -8,6 +8,13 @@
     <a routerLink="" class="nav-link">Pricing</a>
   </nav>
   <div class="navbar-right">
-    <app-landing-page-buttons></app-landing-page-buttons>
+    <app-landing-page-buttons
+        [buttonText] = "'LOG IN'"
+        [buttonStyleClass] = "'btn-login'">
+    </app-landing-page-buttons>
+    <app-landing-page-buttons
+        [buttonText] = "'SIGN UP'"
+        [buttonStyleClass] = "'btn-signup'">
+    </app-landing-page-buttons>
   </div>
 </div>

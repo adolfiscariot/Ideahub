@@ -1,0 +1,30 @@
+.cta-header{
+    font-size: xx-large;
+}
+
+.header-text{
+    position: relative;
+    display: inline-block;
+}
+
+.header-text::after{
+    content: '';
+    border-radius: 2px;
+    background-color: purple;
+    position: absolute;
+    width: 80%;
+    transform: translate(-50%);
+    height: 5px;
+    left: 50%;
+    bottom: -20px;
+}
+
+.header-underline{
+    margin-top: 10px;
+    width: 30px;
+}
+
+.subheader-text{
+    font-size: 1em;
+    font-weight: medium;
+}
