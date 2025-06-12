@@ -1,3 +1,9 @@
-<div class="landing-page-buttons">
-  <button class="btn" [ngClass]="buttonStyleClass">{{buttonText}}</button>
+<div class="button">
+  <button 
+    class="btn" 
+    [routerLink] = "buttonLink" 
+    [ngClass]="buttonStyleClass"
+  >
+      {{buttonText}}
+  </button>
 </div>

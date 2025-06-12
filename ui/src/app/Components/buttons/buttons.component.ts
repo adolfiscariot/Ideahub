@@ -12,6 +12,7 @@ import { RouterModule } from '@angular/router';
 export class ButtonsComponent {
   @Input() buttonText: string = '';
   @Input() buttonStyleClass: string = '';
+  @Input() buttonLink: string = '';
 }
 
 //@Input is a decorator, just like @property in Python.
