@@ -1,14 +1,3 @@
-.landing-page-body{
-  box-sizing: border-box;
-  margin-top:70px;
-  height: calc(100vh - 70px - 30px); //The whole screen minus the header and footer heights
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow-y: auto;
-}
-
-.landing-page-body app-cta{
+.landing-page-body app-cta {
   text-align: center;
 }
-

@@ -1,20 +1,33 @@
 <div class="registration">
-    <form class="registration-form">
-        <div class="name-section">
-            <label class="reg-form-label" for="name-input">Name</label>
-            <input id="name-input" type="text" placeholder="Input your name" />
-        </div>
-        <div class="email-section">
-            <label class="reg-form-label" for="email-input">Email</label>
-            <input id="email-input" type="email" placeholder="Input your email" />
-        </div>
-        <div class="password-section">
-            <label class="reg-form-label" for="password-input">Password</label>
-            <input id="password-input" type="password" placeholder="Input your password" />
-        </div>
-        <div class="confirm-password-section">
-            <label class="reg-form-label" for="confirm-password-input">Confirm Password</label>
-            <input id="confirm-password-input" type="password" placeholder="Confirm your password" />
-        </div>
-    </form>
+  <form class="registration-form" id="registration-form">
+    <div class="name-section">
+      <label class="reg-form-label" for="name-input">Name: </label>
+      <input id="name-input" type="text" placeholder="Input your name" />
+    </div>
+    <div class="email-section">
+      <label class="reg-form-label" for="email-input">Email: </label>
+      <input id="email-input" type="email" placeholder="Input your email" />
+    </div>
+    <div class="password-section">
+      <label class="reg-form-label" for="password-input">Password: </label>
+      <input
+        id="password-input"
+        type="password"
+        placeholder="Input your password"
+      />
+    </div>
+    <div class="confirm-password-section">
+      <label class="reg-form-label" for="confirm-password-input"
+        >Confirm Password:
+      </label>
+      <input
+        id="confirm-password-input"
+        type="password"
+        placeholder="Confirm your password"
+      />
+    </div>
+    <div class="submit-button">
+      <app-buttons />
+    </div>
+  </form>
 </div>
