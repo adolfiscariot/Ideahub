@@ -3,7 +3,40 @@
   border-radius: 5px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 40px;
+  padding: 50px 50px;
+}
+
+.form-section{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+label {
+  max-width: 200px;
+  text-align: right;
+}
+
+input {
+  border: 0px;
+  border-bottom: 1px solid black;
+}
+
+.submit-button{
+  text-align: center;
+  & p{
+    font-size: 14px;
+  }
+  & a{
+    font-size: 14px;
+  }
+}
+
+input:focus {
+  outline: none;
+  border-color: violet;
+  box-shadow: 0 0 0 0.2rem plum;
+  border-radius: 5px;
 }

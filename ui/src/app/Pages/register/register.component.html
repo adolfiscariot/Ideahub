@@ -1,14 +1,14 @@
 <div class="registration">
   <form class="registration-form" id="registration-form">
-    <div class="name-section">
+    <div class="form-section">
       <label class="reg-form-label" for="name-input">Name: </label>
       <input id="name-input" type="text" placeholder="Input your name" />
     </div>
-    <div class="email-section">
+    <div class="form-section">
       <label class="reg-form-label" for="email-input">Email: </label>
       <input id="email-input" type="email" placeholder="Input your email" />
     </div>
-    <div class="password-section">
+    <div class="form-section">
       <label class="reg-form-label" for="password-input">Password: </label>
       <input
         id="password-input"
@@ -16,7 +16,7 @@
         placeholder="Input your password"
       />
     </div>
-    <div class="confirm-password-section">
+    <div class="form-section">
       <label class="reg-form-label" for="confirm-password-input"
         >Confirm Password:
       </label>
@@ -27,7 +27,13 @@
       />
     </div>
     <div class="submit-button">
-      <app-buttons />
+      <app-buttons 
+        buttonText="Register"
+        buttonStyleClass="btn-registration"
+        buttonLink= "INSERT BACKEND LINK" 
+      />
+      <p>Already have an account?</p>
+      <a><u>Login here</u></a>
     </div>
   </form>
 </div>
