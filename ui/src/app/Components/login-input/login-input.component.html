@@ -1,0 +1,39 @@
+<div class="login-input">
+  <form
+    class="login-form"
+    id="login-form"
+    [formGroup]="loginForm"
+    (ngSubmit)="onSubmit($event)"
+  >
+    <div class="page-header">Log In</div>
+    <div class="form-section">
+      <input type="email" placeholder="Email" formControlName="email" />
+    </div>
+    <div class="error-message" *ngIf="loginForm.get('email')?.touched">
+      <span *ngIf="loginForm.get('email')?.errors?.['email']">
+        Please enter a valid email address
+      </span>
+      <span *ngIf="loginForm.get('email')?.errors?.['required']">
+        Please enter your email address
+      </span>
+    </div>
+
+    <div class="form-section">
+      <input
+        type="password"
+        placeholder="Password"
+        formControlName="password"
+      />
+    </div>
+
+    <div class="submit-button">
+      <app-buttons
+        [buttonText]="'Log In'"
+        [buttonStyleClass]="'btn-login'"
+        [buttonType]="'submit'"
+      />
+      <p>Don't yet have an account?</p>
+      <a routerLink="/register"><u>Sign up here</u></a>
+    </div>
+  </form>
+</div>

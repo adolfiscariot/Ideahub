@@ -15,10 +15,11 @@ import { Registration } from '../../Interfaces/Registration/registration-interfa
 import { confirmPasswordValidator } from '../../Validators/password-match.validators';
 import { Router } from '@angular/router';
 import { ConfirmRegistrationComponent } from '../../Pages/confirm-registration/confirm-registration.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-registration-input',
-  imports: [ButtonsComponent, ReactiveFormsModule, NgIf],
+  imports: [ButtonsComponent, ReactiveFormsModule, NgIf, RouterLink],
   standalone: true,
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',

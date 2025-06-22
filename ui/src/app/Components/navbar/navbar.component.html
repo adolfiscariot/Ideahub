@@ -9,16 +9,18 @@
     <a routerLink="" class="nav-link">Contacts</a>
     <a routerLink="" class="nav-link">Documentation</a>
   </nav>
-  <div class="navbar-right">
-    <app-buttons
-      [buttonText]="'LOG IN'"
-      [buttonStyleClass]="'btn-login'"
-      [buttonLink]="'login'"
-    />
-    <app-buttons
-      [buttonText]="'SIGN UP'"
-      [buttonStyleClass]="'btn-signup'"
-      [buttonLink]="'/register'"
-    />
+  <div class="navbar-right" *ngIf="loggedInStatus | async as isLoggedIn">
+    <ng-container *ngIf="!isLoggedIn">
+      <app-buttons
+        [buttonText]="'LOG IN'"
+        [buttonStyleClass]="'btn-login-navbar'"
+        [buttonLink]="'/login'"
+      />
+      <app-buttons
+        [buttonText]="'SIGN UP'"
+        [buttonStyleClass]="'btn-signup-navbar'"
+        [buttonLink]="'/register'"
+      />
+    </ng-container>
   </div>
 </div>

@@ -3,19 +3,12 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
+import { Login } from '../../Interfaces/Login/login-interface';
+import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 
 @Injectable({
   providedIn: 'root',
 })
-
-/*
- * This service is responsible for user authentication.
- * It will run once at app startup when it will be called
- * and a _isLoggedIn behaviorsubject, which will have been
- * instantiated to false, will be update to true if the
- * jwt token is fetched from local storage meaning the user
- *  has logged in
- */
 export class AuthService {
   private readonly authUrl = 'http://localhost:5065/api/auth';
 
@@ -36,6 +29,36 @@ export class AuthService {
       }),
       catchError((e) => {
         throw new Error(`Registration failed: ${e}`);
+      })
+    );
+  }
+
+  login(loginData: Login): Observable<any> {
+    console.log(`${loginData.email} is logging in...`);
+
+    return this.http.post<ApiResponse>(`${this.authUrl}/login`, loginData).pipe(
+      tap((response) => {
+        //If status is true i.e. login was successful,store the tokens
+        //and change _isLoggedIn behaviorSubject to true
+        if (response.status && response.data?.accessToken) {
+          console.log('Login successful: ', response);
+
+          localStorage.setItem('accessToken', response.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+          localStorage.setItem(
+            'refreshTokenExpiry',
+            response.data.refreshTokenExpiry
+          );
+
+          this._isLoggedIn.next(true);
+        } else {
+          console.error('Login failed: ', response.message);
+          throw new Error(response.message || 'Login failed');
+        }
+      }),
+      catchError((e) => {
+        console.error(`Login failed: ${e.message}`);
+        throw new Error(`Login failed: ${e.message}`);
       })
     );
   }
