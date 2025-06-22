@@ -1,9 +1,10 @@
 <div class="button">
-  <button 
-    class="btn" 
-    [routerLink] = "buttonLink" 
+  <button
+    class="btn"
+    [type]="buttonType"
+    [routerLink]="buttonType === 'button' ? buttonLink : null"
     [ngClass]="buttonStyleClass"
   >
-      {{buttonText}}
+    {{ buttonText }}
   </button>
 </div>

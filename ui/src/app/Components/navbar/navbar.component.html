@@ -1,7 +1,7 @@
 <div class="navbar">
   <div class="navbar-left">
     <img src="../../../assets/adept logo.png" alt="" class="logo-image" />
-    <span class="product-text">Ideahub</span>
+    <a routerLink="/" class="product-text">Ideahub</a>
   </div>
   <nav class="nav-items">
     <a routerLink="" class="nav-link">About</a>
@@ -11,12 +11,14 @@
   </nav>
   <div class="navbar-right">
     <app-buttons
-        [buttonText] = "'LOG IN'"
-        [buttonStyleClass] = "'btn-login'"
+      [buttonText]="'LOG IN'"
+      [buttonStyleClass]="'btn-login'"
+      [buttonLink]="'login'"
     />
     <app-buttons
-        [buttonText] = "'SIGN UP'"
-        [buttonStyleClass] = "'btn-signup'"
+      [buttonText]="'SIGN UP'"
+      [buttonStyleClass]="'btn-signup'"
+      [buttonLink]="'/register'"
     />
   </div>
 </div>
