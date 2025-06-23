@@ -15,20 +15,20 @@
   cursor: pointer;
 }
 
-.btn-signup{
+.btn-signup {
   background-color: violet;
 }
 
-.btn-signup:hover{
+.btn-signup:hover {
   background-color: purple;
   color: white;
 }
 
-.btn-login:hover{
+.btn-login:hover {
   background-color: orange;
 }
 
-.btn-cta-signup{
+.btn-cta-signup {
   width: 250px;
   height: 50px;
   font-size: 1em;
@@ -36,20 +36,20 @@
   background-color: violet;
 }
 
-.btn-cta-signup:hover{
+.btn-cta-signup:hover {
   background-color: purple;
   color: white;
 }
 
-.btn-registration{
+.btn-registration {
   background-color: violet;
   font-size: medium;
+  width: 100%;
 }
 
-.btn-registration:hover{
+.btn-registration:hover {
   background-color: purple;
   box-shadow: none;
   color: white;
   font-weight: 400;
 }
-

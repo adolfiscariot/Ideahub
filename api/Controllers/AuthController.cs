@@ -30,6 +30,8 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
+    private readonly string homepageUrl = "http://localhost:4200";
+
     //constructor
     public AuthController(
         UserManager<IdeahubUser> userManager,
@@ -132,7 +134,6 @@ public class AuthController : ControllerBase
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
-
         //check if the token or user is null
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
         {
@@ -150,16 +151,18 @@ public class AuthController : ControllerBase
         //check if email has already been confirmed
         if (user.EmailConfirmed)
         {
-            return BadRequest(ApiResponse.Fail("Email already confirmed"));
+            return Redirect(homepageUrl);
         }
 
         //otherwise confirm the email
         var result = await _userManager.ConfirmEmailAsync(user, token);
-        return result.Succeeded
-            ? Ok(ApiResponse.Ok("Email Confirmation Completed"))
-            : BadRequest(ApiResponse.Fail(
+        if (result.Succeeded) {
+            return Redirect(homepageUrl);
+        } else {
+            return BadRequest(ApiResponse.Fail(
                 "Email Confirmation Failed",
                 result.Errors.Select(e => e.Description).ToList()));
+        }
     }
 
     //resend email
