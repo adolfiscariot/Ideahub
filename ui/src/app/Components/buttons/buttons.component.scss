@@ -15,16 +15,16 @@
   cursor: pointer;
 }
 
-.btn-signup {
+.btn-signup-navbar {
   background-color: violet;
 }
 
-.btn-signup:hover {
+.btn-signup-navbar:hover {
   background-color: purple;
   color: white;
 }
 
-.btn-login:hover {
+.btn-login-navbar:hover {
   background-color: orange;
 }
 
@@ -48,6 +48,19 @@
 }
 
 .btn-registration:hover {
+  background-color: purple;
+  box-shadow: none;
+  color: white;
+  font-weight: 400;
+}
+
+.btn-login {
+  background-color: violet;
+  font-size: medium;
+  width: 100%;
+}
+
+.btn-login:hover {
   background-color: purple;
   box-shadow: none;
   color: white;

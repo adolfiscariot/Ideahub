@@ -24,4 +24,16 @@ export const routes: Routes = [
         './Pages/confirm-registration/confirm-registration.component'
       ).then((m) => m.ConfirmRegistrationComponent),
   },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./Pages/login-page/login-page.component').then(
+        (m) => m.LoginPageComponent
+      ),
+  },
+  {
+    path: 'home',
+    loadComponent: () =>
+      import('./Pages/home/home.component').then((m) => m.HomeComponent),
+  },
 ];
