@@ -32,8 +32,10 @@
         [buttonStyleClass]="'btn-login'"
         [buttonType]="'submit'"
       />
-      <p>Don't yet have an account?</p>
-      <a routerLink="/register"><u>Sign up here</u></a>
+      <ng-container>
+        <p>Don't yet have an account?</p>
+        <a routerLink="/register"><u>Sign up here</u></a>
+      </ng-container>
     </div>
   </form>
 </div>

@@ -1,26 +1,36 @@
 <div class="navbar">
   <div class="navbar-left">
     <img src="../../../assets/adept logo.png" alt="" class="logo-image" />
-    <a routerLink="/" class="product-text">Ideahub</a>
+    <span class="product-text">Ideahub</span>
   </div>
   <nav class="nav-items">
-    <a routerLink="RegisterComponent" class="nav-link">About</a>
+    <a routerLink="" class="nav-link">About</a>
     <a routerLink="" class="nav-link">Pricing</a>
     <a routerLink="" class="nav-link">Contacts</a>
     <a routerLink="" class="nav-link">Documentation</a>
   </nav>
-  <div class="navbar-right" *ngIf="loggedInStatus | async as isLoggedIn">
-    <ng-container *ngIf="!isLoggedIn">
-      <app-buttons
-        [buttonText]="'LOG IN'"
-        [buttonStyleClass]="'btn-login-navbar'"
-        [buttonLink]="'/login'"
-      />
-      <app-buttons
-        [buttonText]="'SIGN UP'"
-        [buttonStyleClass]="'btn-signup-navbar'"
-        [buttonLink]="'/register'"
-      />
-    </ng-container>
-  </div>
+  
+  <div class="navbar-right">
+  <ng-container *ngIf="loggedInStatus | async as isLoggedIn; else loggedOutButtons">
+    <app-buttons
+      [buttonText]="'LOG OUT'"
+      [buttonStyleClass]="'btn-logout-navbar'"
+    />
+  </ng-container>
+
+  <ng-template #loggedOutButtons>
+    <app-buttons
+      [buttonText]="'LOG IN'"
+      [buttonStyleClass]="'btn-login-navbar'"
+      [buttonType]="'button'"
+      [buttonLink]="'/login'"
+    />
+    <app-buttons
+      [buttonText]="'SIGN UP'"
+      [buttonStyleClass]="'btn-signup-navbar'"
+      [buttonType]="'button'"
+      [buttonLink]="'/register'"
+    />
+  </ng-template>
+</div>
 </div>
