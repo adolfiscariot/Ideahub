@@ -5,11 +5,14 @@ import { HttpClient } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  router = inject(Router);
+
   private readonly authUrl = 'http://localhost:5065/api/auth';
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
@@ -61,5 +64,30 @@ export class AuthService {
         throw new Error(`Login failed: ${e.message}`);
       })
     );
+  }
+
+  logout(){
+    console.log("User logging out...")
+
+    return this.http.post(`${this.authUrl}/logout`, localStorage.getItem('accessToken')).pipe(
+      tap(()=>{
+        console.log("User logged out successfully");
+
+        //Delete access token, refresh token and redresh token expiry
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('refreshTokenExpiry');
+
+        //change _isLogged in state to false
+        this._isLoggedIn.next(false);
+
+        //Redirect user to landing page
+        this.router.navigate(['/']);
+      }),
+      catchError((e)=>{
+        console.error(`Logout failed: ${e.errors}`);
+        throw new Error(`Logout failed ${e.errors}`);
+      })
+    )
   }
 }

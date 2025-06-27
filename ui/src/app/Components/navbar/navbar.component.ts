@@ -18,4 +18,8 @@ export class NavbarComponent {
   authService = inject(AuthService);
 
   loggedInStatus: Observable<boolean> = this.authService.isLoggedIn$;
+
+  onLogout(){
+    this.authService.logout();
+  }
 }
