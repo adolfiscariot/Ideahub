@@ -25,7 +25,7 @@ export class NavbarComponent {
         console.log(`Logout successful. ${response.message}`);
       },
       error: (error) => {
-        console.error(`Logout failed: ${error.errors}`);
+        console.error(`Logout failed: ${error.message}`);
       }
     });
   }
