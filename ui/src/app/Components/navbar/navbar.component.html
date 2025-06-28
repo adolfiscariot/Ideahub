@@ -2,7 +2,7 @@
   <div class="navbar-left">
     <img src="../../../assets/adept logo.png" alt="" class="logo-image" />
 
-    <!--If logged out this text should lead to the landging page otherwise
+    <!--If logged out this text should lead to the landing page otherwise
         it should lead to the home page-->
     <ng-container  *ngIf="loggedInStatus | async as isLoggedIn; else loggedOutTitle">
       <a class="product-text" [routerLink]="'/home'">Ideahub</a>
@@ -13,7 +13,7 @@
       
   </div>
   <nav class="nav-items">
-    <a routerLink="" class="nav-link">About</a>
+    <a routerLink="/about" class="nav-link">About</a>
     <a routerLink="" class="nav-link">Pricing</a>
     <a routerLink="" class="nav-link">Contacts</a>
     <a routerLink="" class="nav-link">Documentation</a>

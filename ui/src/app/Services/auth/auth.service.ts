@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
@@ -66,14 +66,14 @@ export class AuthService {
     );
   }
 
-  logout(){
+  logout(): Observable<any>{
     console.log("User logging out...")
 
-    return this.http.post(`${this.authUrl}/logout`, localStorage.getItem('accessToken')).pipe(
+    return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
       tap(()=>{
         console.log("User logged out successfully");
 
-        //Delete access token, refresh token and redresh token expiry
+        //Delete access token, refresh token and refresh token expiry
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('refreshTokenExpiry');
@@ -84,9 +84,20 @@ export class AuthService {
         //Redirect user to landing page
         this.router.navigate(['/']);
       }),
-      catchError((e)=>{
-        console.error(`Logout failed: ${e.errors}`);
-        throw new Error(`Logout failed ${e.errors}`);
+      catchError((error: HttpErrorResponse)=>{
+        console.error(`Logout failed: ${error}`);
+        
+        if(error.status == 401 || error.status == 403 || error.status == 400){
+          console.error("Clearing local tokens due to failed logout/invalid token");
+
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('refreshTokenExpiry');
+
+          this._isLoggedIn.next(false);
+          this.router.navigate(['/']);
+        }
+        return throwError(() => new Error(`Status: ${error.status}, Message: ${error.message || 'Unknown error'}`))
       })
     )
   }

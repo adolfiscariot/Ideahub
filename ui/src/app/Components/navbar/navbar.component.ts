@@ -20,6 +20,13 @@ export class NavbarComponent {
   loggedInStatus: Observable<boolean> = this.authService.isLoggedIn$;
 
   onLogout(){
-    this.authService.logout();
+    this.authService.logout().subscribe({
+      next: (response)=>{
+        console.log(`Logout successful. ${response.message}`);
+      },
+      error: (error) => {
+        console.error(`Logout failed: ${error.errors}`);
+      }
+    });
   }
 }
