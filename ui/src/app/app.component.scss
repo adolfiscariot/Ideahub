@@ -1,8 +1,6 @@
 .router-outlet {
   height: calc(100vh - 70px - 30px);
+  width: 100%;
   margin-top: 70px;
   box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }

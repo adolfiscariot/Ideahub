@@ -1,3 +1,11 @@
-.landing-page-body app-cta {
-  text-align: center;
+.landing-page {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & app-cta{
+    text-align: center;
+  }
+  
 }
