@@ -1,6 +1,8 @@
 <div class="base-layout-component">
     <app-sidebar/>
     <div class="main-content">
-        <router-outlet />
+        <router-outlet>
+            <ng-content></ng-content>
+        </router-outlet>
     </div>
 </div>
