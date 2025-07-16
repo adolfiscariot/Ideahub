@@ -18,7 +18,12 @@ export class AuthService {
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    //Without this, reloading the page resets _isLoggedIn to false 
+    //despite the user being logged in
+    const token = localStorage.getItem('accessToken');
+    this._isLoggedIn.next(!!token);
+  }
 
   register(registrationData: Registration): Observable<any> {
     console.log('Registration taking place...');

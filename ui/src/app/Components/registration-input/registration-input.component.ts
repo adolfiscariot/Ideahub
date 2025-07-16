@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
+
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { AuthService } from '../../Services/auth/auth.service';
 import {
@@ -19,7 +19,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-registration-input',
-  imports: [ButtonsComponent, ReactiveFormsModule, NgIf, RouterLink],
+  imports: [ButtonsComponent, ReactiveFormsModule, RouterLink],
   standalone: true,
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',

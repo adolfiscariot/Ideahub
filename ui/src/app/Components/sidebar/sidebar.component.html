@@ -1,2 +1,17 @@
 <div class="sidebar-component">
+    <div class = "sidebar-toggle-icon">
+        <button class="sidebar-toggle-icon" mat-icon-button (click)="toggleSidebar()">
+            <mat-icon>menu</mat-icon> 
+        </button>
+    </div>
+
+    @if(isSidebarExpanded) {
+        <div class="sidebar-content" [ngClass]="'closed'">
+            <ul>
+                <p>One</p>
+                <p>Two</p>
+                <p>Three</p>
+            </ul>
+        </div>
+    }
 </div>

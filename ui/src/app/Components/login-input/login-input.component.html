@@ -4,38 +4,44 @@
     id="login-form"
     [formGroup]="loginForm"
     (ngSubmit)="onSubmit($event)"
-  >
+    >
     <div class="page-header">Log In</div>
     <div class="form-section">
       <input type="email" placeholder="Email" formControlName="email" />
     </div>
-    <div class="error-message" *ngIf="loginForm.get('email')?.touched">
-      <span *ngIf="loginForm.get('email')?.errors?.['email']">
-        Please enter a valid email address
-      </span>
-      <span *ngIf="loginForm.get('email')?.errors?.['required']">
-        Please enter your email address
-      </span>
-    </div>
+    @if (loginForm.get('email')?.touched) {
+      <div class="error-message">
+        @if (loginForm.get('email')?.errors?.['email']) {
+          <span>
+            Please enter a valid email address
+          </span>
+        }
+        @if (loginForm.get('email')?.errors?.['required']) {
+          <span>
+            Please enter your email address
+          </span>
+        }
+      </div>
+    }
 
     <div class="form-section">
       <input
         type="password"
         placeholder="Password"
         formControlName="password"
-      />
-    </div>
+        />
+      </div>
 
-    <div class="submit-button">
-      <app-buttons
-        [buttonText]="'Log In'"
-        [buttonStyleClass]="'btn-login'"
-        [buttonType]="'submit'"
-      />
-      <ng-container>
-        <p>Don't yet have an account?</p>
-        <a routerLink="/register"><u>Sign up here</u></a>
-      </ng-container>
+      <div class="submit-button">
+        <app-buttons
+          [buttonText]="'Log In'"
+          [buttonStyleClass]="'btn-login'"
+          [buttonType]="'submit'"
+          />
+          <ng-container>
+            <p>Don't yet have an account?</p>
+            <a routerLink="/register"><u>Sign up here</u></a>
+          </ng-container>
+        </div>
+      </form>
     </div>
-  </form>
-</div>

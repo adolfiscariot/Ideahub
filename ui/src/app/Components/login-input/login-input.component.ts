@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
+
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { RouterLink } from '@angular/router';
 import {
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-input',
-  imports: [ButtonsComponent, RouterLink, ReactiveFormsModule, NgIf],
+  imports: [ButtonsComponent, RouterLink, ReactiveFormsModule],
   templateUrl: './login-input.component.html',
   styleUrl: './login-input.component.scss',
 })
