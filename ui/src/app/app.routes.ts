@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LandingPageComponent } from './Pages/landing-page/landing-page.component';
 import { RegisterComponent } from './Pages/register/register.component';
+import { AuthGuard } from './Guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -33,6 +34,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
+    canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/home/home.component').then((m) => m.HomeComponent),
   },
