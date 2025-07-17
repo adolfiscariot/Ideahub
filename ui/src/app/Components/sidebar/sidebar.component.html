@@ -5,13 +5,8 @@
         </button>
     </div>
 
-    @if(isSidebarExpanded) {
-        <div class="sidebar-content" [ngClass]="'closed'">
-            <ul>
-                <p>One</p>
-                <p>Two</p>
-                <p>Three</p>
-            </ul>
-        </div>
-    }
+    <div class="sidebar-content" [ngClass]="{'closed' : !isSidebarExpanded}">
+        <ul>
+        </ul>
+    </div>
 </div>
