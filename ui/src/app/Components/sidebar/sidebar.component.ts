@@ -14,5 +14,6 @@ export class SidebarComponent {
 
   toggleSidebar(){
     this.isSidebarExpanded = !this.isSidebarExpanded;
+    console.log("The state is: %s", this.isSidebarExpanded);
   }
 }
