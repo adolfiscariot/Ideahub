@@ -38,4 +38,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/home/home.component').then((m) => m.HomeComponent),
   },
+  {
+    path: 'ideas',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
+  },
 ];
