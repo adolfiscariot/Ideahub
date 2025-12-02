@@ -10,6 +10,8 @@ public class IdeahubDbContextFactory : IDesignTimeDbContextFactory<IdeahubDbCont
         //manually configure iConfiguation to get connectionString env variable
         var configuration = new ConfigurationBuilder()
                 .AddUserSecrets<IdeahubDbContextFactory>()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 

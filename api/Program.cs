@@ -152,20 +152,28 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 //3. Build the app
 var app = builder.Build();
 
+// APPLY EF MIGRATIONS HERE
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+    db.Database.Migrate();
+}
+
 //Seed Roles at App Startup
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new [] {RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser};
+    var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
 
-    foreach(var role in roles)
+    foreach (var role in roles)
     {
-        if(!await roleManager.RoleExistsAsync(role))
+        if (!await roleManager.RoleExistsAsync(role))
         {
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
 }
+
 
 
 //4. Add MiddleWare
