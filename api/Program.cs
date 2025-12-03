@@ -172,6 +172,95 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
+
+    // Seed SuperAdmin User
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdeahubUser>>();
+    var adminEmail = "admin@ideahub.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        adminUser = new IdeahubUser
+        {
+            UserName = "SuperAdmin",
+            Email = adminEmail,
+            DisplayName = "Super Admin",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, "Admin@123");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, RoleConstants.SuperAdmin);
+        }
+    }
+
+    // Seed Initial Groups
+    var dbContext = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+    if (!dbContext.Groups.Any())
+    {
+        var groups = new List<Group>
+        {
+            new Group 
+            { 
+                Name = "Innovation & Product Development Group", 
+                Description = "Focused on ideating, prototyping, and testing new software solutions, AI models, and automation tools. This group ensures that all new concepts are aligned with market needs and Adept’s strategic vision.",
+                CreatedByUserId = adminUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                UserGroups = new List<UserGroup>
+                {
+                    new UserGroup { UserId = adminUser.Id, IsGroupAdmin = true, JoinedAt = DateTime.UtcNow }
+                }
+            },
+            new Group 
+            { 
+                Name = "Digital Transformation & Tech Integration Group", 
+                Description = "Responsible for implementing cutting-edge technologies across the organization and client projects. They handle cloud solutions, LMS development, AI integrations, and overall IT infrastructure modernization.",
+                CreatedByUserId = adminUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                UserGroups = new List<UserGroup>
+                {
+                    new UserGroup { UserId = adminUser.Id, IsGroupAdmin = true, JoinedAt = DateTime.UtcNow }
+                }
+            },
+            new Group 
+            { 
+                Name = "Client Solutions & BPO Excellence Group", 
+                Description = "Ensures that client-facing services, such as contact center operations, data annotation, and BPO workflows, are optimized for efficiency and quality. Focused on delivering exceptional customer experience.",
+                CreatedByUserId = adminUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                UserGroups = new List<UserGroup>
+                {
+                    new UserGroup { UserId = adminUser.Id, IsGroupAdmin = true, JoinedAt = DateTime.UtcNow }
+                }
+            },
+            new Group 
+            { 
+                Name = "Data & Analytics Intelligence Group", 
+                Description = "Manages collection, analysis, and interpretation of data for both internal and client use. This group leverages AI and analytics to provide actionable insights and inform strategic decision-making.",
+                CreatedByUserId = adminUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                UserGroups = new List<UserGroup>
+                {
+                    new UserGroup { UserId = adminUser.Id, IsGroupAdmin = true, JoinedAt = DateTime.UtcNow }
+                }
+            },
+            new Group 
+            { 
+                Name = "Sustainability, Impact & Community Group", 
+                Description = "Drives initiatives around corporate social responsibility, environmental sustainability, and community engagement. Ensures Adept’s solutions contribute positively to society and align with ethical practices.",
+                CreatedByUserId = adminUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                UserGroups = new List<UserGroup>
+                {
+                    new UserGroup { UserId = adminUser.Id, IsGroupAdmin = true, JoinedAt = DateTime.UtcNow }
+                }
+            }
+        };
+
+        dbContext.Groups.AddRange(groups);
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 

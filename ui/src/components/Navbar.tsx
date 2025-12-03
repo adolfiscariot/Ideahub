@@ -37,29 +37,29 @@ export const Navbar = () => {
               Dashboard
             </NavLink>
           </div>
-        </div>
 
-        <div className="ml-auto flex items-center gap-4">
-          {api.isAuthenticated() ? (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                api.clearToken();
-                window.location.reload(); // Simple way to reset state
-              }}
-            >
-              Logout
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link to="/register">
-                <Button>Sign Up</Button>
-              </Link>
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-4">
+            {api.isAuthenticated() ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  api.clearToken();
+                  window.location.reload(); // Simple way to reset state
+                }}
+              >
+                Logout
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link to="/login">
+                  <Button variant="ghost">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button>Sign Up</Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

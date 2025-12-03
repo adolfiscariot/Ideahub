@@ -16,6 +16,8 @@ public class UserGroup
     [DataType (DataType.DateTime)]
     public DateTime JoinedAt {get; set;} = DateTime.UtcNow;
 
+    public bool IsGroupAdmin { get; set; } = false;
+
 
     //Navigation Properties
     public IdeahubUser? User {get; set;} = null!;
