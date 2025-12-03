@@ -99,6 +99,11 @@ class ApiClient {
 
       const data = await response.json();
 
+      // Normalize backend response: map 'status' to 'success' if needed
+      if (data.status !== undefined && data.success === undefined) {
+        data.success = data.status;
+      }
+
       if (!response.ok) {
         throw new Error(data.message || 'API request failed');
       }
@@ -183,8 +188,8 @@ class ApiClient {
   }
 
   // Auth APIs
-  async login(email: string, password: string): Promise<ApiResponse<{ token: string }>> {
-    return this.request<{ token: string }>('/Auth/login', {
+  async login(email: string, password: string): Promise<ApiResponse<{ accessToken: string; refreshToken: string; refreshTokenExpiry: string }>> {
+    return this.request<{ accessToken: string; refreshToken: string; refreshTokenExpiry: string }>('/Auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });

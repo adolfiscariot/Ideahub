@@ -23,8 +23,8 @@ export default function Login() {
         try {
             const response = await api.login(formData.email, formData.password);
 
-            if (response.success && response.data?.token) {
-                api.setToken(response.data.token);
+            if (response.success && response.data?.accessToken) {
+                api.setToken(response.data.accessToken);
                 toast.success('Welcome back!', {
                     description: 'You have successfully logged in.',
                 });
@@ -54,7 +54,7 @@ export default function Login() {
                     <Input
                         id="email"
                         type="email"
-                        placeholder="m@example.com"
+                        placeholder="m@adept-techno.com"
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
