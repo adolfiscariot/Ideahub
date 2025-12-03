@@ -1,73 +1,120 @@
-# Welcome to your Lovable project
+# IdeaHub
 
-## Project info
+**A collaborative platform for teams to share ideas, vote on innovations, and transform concepts into projects.**
 
-**URL**: https://lovable.dev/projects/186a6e10-0453-44dc-8c07-13c97793fe26
+## About
 
-## How can I edit this code?
+IdeaHub is a modern web application built to facilitate collaboration and innovation within teams. Create groups, share ideas, vote on the best concepts, and promote promising ideas into full-fledged projects.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+### Frontend
+- **React 18** - Modern UI library
+- **Vite** - Fast build tool and dev server
+- **TypeScript** - Type-safe development
+- **shadcn/ui** - Beautiful, accessible component library
+- **Tailwind CSS** - Utility-first CSS framework
+- **TanStack Query** - Powerful data fetching and caching
+- **React Router** - Client-side routing
+- **Zod** - Schema validation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/186a6e10-0453-44dc-8c07-13c97793fe26) and start prompting.
+### Backend
+- **.NET 10** - High-performance web framework
+- **ASP.NET Core** - Web API framework
+- **Entity Framework Core** - ORM for database access
+- **PostgreSQL** - Reliable, open-source database
+- **JWT Authentication** - Secure user authentication
+- **ASP.NET Identity** - User management
 
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js 18+ and npm/pnpm
+- .NET 10 SDK
+- Docker (for PostgreSQL database)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/adolfiscariot/Ideahub.git
+   cd Ideahub
+   ```
 
-Follow these steps:
+2. **Start the database**
+   ```bash
+   docker-compose up -d
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Start the backend API**
+   ```bash
+   cd api
+   dotnet run
+   ```
+   The API will be available at `http://localhost:5065`
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. **Start the frontend**
+   ```bash
+   cd ui
+   npm install
+   npm run dev
+   ```
+   The UI will be available at `http://localhost:8080`
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Features
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+- 🎯 **Group Management** - Create and join groups
+- 💡 **Idea Sharing** - Post ideas within groups
+- 🗳️ **Voting System** - Vote on ideas to prioritize them
+- 🚀 **Project Promotion** - Transform top ideas into projects
+- 👥 **User Authentication** - Secure login and registration
+- 🎨 **Modern UI** - Beautiful, responsive design with dark mode support
+
+## Project Structure
+
+```
+Ideahub/
+├── api/              # .NET backend
+│   ├── Controllers/  # API endpoints
+│   ├── Models/       # Data models
+│   ├── Data/         # Database context
+│   └── Services/     # Business logic
+├── ui/               # React frontend
+│   ├── src/
+│   │   ├── components/  # Reusable UI components
+│   │   ├── pages/       # Page components
+│   │   ├── lib/         # Utilities and API client
+│   │   └── hooks/       # Custom React hooks
+│   └── public/          # Static assets
+└── docker-compose.yml   # Database configuration
 ```
 
-**Edit a file directly in GitHub**
+## Development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Frontend Development
+```bash
+cd ui
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+```
 
-**Use GitHub Codespaces**
+### Backend Development
+```bash
+cd api
+dotnet watch run     # Run with hot reload
+dotnet build         # Build the project
+dotnet test          # Run tests
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Contributing
 
-## What technologies are used for this project?
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-This project is built with:
+## License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is licensed under the MIT License.
 
-## How can I deploy this project?
+## Acknowledgments
 
-Simply open [Lovable](https://lovable.dev/projects/186a6e10-0453-44dc-8c07-13c97793fe26) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Built with ❤️ by Adept Technologies
