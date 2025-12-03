@@ -74,6 +74,10 @@ class ApiClient {
     localStorage.removeItem('auth_token');
   }
 
+  isAuthenticated(): boolean {
+    return !!this.token;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -140,8 +144,8 @@ class ApiClient {
 
   // Idea APIs  
   async getIdeas(groupId?: number): Promise<ApiResponse<Idea[]>> {
-    const endpoint = groupId 
-      ? `/Idea/view-ideas?groupId=${groupId}` 
+    const endpoint = groupId
+      ? `/Idea/view-ideas?groupId=${groupId}`
       : '/Idea/view-ideas';
     return this.request<Idea[]>(endpoint);
   }
