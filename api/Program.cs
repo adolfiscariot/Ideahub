@@ -115,7 +115,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AllowedOrigins, policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:8080", "http://localhost:8081")
               .AllowAnyHeader()
               .AllowAnyMethod()
     );
@@ -151,6 +151,13 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 //3. Build the app
 var app = builder.Build();
+
+//Apply pending migrations and create database if it doesn't exist
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+    dbContext.Database.EnsureCreated(); // Creates schema without migrations
+}
 
 //Seed Roles at App Startup
 using (var scope = app.Services.CreateScope())

@@ -1,16 +1,17 @@
+import { Link } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
-import adeptLogo from '@/assets/adept-logo.png';
+import adeptLogo from '@/assets/adeptwebp.webp';
 
 export const Navbar = () => {
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center gap-8">
-          <div className="flex items-center gap-3">
-            <img src={adeptLogo} alt="Adept Technologies" className="h-8 w-auto" />
-            <span className="font-serif font-semibold text-lg text-foreground">IdeaHub</span>
-          </div>
-          
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <img src={adeptLogo} alt="Adept Technologies" className="h-12 w-auto" />
+            {/* <span className="font-serif font-semibold text-lg text-foreground">IdeaHub</span> */}
+          </Link>
+
           <div className="flex items-center gap-1">
             <NavLink
               to="/groups"
