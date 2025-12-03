@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/Navbar';
+import { CreateGroupDialog } from '@/components/CreateGroupDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,7 @@ export default function Groups() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   // Fetch groups from API
   const { data: groupsResponse, isLoading, error } = useQuery({
@@ -60,21 +62,28 @@ export default function Groups() {
               </p>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setViewMode('list')}
-              >
-                <LayoutList className="h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Create Group</span>
               </Button>
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
+              <div className="h-8 w-px bg-border mx-2" />
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setViewMode('list')}
+                >
+                  <LayoutList className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -114,7 +123,11 @@ export default function Groups() {
                   <p className="text-muted-foreground text-center max-w-md mb-6">
                     Be the first to create a group and start collaborating! Groups are where great ideas come to life.
                   </p>
-                  <Button size="lg" className="gap-2">
+                  <Button
+                    size="lg"
+                    className="gap-2"
+                    onClick={() => setCreateDialogOpen(true)}
+                  >
                     <Users className="h-5 w-5" />
                     Create Your First Group
                   </Button>
@@ -260,6 +273,12 @@ export default function Groups() {
           )}
         </div>
       </div>
+
+      {/* Create Group Dialog */}
+      <CreateGroupDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
     </TooltipProvider>
   );
 }
