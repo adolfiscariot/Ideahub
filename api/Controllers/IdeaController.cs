@@ -80,6 +80,7 @@ public class IdeaController : ControllerBase
     }
 
     //View all ideas
+    [AllowAnonymous]
     [HttpGet("view-ideas")]
     public async Task<IActionResult> ViewIdeas(int groupId)
     {

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: ideahub_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: ideahub
+    ports:
+      - "5433:5432"
+    volumes:
+      - ideahub_postgres_data_v16:/var/lib/postgresql/data
+
+volumes:
+  ideahub_postgres_data_v16:

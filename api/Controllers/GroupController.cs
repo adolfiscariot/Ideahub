@@ -124,6 +124,7 @@ public class GroupController : ControllerBase
 
 
     //Show Groups
+    [AllowAnonymous]
     [HttpGet("view-groups")]
     public async Task<IActionResult> ViewGroups()
     {
@@ -131,11 +132,11 @@ public class GroupController : ControllerBase
         var groups = await _context.Groups.Select(g => new { g.Name, g.Description, g.CreatedByUser.DisplayName }).ToListAsync();
 
         //Check if groups exist
-        if (groups is null || !groups.Any())
-        {
-            _logger.LogError("No groups found");
-            return NotFound();
-        }
+        // if (groups is null || !groups.Any())
+        // {
+        //     _logger.LogError("No groups found");
+        //     return NotFound();
+        // }
 
         //Return groups if they exist
         _logger.LogInformation("Groups retrieved successfully");
@@ -232,6 +233,7 @@ public class GroupController : ControllerBase
     }
 
     //View Individual Group
+    [AllowAnonymous]
     [HttpGet("{groupId}")]
     public async Task<IActionResult> ViewGroup(int groupId)
     {
@@ -427,6 +429,7 @@ public class GroupController : ControllerBase
     }
 
     //Get members of group
+    [AllowAnonymous]
     [HttpGet("get-members")]
     public async Task<IActionResult> GetMembers(int groupId)
     {
