@@ -124,6 +124,7 @@ public class GroupController : ControllerBase
 
 
     //Show Groups
+    [AllowAnonymous]
     [HttpGet("view-groups")]
     public async Task<IActionResult> ViewGroups()
     {
@@ -232,6 +233,7 @@ public class GroupController : ControllerBase
     }
 
     //View Individual Group
+    [AllowAnonymous]
     [HttpGet("{groupId}")]
     public async Task<IActionResult> ViewGroup(int groupId)
     {
@@ -427,6 +429,7 @@ public class GroupController : ControllerBase
     }
 
     //Get members of group
+    [AllowAnonymous]
     [HttpGet("get-members")]
     public async Task<IActionResult> GetMembers(int groupId)
     {
