@@ -20,7 +20,7 @@ export class GroupsService {
     };
   }
 
-  // ===== YOUR ACTUAL ENDPOINTS =====
+  // ===== Mapping to current endpoints =====
 
   // GET /api/group/view-groups
   getGroups(): Observable<ApiResponse<any>> {
@@ -36,49 +36,26 @@ export class GroupsService {
     );
   }
 
-  // POST /api/group/join-group?groupId=1
-  joinGroup(groupId: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('groupId', groupId.toString());
+  // POST /api/group/join-group?groupId={guid}
+  joinGroup(groupId: string): Observable<ApiResponse<any>> {
+    const params = new HttpParams().set('groupId', groupId);
     return this.http.post<any>(`${this.apiUrl}/join-group`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
-  // GET /api/group/get-members?groupId=1
-  getGroupMembers(groupId: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('groupId', groupId.toString());
+  // GET /api/group/get-members?groupId={guid}
+  getGroupMembers(groupId: string): Observable<ApiResponse<any>> {
+    const params = new HttpParams().set('groupId', groupId);
     return this.http.get<any>(`${this.apiUrl}/get-members`, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
-  // GET /api/group/{groupId}
-  getGroupById(groupId: number): Observable<ApiResponse<any>> {
-    return this.http.get<any>(`${this.apiUrl}/${groupId}`).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
-  }
-
-  // GET /api/group/view-requests?groupId=1
-  getPendingRequests(groupId: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('groupId', groupId.toString());
-    return this.http.get<any>(`${this.apiUrl}/view-requests`, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
-  }
-
-  // POST /api/group/leave-group?groupId=1
-  leaveGroup(groupId: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('groupId', groupId.toString());
-    return this.http.post<any>(`${this.apiUrl}/leave-group`, {}, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
-  }
-
-  // POST /api/group/accept-request?groupId=1&requestUserId={userId}
-  acceptRequest(groupId: number, requestUserId: string): Observable<ApiResponse<any>> {
+  // POST /api/group/accept-request?groupId={guid}&requestUserId={userId}
+  acceptRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
-      .set('groupId', groupId.toString())
+      .set('groupId', groupId)
       .set('requestUserId', requestUserId);
     
     return this.http.post<any>(`${this.apiUrl}/accept-request`, {}, { params }).pipe(
@@ -86,10 +63,10 @@ export class GroupsService {
     );
   }
 
-  // POST /api/group/reject-request?groupId=1&requestUserId={userId}
-  rejectRequest(groupId: number, requestUserId: string): Observable<ApiResponse<any>> {
+  // POST /api/group/reject-request?groupId={guid}&requestUserId={userId}
+  rejectRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
-      .set('groupId', groupId.toString())
+      .set('groupId', groupId)
       .set('requestUserId', requestUserId);
     
     return this.http.post<any>(`${this.apiUrl}/reject-request`, {}, { params }).pipe(
@@ -98,7 +75,7 @@ export class GroupsService {
   }
 
   // DELETE /api/group/{groupId}
-  deleteGroup(groupId: number): Observable<ApiResponse<any>> {
+  deleteGroup(groupId: string): Observable<ApiResponse<any>> {
     return this.http.delete<any>(`${this.apiUrl}/${groupId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );

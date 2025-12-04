@@ -7,10 +7,141 @@
 
   <hr class="divider">
 
-  <!-- Create Group Form (Toggle) -->
-  <div class="create-group-section" *ngIf="showCreateForm">
-    <div class="create-group-card">
-      <h3>Create New Group</h3>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading groups...</p>
+  </div>
+
+  <!-- Groups List -->
+  <div *ngIf="!isLoading" class="groups-list">
+    
+    <!-- No Groups State -->
+    <div *ngIf="groups.length === 0" class="no-groups">
+      <div class="no-groups-icon">🏢</div>
+      <h3>No groups yet</h3>
+      <p>Be the first to create a group and start collaborating!</p>
+      <button class="create-button" (click)="toggleCreateForm()">
+        + Create First Group
+      </button>
+    </div>
+    
+    <div *ngIf="groups.length > 0" class="groups-grid">
+  <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
+    
+    <!-- Group Header -->
+<div class="group-header">
+  <div class="group-title-section">
+    <h2 class="group-name">{{ group.name }}</h2>
+    <div class="group-status">
+      <span *ngIf="!group.isActive" class="status-badge inactive">Inactive</span>
+      <span *ngIf="group.isDeleted" class="status-badge deleted">Deleted</span>
+    </div>
+  </div>
+  
+  <!-- Group Join/Pending Status -->
+  <div class="group-join-section">
+    <!-- If user IS a member (in UserGroups) -->
+    <div *ngIf="group.isMember" class="member-status">
+      👥 Member
+    </div>
+    
+    <!-- If user has PENDING request (in GroupMembershipRequests with Status = Pending) -->
+    <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
+      ⏳ Pending Approval
+      <!-- No cancel button for now (no cancel endpoint) -->
+    </div>
+    
+    <!-- If user is NOT a member AND NO pending request -->
+    <button *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+            class="join-button"
+            (click)="onJoinGroup(group.id)">
+      Join Group
+    </button>
+  
+            
+            <!-- Pending badge -->
+            <span *ngIf="group.hasPendingRequest" class="pending-badge">
+              ⏳ Pending Approval
+            </span>
+          </div>
+        </div>
+        
+        <!-- Group Description -->
+        <p class="group-description">{{ group.description }}</p>
+        
+        <!-- Group Stats -->
+        <div class="group-stats">
+          <div class="stat">
+            <span class="stat-icon">👥</span>
+            <span class="stat-count">{{ group.memberCount || 0 }} members</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">💡</span>
+            <span class="stat-count">{{ group.ideaCount || 0 }} ideas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">📅</span>
+            <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+          </div>
+        </div>
+
+        <!-- Admin Info -->
+        <div *ngIf="canConfigureGroup(group)" class="admin-info">
+          <span class="admin-badge">👑 You are admin</span>
+        </div>
+
+        <hr class="group-divider">
+
+        <!-- Group Actions -->
+        <div class="group-actions">
+          <!-- Details Button -->
+          <button class="action-button" (click)="openDetailsModal(group)">
+            <span class="action-icon">📋</span>
+            Details
+          </button>
+          
+          <!-- Members Button -->
+          <button class="action-button" (click)="openMembersModal(group)">
+            <span class="action-icon">👥</span>
+            Members
+            <span *ngIf="group.memberCount" class="count-badge">{{ group.memberCount }}</span>
+          </button>
+          
+          <!-- View Ideas Button -->
+          <button class="action-button disabled" disabled>
+            <span class="action-icon">💡</span>
+            View Ideas
+            <span class="coming-soon">Soon</span>
+          </button>
+          
+          <!-- Configure Button (Admin only) -->
+          <button *ngIf="canConfigureGroup(group)" 
+                  class="action-button configure" 
+                  (click)="openConfigureModal(group)">
+            <span class="action-icon">⚙️</span>
+            Configure
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Group Button -->
+  <div *ngIf="!showCreateForm && !isLoading" class="create-group-toggle">
+    <button class="create-button" (click)="toggleCreateForm()">
+      <span class="create-icon">+</span>
+      Create New Group
+    </button>
+  </div>
+
+  <!-- Create Group Modal/Form -->
+  <div *ngIf="showCreateForm" class="create-group-modal-overlay">
+    <div class="create-group-modal">
+      <div class="modal-header">
+        <h3>Create New Group</h3>
+        <button class="close-button" (click)="onCancelCreate()">×</button>
+      </div>
       
       <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
         <div class="form-group">
@@ -48,7 +179,7 @@
           </div>
         </div>
 
-        <div class="form-actions">
+        <div class="modal-actions">
           <button 
             type="button" 
             class="btn btn-secondary"
@@ -65,176 +196,5 @@
         </div>
       </form>
     </div>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading">
-    <div class="spinner"></div>
-    <p>Loading groups...</p>
-  </div>
-
-  <!-- Groups List -->
-  <div *ngIf="!isLoading" class="groups-list">
-    
-    <!-- No Groups State -->
-    <div *ngIf="groups.length === 0" class="no-groups">
-      <div class="no-groups-icon">🏢</div>
-      <h3>No groups yet</h3>
-      <p>Be the first to create a group and start collaborating!</p>
-      <button class="create-button" (click)="toggleCreateForm()">
-        + Create First Group
-      </button>
-    </div>
-    
-    <!-- Groups Grid -->
-    <div *ngIf="groups.length > 0" class="groups-grid">
-      <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
-        
-        <!-- Group Header -->
-        <div class="group-header">
-          <div class="group-title-section">
-            <h2 class="group-name">{{ group.name }}</h2>
-            <div class="group-status">
-              <span *ngIf="!group.isActive" class="status-badge inactive">Inactive</span>
-              <span *ngIf="group.isDeleted" class="status-badge deleted">Deleted</span>
-              <span *ngIf="group.isJoined" class="status-badge member">Member</span>
-            </div>
-          </div>
-          
-          <!-- Join/Leave/Pending Button -->
-          <div class="group-join-section">
-            <!-- Already a member -->
-            <button 
-              *ngIf="group.isJoined"
-              class="leave-button"
-              (click)="onJoinGroup(group.id)">
-              Leave Group
-            </button>
-            
-            <!-- Pending request -->
-            <button 
-              *ngIf="!group.isJoined && hasPendingRequest(group.id)"
-              class="pending-button"
-              (click)="onJoinGroup(group.id)">
-              Cancel Request
-            </button>
-            
-            <!-- Can join -->
-            <button 
-              *ngIf="!group.isJoined && !hasPendingRequest(group.id) && group.isActive && !group.isDeleted"
-              class="join-button"
-              (click)="onJoinGroup(group.id)">
-              Join Group
-            </button>
-            
-            <!-- Pending badge -->
-            <span *ngIf="hasPendingRequest(group.id)" class="pending-badge">
-              ⏳ Pending Approval
-            </span>
-          </div>
-        </div>
-        
-        <!-- Group Description -->
-        <p class="group-description">{{ group.description }}</p>
-        
-        <!-- Group Stats -->
-        <div class="group-stats">
-          <div class="stat">
-            <span class="stat-icon">👥</span>
-            <span class="stat-count">{{ group.memberCount || 0 }} members</span>
-          </div>
-          <div class="stat">
-            <span class="stat-icon">💡</span>
-            <span class="stat-count">{{ group.ideaCount || 0 }} ideas</span>
-          </div>
-          <div class="stat">
-            <span class="stat-icon">📅</span>
-            <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
-          </div>
-        </div>
-
-        <!-- Admin Info -->
-        <div *ngIf="canConfigureGroup(group)" class="admin-info">
-          <span class="admin-badge">👑 You are admin</span>
-        </div>
-
-        <hr class="group-divider">
-
-        <!-- Group Actions -->
-        <div class="group-actions">
-          <!-- Details Button - Opens Modal -->
-          <button class="action-button" (click)="openDetailsModal(group)">
-            <span class="action-icon">📋</span>
-            Details
-          </button>
-          
-          <!-- Members Button - Opens Modal -->
-          <button class="action-button" (click)="openMembersModal(group)">
-            <span class="action-icon">👥</span>
-            Members
-            <span *ngIf="group.memberCount" class="count-badge">{{ group.memberCount }}</span>
-          </button>
-          
-          <!-- View Ideas Button (disabled for now) -->
-          <button class="action-button disabled" disabled>
-            <span class="action-icon">💡</span>
-            View Ideas
-            <span class="coming-soon">Soon</span>
-          </button>
-          
-          <!-- Configure Button (Admin only) -->
-          <button *ngIf="canConfigureGroup(group)" 
-                  class="action-button configure" 
-                  (click)="openConfigureModal(group)">
-            <span class="action-icon">⚙️</span>
-            Configure
-          </button>
-          
-          <!-- Pending Requests Button (Admin only) -->
-          <button *ngIf="canConfigureGroup(group)" 
-                  class="action-button requests-button"
-                  (click)="openPendingRequestsModal(group)">
-            <span class="action-icon">📨</span>
-            Pending Requests
-            <span *ngIf="getPendingRequestCount(group.id) > 0" class="count-badge alert">
-              {{ getPendingRequestCount(group.id) }}
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Create Group Button (when form is hidden and there are groups) -->
-  <div *ngIf="!showCreateForm && !isLoading && groups.length > 0" class="create-group-toggle">
-    <button class="create-button" (click)="toggleCreateForm()">
-      <span class="create-icon">+</span>
-      Create New Group
-    </button>
-  </div>
-
-  <!-- Bottom Action Buttons -->
-  <div class="bottom-actions">
-    <button class="bottom-button" 
-            (click)="openDetailsModal(groups[0])" 
-            [disabled]="groups.length === 0">
-      <span class="bottom-icon">📋</span>
-      Details
-    </button>
-    <button class="bottom-button" 
-            (click)="openMembersModal(groups[0])" 
-            [disabled]="groups.length === 0">
-      <span class="bottom-icon">👥</span>
-      Members
-    </button>
-    <button class="bottom-button primary" (click)="toggleCreateForm()">
-      <span class="bottom-icon">+</span>
-      Create Group
-    </button>
-  </div>
-
-  <!-- Footer Note -->
-  <div class="footer-note">
-    <p>Go to Settings to activate Windows.</p>
   </div>
 </div>

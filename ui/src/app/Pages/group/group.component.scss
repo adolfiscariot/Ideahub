@@ -373,6 +373,151 @@
   .group-actions {
     flex-direction: column;
   }
+
+  // Modal styles
+.create-group-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.create-group-modal {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      color: #333;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: #666;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      
+      &:hover {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+    }
+  }
+  
+  form {
+    padding: 0 24px 24px 24px;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+  }
+}
+
+// Member status
+.member-status {
+  .member-tag {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+/* Remove member status from group header */
+.group-header .group-status {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  
+  &.inactive {
+    background-color: #ffc107;
+    color: #333;
+  }
+  
+  &.deleted {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  /* Remove member badge style */
+  &.member {
+    display: none; /* This hides the member badge completely */
+  }
+}
+
+/* Simple text for member status */
+.member-text {
+  color: #28a745;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pending-status {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #ffeaa7;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-status {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
   
   .bottom-actions {
     flex-direction: column;
