@@ -30,7 +30,7 @@ export class LoginInputComponent implements OnInit {
       nonNullable: true,
     }),
     password: new FormControl('', {
-      validators: Validators.required,
+      validators: [Validators.required],
       nonNullable: true,
     }),
   });

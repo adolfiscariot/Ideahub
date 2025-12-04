@@ -21,12 +21,12 @@ services:
     container_name: ideahub-backend
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:8080
-      ASPNETCORE_HTTPS_PORTS: 8081
+      ASPNETCORE_URLS: http://+:5066
+      ASPNETCORE_HTTPS_PORTS: 7204
       ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_admin
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
     ports:
-      - "8080:8080"
+      - "5066:5066"
     depends_on:
       - ideahub-db
     restart: always
@@ -40,7 +40,7 @@ services:
     container_name: ideahub-frontend
     command: ["npm", "start"]
     environment:
-      ANGULAR_API_URL: "http://localhost:8080"
+      ANGULAR_API_URL: "http://localhost:5066"
     ports:
       - "4200:4200"   # Angular default dev server port
     depends_on:

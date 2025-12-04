@@ -143,7 +143,7 @@ builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 //2.9 Link the SendGridSettings class to the "SendGrid" user secrets
 builder.Services.Configure<SendGridSettings>(
-    builder.Configuration.GetSection("SendGrid"));
+    builder.Configuration.GetSection("SendGridSettings"));
 
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
