@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
+import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 
 @Component({
   selector: 'app-groups',
@@ -17,17 +20,29 @@ import { ReactiveFormsModule } from '@angular/forms';
   ]
 })
 export class GroupsComponent implements OnInit {
+  // Group data
   groups: any[] = [];
+  
+  // Page content
   title = 'Groups';
   subtitle = 'Explore and join groups to collaborate on ideas and projects.';
+  
+  // Form state
   showCreateForm = false;
   createGroupForm: FormGroup;
   isSubmitting = false;
   isLoading: boolean = true;
+  
+  // Store pending requests for each group
+  pendingRequests: Map<number, boolean> = new Map();
+  
+  // Store pending request counts for each group (for admins)
+  pendingRequestCounts: Map<number, number> = new Map();
 
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
+    private dialog: MatDialog,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
@@ -43,49 +58,115 @@ export class GroupsComponent implements OnInit {
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
-  this.isLoading = true;
-  this.groupsService.getGroups().subscribe({
-    next: (response: any) => {
-      this.isLoading = false;
-      const isSuccess = response.success || response.status;
-      if (isSuccess && response.data) {
-        // Backend should return IsMember field
-        this.groups = response.data.map((group: any) => ({
-          id: group.Id || group.id,
-          name: group.Name || group.name,
-          description: group.Description || group.description,
-          isActive: group.IsActive !== false, // default to true
-          createdAt: group.CreatedAt || group.createdAt,
-          createdByUserId: group.CreatedByUserId || group.createdByUserId,
-          createdByUser: group.CreatedByUser || group.createdByUser,
+    this.isLoading = true;
+    this.groupsService.getGroups().subscribe({
+      next: (response: any) => {
+        this.isLoading = false;
+        const isSuccess = response.success || response.status;
+        if (isSuccess && response.data) {
+          this.groups = response.data.map((group: any) => ({
+            ...group,
+            id: group.id || 0,
+            name: group.name || group.Name,
+            description: group.description || group.Description,
+            isJoined: group.isMember || group.IsMember || false,
+            hasPendingRequest: group.hasPendingRequest || group.HasPendingRequest || false,
+            memberCount: group.memberCount || group.MemberCount || 0,
+            ideaCount: group.ideaCount || group.IdeaCount || 0,
+            isActive: group.isActive || group.IsActive !== false,
+            isDeleted: group.isDeleted || group.IsDeleted || false,
+            createdAt: group.createdAt || group.CreatedAt || new Date().toISOString(),
+            createdByUserId: group.createdByUserId || group.CreatedByUserId || 'unknown',
+            createdByUser: group.createdByUser || group.CreatedByUser || {
+              displayName: 'Unknown',
+              email: ''
+            }
+          }));
           
-          // THE KEY FIELD - check all possible property names
-          isJoined: group.IsMember || group.isMember || group.IsJoined || group.isJoined || false,
-          
-          // Optional fields
-          hasPendingRequest: group.HasPendingRequest || group.hasPendingRequest || false,
-          memberCount: group.MemberCount || group.memberCount || 0,
-          ideaCount: group.IdeaCount || group.ideaCount || 0
-        }));
-        
-        console.log('Loaded groups:', this.groups); // Debug log
+          // Check pending requests for each group
+          this.groups.forEach(group => {
+            if (group.hasPendingRequest) {
+              this.pendingRequests.set(group.id, true);
+            }
+          });
+        } else {
+          console.error('Failed to load groups:', response.message);
+          this.groups = [];
+        }
+      },
+      error: (error: any) => {
+        this.isLoading = false;
+        console.error('Error loading groups:', error);
+        this.groups = [];
       }
-    },
-    error: (error: any) => {
-      this.isLoading = false;
-      console.error('Error loading groups:', error);
-    }
-  });
-}
+    });
+  }
+
+  // ===== MODAL METHODS =====
+
+  openDetailsModal(group: any): void {
+    this.dialog.open(GroupDetailsModalComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: { group: group },
+      panelClass: 'custom-modal'
+    });
+  }
+
+  openMembersModal(group: any): void {
+    this.dialog.open(GroupMembersModalComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: { group: group },
+      panelClass: 'custom-modal'
+    });
+  }
+
+  openConfigureModal(group: any): void {
+    // TODO: Create a configure modal component
+    alert(`Configure group: ${group.name}\n\nGroup Settings:\n- Edit group info\n- Manage members\n- Change privacy settings\n- Delete group\n\nFeature coming soon!`);
+  }
+
+  openPendingRequestsModal(group: any): void {
+    // TODO: Create a pending requests modal component
+    this.viewPendingRequests(group.id);
+  }
 
   // ===== GROUP JOIN/LEAVE METHODS =====
 
   onJoinGroup(groupId: number): void {
+    // Check if user has pending request for this group
+    if (this.hasPendingRequest(groupId)) {
+      // Cancel pending request
+      if (confirm('Cancel your join request?')) {
+        this.cancelJoinRequest(groupId);
+      }
+      return;
+    }
+
+    // Check if user is already a member
+    const group = this.groups.find(g => g.id === groupId);
+    if (group?.isJoined) {
+      // Leave group
+      if (confirm('Are you sure you want to leave this group?')) {
+        this.leaveGroup(groupId);
+      }
+      return;
+    }
+
+    // Join group (request to join)
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
         if (isSuccess) {
           alert('Join request sent! Awaiting admin approval.');
+          this.pendingRequests.set(groupId, true);
+          
+          // Update the group's hasPendingRequest status
+          const index = this.groups.findIndex(g => g.id === groupId);
+          if (index !== -1) {
+            this.groups[index].hasPendingRequest = true;
+          }
         } else {
           if (response.message?.includes('authenticated') || 
               response.message?.includes('login') || 
@@ -112,6 +193,43 @@ export class GroupsComponent implements OnInit {
     });
   }
 
+  cancelJoinRequest(groupId: number): void {
+    // TODO: Implement cancel join request endpoint
+    // For now, just remove from local state
+    this.pendingRequests.delete(groupId);
+    
+    // Update the group's hasPendingRequest status
+    const index = this.groups.findIndex(g => g.id === groupId);
+    if (index !== -1) {
+      this.groups[index].hasPendingRequest = false;
+    }
+    
+    alert('Join request cancelled.');
+  }
+
+  leaveGroup(groupId: number): void {
+    this.groupsService.leaveGroup(groupId).subscribe({
+      next: (response: any) => {
+        const isSuccess = response.success || response.status;
+        if (isSuccess) {
+          alert('You have left the group.');
+          
+          // Update local state
+          const index = this.groups.findIndex(g => g.id === groupId);
+          if (index !== -1) {
+            this.groups[index].isJoined = false;
+          }
+        } else {
+          alert(response.message || 'Failed to leave group.');
+        }
+      },
+      error: (error: any) => {
+        console.error('Error leaving group:', error);
+        alert('Failed to leave group. Please try again.');
+      }
+    });
+  }
+
   // ===== GROUP CREATION METHODS =====
 
   toggleCreateForm(): void {
@@ -122,145 +240,78 @@ export class GroupsComponent implements OnInit {
   }
 
   onCreateGroup(): void {
-  if (this.createGroupForm.invalid) {
-    this.createGroupForm.markAllAsTouched();
-    return;
-  }
+    if (this.createGroupForm.invalid) {
+      this.createGroupForm.markAllAsTouched();
+      return;
+    }
 
-  this.isSubmitting = true;
-  const newGroup: AddGroup = this.createGroupForm.value;
+    this.isSubmitting = true;
+    const newGroup: AddGroup = this.createGroupForm.value;
 
-  this.groupsService.createGroup(newGroup).subscribe({
-    next: (response: any) => {
-      this.isSubmitting = false;
-      const isSuccess = response.success || response.status;
-      if (isSuccess) {
-        alert('Group created successfully!');
-        
-        // Create temporary group object with isJoined: true
-        const tempGroup = {
-          ...newGroup,
-          id: response.data?.id || Date.now(), // Temporary ID
-          name: newGroup.name,
-          description: newGroup.description,
-          isJoined: true, // ← THIS IS THE KEY FIX
-          memberCount: 1,
-          ideaCount: 0,
-          isActive: true,
-          createdAt: new Date().toISOString()
-        };
+    this.groupsService.createGroup(newGroup).subscribe({
+      next: (response: any) => {
+        this.isSubmitting = false;
+        const isSuccess = response.success || response.status;
+        if (isSuccess) {
+          alert('Group created successfully!');
+          
+          // Add the new group to the list with isJoined: true
+          const newGroupData = {
+            ...newGroup,
+            id: response.data?.id || Date.now(),
+            isJoined: true,
+            isAdmin: true,
+            memberCount: 1,
+            ideaCount: 0,
+            isActive: true,
+            isDeleted: false,
+            createdAt: new Date().toISOString(),
+            createdByUserId: this.authService.getCurrentUserId() || 'unknown',
+            createdByUser: {
+              displayName: 'You',
+              email: ''
+            },
+            hasPendingRequest: false
+          };
 
-        // Add to beginning of list immediately
-        this.groups.unshift(tempGroup);
-        
-        // Reset form
-        this.createGroupForm.reset();
-        this.showCreateForm = false;
-        
-        // Refresh from server after 1 second to get real data
-        setTimeout(() => {
-          this.loadGroups();
-        }, 1000);
-        
-      } else {
-        // Error handling...
-        if (response.message?.includes('authenticated') || 
-            response.message?.includes('User ID') || 
-            response.message?.includes('login')) {
-          alert('Please login to create a group.');
+          this.groups.unshift(newGroupData);
+          
+          this.createGroupForm.reset();
+          this.showCreateForm = false;
+          
+          // Refresh after a short delay to get full data from server
+          setTimeout(() => {
+            this.loadGroups();
+          }, 1500);
+          
         } else {
-          alert(response.message || 'Failed to create group.');
+          if (response.message?.includes('authenticated') || 
+              response.message?.includes('User ID') || 
+              response.message?.includes('login')) {
+            alert('Please login to create a group.');
+          } else {
+            alert(response.message || 'Failed to create group.');
+          }
+        }
+      },
+      error: (error: any) => {
+        this.isSubmitting = false;
+        console.error('Error creating group:', error);
+        
+        if (error.status === 401) {
+          alert('Please login to create a group.');
+        } else if (error.status === 400) {
+          alert('Invalid group data. Please check your input.');
+        } else {
+          alert('Failed to create group. Please try again.');
         }
       }
-    },
-    error: (error: any) => {
-      this.isSubmitting = false;
-      console.error('Error creating group:', error);
-      
-      if (error.status === 401) {
-        alert('Please login to create a group.');
-      } else if (error.status === 400) {
-        alert('Invalid group data. Please check your input.');
-      } else {
-        alert('Failed to create group. Please try again.');
-      }
-    }
-  });
-}
+    });
+  }
 
   onCancelCreate(): void {
     this.showCreateForm = false;
     this.createGroupForm.reset();
-  }
-
-  // ===== GROUP VIEWING METHODS =====
-
-  viewMembers(groupId: number): void {
-    if (groupId === 0) return;
-    
-    this.groupsService.getGroupMembers(groupId).subscribe({
-      next: (response: any) => {
-        const isSuccess = response.success || response.status;
-        if (isSuccess && response.data) {
-          if (response.data.length === 0) {
-            alert('This group has no members yet.');
-            return;
-          }
-          
-          const memberList = response.data.map((member: any) => 
-            `${member.UserName || member.displayName || 'Unknown Member'} (${member.Email || member.email || 'No email'})`
-          ).join('\n');
-          
-          alert(`Group Members:\n\n${memberList}`);
-        } else {
-          alert(response.message || 'Failed to load members.');
-        }
-      },
-      error: (error: any) => {
-        console.error('Error loading members:', error);
-        alert('Failed to load members. Please try again.');
-      }
-    });
-  }
-
-  viewDetails(group: any): void {
-    const details = `
-Group Details:
-===============
-Name: ${group.name || group.Name}
-Description: ${group.description || group.Description}
-Created By: ${group.createdByUser?.DisplayName || group.DisplayName || 'Unknown'}
-Created: ${this.formatDate(group.createdAt)}
-${group.isJoined ? '✓ You are a member' : '○ You are not a member'}
-${group.isDeleted ? '⚠️ This group has been deleted' : ''}
-    `;
-    alert(details);
-  }
-
-  viewPendingRequests(groupId: number): void {
-    this.groupsService.getPendingRequests(groupId).subscribe({
-      next: (response: any) => {
-        const isSuccess = response.success || response.status;
-        if (isSuccess && response.data) {
-          if (response.data.length === 0) {
-            alert('No pending requests for this group.');
-            return;
-          }
-          
-          const requestList = response.data.map((req: any, index: number) => 
-            `Request ${index + 1}: User ID: ${req}`
-          ).join('\n\n');
-          
-          alert(`Pending Join Requests:\n\n${requestList}\n\nTotal: ${response.data.length} request(s)`);
-        } else {
-          alert(response.message || 'Failed to load pending requests.');
-        }
-      },
-      error: (error: any) => {
-        console.error('Error loading pending requests:', error);
-        alert('Failed to load pending requests. Please try again.');
-      }
-    });
   }
 
   // ===== HELPER METHODS =====
@@ -286,7 +337,7 @@ ${group.isDeleted ? '⚠️ This group has been deleted' : ''}
   // ===== PERMISSION METHODS =====
 
   canViewMembers(group: any): boolean {
-    return true;
+    return true; // Everyone can view members for now
   }
 
   canConfigureGroup(group: any): boolean {
@@ -294,11 +345,63 @@ ${group.isDeleted ? '⚠️ This group has been deleted' : ''}
   }
 
   canViewIdeas(group: any): boolean {
-    return true;
+    return true; // Will implement later
   }
 
-  isUserLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+  // ===== PENDING REQUEST METHODS =====
+
+  hasPendingRequest(groupId: number): boolean {
+    return this.pendingRequests.get(groupId) || false;
+  }
+
+  getPendingRequestCount(groupId: number): number {
+    return this.pendingRequestCounts.get(groupId) || 0;
+  }
+
+  // ===== LEGACY METHODS (for backward compatibility) =====
+
+  viewDetails(group: any): void {
+    // Legacy method - redirects to modal
+    this.openDetailsModal(group);
+  }
+
+  viewMembers(groupId: number): void {
+    // Legacy method - find group and open modal
+    const group = this.groups.find(g => g.id === groupId);
+    if (group) {
+      this.openMembersModal(group);
+    }
+  }
+
+  viewPendingRequests(groupId: number): void {
+    this.groupsService.getPendingRequests(groupId).subscribe({
+      next: (response: any) => {
+        const isSuccess = response.success || response.status;
+        if (isSuccess && response.data) {
+          if (response.data.length === 0) {
+            alert('No pending requests for this group.');
+            return;
+          }
+          
+          const requestList = response.data.map((req: any, index: number) => 
+            `Request ${index + 1}: User ID: ${req}`
+          ).join('\n\n');
+          
+          alert(`Pending Join Requests:\n\n${requestList}\n\nTotal: ${response.data.length} request(s)`);
+        } else {
+          alert(response.message || 'Failed to load pending requests.');
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading pending requests:', error);
+        alert('Failed to load pending requests.');
+      }
+    });
+  }
+
+  viewIdeas(groupId: number): void {
+    // Will implement later
+    console.log('View ideas for group:', groupId);
   }
 
   // ===== FORM GETTER METHODS =====
@@ -309,23 +412,5 @@ ${group.isDeleted ? '⚠️ This group has been deleted' : ''}
   
   get description() { 
     return this.createGroupForm.get('description'); 
-  }
-
-  // ===== STUB METHODS =====
-
-  viewIdeas(groupId: number): void {
-    alert(`Viewing ideas for group ID: ${groupId}\n\nFeature coming soon!`);
-  }
-
-  onConfigureGroup(group: any): void {
-    alert(`Configure group: ${group.name || group.Name}\n\nGroup Settings:\n- Edit group info\n- Manage members\n- Change privacy settings\n- Delete group\n\nFeature coming soon!`);
-  }
-
-  hasPendingRequest(groupId: number): boolean {
-    return false;
-  }
-
-  getPendingRequestCount(groupId: number): number {
-    return 0;
   }
 }

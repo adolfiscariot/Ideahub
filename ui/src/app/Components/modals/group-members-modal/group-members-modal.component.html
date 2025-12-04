@@ -1,0 +1,50 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h2>Group Members</h2>
+    <div class="header-info">
+      <span class="member-count">{{ members.length }} members</span>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <span>×</span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="modal-content">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading members...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && members.length === 0" class="no-members">
+      <div class="no-members-icon">👥</div>
+      <h3>No members yet</h3>
+      <p>Be the first to join this group!</p>
+    </div>
+    
+    <div *ngIf="!isLoading && members.length > 0" class="members-list">
+      <div *ngFor="let member of members" class="member-item">
+        <div class="member-avatar">
+          {{ getInitials(member.displayName || member.UserName) }}
+        </div>
+        <div class="member-info">
+          <div class="member-name">{{ member.displayName || member.UserName || 'Unknown User' }}</div>
+          <div class="member-email">{{ member.email || member.Email || 'No email' }}</div>
+        </div>
+        <div *ngIf="member.role" class="member-role">
+          <span class="role-badge">{{ member.role }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-footer">
+    <button mat-button (click)="close()">Close</button>
+    <button *ngIf="!data.group.isJoined" 
+            mat-raised-button 
+            color="primary"
+            (click)="joinGroup()"
+            [disabled]="joining">
+      {{ joining ? 'Joining...' : 'Join Group' }}
+    </button>
+  </div>
+</div>

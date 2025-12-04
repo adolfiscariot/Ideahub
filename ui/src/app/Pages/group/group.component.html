@@ -103,7 +103,13 @@
           
           <!-- Join/Leave/Pending Button -->
           <div class="group-join-section">
-           
+            <!-- Already a member -->
+            <button 
+              *ngIf="group.isJoined"
+              class="leave-button"
+              (click)="onJoinGroup(group.id)">
+              Leave Group
+            </button>
             
             <!-- Pending request -->
             <button 
@@ -156,28 +162,30 @@
 
         <!-- Group Actions -->
         <div class="group-actions">
-          <!-- Details Button -->
-          <button class="action-button" (click)="viewDetails(group)">
+          <!-- Details Button - Opens Modal -->
+          <button class="action-button" (click)="openDetailsModal(group)">
             <span class="action-icon">📋</span>
             Details
           </button>
           
-          <!-- Members Button -->
-          <button *ngIf="canViewMembers(group)" class="action-button" (click)="viewMembers(group.id)">
+          <!-- Members Button - Opens Modal -->
+          <button class="action-button" (click)="openMembersModal(group)">
             <span class="action-icon">👥</span>
             Members
             <span *ngIf="group.memberCount" class="count-badge">{{ group.memberCount }}</span>
           </button>
           
-          <!-- View Ideas Button -->
-          <button *ngIf="canViewIdeas(group)" class="action-button" (click)="viewIdeas(group.id)">
+          <!-- View Ideas Button (disabled for now) -->
+          <button class="action-button disabled" disabled>
             <span class="action-icon">💡</span>
             View Ideas
-            <span *ngIf="group.ideaCount" class="count-badge">{{ group.ideaCount }}</span>
+            <span class="coming-soon">Soon</span>
           </button>
           
           <!-- Configure Button (Admin only) -->
-          <button *ngIf="canConfigureGroup(group)" class="action-button configure" (click)="onConfigureGroup(group)">
+          <button *ngIf="canConfigureGroup(group)" 
+                  class="action-button configure" 
+                  (click)="openConfigureModal(group)">
             <span class="action-icon">⚙️</span>
             Configure
           </button>
@@ -185,7 +193,7 @@
           <!-- Pending Requests Button (Admin only) -->
           <button *ngIf="canConfigureGroup(group)" 
                   class="action-button requests-button"
-                  (click)="viewPendingRequests(group.id)">
+                  (click)="openPendingRequestsModal(group)">
             <span class="action-icon">📨</span>
             Pending Requests
             <span *ngIf="getPendingRequestCount(group.id) > 0" class="count-badge alert">
@@ -205,28 +213,25 @@
     </button>
   </div>
 
- 
-
   <!-- Bottom Action Buttons -->
-  <!-- Bottom Action Buttons -->
-<div class="bottom-actions">
-  <button class="bottom-button" 
-          (click)="viewDetails(groups[0])" 
-          [disabled]="groups.length === 0">
-    <span class="bottom-icon">📋</span>
-    Details
-  </button>
-  <button class="bottom-button" 
-          (click)="viewMembers(groups[0]?.id || 0)" 
-          [disabled]="groups.length === 0">
-    <span class="bottom-icon">👥</span>
-    Members
-  </button>
-  <button class="bottom-button primary" (click)="toggleCreateForm()">
-    <span class="bottom-icon">+</span>
-    Create Group
-  </button>
-</div>
+  <div class="bottom-actions">
+    <button class="bottom-button" 
+            (click)="openDetailsModal(groups[0])" 
+            [disabled]="groups.length === 0">
+      <span class="bottom-icon">📋</span>
+      Details
+    </button>
+    <button class="bottom-button" 
+            (click)="openMembersModal(groups[0])" 
+            [disabled]="groups.length === 0">
+      <span class="bottom-icon">👥</span>
+      Members
+    </button>
+    <button class="bottom-button primary" (click)="toggleCreateForm()">
+      <span class="bottom-icon">+</span>
+      Create Group
+    </button>
+  </div>
 
   <!-- Footer Note -->
   <div class="footer-note">
