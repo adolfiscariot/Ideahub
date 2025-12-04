@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: ideahub
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - ideahub_postgres_data_v16:/var/lib/postgresql/data
 
