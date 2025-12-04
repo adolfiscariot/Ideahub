@@ -327,4 +327,41 @@ public class IdeaController : ControllerBase
         }
     }
 
+    //View all ideas created by the user (across all groups)
+    [HttpGet("my-ideas")]
+    public async Task<IActionResult> GetMyIdeas()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
+        }
+
+        try
+        {
+            var ideas = await _context.Ideas
+                .Include(i => i.Group)
+                .Where(i => i.UserId == userId)
+                .OrderByDescending(i => i.CreatedAt)
+                .Select(i => new 
+                {
+                    i.Id,
+                    i.Title,
+                    i.Description,
+                    i.Status,
+                    i.CreatedAt,
+                    GroupName = i.Group.Name,
+                    GroupId = i.GroupId,
+                    IsPromotedToProject = i.IsPromotedToProject
+                })
+                .ToListAsync();
+
+            return Ok(ApiResponse.Ok("User ideas retrieved", ideas));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error fetching user ideas: {e}", e);
+            return StatusCode(500, ApiResponse.Fail("Failed to fetch user ideas"));
+        }
+    }
 }

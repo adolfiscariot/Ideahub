@@ -38,6 +38,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/home/home.component').then((m) => m.HomeComponent),
   },
+  {
+    path: 'my-ideas',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/my-ideas/my-ideas.component').then((m) => m.MyIdeasComponent),
+  },
 
   // Groups Routes - Fixed path to match navbar
   // {

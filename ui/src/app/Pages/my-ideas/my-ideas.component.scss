@@ -1,0 +1,109 @@
+.ideas-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 24px;
+        color: #333;
+    }
+
+    .loading,
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .ideas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .idea-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #eee;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+
+            .group-badge {
+                background: #f5f5f5;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                color: #666;
+            }
+
+            .status {
+                font-size: 0.8rem;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-weight: 500;
+
+                &.open {
+                    background: #e3f2fd;
+                    color: #1976d2;
+                }
+
+                &.closed {
+                    background: #e8f5e9;
+                    color: #388e3c;
+                }
+            }
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+        }
+
+        .description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: auto;
+
+            .promoted-badge {
+                background: #fff3e0;
+                color: #f57c00;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+        }
+    }
+}
