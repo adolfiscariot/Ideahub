@@ -125,22 +125,60 @@ public class GroupController : ControllerBase
 
     //Show Groups
     [HttpGet("view-groups")]
-    public async Task<IActionResult> ViewGroups()
+public async Task<IActionResult> ViewGroups()
+{
+    // Get current user ID from JWT token
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+    if (string.IsNullOrWhiteSpace(currentUserId))
     {
-        //Fetch groups from database
-        var groups = await _context.Groups.Select(g => new { g.Name, g.Description, g.CreatedByUser.DisplayName }).ToListAsync();
-
-        //Check if groups exist
-        if (groups is null || !groups.Any())
-        {
-            _logger.LogError("No groups found");
-            return NotFound();
-        }
-
-        //Return groups if they exist
-        _logger.LogInformation("Groups retrieved successfully");
-        return Ok(ApiResponse.Ok("Groups retrieved successfully", groups));
+        _logger.LogError("User not authenticated");
+        return Unauthorized(ApiResponse.Fail("User not authenticated"));
     }
+
+    // Fetch groups with membership status for current user
+    var groups = await _context.Groups
+        .Select(g => new 
+        {
+            g.Id,
+            g.Name,
+            g.Description,
+            g.IsActive,
+            g.CreatedAt,
+            g.CreatedByUserId,
+            CreatedByUser = new 
+            {
+                g.CreatedByUser.DisplayName,
+                g.CreatedByUser.Email
+            },
+            
+            // CRITICAL: Check if current user is a member
+            IsMember = _context.UserGroups
+                .Any(ug => ug.GroupId == g.Id && ug.UserId == currentUserId),
+            
+            // Check if user has pending request
+            HasPendingRequest = _context.GroupMembershipRequests
+                .Any(gmr => gmr.GroupId == g.Id && 
+                           gmr.UserId == currentUserId && 
+                           gmr.Status == Status.Pending),
+            
+            // Get member count
+            MemberCount = _context.UserGroups.Count(ug => ug.GroupId == g.Id),
+            
+            // Get idea count (if you have Ideas table)
+            IdeaCount = _context.Ideas.Count(i => i.GroupId == g.Id)
+        })
+        .ToListAsync();
+
+    if (groups == null || !groups.Any())
+    {
+        _logger.LogWarning("No groups found");
+        return Ok(ApiResponse.Ok("No groups found", new List<object>()));
+    }
+
+    _logger.LogInformation("Retrieved {count} groups for user {userId}", groups.Count, currentUserId);
+    return Ok(ApiResponse.Ok("Groups retrieved successfully", groups));
+}
 
     //Join Group
     [HttpPost("join-group")]
