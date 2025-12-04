@@ -33,6 +33,7 @@ builder.Services.AddDbContext<IdeahubDbContext>(options =>
 );
 
 //2.3 Identity Service
+var requireConfirmedEmail = builder.Configuration.GetValue<bool>("SignIn:RequireConfirmedEmail", true);
 builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
     {
         //Password Settings
@@ -43,7 +44,7 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
         //User Settings
         options.User.RequireUniqueEmail = true;
         //Sign In Settings
-        options.SignIn.RequireConfirmedEmail = true;
+        options.SignIn.RequireConfirmedEmail = requireConfirmedEmail;
     })
     .AddEntityFrameworkStores<IdeahubDbContext>()
     .AddDefaultTokenProviders();

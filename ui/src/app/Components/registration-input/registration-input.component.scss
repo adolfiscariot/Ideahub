@@ -47,9 +47,11 @@ label {
 .submit-button {
   width: 100%;
   text-align: center;
+
   & p {
     font-size: 14px;
   }
+
   & a {
     font-size: 14px;
   }
@@ -58,6 +60,7 @@ label {
 input:hover {
   outline: 1px solid purple;
 }
+
 input:focus {
   outline: 1px solid purple;
   border-bottom: 2px solid purple;
@@ -65,8 +68,59 @@ input:focus {
   border-left: 2px solid purple;
 }
 
+.server-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
+
+  p {
+    color: #721c24;
+    margin: 4px 0;
+    font-size: 13px;
+    text-align: left;
+  }
+}
+
 .error-message {
   color: red;
+  font-size: 12px;
+  text-align: left;
+  width: 100%;
+
+  &.password-requirements {
+    color: #666;
+
+    ul {
+      margin: 5px 0;
+      padding-left: 20px;
+      list-style: none;
+
+      li {
+        position: relative;
+        padding-left: 20px;
+        margin: 3px 0;
+        color: #dc3545;
+
+        &::before {
+          content: '✗';
+          position: absolute;
+          left: 0;
+        }
+
+        &.valid {
+          color: #28a745;
+
+          &::before {
+            content: '✓';
+          }
+        }
+      }
+    }
+  }
 }
 
 a {

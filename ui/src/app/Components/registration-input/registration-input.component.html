@@ -1,103 +1,85 @@
 <div class="registration">
-  <form
-    class="registration-form"
-    id="registration-form"
-    [formGroup]="registrationForm"
-    (ngSubmit)="onSubmit($event)"
-    >
+  <form class="registration-form" id="registration-form" [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)">
     <div class="page-header">Register</div>
-    <div class="form-section">
-      <input
-        id="name-input"
-        type="text"
-        placeholder="Name"
-        formControlName="displayName"
-        />
-      </div>
-      @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.errors?.['required']) {
-        <div
-          class="error-message"
-          >
-          Please enter your name
-        </div>
+
+    @if (serverError.length > 0) {
+    <div class="server-error">
+      @for (error of serverError; track error) {
+      <p>{{ error }}</p>
       }
+    </div>
+    }
+    <div class="form-section">
+      <input id="name-input" type="text" placeholder="Name" formControlName="displayName" />
+    </div>
+    @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.errors?.['required']) {
+    <div class="error-message">
+      Please enter your name
+    </div>
+    }
 
-      <div class="form-section">
-        <input
-          id="email-input"
-          type="email"
-          placeholder="Email"
-          formControlName="email"
-          />
-        </div>
-        @if (registrationForm.get('email')?.touched) {
-          <div class="error-message">
-            @if (registrationForm.get('email')?.errors?.['required']) {
-              <span>
-                Please enter your email</span
-                >
-            }
-            @if (registrationForm.get('email')?.errors?.['email']) {
-              <span>
-                Please enter a valid email
-              </span>
-            }
-          </div>
-        }
+    <div class="form-section">
+      <input id="email-input" type="email" placeholder="Email" formControlName="email" />
+    </div>
+    @if (registrationForm.get('email')?.touched) {
+    <div class="error-message">
+      @if (registrationForm.get('email')?.errors?.['required']) {
+      <span>
+        Please enter your email</span>
+      }
+      @if (registrationForm.get('email')?.errors?.['email']) {
+      <span>
+        Please enter a valid email
+      </span>
+      }
+    </div>
+    }
 
-        <div class="form-section">
-          <input
-            id="password-input"
-            type="password"
-            placeholder="Password"
-            formControlName="password"
-            />
-          </div>
+    <div class="form-section">
+      <input id="password-input" type="password" placeholder="Password" formControlName="password" />
+    </div>
 
-          @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.errors?.['required']) {
-            <div
-              class="error-message"
-              >
-              Please enter your password
-            </div>
-          }
+    @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.invalid) {
+    <div class="error-message password-requirements">
+      @if (registrationForm.get('password')?.errors?.['required']) {
+      <span>Password is required</span>
+      } @else if (registrationForm.get('password')?.errors?.['minlength'] ||
+      registrationForm.get('password')?.errors?.['pattern']) {
+      <span>Password must contain:</span>
+      <ul>
+        <li [class.valid]="(registrationForm.get('password')?.value?.length ?? 0) >= 8">At least 8 characters</li>
+        <li [class.valid]="registrationForm.get('password')?.value?.match('[A-Z]')">One uppercase letter</li>
+        <li [class.valid]="registrationForm.get('password')?.value?.match('[a-z]')">One lowercase letter</li>
+        <li [class.valid]="registrationForm.get('password')?.value?.match('[0-9]')">One number</li>
+        <li [class.valid]="registrationForm.get('password')?.value?.match('[!@#$%^&*]')">One special character (!@#$%^&*
+          etc.)</li>
+      </ul>
+      }
+    </div>
+    }
 
-          <div class="form-section">
-            <input
-              id="confirm-password-input"
-              type="password"
-              placeholder="Confirm password"
-              formControlName="confirmPassword"
-              />
-            </div>
-            @if (
-              registrationForm.get('confirmPassword')?.invalid &&
-              registrationForm.get('confirmPassword')?.touched
-              ) {
-              <div
-                class="error-message"
-                >
-                @if (registrationForm.get('confirmPassword')?.errors?.['required']) {
-                  <span
-                    >Confirm Password field is required</span
-                    >
-                }
-                @if (registrationForm.get('confirmPassword')?.errors?.['passwordsDontMatch']) {
-                  <span
-                    >Passwords don't match</span
-                    >
-                  }
-                </div>
-              }
+    <div class="form-section">
+      <input id="confirm-password-input" type="password" placeholder="Confirm password"
+        formControlName="confirmPassword" />
+    </div>
+    @if (
+    registrationForm.get('confirmPassword')?.invalid &&
+    registrationForm.get('confirmPassword')?.touched
+    ) {
+    <div class="error-message">
+      @if (registrationForm.get('confirmPassword')?.errors?.['required']) {
+      <span>Confirm Password field is required</span>
+      }
+      @if (registrationForm.get('confirmPassword')?.errors?.['passwordsDontMatch']) {
+      <span>Passwords don't match</span>
+      }
+    </div>
+    }
 
-              <div class="submit-button">
-                <app-buttons
-                  [buttonText]="'Register'"
-                  [buttonStyleClass]="'btn-registration'"
-                  [buttonType]="'submit'"
-                  />
-                  <p>Already have an account?</p>
-                  <a routerLink="/login"><u>Login here</u></a>
-                </div>
-              </form>
-            </div>
+    <div class="submit-button">
+      <app-buttons [buttonText]="'Register'" [buttonStyleClass]="'btn-registration'" [buttonType]="'submit'" />
+      <p>Already have an account?</p>
+      <a routerLink="/login"><u>Login here</u></a>
+    </div>
+  </form>
+</div>

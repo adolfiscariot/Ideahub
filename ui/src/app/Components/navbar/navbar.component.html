@@ -1,14 +1,6 @@
 <div class="navbar">
   <div class="navbar-left">
-    @if (loggedInStatus | async; as isLoggedIn) {
-    <a [routerLink]="'/home'">
-      <img src="adeptwebp.webp" alt="Logo" class="logo-image" />
-    </a>
-    } @else {
-    <a [routerLink]="'/'">
-      <img src="adeptwebp.webp" alt="Logo" class="logo-image" />
-    </a>
-    }
+
 
     <!--If logged out this text should lead to the landing page otherwise
     it should lead to the home page-->

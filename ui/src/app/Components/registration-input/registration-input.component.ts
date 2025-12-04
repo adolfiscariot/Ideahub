@@ -28,7 +28,10 @@ export class RegistrationInputComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
 
-  ngOnInit(): void {}
+  serverError: string[] = [];
+  isLoading = false;
+
+  ngOnInit(): void { }
 
   registrationForm = new FormGroup(
     {
@@ -45,7 +48,7 @@ export class RegistrationInputComponent implements OnInit {
           Validators.required,
           Validators.minLength(8),
           Validators.pattern(
-            '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ !@#$%^&*()_+\\-=\\[\\]{}|\\;:\'",.<>\\/?]).{8,}$'
+            '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ !@#$%^&*()_+\\-=\\[\\]{}|\\;:\'\",.<>\\/?]).{8,}$'
           ),
         ],
         nonNullable: true,
@@ -59,27 +62,39 @@ export class RegistrationInputComponent implements OnInit {
   );
 
   onSubmit(event: Event) {
+    this.serverError = [];
+
     if (this.registrationForm.valid) {
+      this.isLoading = true;
       const registrationData: Registration =
         this.registrationForm.getRawValue();
       this.authService.register(registrationData).subscribe({
-        next: (response) => {
+        next: (response: any) => {
+          this.isLoading = false;
           console.log(`Registration was successful: ${response.message}`);
-          alert('Registration was successful');
           this.router.navigate(['/confirm-registration']);
         },
-        error: (errorMessage) => {
-          console.error(`Registration unsuccessful: ${errorMessage.errors}`);
-          alert(
-            `Registration failed.${errorMessage.value || 'Please try again'}`
-          );
+        error: (error: any) => {
+          this.isLoading = false;
+          console.error(`Registration unsuccessful:`, error);
+
+          // Check if the error has a response body with an errors array
+          if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
+            this.serverError = error.error.errors;
+          }
+          // Fallback for single message
+          else if (error.error && error.error.message) {
+            this.serverError = [error.error.message];
+          }
+          // Generic fallback
+          else {
+            this.serverError = ['Registration failed. Please try again.'];
+          }
         },
       });
-      this.registrationForm.reset();
     } else {
       event.preventDefault();
       this.registrationForm.markAllAsTouched();
-      alert('Please fill the form correctly');
     }
   }
 }

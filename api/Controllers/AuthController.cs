@@ -57,12 +57,15 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto registerDto)
     {
+        var requireConfirmedEmail = _configuration.GetValue<bool>("SignIn:RequireConfirmedEmail", true);
+
         //create user
         var user = new IdeahubUser
         {
             DisplayName = registerDto.DisplayName,
             Email = registerDto.Email,
-            UserName = registerDto.Email
+            UserName = registerDto.Email,
+            EmailConfirmed = !requireConfirmedEmail // Auto-confirm if not required
         };
         var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -114,8 +117,17 @@ public class AuthController : ControllerBase
             catch (Exception e)
             {
                 _logger.LogError("Confirmation Email Not Sent: {Message}", e.Message);
-                await _userManager.DeleteAsync(user);
-                return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email"));
+                
+                // Only fail if email confirmation is required
+                if (requireConfirmedEmail)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email"));
+                }
+                else
+                {
+                     _logger.LogWarning("Failed to send confirmation email, but proceeding since confirmation is not required.");
+                }
             }
 
             _logger.LogInformation("Account Registration email sent");
@@ -223,6 +235,8 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
+        var requireConfirmedEmail = _configuration.GetValue<bool>("SignIn:RequireConfirmedEmail", true);
+
         //find the user
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
         if (user is null)
@@ -232,7 +246,7 @@ public class AuthController : ControllerBase
         }
 
         //check email confirmation
-        if (!user.EmailConfirmed)
+        if (requireConfirmedEmail && !user.EmailConfirmed)
         {
             _logger.LogWarning("Please confirm your email before logging in");
             return BadRequest(ApiResponse.Fail("Please confirm your email before logging in"));
