@@ -1,57 +1,54 @@
-<app-base-layout>
-    <div class="dashboard-container">
-        <h1>Dashboard</h1>
+<div class="dashboard-container">
+    <h1>Dashboard</h1>
 
-        @if (isLoading) {
-        <div class="loading">Loading stats...</div>
-        } @else {
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Ideas</h3>
-                <div class="value">{{ stats?.totalIdeas || 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Open Ideas</h3>
-                <div class="value">{{ stats?.openIdeas || 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Closed Ideas</h3>
-                <div class="value">{{ stats?.closedIdeas || 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <h3>Promoted</h3>
-                <div class="value">{{ stats?.promotedIdeas || 0 }}</div>
-            </div>
-            <div class="stat-card">
-                <h3>My Groups</h3>
-                <div class="value">{{ stats?.totalGroups || 0 }}</div>
-            </div>
+    @if (isLoading) {
+    <div class="loading">Loading stats...</div>
+    } @else {
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Ideas</h3>
+            <div class="value">{{ stats?.totalIdeas || 0 }}</div>
         </div>
+        <div class="stat-card">
+            <h3>Open Ideas</h3>
+            <div class="value">{{ stats?.openIdeas || 0 }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Closed Ideas</h3>
+            <div class="value">{{ stats?.closedIdeas || 0 }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Promoted</h3>
+            <div class="value">{{ stats?.promotedIdeas || 0 }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>My Groups</h3>
+            <div class="value">{{ stats?.totalGroups || 0 }}</div>
+        </div>
+    </div>
 
-        <div class="recent-activity">
-            <h2>Recent Activity</h2>
-            @if (recentActivity.length > 0) {
-            <div class="activity-list">
-                @for (activity of recentActivity; track activity.id) {
-                <div class="activity-item">
-                    <div class="activity-header">
-                        <span class="title">{{ activity.title }}</span>
-                        <span class="status" [class.open]="activity.status === 0"
-                            [class.closed]="activity.status === 1">
-                            {{ activity.status === 0 ? 'Open' : 'Closed' }}
-                        </span>
-                    </div>
-                    <div class="activity-details">
-                        <span class="group">Group: {{ activity.groupName }}</span>
-                        <span class="date">{{ activity.createdAt | date:'mediumDate' }}</span>
-                    </div>
+    <div class="recent-activity">
+        <h2>Recent Activity</h2>
+        @if (recentActivity.length > 0) {
+        <div class="activity-list">
+            @for (activity of recentActivity; track activity.id) {
+            <div class="activity-item">
+                <div class="activity-header">
+                    <span class="title">{{ activity.title }}</span>
+                    <span class="status" [class.open]="activity.status === 0" [class.closed]="activity.status === 1">
+                        {{ activity.status === 0 ? 'Open' : 'Closed' }}
+                    </span>
                 </div>
-                }
+                <div class="activity-details">
+                    <span class="group">Group: {{ activity.groupName }}</span>
+                    <span class="date">{{ activity.createdAt | date:'mediumDate' }}</span>
+                </div>
             </div>
-            } @else {
-            <p>No recent activity found.</p>
             }
         </div>
+        } @else {
+        <p>No recent activity found.</p>
         }
     </div>
-</app-base-layout>
+    }
+</div>

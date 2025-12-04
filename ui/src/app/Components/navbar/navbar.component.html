@@ -11,14 +11,9 @@
     }
 
   </div>
+
   @if (loggedInStatus | async; as isLoggedIn) {
-  <nav class="nav-items">
-    <a routerLink="/home" class="nav-link">Home</a>
-    <a routerLink="/my-ideas" class="nav-link">Ideas</a>
-    <a routerLink="/groups" class="nav-link">Groups</a>
-    <a routerLink="/projects" class="nav-link">Projects</a>
-    <a routerLink="/user-manual" class="nav-link">User Manual</a>
-  </nav>
+  <!-- Logged in navigation is in the sidebar -->
   } @else {
   <nav class="nav-items">
     <a routerLink="/about" class="nav-link">About</a>
@@ -27,8 +22,6 @@
     <a routerLink="/documentation" class="nav-link">Documentation</a>
   </nav>
   }
-
-
 
   <div class="navbar-right">
     @if (loggedInStatus | async; as isLoggedIn) {

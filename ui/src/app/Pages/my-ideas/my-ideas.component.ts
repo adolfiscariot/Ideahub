@@ -1,12 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { BaseLayoutComponent } from "../../Components/base-layout/base-layout.component";
 import { IdeaService } from '../../Services/idea/idea.service';
 import { MyIdea } from '../../Interfaces/Idea/my-idea.interface';
 import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-my-ideas',
-    imports: [BaseLayoutComponent, CommonModule],
+    imports: [CommonModule],
     templateUrl: './my-ideas.component.html',
     styleUrl: './my-ideas.component.scss'
 })

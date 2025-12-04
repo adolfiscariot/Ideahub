@@ -1,34 +1,32 @@
-<app-base-layout>
-    <div class="ideas-container">
-        <h1>My Ideas</h1>
+<div class="ideas-container">
+    <h1>My Ideas</h1>
 
-        @if (isLoading) {
-        <div class="loading">Loading ideas...</div>
-        } @else if (ideas.length === 0) {
-        <div class="empty-state">
-            <p>You haven't created any ideas yet.</p>
-        </div>
-        } @else {
-        <div class="ideas-grid">
-            @for (idea of ideas; track idea.id) {
-            <div class="idea-card">
-                <div class="card-header">
-                    <span class="group-badge">{{ idea.groupName }}</span>
-                    <span class="status" [class.open]="idea.status === 0" [class.closed]="idea.status === 1">
-                        {{ idea.status === 0 ? 'Open' : 'Closed' }}
-                    </span>
-                </div>
-                <h2>{{ idea.title }}</h2>
-                <p class="description">{{ idea.description }}</p>
-                <div class="card-footer">
-                    <span class="date">{{ idea.createdAt | date:'mediumDate' }}</span>
-                    @if (idea.isPromotedToProject) {
-                    <span class="promoted-badge">Promoted</span>
-                    }
-                </div>
+    @if (isLoading) {
+    <div class="loading">Loading ideas...</div>
+    } @else if (ideas.length === 0) {
+    <div class="empty-state">
+        <p>You haven't created any ideas yet.</p>
+    </div>
+    } @else {
+    <div class="ideas-grid">
+        @for (idea of ideas; track idea.id) {
+        <div class="idea-card">
+            <div class="card-header">
+                <span class="group-badge">{{ idea.groupName }}</span>
+                <span class="status" [class.open]="idea.status === 0" [class.closed]="idea.status === 1">
+                    {{ idea.status === 0 ? 'Open' : 'Closed' }}
+                </span>
             </div>
-            }
+            <h2>{{ idea.title }}</h2>
+            <p class="description">{{ idea.description }}</p>
+            <div class="card-footer">
+                <span class="date">{{ idea.createdAt | date:'mediumDate' }}</span>
+                @if (idea.isPromotedToProject) {
+                <span class="promoted-badge">Promoted</span>
+                }
+            </div>
         </div>
         }
     </div>
-</app-base-layout>
+    }
+</div>

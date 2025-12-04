@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { BaseLayoutComponent } from "../../Components/base-layout/base-layout.component";
 import { AnalyticsService } from '../../Services/analytics/analytics.service';
 import { DashboardStats } from '../../Interfaces/Analytics/dashboard-stats.interface';
 import { RecentActivity } from '../../Interfaces/Analytics/recent-activity.interface';
@@ -7,7 +6,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
-  imports: [BaseLayoutComponent, CommonModule],
+  imports: [CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

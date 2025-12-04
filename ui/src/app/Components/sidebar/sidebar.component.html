@@ -1,20 +1,33 @@
-<div class="sidebar-component">
-    <div class = "sidebar-toggle-icon">
-        <button class="sidebar-toggle-icon" mat-icon-button (click)="toggleSidebar()">
-            <mat-icon>menu</mat-icon> 
+<div class="sidebar" [class.collapsed]="isCollapsed">
+    <div class="toggle-btn-container">
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <lucide-icon [img]="isCollapsed ? icons.expand : icons.collapse" class="toggle-icon"></lucide-icon>
         </button>
     </div>
 
-    <div class="sidebar-content" [ngClass]="{'closed' : !isSidebarExpanded}">
-        <ul>
-            <li>
-                <mat-icon>offline_bolt</mat-icon>
-                <a href="#">Ideas</a>
-            </li>
-            <li>
-                <mat-icon>group</mat-icon>
-                <a href="#">Groups</a>
-            </li>
-        </ul>
+    <nav class="nav-links">
+        <a routerLink="/home" routerLinkActive="active" class="nav-item">
+            <lucide-icon [img]="icons.dashboard" class="nav-icon"></lucide-icon>
+            @if (!isCollapsed) { <span>Dashboard</span> }
+        </a>
+        <a routerLink="/my-ideas" routerLinkActive="active" class="nav-item">
+            <lucide-icon [img]="icons.ideas" class="nav-icon"></lucide-icon>
+            @if (!isCollapsed) { <span>My Ideas</span> }
+        </a>
+        <a routerLink="/groups" routerLinkActive="active" class="nav-item">
+            <lucide-icon [img]="icons.groups" class="nav-icon"></lucide-icon>
+            @if (!isCollapsed) { <span>Groups</span> }
+        </a>
+        <a routerLink="/projects" routerLinkActive="active" class="nav-item">
+            <lucide-icon [img]="icons.projects" class="nav-icon"></lucide-icon>
+            @if (!isCollapsed) { <span>Projects</span> }
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a (click)="onLogout()" class="nav-item logout">
+            <lucide-icon [img]="icons.logout" class="nav-icon"></lucide-icon>
+            @if (!isCollapsed) { <span>Logout</span> }
+        </a>
     </div>
 </div>

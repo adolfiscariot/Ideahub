@@ -1,6 +1,26 @@
-.router-outlet {
-  height: calc(100vh - 70px - 30px);
-  width: 100%;
+.main-layout {
+  display: flex;
+  min-height: calc(100vh - 70px);
   margin-top: 70px;
-  box-sizing: border-box;
+}
+
+.sidebar-container {
+  width: 250px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 70px;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  border-right: 1px solid #e9ecef;
+  transition: width 0.3s ease;
+
+  &.collapsed {
+    width: 60px;
+  }
+}
+
+.content-container {
+  flex: 1;
+  padding: 20px;
+  min-width: 0;
 }

@@ -1,19 +1,38 @@
-import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';    
-import { MatButtonModule } from '@angular/material/button';
-import { NgClass } from '@angular/common';
+import { Component, inject, Output, EventEmitter } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import { AuthService } from '../../Services/auth/auth.service';
+import { LucideAngularModule, LayoutDashboard, Lightbulb, Users, Briefcase, LogOut, ChevronLeft, ChevronRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [MatIconModule, MatButtonModule, NgClass],
+  standalone: true,
+  imports: [RouterModule, AsyncPipe, LucideAngularModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
-  isSidebarExpanded: boolean = false;
+  authService = inject(AuthService);
 
-  toggleSidebar(){
-    this.isSidebarExpanded = !this.isSidebarExpanded;
-    console.log("The state is: %s", this.isSidebarExpanded);
+  @Output() collapsedChange = new EventEmitter<boolean>();
+  isCollapsed = false;
+
+  readonly icons = {
+    dashboard: LayoutDashboard,
+    ideas: Lightbulb,
+    groups: Users,
+    projects: Briefcase,
+    logout: LogOut,
+    collapse: ChevronLeft,
+    expand: ChevronRight
+  };
+
+  onLogout() {
+    this.authService.logout().subscribe();
+  }
+
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
   }
 }

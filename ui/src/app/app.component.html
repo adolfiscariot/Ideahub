@@ -1,10 +1,15 @@
 <app-navbar />
 
-<div class="router-outlet">
-    <router-outlet />
+<div class="main-layout">
+    @if (loggedInStatus | async) {
+    <div class="sidebar-container" [class.collapsed]="isSidebarCollapsed">
+        <app-sidebar (collapsedChange)="onSidebarToggle($event)" />
+    </div>
+    }
+
+    <div class="content-container">
+        <router-outlet />
+    </div>
 </div>
 
 <app-footer />
-
-<!--
--->
