@@ -15,12 +15,6 @@
       <p>Loading members...</p>
     </div>
     
-    <div *ngIf="!isLoading && members.length === 0" class="no-members">
-      <div class="no-members-icon">👥</div>
-      <h3>No members yet</h3>
-      <p>Be the first to join this group!</p>
-    </div>
-    
     <div *ngIf="!isLoading && members.length > 0" class="members-list">
       <div *ngFor="let member of members" class="member-item">
         <div class="member-avatar">
