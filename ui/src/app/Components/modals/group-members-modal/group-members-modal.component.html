@@ -27,24 +27,12 @@
           {{ getInitials(member.displayName || member.UserName) }}
         </div>
         <div class="member-info">
-          <div class="member-name">{{ member.displayName || member.UserName || 'Unknown User' }}</div>
-          <div class="member-email">{{ member.email || member.Email || 'No email' }}</div>
+          <span class="detail-value">{{ data.group.createdByUser?.displayName || 'Unknown' }}</span>
         </div>
         <div *ngIf="member.role" class="member-role">
           <span class="role-badge">{{ member.role }}</span>
         </div>
       </div>
     </div>
-  </div>
-  
-  <div class="modal-footer">
-    <button mat-button (click)="close()">Close</button>
-    <button *ngIf="!data.group.isJoined" 
-            mat-raised-button 
-            color="primary"
-            (click)="joinGroup()"
-            [disabled]="joining">
-      {{ joining ? 'Joining...' : 'Join Group' }}
-    </button>
   </div>
 </div>

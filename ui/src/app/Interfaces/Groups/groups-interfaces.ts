@@ -39,7 +39,6 @@ export interface GroupMember {
 export interface AddGroup {
   name: string;
   description: string;
-  //initialMembers: string[]; // array of user IDs if none pick the first member make them admin
 }
 
 export interface UserWithRoles {
@@ -60,7 +59,7 @@ export interface GroupMembershipRequest {
   id: number;
   userId: number;
   groupId: number;
-  status: 'Pending' | 'Approved' | 'Rejected';
+  status: 'Pending' | 'Approved' | 'Rejected'; // IS REJECTED STILL VALID CONFIRM WITH MARK
   requestedAt: Date | string;
   acceptedOrRejectedAt?: Date | string;
   userDisplayName?: string;

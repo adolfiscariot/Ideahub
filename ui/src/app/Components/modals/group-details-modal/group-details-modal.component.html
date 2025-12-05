@@ -39,13 +39,6 @@
         <span class="detail-label">Created By</span>
         <span class="detail-value">{{ data.group.createdByUser?.displayName || 'Unknown' }}</span>
       </div>
-      
-      <div class="detail-item">
-        <span class="detail-label">Your Status</span>
-        <span class="detail-value" [class.member]="data.group.isJoined" [class.non-member]="!data.group.isJoined">
-          {{ data.group.isJoined ? 'Member' : 'Not a member' }}
-        </span>
-      </div>
     </div>
     
     <div *ngIf="data.group.hasPendingRequest" class="pending-notice">

@@ -20,7 +20,7 @@ export class GroupsService {
     };
   }
 
-  // ===== Mapping to current endpoints =====
+  // ===== Mapping to current existing endpoints =====
 
   // GET /api/group/view-groups
   getGroups(): Observable<ApiResponse<any>> {
@@ -59,17 +59,6 @@ export class GroupsService {
       .set('requestUserId', requestUserId);
     
     return this.http.post<any>(`${this.apiUrl}/accept-request`, {}, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
-  }
-
-  // POST /api/group/reject-request?groupId={guid}&requestUserId={userId}
-  rejectRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
-    const params = new HttpParams()
-      .set('groupId', groupId)
-      .set('requestUserId', requestUserId);
-    
-    return this.http.post<any>(`${this.apiUrl}/reject-request`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }

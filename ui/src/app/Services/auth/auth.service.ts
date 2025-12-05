@@ -42,12 +42,10 @@ export class AuthService {
   }
 
   login(loginData: Login): Observable<any> {
-    console.log(`${loginData.email} is logging in...`);
 
     return this.http.post<ApiResponse>(`${this.authUrl}/login`, loginData).pipe(
       tap((response) => {
         if (response.status && response.data?.accessToken) {
-          console.log('Login successful: ', response);
 
           localStorage.setItem('accessToken', response.data.accessToken);
           localStorage.setItem('refreshToken', response.data.refreshToken);
@@ -58,12 +56,10 @@ export class AuthService {
 
           this._isLoggedIn.next(true);
         } else {
-          console.error('Login failed: ', response.message);
           throw new Error(response.message || 'Login failed');
         }
       }),
       catchError((e) => {
-        console.error(`Login failed: ${e.message}`);
         throw new Error(`Login failed: ${e.message}`);
       })
     );
@@ -74,7 +70,6 @@ export class AuthService {
 
     return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
       tap(()=>{
-        console.log("User logged out successfully");
 
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -85,10 +80,8 @@ export class AuthService {
         this.router.navigate(['/']);
       }),
       catchError((error: HttpErrorResponse)=>{
-        console.error(`Logout failed: ${error}`);
         
         if(error.status == 401 || error.status == 403 || error.status == 400){
-          console.error("Clearing local tokens due to failed logout/invalid token");
 
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
@@ -102,7 +95,7 @@ export class AuthService {
     )
   }
 
-  // ===== NEW METHODS FOR PERMISSION CHECKING =====
+  // ===== PERMISSION CHECKING METHODS =====
 
   // Check if user is logged in
   isLoggedIn(): boolean {
@@ -110,18 +103,18 @@ export class AuthService {
     return !!token;
   }
 
-  // Get current user (simplified - you'll need to store user data on login)
+  // Get current user
   getCurrentUser(): any {
     const token = localStorage.getItem('accessToken');
     if (!token) return null;
     
-    // Decode JWT token to get user info (simplified)
+    // Decode JWT token to get user info 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         id: payload.sub || payload.nameid,
         email: payload.email,
-        roles: payload.role || [] // Assuming roles are in the token
+        roles: payload.role || [] // Assuming roles are in the token // CONFIRM THIS IS NOT DUMMY 
       };
     } catch {
       return null;

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LandingPageComponent } from './Pages/landing-page/landing-page.component';
 import { RegisterComponent } from './Pages/register/register.component';
 import { AuthGuard } from './Guards/auth.guard';
-import { GroupsComponent } from './Pages/group/group.component'; // ARE THESE USED???
+import { GroupsComponent } from './Pages/group/group.component'; // ARE THESE REALLY USED???
 
 export const routes: Routes = [
   {
