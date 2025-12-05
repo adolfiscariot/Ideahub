@@ -30,7 +30,7 @@ services:
       SendGridSettings__SenderName: Ideahub
       SignIn__RequireConfirmedEmail: "false"
     ports:
-      - "5066:5066"
+      - "5065:5066"
     depends_on:
       - ideahub-db
     restart: always

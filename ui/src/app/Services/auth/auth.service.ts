@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 export class AuthService {
   router = inject(Router);
 
-  private readonly authUrl = 'http://localhost:5066/api/auth';
+  private readonly authUrl = 'http://localhost:5065/api/auth';
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
@@ -92,7 +92,7 @@ export class AuthService {
       catchError((error: HttpErrorResponse) => {
         console.error(`Logout failed: ${error}`);
 
-        if (error.status == 401 || error.status == 403 || error.status == 400) {
+        if (error.status === 401 || error.status === 403 || error.status === 400) {
           console.error("Clearing local tokens due to failed logout/invalid token");
 
           localStorage.removeItem('accessToken');
@@ -101,6 +101,12 @@ export class AuthService {
 
           this._isLoggedIn.next(false);
           this.router.navigate(['/']);
+
+          // Return an empty observable to complete the stream gracefully
+          return new Observable(observer => {
+            observer.next(null);
+            observer.complete();
+          });
         }
         return throwError(() => new Error(`Status: ${error.status}, Message: ${error.message || 'Unknown error'}`))
       })

@@ -8,7 +8,7 @@ import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
     providedIn: 'root'
 })
 export class IdeaService {
-    private readonly apiUrl = 'http://localhost:5066/api/idea';
+    private apiUrl = 'http://localhost:5065/api/ideas';
 
     constructor(private http: HttpClient) { }
 

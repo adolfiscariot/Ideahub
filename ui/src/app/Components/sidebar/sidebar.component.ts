@@ -1,13 +1,12 @@
 import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
 import { AuthService } from '../../Services/auth/auth.service';
 import { LucideAngularModule, LayoutDashboard, Lightbulb, Users, Briefcase, LogOut, ChevronLeft, ChevronRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterModule, AsyncPipe, LucideAngularModule],
+  imports: [RouterModule, LucideAngularModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })

@@ -1,18 +1,15 @@
 <div class="navbar">
   <div class="navbar-left">
-
-
     <!--If logged out this text should lead to the landing page otherwise
     it should lead to the home page-->
-    @if (loggedInStatus | async; as isLoggedIn) {
+    @if ((loggedInStatus | async) && !shouldHideSidebar) {
     <a class="product-text" [routerLink]="'/home'">Ideahub</a>
     } @else {
     <a class="product-text" [routerLink]="'/'">Ideahub</a>
     }
-
   </div>
 
-  @if (loggedInStatus | async; as isLoggedIn) {
+  @if ((loggedInStatus | async) && !shouldHideSidebar) {
   <!-- Logged in navigation is in the sidebar -->
   } @else {
   <nav class="nav-items">

@@ -9,7 +9,7 @@ import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
     providedIn: 'root'
 })
 export class AnalyticsService {
-    private readonly apiUrl = 'http://localhost:5066/api/analytics';
+    private apiUrl = 'http://localhost:5065/api/analytics';
 
     constructor(private http: HttpClient) { }
 

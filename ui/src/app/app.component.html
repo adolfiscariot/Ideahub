@@ -1,7 +1,7 @@
 <app-navbar />
 
 <div class="main-layout">
-    @if (loggedInStatus | async) {
+    @if ((loggedInStatus | async) && !shouldHideSidebar) {
     <div class="sidebar-container" [class.collapsed]="isSidebarCollapsed">
         <app-sidebar (collapsedChange)="onSidebarToggle($event)" />
     </div>

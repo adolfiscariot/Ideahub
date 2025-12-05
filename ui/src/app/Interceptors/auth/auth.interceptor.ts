@@ -1,4 +1,4 @@
-import {HttpEvent, HttpEventType, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpEventType, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
@@ -6,26 +6,33 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
   const accessToken = localStorage.getItem('accessToken');
 
   //If accessToken is not null clone the request and 
-  if(accessToken){
+  if (accessToken) {
     const newRequest = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${accessToken}`)
     });
-      
+
     return next(newRequest).pipe(
       tap(
         (event) => {
-          if (event.type === HttpEventType.Response){
+          if (event.type === HttpEventType.Response) {
             console.log(`Request to ${newRequest.urlWithParams} completed with status ${event.status}`);
           }
         }
       ),
       catchError((e) => {
         console.error(`Request to ${newRequest.urlWithParams} failed with error ${e}`);
-        return throwError(()=>e.errors);
+        if (e.status === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('refreshTokenExpiry');
+          // Optional: Redirect to login page or reload to update UI state
+          // window.location.href = '/login'; 
+        }
+        return throwError(() => e);
       })
     );
   }
-  
+
   //if accessToken is null just pass the original request
-  return next(req); 
+  return next(req);
 };
