@@ -23,8 +23,6 @@ export class AuthService {
     this._isLoggedIn.next(!!token);
   }
 
-  // ===== EXISTING METHODS =====
-
   register(registrationData: Registration): Observable<any> {
     console.log('Registration taking place...');
 
@@ -104,23 +102,35 @@ export class AuthService {
   }
 
   // Get current user
-  getCurrentUser(): any {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    
-    // Decode JWT token to get user info 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        id: payload.sub || payload.nameid,
-        email: payload.email,
-        roles: payload.role || [] // Assuming roles are in the token // CONFIRM THIS IS NOT DUMMY 
-      };
-    } catch {
-      return null;
-    }
-  }
+ getCurrentUser(): any {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
 
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    const userId =
+      payload.sub ||
+      payload.nameid ||
+      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+
+    return {
+      id: userId,
+      email:
+        payload.email ||
+        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+      roles:
+        payload.role ||
+        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+        []
+    };
+
+  } catch {
+    return null;
+  }
+}
+
+///======= IS THIS NECESSARY? =======
   // Get user roles from token
   getCurrentUserRoles(): string[] {
     const user = this.getCurrentUser();
