@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { LandingPageComponent } from './Pages/landing-page/landing-page.component';
 import { RegisterComponent } from './Pages/register/register.component';
 import { AuthGuard } from './Guards/auth.guard';
-import { GroupsComponent } from './Pages/group/group.component'; // ARE THESE REALLY USED???
 
 export const routes: Routes = [
   {
@@ -44,5 +43,20 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/group/group.component').then((m) => m.GroupsComponent),
+  },
+
+  {
+    path: 'groups/:groupId/ideas',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   }
+  // {
+  //   path: 'notifications',
+  //   canActivate: [AuthGuard],
+  //   loadComponent: () =>
+  //     import('./Pages/notifications/notifications.component').then(
+  //       (m) => m.NotificationsComponent
+  //     ),
+  // }
 ];
