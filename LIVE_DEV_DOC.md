@@ -4,6 +4,12 @@
 - reject-requests
 - leave-group
 
+## Auth checklist
+
+- Have proper display of error messages in the login and registration (right now we have JS alerts - not user-friendly)
+
+- Ensure when the user session expires the jwt token prompt them to login again dont leave them hanging - have like a popup saying your session has expired click login to login again 
+
 # Ideas tab checklist
 
 ## DONE
@@ -36,11 +42,14 @@ OR INSTEAD OF A POPUP HAVE THE PAGE DIVIDED INTO THREE SECTIONS: MEMBERS ON THEF
 
 THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING TO THE USER CLICK IDEA VIEW CLOSE CLICK ANOTHER ONE CLOSE YEAH I DONT WANT THAT 
 
+
 ## NICE TO HAVE
 
 - IDEA DISPLAY UI - SORT OF LIKE A STICKY NOTE SITUATION - YEAH SOMETHING RETRO - THINK ABOUT IT - INSTEAD OF GENERIC CARD STACKING
 
 - POSSIBLY HAVE A COMMENT SECTION
+
+- COULD POSSIBLY HAVE DRAFTS - MAYBE 
 
 # Groups tab checklist
 
@@ -77,13 +86,13 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - Have it as member or admin tag (remove the "you are")
 
-- Remove the config button in the group component html page 
+- Remove the config button in the group component html page
+
+- Ensure the information and components inside each group card is level with those around it
 
 ## NICE TO HAVE
 
 - EDIT GROUP NAME button probably
-
-- Probably remove the list view entirely
 
 - POSSIBLY HAVE CATEGORIES TO AVOID SO MUCH CLUTTER FROM ALL SORTS OF GROUPS WITH THE FORMATION OF GROUPS - how can we categorize the groups
 
