@@ -4,12 +4,6 @@
 - reject-requests
 - leave-group
 
-## Auth checklist
-
-- Have proper display of error messages in the login and registration (right now we have JS alerts - not user-friendly)
-
-- Ensure when the user session expires the jwt token prompt them to login again dont leave them hanging - have like a popup saying your session has expired click login to login again 
-
 # Ideas tab checklist
 
 ## DONE
@@ -42,14 +36,11 @@ OR INSTEAD OF A POPUP HAVE THE PAGE DIVIDED INTO THREE SECTIONS: MEMBERS ON THEF
 
 THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING TO THE USER CLICK IDEA VIEW CLOSE CLICK ANOTHER ONE CLOSE YEAH I DONT WANT THAT 
 
-
 ## NICE TO HAVE
 
 - IDEA DISPLAY UI - SORT OF LIKE A STICKY NOTE SITUATION - YEAH SOMETHING RETRO - THINK ABOUT IT - INSTEAD OF GENERIC CARD STACKING
 
 - POSSIBLY HAVE A COMMENT SECTION
-
-- COULD POSSIBLY HAVE DRAFTS - MAYBE 
 
 # Groups tab checklist
 
@@ -82,11 +73,11 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - PLACE THAT DELETE ICON OR BUTTON SOMEWHERE BETTER - ALSO CHANGE HOW IT LOOKS DOES NOT LOOK GOOD
 
-- Edit that out ? logo 
+- Edit that out ? logo - have something else in place maybe an avatar or think of something
 
-- Have it as member or admin tag (remove the "you are")
+- Have it as either member or admin tag (remove the "you are")
 
-- Remove the config button in the group component html page
+- Remove the config button in the group component html page 
 
 - Ensure the information and components inside each group card is level with those around it
 
@@ -111,10 +102,3 @@ ENSURE YOU DRY
 REVIEW THE CODE AGAIN AND AGAIN AND UNDERSTAND IT 
 
 REMOVE UNNECESSARY COMMENTS
-
-
-
-
-
-
-
