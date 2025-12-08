@@ -73,17 +73,15 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - PLACE THAT DELETE ICON OR BUTTON SOMEWHERE BETTER - ALSO CHANGE HOW IT LOOKS DOES NOT LOOK GOOD
 
-- Edit that out ? logo 
+- Edit that out ? logo - have something else in place maybe an avatar or think of something
 
-- Have it as member or admin tag (remove the "you are")
+- Have it as either member or admin tag (remove the "you are")
 
 - Remove the config button in the group component html page 
 
 ## NICE TO HAVE
 
 - EDIT GROUP NAME button probably
-
-- Probably remove the list view entirely
 
 - POSSIBLY HAVE CATEGORIES TO AVOID SO MUCH CLUTTER FROM ALL SORTS OF GROUPS WITH THE FORMATION OF GROUPS - how can we categorize the groups
 
