@@ -38,29 +38,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/home/home.component').then((m) => m.HomeComponent),
   },
-
-  // Groups Routes - Fixed path to match navbar
-  // {
-  //   path: 'groups',
-  //   canActivate: [AuthGuard],
-  //   loadComponent: () =>
-  //     import('./Pages/group-page/group-page.component').then((m) => m.GroupsComponent),
-  // },
-  // {
-  //   path: 'groups/:id',
-  //   canActivate: [AuthGuard],
-  //   loadComponent: () =>
-  //     import('./Pages/group-detail/group-detail.component').then((m) => m.GroupDetailComponent),
-  // },
-
-  // Redirect old 'group' path to new 'groups' path for backward compatibility
   {
-    path: 'group',
-    redirectTo: 'groups',
-    pathMatch: 'full'
+    path: 'groups',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/group/group.component').then((m) => m.GroupsComponent),
   },
+
   {
-    path: 'group/:id',
-    redirectTo: 'groups/:id'
+    path: 'groups/:groupId/ideas',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   }
+  // {
+  //   path: 'notifications',
+  //   canActivate: [AuthGuard],
+  //   loadComponent: () =>
+  //     import('./Pages/notifications/notifications.component').then(
+  //       (m) => m.NotificationsComponent
+  //     ),
+  // }
 ];
