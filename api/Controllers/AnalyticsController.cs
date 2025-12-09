@@ -31,9 +31,7 @@ public class AnalyticsController : ControllerBase
         try
         {
             var ideas = await _context.Ideas
-                .Include(i => i.Votes)
-                .Include(i => i.User)
-                .Include(i => i.Group)
+
                 .Where(i => !i.IsDeleted)
                 .OrderByDescending(i => i.Votes.Count(v => !v.IsDeleted))
                 .Take(5)
@@ -90,8 +88,7 @@ public class AnalyticsController : ControllerBase
         try
         {
             var ideas = await _context.Ideas
-                .Include(i => i.User)
-                .Include(i => i.Group)
+
                 .Where(i => i.IsPromotedToProject && !i.IsDeleted)
                 .OrderByDescending(i => i.UpdatedAt)
                 .Take(5)
@@ -120,18 +117,22 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
-            var totalIdeas = await _context.Ideas.CountAsync(i => !i.IsDeleted);
-            var openIdeas = await _context.Ideas.CountAsync(i => !i.IsDeleted && i.Status == IdeaStatus.Open);
-            var promotedIdeas = await _context.Ideas.CountAsync(i => !i.IsDeleted && i.IsPromotedToProject);
-            var closedIdeas = await _context.Ideas.CountAsync(i => !i.IsDeleted && i.Status == IdeaStatus.Closed);
+            var stats = await _context.Ideas
+                .Where(i => !i.IsDeleted)
+                .GroupBy(x => 1)
+                .Select(g => new
+                {
+                    Total = g.Count(),
+                    Open = g.Count(i => i.Status == IdeaStatus.Open),
+                    Promoted = g.Count(i => i.IsPromotedToProject),
+                    Closed = g.Count(i => i.Status == IdeaStatus.Closed)
+                })
+                .FirstOrDefaultAsync();
 
-            var stats = new
+            if (stats == null)
             {
-                Total = totalIdeas,
-                Open = openIdeas,
-                Promoted = promotedIdeas,
-                Closed = closedIdeas
-            };
+                stats = new { Total = 0, Open = 0, Promoted = 0, Closed = 0 };
+            }
 
             return Ok(ApiResponse.Ok("Idea statistics", stats));
         }
