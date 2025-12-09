@@ -70,6 +70,7 @@ public class AnalyticsController : ControllerBase
                     u.Email,
                     IdeaCount = u.Ideas.Count(i => !i.IsDeleted)
                 })
+                .Where(x => x.IdeaCount > 0)
                 .OrderByDescending(x => x.IdeaCount)
                 .Take(5)
                 .ToListAsync();

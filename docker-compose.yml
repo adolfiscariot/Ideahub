@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ideahub_admin
       POSTGRES_DB: ideahub_db
     ports:
-      - "5432:5432"   # expose DB to host
+      - "5432:5432" # expose DB to host
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
@@ -26,7 +26,7 @@ services:
       ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_admin
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
     ports:
-      - "5066:5066"
+      - "5065:5066"
     depends_on:
       - ideahub-db
     restart: always
@@ -38,11 +38,11 @@ services:
       context: ./ui
       dockerfile: Dockerfile
     container_name: ideahub-frontend
-    command: ["npm", "start"]
+    command: [ "npm", "start" ]
     environment:
       ANGULAR_API_URL: "http://localhost:5066"
     ports:
-      - "4200:4200"   # Angular default dev server port
+      - "4200:4200" # Angular default dev server port
     depends_on:
       - ideahub-backend
     networks:
@@ -50,6 +50,7 @@ services:
 
 volumes:
   ideahub_data:
+
 
 networks:
   ideahub-net:
