@@ -3,10 +3,36 @@ import { BaseLayoutComponent } from "../../Components/base-layout/base-layout.co
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
 
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroChartBar,
+  heroLockOpen,
+  heroRocketLaunch,
+  heroLockClosed,
+  heroFire,
+  heroTrophy,
+  heroBuildingOffice2,
+  heroLightBulb,
+  heroHandThumbUp,
+  heroBriefcase
+} from '@ng-icons/heroicons/outline';
+
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [BaseLayoutComponent, CommonModule],
+  imports: [BaseLayoutComponent, CommonModule, NgIcon],
+  viewProviders: [provideIcons({
+    heroChartBar,
+    heroLockOpen,
+    heroRocketLaunch,
+    heroLockClosed,
+    heroFire,
+    heroTrophy,
+    heroBuildingOffice2,
+    heroLightBulb,
+    heroHandThumbUp,
+    heroBriefcase
+  })],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

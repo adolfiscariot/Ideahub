@@ -8,28 +8,28 @@
         <!-- Idea Statistics Summary -->
         <div class="stats-summary" *ngIf="ideaStats">
             <div class="stat-card total">
-                <div class="stat-icon">📊</div>
+                <div class="stat-icon"><ng-icon name="heroChartBar"></ng-icon></div>
                 <div class="stat-info">
                     <span class="stat-value">{{ideaStats.total}}</span>
                     <span class="stat-label">Total Ideas</span>
                 </div>
             </div>
             <div class="stat-card open">
-                <div class="stat-icon">🔓</div>
+                <div class="stat-icon"><ng-icon name="heroLockOpen"></ng-icon></div>
                 <div class="stat-info">
                     <span class="stat-value">{{ideaStats.open}}</span>
                     <span class="stat-label">Open</span>
                 </div>
             </div>
             <div class="stat-card promoted">
-                <div class="stat-icon">🚀</div>
+                <div class="stat-icon"><ng-icon name="heroRocketLaunch"></ng-icon></div>
                 <div class="stat-info">
                     <span class="stat-value">{{ideaStats.promoted}}</span>
                     <span class="stat-label">Promoted</span>
                 </div>
             </div>
             <div class="stat-card closed">
-                <div class="stat-icon">🔒</div>
+                <div class="stat-icon"><ng-icon name="heroLockClosed"></ng-icon></div>
                 <div class="stat-info">
                     <span class="stat-value">{{ideaStats.closed}}</span>
                     <span class="stat-label">Closed</span>
@@ -42,7 +42,7 @@
             <div class="card most-voted">
                 <div class="card-header">
                     <h2>Most Voted Ideas</h2>
-                    <span class="icon">🔥</span>
+                    <span class="icon"><ng-icon name="heroFire"></ng-icon></span>
                 </div>
                 <div class="card-content">
                     <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
@@ -67,7 +67,7 @@
             <div class="card top-contributors">
                 <div class="card-header">
                     <h2>Top Contributors</h2>
-                    <span class="icon">🏆</span>
+                    <span class="icon"><ng-icon name="heroTrophy"></ng-icon></span>
                 </div>
                 <div class="card-content">
                     <div *ngIf="topContributors.length > 0; else noContributors">
@@ -92,7 +92,7 @@
             <div class="card group-engagement">
                 <div class="card-header">
                     <h2>Top Groups</h2>
-                    <span class="icon">🏢</span>
+                    <span class="icon"><ng-icon name="heroBuildingOffice2"></ng-icon></span>
                 </div>
                 <div class="card-content">
                     <div *ngIf="groupEngagement.length > 0; else noGroups">
@@ -116,7 +116,7 @@
             <div class="card promoted-ideas">
                 <div class="card-header">
                     <h2>Promoted Ideas</h2>
-                    <span class="icon">🚀</span>
+                    <span class="icon"><ng-icon name="heroRocketLaunch"></ng-icon></span>
                 </div>
                 <div class="card-content">
                     <div *ngIf="promotedIdeas.length > 0; else noPromoted">
@@ -143,21 +143,21 @@
             <h2>Your Impact</h2>
             <div class="personal-stats-grid">
                 <div class="p-stat">
-                    <span class="icon">💡</span>
+                    <span class="icon"><ng-icon name="heroLightBulb"></ng-icon></span>
                     <div class="info">
                         <span class="value">{{personalStats.ideasCreated}}</span>
                         <span class="label">Ideas Created</span>
                     </div>
                 </div>
                 <div class="p-stat">
-                    <span class="icon">🗳️</span>
+                    <span class="icon"><ng-icon name="heroHandThumbUp"></ng-icon></span>
                     <div class="info">
                         <span class="value">{{personalStats.votesCast}}</span>
                         <span class="label">Votes Cast</span>
                     </div>
                 </div>
                 <div class="p-stat">
-                    <span class="icon">🏗️</span>
+                    <span class="icon"><ng-icon name="heroBriefcase"></ng-icon></span>
                     <div class="info">
                         <span class="value">{{personalStats.projectsInvolved}}</span>
                         <span class="label">Projects Involved</span>
