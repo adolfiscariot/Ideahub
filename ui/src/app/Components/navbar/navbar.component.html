@@ -2,11 +2,11 @@
   <div class="navbar-left">
     @if (loggedInStatus | async; as isLoggedIn) {
     <a [routerLink]="'/home'">
-      <img src="adeptwebp.webp" alt="Logo" class="logo-image" />
+      <img src="assets/adeptwebp.webp" alt="Logo" class="logo-image" />
     </a>
     } @else {
     <a [routerLink]="'/'">
-      <img src="adeptwebp.webp" alt="Logo" class="logo-image" />
+      <img src="assets/adeptwebp.webp" alt="Logo" class="logo-image" />
     </a>
     }
 
