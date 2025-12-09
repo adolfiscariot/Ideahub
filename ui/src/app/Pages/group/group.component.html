@@ -1,0 +1,292 @@
+<div class="groups-container">
+
+  <!-- Header Section with Create Button -->
+  <header class="groups-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">{{ subtitle }}</p>
+      </div>
+
+      <button *ngIf="!showCreateForm && !isLoading && groups.length > 0"
+              class="create-group-header-btn"
+              (click)="toggleCreateForm()">
+        <span class="create-icon">+</span>
+        Create Group
+      </button>
+    </div>
+  </header>
+
+  <hr class="divider">
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading groups...</p>
+  </div>
+
+  <!-- Groups List -->
+  <div *ngIf="!isLoading" class="groups-list">
+
+    <!-- No Groups State -->
+    <div *ngIf="groups.length === 0" class="no-groups">
+      <div class="no-groups-icon">+</div>
+      <h3>No groups yet</h3>
+      <p>Be the first to create a group and start collaborating!</p>
+      <button class="create-button" (click)="toggleCreateForm()">
+        + Create First Group
+      </button>
+    </div>
+
+    <!-- ✅ VIEW TOGGLE -->
+    <div *ngIf="groups.length > 0" class="view-toggle">
+      <button class="toggle-btn"
+              [class.active]="viewMode === 'grid'"
+              (click)="viewMode = 'grid'">
+        🔳 Grid
+      </button>
+
+      <button class="toggle-btn"
+              [class.active]="viewMode === 'list'"
+              (click)="viewMode = 'list'">
+        📄 List
+      </button>
+    </div>
+
+    <!-- ✅ GRID VIEW -->
+    <div *ngIf="groups.length > 0 && viewMode === 'grid'" class="groups-grid">
+
+      <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
+
+        <!-- Group Header -->
+        <div class="group-header">
+          <div class="group-title-section">
+            <h2 class="group-name">{{ group.name }}</h2>
+            <div class="group-status">
+              <span *ngIf="!group.isActive" class="status-badge inactive">Inactive</span>
+              <span *ngIf="group.isDeleted" class="status-badge deleted">Deleted</span>
+            </div>
+          </div>
+
+          <div class="group-header-right">
+            <div class="group-join-section">
+
+              <!-- Member -->
+              <button *ngIf="group.isMember"
+                      class="view-ideas-button"
+                      (click)="onViewIdeas(group.id)">
+                💡 View Ideas
+              </button>
+
+              <!-- Pending -->
+              <div *ngIf="!group.isMember && group.hasPendingRequest"
+                   class="pending-status">
+                ⏳ Pending Approval
+              </div>
+
+              <!-- Join -->
+              <button *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+                      class="join-button"
+                      (click)="onJoinGroup(group.id)">
+                Join Group
+              </button>
+
+            </div>
+
+            <!-- Delete -->
+            <button *ngIf="canConfigureGroup(group)"
+                    class="delete-group-btn"
+                    (click)="onDeleteGroup(group)"
+                    title="Delete Group">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <p class="group-description">{{ group.description }}</p>
+
+        <!-- Stats -->
+        <div class="group-stats">
+          <div class="stat">
+            <span class="stat-icon">👥</span>
+            <span class="stat-count">{{ group.memberCount || 0 }} members</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">💡</span>
+            <span class="stat-count">{{ group.ideaCount || 0 }} ideas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-icon">📅</span>
+            <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+          </div>
+        </div>
+
+        <!-- Admin -->
+        <div *ngIf="canConfigureGroup(group)" class="admin-info">
+          <span class="admin-badge">👑 You are admin</span>
+        </div>
+
+        <hr class="group-divider">
+
+        <!-- Actions -->
+        <div class="group-actions">
+
+          <!-- Details -->
+          <button class="action-button" (click)="openDetailsModal(group)">
+            <span class="action-icon">📋</span>
+            Details
+          </button>
+
+          <!-- Members -->
+          <button class="action-button" (click)="openMembersModal(group)">
+            <span class="action-icon">👥</span>
+            Members
+            <span *ngIf="group.memberCount" class="count-badge">{{ group.memberCount }}</span>
+          </button>
+
+          <!-- Ideas (Member) -->
+          <button *ngIf="group.isMember"
+                  class="action-button"
+                  (click)="onViewIdeas(group.id)">
+            <span class="action-icon">💡</span>
+            View Ideas
+            <span *ngIf="group.ideaCount" class="count-badge">{{ group.ideaCount }}</span>
+          </button>
+
+          <!-- Ideas (Locked) -->
+          <button *ngIf="!group.isMember"
+                  class="action-button disabled"
+                  disabled
+                  title="Join group to view ideas">
+            <span class="action-icon">🔒</span>
+            View Ideas
+          </button>
+
+          <!-- Configure -->
+          <button *ngIf="canConfigureGroup(group)"
+                  class="action-button configure"
+                  (click)="openConfigureModal(group)">
+            <span class="action-icon">⚙️</span>
+            Configure
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ LIST VIEW -->
+    <div *ngIf="groups.length > 0 && viewMode === 'list'" class="groups-list-view">
+
+      <div *ngFor="let group of groups; trackBy: trackById" class="group-card list-mode">
+
+        <div class="list-left">
+          <h2 class="group-name">{{ group.name }}</h2>
+          <p class="group-description">{{ group.description }}</p>
+
+          <div class="group-stats list-stats">
+            <span class="stat-item">👥 {{ group.memberCount || 0 }}</span>
+            <span class="stat-item">💡 {{ group.ideaCount || 0 }}</span>
+            <span class="stat-item">📅 {{ formatDate(group.createdAt) }}</span>
+          </div>
+        </div>
+
+        <div class="list-right">
+
+          <!-- Member -->
+          <button *ngIf="group.isMember"
+                  class="action-button"
+                  (click)="onViewIdeas(group.id)">
+            <span class="action-icon">💡</span>
+            Ideas
+          </button>
+
+          <!-- Locked -->
+          <button *ngIf="!group.isMember"
+                  class="action-button disabled"
+                  disabled
+                  title="Join group to view ideas">
+            <span class="action-icon">🔒</span>
+            Ideas
+          </button>
+
+          <!-- Members -->
+          <button class="action-button"
+                  (click)="openMembersModal(group)">
+            <span class="action-icon">👥</span>
+            Members
+          </button>
+
+          <!-- Details -->
+          <button class="action-button"
+                  (click)="openDetailsModal(group)">
+            <span class="action-icon">📋</span>
+            Details
+          </button>
+
+          <!-- Configure -->
+          <button *ngIf="canConfigureGroup(group)"
+                  class="action-button configure"
+                  (click)="openConfigureModal(group)">
+            <span class="action-icon">⚙️</span>
+            Config
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Create Group Modal -->
+  <div *ngIf="showCreateForm" class="create-group-modal-overlay">
+    <div class="create-group-modal">
+      <div class="modal-header">
+        <h3>Create New Group</h3>
+        <button class="close-button" (click)="onCancelCreate()">×</button>
+      </div>
+
+      <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
+
+        <div class="form-group">
+          <label for="groupName">Group Name</label>
+          <input id="groupName"
+                 type="text"
+                 formControlName="name"
+                 placeholder="Enter group name"
+                 class="form-control"
+                 [class.error]="name?.invalid && name?.touched">
+        </div>
+
+        <div class="form-group">
+          <label for="groupDescription">Description</label>
+          <textarea id="groupDescription"
+                    formControlName="description"
+                    placeholder="Describe what your group is about"
+                    rows="3"
+                    class="form-control"
+                    [class.error]="description?.invalid && description?.touched"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button"
+                  class="btn btn-secondary"
+                  (click)="onCancelCreate()"
+                  [disabled]="isSubmitting">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="createGroupForm.invalid || isSubmitting">
+            {{ isSubmitting ? 'Creating...' : 'Create Group' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>

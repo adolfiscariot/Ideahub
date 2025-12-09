@@ -1,0 +1,52 @@
+<div class="delete-confirm-modal">
+  <div class="modal-content">
+    <div class="warning-icon">⚠️</div>
+    
+    <h3>Delete Group</h3>
+    
+    <p>Are you sure you want to delete this group? This action cannot be undone.</p>
+    
+    <div class="group-name-warning">
+      Group to delete: <strong>{{data.groupName}}</strong>
+    </div>
+    
+    <p>Type <strong>"DELETE"</strong> to confirm:</p>
+    
+    <form [formGroup]="confirmForm" (ngSubmit)="onConfirm()">
+      <input 
+        type="text" 
+        formControlName="confirmText"
+        placeholder="Type DELETE here"
+        class="confirm-input"
+        [class.error]="confirmText?.invalid && confirmText?.touched"
+        autocomplete="off">
+      
+      @if (confirmText?.invalid && confirmText?.touched) {
+        <div class="error-message">
+          You must type "DELETE" exactly to confirm deletion.
+        </div>
+      }
+      
+      <div class="modal-actions">
+        <button 
+          type="button" 
+          class="cancel-btn"
+          (click)="onCancel()"
+          [disabled]="isSubmitting">
+          Cancel
+        </button>
+        
+        <button 
+          type="submit" 
+          class="delete-btn"
+          [disabled]="confirmForm.invalid || isSubmitting">
+          @if (isSubmitting) {
+            Deleting...
+          } @else {
+            Delete Group
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
