@@ -7,48 +7,32 @@
 
         <!-- Idea Statistics Summary -->
         <div class="stats-summary" *ngIf="ideaStats">
-            <div class="stat-card">
-                <span class="stat-value">{{ideaStats.total}}</span>
-                <span class="stat-label">Total Ideas</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">{{ideaStats.open}}</span>
-                <span class="stat-label">Open</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">{{ideaStats.promoted}}</span>
-                <span class="stat-label">Promoted</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value">{{ideaStats.closed}}</span>
-                <span class="stat-label">Closed</span>
-            </div>
-        </div>
-
-        <!-- Personal Stats -->
-        <div class="personal-stats-section" *ngIf="personalStats">
-            <h2>Your Impact</h2>
-            <div class="personal-stats-grid">
-                <div class="p-stat">
-                    <span class="icon">💡</span>
-                    <div class="info">
-                        <span class="value">{{personalStats.ideasCreated}}</span>
-                        <span class="label">Ideas Created</span>
-                    </div>
+            <div class="stat-card total">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ideaStats.total}}</span>
+                    <span class="stat-label">Total Ideas</span>
                 </div>
-                <div class="p-stat">
-                    <span class="icon">🗳️</span>
-                    <div class="info">
-                        <span class="value">{{personalStats.votesCast}}</span>
-                        <span class="label">Votes Cast</span>
-                    </div>
+            </div>
+            <div class="stat-card open">
+                <div class="stat-icon">🔓</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ideaStats.open}}</span>
+                    <span class="stat-label">Open</span>
                 </div>
-                <div class="p-stat">
-                    <span class="icon">🏗️</span>
-                    <div class="info">
-                        <span class="value">{{personalStats.projectsInvolved}}</span>
-                        <span class="label">Projects Involved</span>
-                    </div>
+            </div>
+            <div class="stat-card promoted">
+                <div class="stat-icon">🚀</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ideaStats.promoted}}</span>
+                    <span class="stat-label">Promoted</span>
+                </div>
+            </div>
+            <div class="stat-card closed">
+                <div class="stat-icon">🔒</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ideaStats.closed}}</span>
+                    <span class="stat-label">Closed</span>
                 </div>
             </div>
         </div>
@@ -153,5 +137,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- Personal Stats -->
+        <div class="personal-stats-section" *ngIf="personalStats">
+            <h2>Your Impact</h2>
+            <div class="personal-stats-grid">
+                <div class="p-stat">
+                    <span class="icon">💡</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.ideasCreated}}</span>
+                        <span class="label">Ideas Created</span>
+                    </div>
+                </div>
+                <div class="p-stat">
+                    <span class="icon">🗳️</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.votesCast}}</span>
+                        <span class="label">Votes Cast</span>
+                    </div>
+                </div>
+                <div class="p-stat">
+                    <span class="icon">🏗️</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.projectsInvolved}}</span>
+                        <span class="label">Projects Involved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </app-base-layout>
