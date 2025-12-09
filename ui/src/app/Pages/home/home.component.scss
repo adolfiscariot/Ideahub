@@ -1,89 +1,175 @@
 .dashboard-container {
     padding: 2rem;
     background-color: #f8f9fa;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    min-height: 100%;
 }
 
-.p-stat {
-    background: linear-gradient(135deg, #ee82ee 0%, #1d101d 100%);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.dashboard-header {
+    margin-bottom: 2rem;
 
-    .icon {
-        font-size: 2rem;
-        background: rgba(255, 255, 255, 0.2);
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
     }
 
-    .info {
-        display: flex;
-        flex-direction: column;
+    p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+}
 
-        .value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 
+    .stat-card {
         background: white;
+        padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        transition: transform 0.2s,
-        box-shadow 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s;
 
         &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
         }
 
-        .card-header {
-            .icon {
-                font-size: 1.5rem;
-            }
+        .stat-icon {
+            font-size: 2rem;
+            background: #f8f9fa;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
-        &.most-voted .card-header {
-            border-left: 4px solid #e74c3c;
+        .stat-info {
+            display: flex;
+            flex-direction: column;
         }
 
-        &.top-contributors .card-header {
-            border-left: 4px solid #f1c40f;
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1.2;
         }
 
-        &.promoted-ideas .card-header {
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        &.total {
+            border-left: 4px solid #3498db;
+        }
+
+        &.open {
+            border-left: 4px solid #2ecc71;
+        }
+
+        &.promoted {
             border-left: 4px solid #9b59b6;
         }
 
-        &.group-engagement .card-header {
-            border-left: 4px solid #1abc9c;
+        &.closed {
+            border-left: 4px solid #95a5a6;
+        }
+    }
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    /* Ensure cards match height in grid */
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: #34495e;
         }
 
-        .card-content {
-            padding: 0;
+        .icon {
+            font-size: 1.5rem;
         }
     }
 
-    .list-item {
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #f1f1f1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+    &.most-voted .card-header {
+        border-left: 4px solid #e74c3c;
+    }
 
-        &:last-child {
-            border-bottom: none;
+    &.top-contributors .card-header {
+        border-left: 4px solid #f1c40f;
+    }
+
+    &.promoted-ideas .card-header {
+        border-left: 4px solid #9b59b6;
+    }
+
+    &.group-engagement .card-header {
+        border-left: 4px solid #1abc9c;
+    }
+
+    .card-content {
+        padding: 0;
+    }
+}
+
+.list-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background-color: #fafafa;
+    }
+
+    .item-main {
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 0.25rem 0;
         }
 
         p {
@@ -132,7 +218,7 @@
 
     .item-main {
         flex: 1;
-        min-width: 0; // For truncation to work
+        min-width: 0;
 
         .email {
             font-size: 0.8rem;
@@ -162,4 +248,62 @@
     text-align: center;
     color: #bdc3c7;
     font-style: italic;
+}
+
+.personal-stats-section {
+    margin-top: 2rem;
+
+    h2 {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .personal-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .p-stat {
+        background: linear-gradient(135deg, #8e44ad 0%, #3498db 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+
+        &:hover {
+            transform: translateY(-3px);
+        }
+
+        .icon {
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+
+            .value {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            .label {
+                font-size: 0.9rem;
+                opacity: 0.9;
+            }
+        }
+    }
 }
