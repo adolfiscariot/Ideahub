@@ -36,13 +36,56 @@ import {
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
+interface MostVotedIdea {
+  id: string;
+  title: string;
+  description: string;
+  author: string;
+  groupName: string;
+  voteCount: number;
+}
+
+interface TopContributor {
+  displayName: string;
+  email: string;
+  ideaCount: number;
+}
+
+interface PromotedIdea {
+  id: string;
+  title: string;
+  description: string;
+  author: string;
+  groupName: string;
+  promotionDate: string;
+}
+
+interface IdeaStats {
+  totalIdeas: number;
+  totalVotes: number;
+  totalPromoted: number;
+}
+
+interface GroupEngagement {
+  groupName: string;
+  engagementScore: number;
+  ideaCount: number;
+}
+
+interface PersonalStats {
+  userId: string;
+  ideaCount: number;
+  voteCount: number;
+  promotedCount: number;
+}
+
 export class HomeComponent implements OnInit {
-  mostVotedIdeas: any[] = [];
-  topContributors: any[] = [];
-  promotedIdeas: any[] = [];
-  ideaStats: any = null;
-  groupEngagement: any[] = [];
-  personalStats: any = null;
+  mostVotedIdeas: MostVotedIdea[] = [];
+  topContributors: TopContributor[] = [];
+  promotedIdeas: PromotedIdea[] = [];
+  ideaStats: IdeaStats | null = null;
+  groupEngagement: GroupEngagement[] = [];
+  personalStats: PersonalStats | null = null;
 
   constructor(private analyticsService: AnalyticsService) { }
 
