@@ -142,10 +142,6 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  openConfigureModal(group: any): void {
-    alert(`Configure group: ${group.name}\n\nGroup Settings:\n- Edit group info\n- Manage members\n- Change privacy settings\n- Delete group\n\nFeature coming soon!`);
-  }
-
   openPendingRequestsModal(group: any): void {
     alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
   }

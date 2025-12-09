@@ -112,17 +112,17 @@ public class IdeaController : ControllerBase
         var ideas = await _context.Ideas.Where(i => i.GroupId == groupId).ToListAsync();
         if (ideas.Count == 0)
         {
-            _logger.LogError("No ideas exist in group: {groupName}", group.Name);
-            return NotFound(ApiResponse.Fail("No ideas exist in group"));
+            _logger.LogInformation("No ideas found in group: {groupName}", group.Name);
+            return Ok(ApiResponse.Ok("No ideas found", new List<object>()));
         }
 
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new { idea.Title, idea.Description, idea.Group.Name});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.UserId, idea.Group.Name, idea.CreatedAt});
         }
 
-        _logger.LogInformation($"The {ideas.Count()} ideas in group {group.Name} are: ", ideaDataToReturn);
+        
         return Ok(ApiResponse.Ok($"{ideas.Count()} Ideas found", ideaDataToReturn));
     }
 
@@ -231,8 +231,6 @@ public class IdeaController : ControllerBase
             }
         }
 
-        //create new idea details based on changes made
-        
         var updatedIdea = new IdeaDetailsDto
         {
             Title = idea.Title,

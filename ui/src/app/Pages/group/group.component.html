@@ -94,11 +94,11 @@
         <div class="group-stats">
           <div class="stat">
             <span class="stat-icon">👥</span>
-            <span class="stat-count">{{ group.memberCount || 0 }} members</span>
+            <span class="stat-count">{{ group.memberCount || 0 }}</span>
           </div>
           <div class="stat">
-            <span class="stat-icon">💡</span>
-            <span class="stat-count">{{ group.ideaCount || 0 }} ideas</span>
+            <span class="stat-icon">💡</span> <span class="stat-count">{{ group.ideaCount || 0 }} </span>
+            
           </div>
           <div class="stat">
             <span class="stat-icon">📅</span>
@@ -106,9 +106,9 @@
           </div>
         </div>
 
-        <!-- Admin -->
+        <!-- Admin --> <!--SET A CONDITION TO SHOW ADMIN BADGE IF USER CANCONFIGURE THE GROUP and also just plain member-->
         <div *ngIf="canConfigureGroup(group)" class="admin-info">
-          <span class="admin-badge">👑 You are admin</span>
+          <span class="admin-badge">admin</span> 
         </div>
 
         <hr class="group-divider">
@@ -136,23 +136,6 @@
             <span class="action-icon">💡</span>
             View Ideas
             <span *ngIf="group.ideaCount" class="count-badge">{{ group.ideaCount }}</span>
-          </button>
-
-          <!-- Ideas (Locked) -->
-          <button *ngIf="!group.isMember"
-                  class="action-button disabled"
-                  disabled
-                  title="Join group to view ideas">
-            <span class="action-icon">🔒</span>
-            View Ideas
-          </button>
-
-          <!-- Configure -->
-          <button *ngIf="canConfigureGroup(group)"
-                  class="action-button configure"
-                  (click)="openConfigureModal(group)">
-            <span class="action-icon">⚙️</span>
-            Configure
           </button>
 
         </div>

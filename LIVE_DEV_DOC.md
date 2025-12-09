@@ -1,3 +1,27 @@
+# Primary Colors
+
+#ee82ee
+
+rgba(238, 130, 238)
+
+
+#800080
+
+rgba(128, 0, 128)
+
+
+#000000
+
+rgba(0, 0, 0)
+
+# Auth
+
+- Have user friendly errors on the authentication part for the user like invalid password your password must contain or even like a checkbox for their password on register
+
+# Token refresh
+
+- Either show and tell the user their session has expired and they should log out after a reasonable amount of time or automatically refresh their token through that endpoint confirm what the endpoint was for
+
 # Missing Backend Endpoints 
 
 - get-requests
@@ -16,19 +40,37 @@
 
 - REMOVE IDEA COMMENTS
 
-## TO BE DONE
-
-- HAVE THE SHARE IDEA AS A POPUP MODAL NOT AN INLINE THING
-
-- IDEA DATE FIX
-
-- IDEA DELETION 
-
-- IDEA OPENING AND VIEWING - popup
+- REMOVE THE ANONYMOUS LOGO - ITS REPETITIVE
 
 - Increase margins for Idea page too
 
-- REMOVE THE ANONYMOUS LOGO - ITS REPETITIVE 
+- IDEA OPENING AND VIEWING - window to the right - change that window and have the split page one - This should call the open idea endpoint i think or believe
+
+- HAVE THE SHARE IDEA AS A POPUP MODAL NOT AN INLINE THING 
+
+- SHOW THE CHAR NUMBER FOR TITLE AND DESCRIPTION IN THE SHARE IDEA FORM 
+
+- IDEA DATE FIX 
+
+- IDEA DELETION - connect to endpoint
+
+## TO BE DONE
+
+- Remove Console logs when completely done with ideas 
+
+- Update Idea - connect to endpoint
+
+- Viewing endpoint - connect to it - although i dont think its really necessary when we are on the ideas page since frontend handles that already
+
+- Pagination
+
+- Member fetching for this particular group and also display when that member thing is clicked also the member count
+
+- Vote on Ideas connect to backend endpoints
+
+- Small UI touch up
+
+- IF admin for the group show a promote button it should be like left click and get options that should show the admin the promote idea option - think about this... 
 
 **Considerations for the Idea opening and viewing popup**
 
@@ -55,11 +97,22 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - FETCH THE COUNT NO OF IDEAS AND DISPLAY THEM ON THE GROUPS LANDING PAGE
 
+- Remove list view
 
-## TO BE DONE 
 - Increase margins
 
-- Remove list view
+- Remove the config button in the group component html page 
+
+
+## TO BE DONE
+
+- Remove the console logs
+
+- SHOW THE CHAR NUMBER FOR TITLE AND DESCRIPTION IN THE SHARE IDEA FORM  - HAVE THE SAME DESIGN AS THE IDEAS TAB FOR THIS CHANGES TO BE MADE TO THE MODAL FOR CREATE GROUP
+
+- CHANGE THE CREATE GROUP TO A MODAL NOT AN INLINE ELEMENT
+
+- Pagination
 
 - Leave group endpoint 
 
@@ -75,9 +128,8 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - Edit that out ? logo - have something else in place maybe an avatar or think of something
 
-- Have it as either member or admin tag (remove the "you are")
 
-- Remove the config button in the group component html page 
+- Have it as either member or admin tag (remove the "you are")
 
 - Ensure the information and components inside each group card is level with those around it
 
