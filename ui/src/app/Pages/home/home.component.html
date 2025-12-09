@@ -1,3 +1,157 @@
 <app-base-layout>
-    <p>Under construction. Visit the other pages.</p>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Analytics Dashboard</h1>
+            <p>Insights into community engagement and top ideas.</p>
+        </header>
+
+        <!-- Idea Statistics Summary -->
+        <div class="stats-summary" *ngIf="ideaStats">
+            <div class="stat-card">
+                <span class="stat-value">{{ideaStats.total}}</span>
+                <span class="stat-label">Total Ideas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ideaStats.open}}</span>
+                <span class="stat-label">Open</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ideaStats.promoted}}</span>
+                <span class="stat-label">Promoted</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ideaStats.closed}}</span>
+                <span class="stat-label">Closed</span>
+            </div>
+        </div>
+
+        <!-- Personal Stats -->
+        <div class="personal-stats-section" *ngIf="personalStats">
+            <h2>Your Impact</h2>
+            <div class="personal-stats-grid">
+                <div class="p-stat">
+                    <span class="icon">💡</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.ideasCreated}}</span>
+                        <span class="label">Ideas Created</span>
+                    </div>
+                </div>
+                <div class="p-stat">
+                    <span class="icon">🗳️</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.votesCast}}</span>
+                        <span class="label">Votes Cast</span>
+                    </div>
+                </div>
+                <div class="p-stat">
+                    <span class="icon">🏗️</span>
+                    <div class="info">
+                        <span class="value">{{personalStats.projectsInvolved}}</span>
+                        <span class="label">Projects Involved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-grid">
+            <!-- Most Voted Ideas -->
+            <div class="card most-voted">
+                <div class="card-header">
+                    <h2>Most Voted Ideas</h2>
+                    <span class="icon">🔥</span>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
+                        <div *ngFor="let idea of mostVotedIdeas" class="list-item">
+                            <div class="item-main">
+                                <h3>{{idea.title}}</h3>
+                                <p>{{idea.description}}</p>
+                            </div>
+                            <div class="item-meta">
+                                <span class="author">by {{idea.author}}</span>
+                                <span class="badge vote-badge">{{idea.voteCount}} votes</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noVotes>
+                        <div class="empty-state">No votes recorded yet.</div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <!-- Top Contributors -->
+            <div class="card top-contributors">
+                <div class="card-header">
+                    <h2>Top Contributors</h2>
+                    <span class="icon">🏆</span>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="topContributors.length > 0; else noContributors">
+                        <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
+                            <div class="rank">{{i + 1}}</div>
+                            <div class="item-main">
+                                <h3>{{user.displayName}}</h3>
+                                <p class="email">{{user.email}}</p>
+                            </div>
+                            <div class="item-meta">
+                                <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noContributors>
+                        <div class="empty-state">No contributors yet.</div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <!-- Group Engagement -->
+            <div class="card group-engagement">
+                <div class="card-header">
+                    <h2>Top Groups</h2>
+                    <span class="icon">🏢</span>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="groupEngagement.length > 0; else noGroups">
+                        <div *ngFor="let group of groupEngagement" class="list-item">
+                            <div class="item-main">
+                                <h3>{{group.name}}</h3>
+                            </div>
+                            <div class="item-meta">
+                                <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
+                                <span class="badge vote-badge">{{group.voteCount}} votes</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noGroups>
+                        <div class="empty-state">No active groups yet.</div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <!-- Promoted Ideas -->
+            <div class="card promoted-ideas">
+                <div class="card-header">
+                    <h2>Promoted Ideas</h2>
+                    <span class="icon">🚀</span>
+                </div>
+                <div class="card-content">
+                    <div *ngIf="promotedIdeas.length > 0; else noPromoted">
+                        <div *ngFor="let idea of promotedIdeas" class="list-item">
+                            <div class="item-main">
+                                <h3>{{idea.title}}</h3>
+                                <p>{{idea.description}}</p>
+                            </div>
+                            <div class="item-meta">
+                                <span class="author">by {{idea.author}}</span>
+                                <span class="date">{{idea.promotedDate | date}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noPromoted>
+                        <div class="empty-state">No ideas promoted yet.</div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
 </app-base-layout>
