@@ -16,9 +16,10 @@ export interface Idea {
   voteCount?: number;
   commentCount?: number;
   userVoted?: boolean;
+  userVoteId?: string;
   
   groupName?: string;
-  name?: string;       
+  name?: string;    
 } 
 
 export interface CreateIdeaRequest {
@@ -38,7 +39,38 @@ export interface VoteRequest {
   groupId: string;
 }
 
+export interface UnvoteRequest {
+  voteId: string;
+}
+
+export interface SeeVotesRequest {
+  ideaId: string;
+}
+
+export interface VoteDetails {
+  userName: string;
+  userEmail: string;
+  userId: string;           
+  ideaId: number;           
+  isDeleted: boolean;       
+  voteId: number;           
+  time: string;            
+}
+
 export interface PromoteRequest {
   ideaId: string;
   groupId: string;
+}
+
+export interface IdeaUpdate {
+  title?: string;
+  description?: string;
+  status?: string;
+}
+
+export interface VoteResponse {
+  id?: string;              
+  ideaId?: string;
+  userId?: string;
+  createdAt?: Date;
 }

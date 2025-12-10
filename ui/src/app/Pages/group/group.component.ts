@@ -158,8 +158,17 @@ export class GroupsComponent implements OnInit {
     return;
   }
   
-  // Navigate to ideas page instead of showing alert
-  this.router.navigate(['/groups', groupId, 'ideas']);
+  // Check if user is group creator
+  const isGroupCreator = this.isGroupCreator(group);
+  
+  // Navigate to ideas page with state
+  this.router.navigate(['/groups', groupId, 'ideas'], {
+    state: {
+      isGroupCreator: isGroupCreator,
+      groupName: group.name,
+      groupCreatorId: group.createdByUserId
+    }
+  });
 }
 
   onJoinGroup(groupId: string): void {
@@ -364,7 +373,7 @@ export class GroupsComponent implements OnInit {
     return this.pendingRequests.get(groupId) || false;
   }
 
-  // ===== FORM GETTER METHODS =====
+  // ===== FORM GETTER METHODS ===== // SHOULD BE REMOVED AND MOVED TO 
 
   get name() { 
     return this.createGroupForm.get('name'); 

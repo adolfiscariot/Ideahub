@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest } from '../Interfaces/Ideas/idea-interfaces';
+import { Observable, map, tap, throwError } from 'rxjs';
+import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest  } from '../Interfaces/Ideas/idea-interfaces';
+import { VoteService } from './vote.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest } fro
 export class IdeasService {
   private apiUrl = 'http://localhost:5065/api/idea';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private voteService: VoteService) { }
 
   // Helper method to convert backend response
   private convertResponse<T>(response: any): ApiResponse<T> {
@@ -51,8 +52,9 @@ export class IdeasService {
   }
 
   // PUT update idea
-  updateIdea(ideaId: string, idea: Partial<Idea>): Observable<ApiResponse<Idea>> {
-    return this.http.put<any>(`${this.apiUrl}/${ideaId}`, idea).pipe(
+  updateIdea(ideaId: string, updateIdea: IdeaUpdate): Observable<ApiResponse<Idea>> {
+    console.log('Updating idea:', ideaId, updateIdea);
+    return this.http.put<any>(`${this.apiUrl}/${ideaId}`, updateIdea).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
   }
@@ -70,19 +72,33 @@ export class IdeasService {
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
     
-    return this.http.post<any>(`${this.apiUrl}/idea/promote-idea`, {}, { params }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/promote-idea`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
   // POST vote for idea
-  voteForIdea(request: VoteRequest): Observable<ApiResponse<any>> {
-    const params = new HttpParams()
-      .set('groupId', request.groupId)
-      .set('ideaId', request.ideaId);
-    
-    return this.http.post<any>(`${this.apiUrl}/vote-idea`, {}, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
+  voteForIdea(groupId: string, ideaId: string) {
+    const request: VoteRequest = {
+      groupId: groupId,
+      ideaId: ideaId
+    };
+    return this.voteService.castVote(request);
+  }
+
+  // Remove vote
+  removeVote(voteId: string) {
+    const request: UnvoteRequest = {
+      voteId: voteId
+    };
+    return this.voteService.unvote(request);
+  }
+
+  // Get votes for idea
+  getVotesForIdea(ideaId: string) {
+    const request: SeeVotesRequest = {
+      ideaId: ideaId
+    };
+    return this.voteService.seeVotes(request);
   }
 }

@@ -25,108 +25,114 @@ public class VoteController : ControllerBase
 
     //Cast Vote
     [HttpPost("cast-vote")]
-    public async Task<IActionResult> CastVote(int groupId, int ideaId)
+public async Task<IActionResult> CastVote(int groupId, int ideaId)
+{
+    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+    try
     {
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        //fetch user info
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _logger.LogError("Cast Vote: Vote Controller: User Id not found");
+            return Unauthorized(ApiResponse.Fail("User Id not found"));
+        }
+
+        //fetch group info
+        var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+        if (group is null)
+        {
+            _logger.LogError("Cast Vote: Group with id {groupId} not found", groupId);
+            return NotFound(ApiResponse.Fail("Group not found"));
+        }
+
+        //make sure user is in group
+        var groupMember = await _context.UserGroups
+            .FirstOrDefaultAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
+
+        if (groupMember is null)
+        {
+            _logger.LogError("Cast Vote: User {userEmail} does not belong to group {groupName}", userEmail, group.Name);
+            return StatusCode(403, ApiResponse.Fail("User can't vote as they're not in the idea's group"));
+        }
+
+        //fetch the idea
+        var idea = await _context.Ideas.FirstOrDefaultAsync(i => i.Id == ideaId);
+        if (idea is null)
+        {
+            _logger.LogError("Cast Vote: Idea with Id {ideaId} doesn't exist", ideaId);
+            return NotFound(ApiResponse.Fail("Idea not found"));
+        }
+
+        //check if user has already voted
+        var existingVote = await _context.Votes.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.UserId == userId && v.IdeaId == ideaId);
+        if (existingVote != null)
+        {
+            if (existingVote.IsDeleted == false)
+            {
+                _logger.LogError("Cast Vote: User {userName} has already voted for idea {ideaId}", userEmail, ideaId);
+                return StatusCode(403, ApiResponse.Fail("User has already voted"));
+            }
+            else if (existingVote.IsDeleted == true)
+            {
+                existingVote.IsDeleted = false;
+                existingVote.DeletedAt = null;
+                _context.Votes.Update(existingVote);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("User {userEmail} has successfully re-voted for idea {ideaId} at {curerntTime}", userEmail, ideaId, DateTime.UtcNow);
+                return Ok(ApiResponse.Ok("Re-voting successful", new { 
+                    id = existingVote.Id,
+                    userId = existingVote.UserId,
+                    ideaId = existingVote.IdeaId,
+                    votedAt = existingVote.VotedAt
+                }));
+            }
+        }
+
+        //create a vote
+        var vote = new Vote
+        {
+            UserId = userId,
+            IdeaId = idea.Id
+        };
+
+        //save vote
         try
         {
-            //fetch user info
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                _logger.LogError("Cast Vote: Vote Controller: User Id not found");
-                return Unauthorized(ApiResponse.Fail("User Id not found"));
-            }
-
-            //fetch group info
-            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
-            if (group is null)
-            {
-                _logger.LogError("Cast Vote: Group with id {groupId} not found", groupId);
-                return NotFound(ApiResponse.Fail("Group not found"));
-            }
-
-            //make sure user is in group
-            var groupMember = await _context.UserGroups
-                .FirstOrDefaultAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
-
-            if (groupMember is null)
-            {
-                _logger.LogError("Cast Vote: User {userEmail} does not belong to group {groupName}", userEmail, group.Name);
-                return StatusCode(403, ApiResponse.Fail("User can't vote as they're not in the idea's group"));
-            }
-
-            //fetch the idea
-            var idea = await _context.Ideas.FirstOrDefaultAsync(i => i.Id == ideaId);
-            if (idea is null)
-            {
-                _logger.LogError("Cast Vote: Idea with Id {ideaId} doesn't exist", ideaId);
-                return NotFound(ApiResponse.Fail("Idea not found"));
-            }
-
-            //check if user has already voted
-            var existingVote = await _context.Votes.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.UserId == userId && v.IdeaId == ideaId);
-            if (existingVote != null)
-            {
-                if (existingVote.IsDeleted == false)
-                {
-                    _logger.LogError("Cast Vote: User {userName} has already voted for idea {ideaId}", userEmail, ideaId);
-                    return StatusCode(403, ApiResponse.Fail("User has already voted"));
-                }
-                else if (existingVote.IsDeleted == true)
-                {
-                    existingVote.IsDeleted = false;
-                    existingVote.DeletedAt = null;
-                    _context.Votes.Update(existingVote);
-                    await _context.SaveChangesAsync();
-
-                    _logger.LogInformation("User {userEmail} has successfully re-voted for idea {ideaId} at {curerntTime}", userEmail, ideaId, DateTime.UtcNow);
-                    return Ok(ApiResponse.Ok("Re-voting successful"));
-                }
-            }
-
-            //create a vote
-            var vote = new Vote
-            {
-                UserId = userId,
-                IdeaId = idea.Id
-            };
-
-            //save vote
-            try
-            {
-                vote.IsDeleted = false;
-                _context.Votes.Add(vote);
-                await _context.SaveChangesAsync();
-            }
+            vote.IsDeleted = false;
+            _context.Votes.Add(vote);
+            await _context.SaveChangesAsync();
             
-            /**
-                The catch block below is responsible for returning a proper error message whenever
-                the user votes twice on the same idea which is not allowed.
-            **/
-            catch (DbUpdateException e)
-            {
-                if (e.InnerException is PostgresException)
-                {
-                    _logger.LogWarning(e, "Cast Vote: User {userEmail} has already voted for idea {ideaId}", userEmail, ideaId);
-                    return StatusCode(403, ApiResponse.Fail("User has already voted"));
-                }
-                else
-                {
-                    _logger.LogError(e, "Error while casting vote");
-                    return StatusCode(500, ApiResponse.Fail("Error while casting code. Please try again"));
-                }
-            } 
-
             _logger.LogInformation("Cast Vote: Vote cast by {userEmail} for idea {ideaTitle}", userEmail, idea.Title);
-            return Ok(ApiResponse.Ok("Vote cast successfully"));
+            return Ok(ApiResponse.Ok("Vote cast successfully", new {
+                id = vote.Id,
+                userId = vote.UserId,
+                ideaId = vote.IdeaId,
+                votedAt = vote.VotedAt
+            }));
         }
-        catch (Exception e)
+    
+        catch (DbUpdateException e)
         {
-            _logger.LogError(e, "Cast Vote: Vote casting by {userEmail} for idea {IdeaId} failed", userEmail, ideaId);
-            return StatusCode(500, ApiResponse.Fail("Internal server error occured while casting a vote. Please try again"));
-        }
+            if (e.InnerException is PostgresException)
+            {
+                _logger.LogWarning(e, "Cast Vote: User {userEmail} has already voted for idea {ideaId}", userEmail, ideaId);
+                return StatusCode(403, ApiResponse.Fail("User has already voted"));
+            }
+            else
+            {
+                _logger.LogError(e, "Error while casting vote");
+                return StatusCode(500, ApiResponse.Fail("Error while casting code. Please try again"));
+            }
+        } 
     }
+    catch (Exception e)
+    {
+        _logger.LogError(e, "Cast Vote: Vote casting by {userEmail} for idea {IdeaId} failed", userEmail, ideaId);
+        return StatusCode(500, ApiResponse.Fail("Internal server error occured while casting a vote. Please try again"));
+    }
+}
 
     //Unvote
     [HttpPost("unvote")]
@@ -206,6 +212,10 @@ public class VoteController : ControllerBase
             {
                 UserName = votes.User.DisplayName,
                 UserEmail = votes.User.Email,
+                userId = votes.UserId,
+                ideaId = votes.IdeaId,
+                isDeleted = votes.IsDeleted,
+                voteId = votes.Id,
                 Time = votes.VotedAt,
             });
 
