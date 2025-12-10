@@ -128,6 +128,7 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 
 - Edit that out ? logo - have something else in place maybe an avatar or think of something
 
+- Have it as either member or admin tag (remove the "you are")
 
 - Have it as either member or admin tag (remove the "you are")
 
