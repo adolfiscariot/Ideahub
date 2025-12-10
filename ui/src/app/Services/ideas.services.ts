@@ -52,14 +52,14 @@ export class IdeasService {
 
   // PUT update idea
   updateIdea(ideaId: string, idea: Partial<Idea>): Observable<ApiResponse<Idea>> {
-    return this.http.put<any>(`${this.apiUrl}/idea/${ideaId}`, idea).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${ideaId}`, idea).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
   }
 
   // DELETE idea
   deleteIdea(ideaId: string): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/idea/${ideaId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/${ideaId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }

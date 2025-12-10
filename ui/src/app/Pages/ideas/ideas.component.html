@@ -1,131 +1,138 @@
-<div class="ideas-container">
-  <!-- Header -->
+<div class="ideas-container" [class.sidebar-open]="selectedIdea">
+  
+  <!-- Header with Members Section -->
   <header class="ideas-header">
     <div class="header-content">
-      <button class="back-button" (click)="goBack()">← Back to Groups</button>
-      <div class="header-text">
-        <h1 class="page-title">{{ groupName || 'Ideas' }}</h1>
-        <p class="page-subtitle">Share and vote on ideas</p>
+      
+      <div class="header-actions">
+        <!-- Members Section -->
+        <div class="members-section" (click)="openMembersModal()">
+          <div class="members-icon">👥</div>
+          <div class="members-info">
+            
+            <div class="members-count">{{ membersCount || 0 }} members</div>
+            <div class="members-label">Click to view</div>
+          </div>
+        </div>
+        
+        <!-- Share Idea Button -->
+        <button *ngIf="!showShareModal" class="create-idea-btn" (click)="openShareModal()">
+          <span class="create-icon">+</span> Share Idea
+        </button>
       </div>
-      <button *ngIf="!showCreateForm" class="create-idea-btn" (click)="toggleCreateForm()">
-        <span class="create-icon">+</span> Share Idea
-      </button>
     </div>
   </header>
-  <hr class="divider">
+  
+  <!-- Section Header -->
+  <div class="section-header">
+    <h2 class="section-title">Ideas</h2>
+    
+    <div class="section-sort">
+      <span class="sort-label">Sort by:</span>
+      <div class="sort-options">
+        <button class="sort-option active">Top Voted</button>
+        <div class="sort-separator">|</div>
+        <button class="sort-option">Newest</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading">
     <div class="spinner"></div>
     <p>Loading ideas...</p>
   </div>
-
-  <!-- Create Idea Form -->
-  <div *ngIf="showCreateForm" class="create-idea-form">
-    <form [formGroup]="createIdeaForm" (ngSubmit)="onCreateIdea()">
-      <div class="form-group">
-        <label for="ideaTitle">Idea Title</label>
-        <input 
-          id="ideaTitle" 
-          type="text" 
-          formControlName="title" 
-          placeholder="What's your idea?" 
-          class="form-control"
-          [class.error]="title?.invalid && title?.touched">
-        <div *ngIf="title?.invalid && title?.touched" class="error-message">
-          <span *ngIf="title?.errors?.['required']">Title is required</span>
-          <span *ngIf="title?.errors?.['minlength']">Minimum 3 characters</span>
-          <span *ngIf="title?.errors?.['maxlength']">Maximum 100 characters</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="ideaDescription">Description</label>
-        <textarea 
-          id="ideaDescription" 
-          formControlName="description" 
-          placeholder="Describe your idea in detail..." 
-          rows="4" 
-          class="form-control"
-          [class.error]="description?.invalid && description?.touched"></textarea>
-        <div *ngIf="description?.invalid && description?.touched" class="error-message">
-          <span *ngIf="description?.errors?.['required']">Description is required</span>
-          <span *ngIf="description?.errors?.['minlength']">Minimum 10 characters</span>
-          <span *ngIf="description?.errors?.['maxlength']">Maximum 500 characters</span>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="toggleCreateForm()" [disabled]="isSubmitting">
-          Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="createIdeaForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Sharing...' : 'Share Idea' }}
-        </button>
-      </div>
-    </form>
-  </div>
-
+  
   <!-- No Ideas State -->
-  <div *ngIf="!isLoading && ideas.length === 0 && !showCreateForm" class="no-ideas">
-    <div class="no-ideas-icon">💡</div>
-    <h3>No ideas yet</h3>
-    <p>Be the first to share an idea in this group!</p>
-    <button class="create-button" (click)="toggleCreateForm()">
-      + Share First Idea
-    </button>
+  <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal" class="no-ideas">
+    <div class="no-ideas-content">
+      <div class="no-ideas-icon">💡</div>
+      <h3>No ideas yet</h3>
+      <p>Be the first to share an idea with the group!</p>
+      <button class="create-idea-btn" (click)="openShareModal()">
+        <span class="create-icon">+</span> Share Idea
+      </button>
+    </div>
   </div>
 
   <!-- Ideas List -->
   <div *ngIf="!isLoading && ideas.length > 0" class="ideas-list">
-    <div *ngFor="let idea of ideas; trackBy: trackById" class="idea-card">
-      <div class="idea-header">
-        <h3 class="idea-title">{{ idea.title }}</h3>
-        <div class="idea-status">
-          <span *ngIf="idea.isPromotedToProject" class="status-badge promoted">✨ Promoted to Project</span>
-          <span *ngIf="idea.isDeleted" class="status-badge deleted">🗑️ Deleted</span>
-          <span class="status-badge">{{ idea.status }}</span>
+    <ng-container *ngFor="let idea of ideas; let last = last; trackBy: trackById">
+      <!-- Idea Card -->
+      <div class="idea-card" (click)="selectIdea(idea)">
+        <div class="idea-card-header">
+          <div class="idea-header-top">
+            <h3 class="idea-title">{{ idea.title }}</h3>
+          </div>
+          <div class="idea-card-meta">
+            <span class="upvote-icon">▲</span>
+            <span class="upvote-count">{{ idea.voteCount || 0 }} votes</span>
+            <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
+          </div>
         </div>
+        <p class="idea-description">
+          {{ idea.description.length > 150 ? (idea.description | slice:0:150) + '...' : idea.description }}
+          <span *ngIf="idea.description.length > 150" class="read-more">Read more</span>
+        </p>
       </div>
-
-      <p class="idea-description">{{ idea.description }}</p>
-
-      <div class="idea-meta">
-        <div class="meta-item">
-          <span class="meta-icon">👤</span>
-          <span class="meta-text">{{ idea.userName || 'Anonymous' }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon">📅</span>
-          <span class="meta-text">{{ idea.createdAt | date:'medium' }}</span>
-        </div>
+      
+      <!-- Divider -->
+      <div *ngIf="!last" class="card-divider">
+        <div class="divider-line"></div>
       </div>
+    </ng-container>
+  </div>
 
-      <div class="idea-stats">
-        <button class="stat-btn" (click)="onVote(idea.id)" [class.voted]="idea.userVoted">
-          <span class="stat-icon">👍</span>
-          <span class="stat-count">{{ idea.voteCount || 0 }} votes</span>
-        </button>
-        <div class="stat-item">
-          <span class="stat-icon">💬</span>
-          <span class="stat-count">{{ idea.commentCount || 0 }} comments</span>
-        </div>
-      </div>
-
-      <div class="idea-actions">
-        <button class="action-button" (click)="onViewIdea(idea.id)">
-          <span class="action-icon">📋</span>
-          Details
-        </button>
-        <button *ngIf="idea.userId === 'current-user-id'" class="action-button" (click)="onDeleteIdea(idea.id)">
-          <span class="action-icon">🗑️</span>
-          Delete
-        </button>
-        <button *ngIf="canPromoteIdea(idea)" class="action-button promote" (click)="onPromote(idea.id)">
-          <span class="action-icon">✨</span>
-          Promote to Project
-        </button>
-      </div>
-    </div>
+  <!-- Leave Group Button -->
+  <div class="leave-group-section">
+    <button class="leave-group-btn">
+      Leave Group
+    </button>
   </div>
 </div>
+
+<!-- Share Idea Modal Component -->
+<app-share-idea-modal 
+  *ngIf="showShareModal"
+  [isVisible]="showShareModal"
+  (close)="closeShareModal()"
+  (share)="onShareIdea($event)">
+</app-share-idea-modal>
+
+<!-- Sidebar for Idea Details -->
+<div *ngIf="selectedIdea" class="idea-sidebar-overlay" (click)="closeSidebar()"></div>
+
+<aside class="idea-sidebar" [class.open]="selectedIdea">
+  <div class="sidebar-header">
+    <button class="sidebar-close-btn" (click)="closeSidebar()">
+      <span>×</span>
+    </button>
+    <h2 class="sidebar-title">Idea Details</h2>
+  </div>
+  
+  <div class="sidebar-content" *ngIf="selectedIdea">
+    <div class="sidebar-idea-header">
+      <div class="sidebar-idea-header-top">
+        <h3 class="sidebar-idea-title">{{ selectedIdea.title }}</h3>
+        
+      </div>
+      <div class="sidebar-vote-section">
+        <span class="upvote-icon">▲</span>
+        <span class="upvote-count">{{ selectedIdea.voteCount || 0 }} votes</span>
+        <div class="sidebar-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <h4 class="sidebar-section-title">Description</h4>
+      <p class="sidebar-idea-description">{{ selectedIdea.description }}</p>
+    </div>
+    
+    <!-- Delete button for idea owner -->
+    <div class="sidebar-actions" *ngIf="isUserIdeaOwner(selectedIdea)">
+      <button class="sidebar-action-btn delete" (click)="onDeleteIdea(selectedIdea.id)">
+       Delete Idea
+      </button>
+    </div>
+  </div>
+</aside>

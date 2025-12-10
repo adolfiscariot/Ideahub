@@ -1,0 +1,130 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Share Your Idea</h2>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <form [formGroup]="ideaForm" (ngSubmit)="submitIdea()">
+        <!-- Title Field -->
+        <div class="form-group">
+          <div class="form-label-row">
+            <label for="ideaTitle">Title *</label>
+            <div class="character-counter" 
+                 [class.warning]="isTitleWarning"
+                 [class.limit-reached]="isTitleLimitReached"
+                 [class.error]="isTitleError"
+                 [attr.data-tooltip]="titleLimitMessage">
+              {{ titleLength }} / {{ TITLE_MAX_LENGTH }}
+            </div>
+          </div>
+          <input 
+            type="text" 
+            id="ideaTitle" 
+            formControlName="title"
+            required
+            maxlength="{{ TITLE_MAX_LENGTH }}"
+            placeholder="What's your idea about?"
+            class="form-input"
+            [class.input-warning]="isTitleWarning"
+            [class.input-limit-reached]="isTitleLimitReached"
+            [class.input-error]="isTitleError"
+            (input)="onTitleInput($event)"
+            (keydown)="onKeyDown($event, 'title')"
+          >
+          <div class="form-feedback">
+            <!-- Limit reached/approaching message -->
+            <div *ngIf="titleLimitMessage" 
+                 class="limit-message"
+                 [class.warning]="isTitleWarning"
+                 [class.limit-reached]="isTitleLimitReached"
+                 [class.error]="isTitleError">
+              <span class="message-icon" *ngIf="isTitleLimitReached">⚠️</span>
+              <span class="message-icon" *ngIf="isTitleError">⛔</span>
+              {{ titleLimitMessage }}
+            </div>
+            
+            <!-- Validation errors -->
+            <div *ngIf="ideaForm.get('title')?.invalid && (ideaForm.get('title')?.dirty || ideaForm.get('title')?.touched)" class="error-message">
+              <span *ngIf="ideaForm.get('title')?.errors?.['required']">Title is required</span>
+              <span *ngIf="ideaForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</span>
+              <span *ngIf="ideaForm.get('title')?.errors?.['maxlength']">Title cannot exceed {{ TITLE_MAX_LENGTH }} characters</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Description Field -->
+        <div class="form-group">
+          <div class="form-label-row">
+            <label for="ideaDescription">Description *</label>
+            <div class="character-counter" 
+                 [class.warning]="isDescriptionWarning"
+                 [class.limit-reached]="isDescriptionLimitReached"
+                 [class.error]="isDescriptionError"
+                 [attr.data-tooltip]="descriptionLimitMessage">
+              {{ descriptionLength }} / {{ DESCRIPTION_MAX_LENGTH }}
+            </div>
+          </div>
+          <div class="textarea-wrapper">
+            <textarea 
+              #descriptionTextarea
+              id="ideaDescription" 
+              formControlName="description"
+              required
+              maxlength="{{ DESCRIPTION_MAX_LENGTH }}"
+              rows="{{ textareaRows }}"
+              placeholder="Describe your idea in detail..."
+              class="form-textarea auto-resize"
+              [class.input-warning]="isDescriptionWarning"
+              [class.input-limit-reached]="isDescriptionLimitReached"
+              [class.input-error]="isDescriptionError"
+              (input)="onDescriptionInput($event)"
+              (keydown)="onKeyDown($event, 'description')"
+              (keyup)="adjustTextareaSize()"
+              (focus)="adjustTextareaSize()"
+            ></textarea>
+            <div class="textarea-resize-handle" *ngIf="descriptionLength > 0"></div>
+          </div>
+          <div class="form-feedback">
+            <!-- Limit reached/approaching message -->
+            <div *ngIf="descriptionLimitMessage" 
+                 class="limit-message"
+                 [class.warning]="isDescriptionWarning"
+                 [class.limit-reached]="isDescriptionLimitReached"
+                 [class.error]="isDescriptionError">
+              <span class="message-icon" *ngIf="isDescriptionLimitReached">⚠️</span>
+              <span class="message-icon" *ngIf="isDescriptionError">⛔</span>
+              {{ descriptionLimitMessage }}
+            </div>
+            
+            <!-- Validation errors -->
+            <div *ngIf="ideaForm.get('description')?.invalid && (ideaForm.get('description')?.dirty || ideaForm.get('description')?.touched)" class="error-message">
+              <span *ngIf="ideaForm.get('description')?.errors?.['required']">Description is required</span>
+              <span *ngIf="ideaForm.get('description')?.errors?.['minlength']">Description must be at least 10 characters</span>
+              <span *ngIf="ideaForm.get('description')?.errors?.['maxlength']">Description cannot exceed {{ DESCRIPTION_MAX_LENGTH }} characters</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="cancel-btn" 
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="submit-btn"
+            [disabled]="!ideaForm.valid || isSubmitting || isTitleError || isDescriptionError"
+          >
+            <span *ngIf="isSubmitting">Sharing...</span>
+            <span *ngIf="!isSubmitting">Share Idea</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
