@@ -9,6 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-groups',
@@ -21,7 +22,7 @@ import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-
   ]
 })
 export class GroupsComponent implements OnInit {
-  viewMode: 'list' | 'grid' = 'list';
+  // viewMode: 'list' | 'grid' = 'list';
   
   // Group data
   groups: any[] = [];
@@ -46,6 +47,7 @@ export class GroupsComponent implements OnInit {
     private groupsService: GroupsService,
     private authService: AuthService,
     private dialog: MatDialog,
+    private router: Router,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
@@ -140,10 +142,6 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  openConfigureModal(group: any): void {
-    alert(`Configure group: ${group.name}\n\nGroup Settings:\n- Edit group info\n- Manage members\n- Change privacy settings\n- Delete group\n\nFeature coming soon!`);
-  }
-
   openPendingRequestsModal(group: any): void {
     alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
   }
@@ -151,15 +149,16 @@ export class GroupsComponent implements OnInit {
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
-    const group = this.groups.find(g => g.id === groupId);
-    
-    if (!group?.isMember) {
-      alert('You must be a member of this group to view ideas.');
-      return;
-    }
-    
-    alert(`Viewing ideas for group: ${group.name}\n\nThis feature is coming soon!\n\nYou will be able to:\n- View all ideas in this group\n- Submit new ideas\n- Vote and comment on ideas`);
+  const group = this.groups.find(g => g.id === groupId);
+  
+  if (!group?.isMember) {
+    alert('You must be a member of this group to view ideas.');
+    return;
   }
+  
+  // Navigate to ideas page instead of showing alert
+  this.router.navigate(['/groups', groupId, 'ideas']);
+}
 
   onJoinGroup(groupId: string): void {
     const group = this.groups.find(g => g.id === groupId);
@@ -255,8 +254,6 @@ export class GroupsComponent implements OnInit {
     this.showCreateForm = false;
     this.createGroupForm.reset();
   }
-
-  // NOT WORKING - FIX THIS
   // ===== GROUP DELETION METHODS =====
 
   isDeleting: boolean = false;
@@ -319,18 +316,18 @@ export class GroupsComponent implements OnInit {
   // ===== HELPER METHODS =====
 
   formatDate(date: any): string {
-    if (!date) return 'Unknown date';
-    try {
-      const d = new Date(date);
-      return d.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
-      });
-    } catch {
-      return 'Invalid date';
-    }
+  if (!date) return 'Unknown date';
+  try {
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch {
+    return 'Invalid date';
   }
+}
 
   formatMemberCount(count: number): string {
     if (!count || count === 0) return '0 members';

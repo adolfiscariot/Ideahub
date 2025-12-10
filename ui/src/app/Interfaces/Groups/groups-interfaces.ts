@@ -1,40 +1,42 @@
-
 export interface Group {
   id: number;
   name: string;
   description: string;
   isActive: boolean;
   createdAt: Date | string;
-  createdByUserId: number;
+  createdByUserId: string; 
   isDeleted: boolean;
-  deletedByUserId?: number;
+  deletedByUserId?: string; 
   deletedAt?: Date | string;
    
   memberCount?: number;
   ideaCount?: number;
-  isJoined?: boolean;
-
+  isMember?: boolean;
+  hasPendingRequest?: boolean;
+  createdByUser?: {
+    displayName: string;
+    email: string;
+  };
+  
   userRoleInGroup?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
 }
-
 export interface UserGroup {
-    userId: number;
+    userId: string; // Changed from number to string
     groupId: number;
     joinedAt: Date | string;
-    roleId: string; //UID from roles table
-    roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User'; //fetched from the db
+    roleId: string;
+    roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
 }
 
 export interface GroupMember {
-  userId: number;
+  userId: string; // Changed from number to string
   groupId: number;
   joinedAt: Date | string;
   displayName: string;
   email: string;
-  roleId: string; //UID from roles table
+  roleId: string;
   roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
 }
-
 
 export interface AddGroup {
   name: string;
@@ -54,28 +56,35 @@ export interface ApiResponse<T> {
     data?: T;
 }
 
-// Group Membership Request
+// Group Membership Request - SINGLE DEFINITION
 export interface GroupMembershipRequest {
   id: number;
-  userId: number;
+  userId: string; // Changed from number to string to match your DB (UserId is GUID/string)
   groupId: number;
-  status: 'Pending' | 'Approved' | 'Rejected'; // IS REJECTED STILL VALID CONFIRM WITH MARK
-  requestedAt: Date | string;
-  acceptedOrRejectedAt?: Date | string;
-  userDisplayName?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  requestedAt: string; // Changed to string only for simplicity
+  acceptedOrRejectedAt?: string;
+  
+  // Additional info from joins (optional)
+  userName?: string;
   userEmail?: string;
+  userDisplayName?: string; // For backward compatibility
   groupName?: string;
+  groupDescription?: string;
 }
 
 // For requesting to join a group
 export interface JoinGroupRequest {
   groupId: number;
-  userId: number;
+  userId: string; // Changed to string to match above
 }
 
 // For approving/rejecting a request
 export interface ProcessMembershipRequest {
   requestId: number;
   status: 'Approved' | 'Rejected';
-  processedByUserId: number;
+  processedByUserId: string; // Changed to string
 }
+
+// REMOVE THE DUPLICATE DEFINITION BELOW - THIS IS CAUSING THE ERROR
+// export interface GroupMembershipRequest { ... }

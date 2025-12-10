@@ -8,13 +8,18 @@ export interface Idea {
   createdAt: Date;
   updatedAt: Date;
   status: string;
-  userId: string;
+  UserId: string;        
+  userId?: string;       
+  
   groupId: string;
   userName?: string;
   voteCount?: number;
   commentCount?: number;
   userVoted?: boolean;
-}
+  
+  groupName?: string;
+  name?: string;       
+} 
 
 export interface CreateIdeaRequest {
   title: string;
