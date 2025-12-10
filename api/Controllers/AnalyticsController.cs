@@ -25,12 +25,23 @@ public class AnalyticsController : ControllerBase
         _userManager = userManager;
     }
 
+    /// <summary>
+    /// Gets the top 5 most voted ideas that are not deleted.
+    /// </summary>
+    /// <returns>A list of ideas with their vote counts, authors, and group information.</returns>
+    /// <response code="200">Returns the most voted ideas successfully.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("most-voted")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetMostVotedIdeas()
     {
         try
         {
             var ideas = await _context.Ideas
+                .Include(i => i.User)
+                .Include(i => i.Group)
+                .Include(i => i.Votes)
 
                 .Where(i => !i.IsDeleted)
                 .OrderByDescending(i => i.Votes.Count(v => !v.IsDeleted))
@@ -55,7 +66,15 @@ public class AnalyticsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets the top 5 contributors based on the number of ideas created.
+    /// </summary>
+    /// <returns>A list of top contributors with their idea counts.</returns>
+    /// <response code="200">Returns the top contributors successfully.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("top-contributors")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetTopContributors()
     {
         try
@@ -82,7 +101,15 @@ public class AnalyticsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets the top 5 most recently promoted ideas.
+    /// </summary>
+    /// <returns>A list of promoted ideas with their promotion dates.</returns>
+    /// <response code="200">Returns the promoted ideas successfully.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("promoted-ideas")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetPromotedIdeas()
     {
         try
@@ -112,7 +139,15 @@ public class AnalyticsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets aggregated statistics for all ideas (Total, Open, Promoted, Closed).
+    /// </summary>
+    /// <returns>An object containing idea statistics.</returns>
+    /// <response code="200">Returns the idea statistics successfully.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("idea-statistics")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetIdeaStatistics()
     {
         try
@@ -143,7 +178,15 @@ public class AnalyticsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets the top 5 groups based on engagement (Idea Count + Vote Count).
+    /// </summary>
+    /// <returns>A list of groups with their engagement metrics.</returns>
+    /// <response code="200">Returns the group engagement data successfully.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("group-engagement")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetGroupEngagement()
     {
         try
@@ -154,7 +197,10 @@ public class AnalyticsController : ControllerBase
                 {
                     g.Name,
                     IdeaCount = g.Ideas.Count(i => !i.IsDeleted),
-                    VoteCount = g.Ideas.SelectMany(i => i.Votes).Count(v => !v.IsDeleted)
+                    VoteCount = g.Ideas
+                        .Where(i => !i.IsDeleted)
+                        .SelectMany(i => i.Votes)
+                        .Count(v => !v.IsDeleted)
                 })
                 .OrderByDescending(g => g.IdeaCount + g.VoteCount)
                 .Take(5)
@@ -169,7 +215,17 @@ public class AnalyticsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets personal statistics for the currently authenticated user.
+    /// </summary>
+    /// <returns>An object containing the user's ideas created, votes cast, and projects involved.</returns>
+    /// <response code="200">Returns the personal statistics successfully.</response>
+    /// <response code="401">User is not authenticated.</response>
+    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("personal-stats")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetPersonalStats()
     {
         try

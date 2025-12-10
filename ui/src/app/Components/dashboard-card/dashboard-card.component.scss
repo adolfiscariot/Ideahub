@@ -1,0 +1,52 @@
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: #34495e;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+        }
+    }
+
+    &.most-voted .card-header {
+        border-left: 4px solid #e74c3c;
+    }
+
+    &.top-contributors .card-header {
+        border-left: 4px solid #f1c40f;
+    }
+
+    &.promoted-ideas .card-header {
+        border-left: 4px solid #9b59b6;
+    }
+
+    &.group-engagement .card-header {
+        border-left: 4px solid #1abc9c;
+    }
+
+    .card-content {
+        padding: 0;
+    }
+}

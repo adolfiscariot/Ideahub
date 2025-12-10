@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { BaseLayoutComponent } from "../../Components/base-layout/base-layout.component";
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
+import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
+import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
+import { PersonalStatCardComponent } from '../../Components/personal-stat-card/personal-stat-card.component';
 
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -17,25 +21,6 @@ import {
   heroBriefcase
 } from '@ng-icons/heroicons/outline';
 
-@Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [BaseLayoutComponent, CommonModule, NgIcon],
-  viewProviders: [provideIcons({
-    heroChartBar,
-    heroLockOpen,
-    heroRocketLaunch,
-    heroLockClosed,
-    heroFire,
-    heroTrophy,
-    heroBuildingOffice2,
-    heroLightBulb,
-    heroHandThumbUp,
-    heroBriefcase
-  })],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
-})
 interface MostVotedIdea {
   id: string;
   title: string;
@@ -57,28 +42,53 @@ interface PromotedIdea {
   description: string;
   author: string;
   groupName: string;
-  promotionDate: string;
+  promotedDate: string;
 }
 
 interface IdeaStats {
-  totalIdeas: number;
-  totalVotes: number;
-  totalPromoted: number;
+  total: number;
+  open: number;
+  promoted: number;
+  closed: number;
 }
 
 interface GroupEngagement {
-  groupName: string;
-  engagementScore: number;
+  name: string;
   ideaCount: number;
+  voteCount: number;
 }
 
 interface PersonalStats {
-  userId: string;
-  ideaCount: number;
-  voteCount: number;
-  promotedCount: number;
+  ideasCreated: number;
+  votesCast: number;
+  projectsInvolved: number;
 }
 
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  imports: [
+    BaseLayoutComponent,
+    CommonModule,
+    StatCardComponent,
+    DashboardCardComponent,
+    PersonalStatCardComponent
+  ],
+  viewProviders: [provideIcons({
+    heroChartBar,
+    heroLockOpen,
+    heroRocketLaunch,
+    heroLockClosed,
+    heroFire,
+    heroTrophy,
+    heroBuildingOffice2,
+    heroLightBulb,
+    heroHandThumbUp,
+    heroBriefcase
+  })],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.scss'
+})
 export class HomeComponent implements OnInit {
   mostVotedIdeas: MostVotedIdea[] = [];
   topContributors: TopContributor[] = [];
@@ -94,46 +104,23 @@ export class HomeComponent implements OnInit {
   }
 
   fetchAnalytics() {
-    this.analyticsService.getMostVotedIdeas().subscribe({
-      next: (res) => {
-        if (res.status) this.mostVotedIdeas = res.data;
+    forkJoin({
+      mostVoted: this.analyticsService.getMostVotedIdeas(),
+      topContributors: this.analyticsService.getTopContributors(),
+      promoted: this.analyticsService.getPromotedIdeas(),
+      stats: this.analyticsService.getIdeaStatistics(),
+      engagement: this.analyticsService.getGroupEngagement(),
+      personal: this.analyticsService.getPersonalStats()
+    }).subscribe({
+      next: (results) => {
+        if (results.mostVoted.status) this.mostVotedIdeas = results.mostVoted.data;
+        if (results.topContributors.status) this.topContributors = results.topContributors.data;
+        if (results.promoted.status) this.promotedIdeas = results.promoted.data;
+        if (results.stats.status) this.ideaStats = results.stats.data;
+        if (results.engagement.status) this.groupEngagement = results.engagement.data;
+        if (results.personal.status) this.personalStats = results.personal.data;
       },
-      error: (err) => console.error('Error fetching most voted ideas', err)
-    });
-
-    this.analyticsService.getTopContributors().subscribe({
-      next: (res) => {
-        if (res.status) this.topContributors = res.data;
-      },
-      error: (err) => console.error('Error fetching top contributors', err)
-    });
-
-    this.analyticsService.getPromotedIdeas().subscribe({
-      next: (res) => {
-        if (res.status) this.promotedIdeas = res.data;
-      },
-      error: (err) => console.error('Error fetching promoted ideas', err)
-    });
-
-    this.analyticsService.getIdeaStatistics().subscribe({
-      next: (res) => {
-        if (res.status) this.ideaStats = res.data;
-      },
-      error: (err) => console.error('Error fetching idea statistics', err)
-    });
-
-    this.analyticsService.getGroupEngagement().subscribe({
-      next: (res) => {
-        if (res.status) this.groupEngagement = res.data;
-      },
-      error: (err) => console.error('Error fetching group engagement', err)
-    });
-
-    this.analyticsService.getPersonalStats().subscribe({
-      next: (res) => {
-        if (res.status) this.personalStats = res.data;
-      },
-      error: (err) => console.error('Error fetching personal stats', err)
+      error: (err) => console.error('Error fetching analytics', err)
     });
   }
 }
