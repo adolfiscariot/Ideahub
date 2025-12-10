@@ -45,7 +45,7 @@ public class AnalyticsController : ControllerBase
 
                 .Where(i => !i.IsDeleted)
                 .OrderByDescending(i => i.Votes.Count(v => !v.IsDeleted))
-                .Take(5)
+                .Take(3)
                 .Select(i => new
                 {
                     i.Id,
@@ -89,7 +89,7 @@ public class AnalyticsController : ControllerBase
                 })
                 .Where(x => x.IdeaCount > 0)
                 .OrderByDescending(x => x.IdeaCount)
-                .Take(5)
+                .Take(3)
                 .ToListAsync();
 
             return Ok(ApiResponse.Ok("Top contributors", contributors));
@@ -118,7 +118,7 @@ public class AnalyticsController : ControllerBase
 
                 .Where(i => i.IsPromotedToProject && !i.IsDeleted)
                 .OrderByDescending(i => i.UpdatedAt)
-                .Take(5)
+                .Take(3)
                 .Select(i => new
                 {
                     i.Id,
@@ -203,7 +203,7 @@ public class AnalyticsController : ControllerBase
                         .Count(v => !v.IsDeleted)
                 })
                 .OrderByDescending(g => g.IdeaCount + g.VoteCount)
-                .Take(5)
+                .Take(3)
                 .ToListAsync();
 
             return Ok(ApiResponse.Ok("Group engagement", groups));
