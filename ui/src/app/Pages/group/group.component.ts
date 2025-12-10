@@ -10,6 +10,7 @@ import { GroupDetailsModalComponent } from '../../Components/modals/group-detail
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { Router } from '@angular/router';
+import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 
 @Component({
   selector: 'app-groups',
@@ -18,8 +19,9 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
-  ]
+    ReactiveFormsModule,
+    ButtonsComponent
+]
 })
 export class GroupsComponent implements OnInit {
   // viewMode: 'list' | 'grid' = 'list';

@@ -8,12 +8,21 @@
         <p class="page-subtitle">{{ subtitle }}</p>
       </div>
 
-      <button *ngIf="!showCreateForm && !isLoading && groups.length > 0"
+      <!--<button *ngIf="!showCreateForm && !isLoading && groups.length > 0"
               class="create-group-header-btn"
               (click)="toggleCreateForm()">
         <span class="create-icon">+</span>
         Create Group
-      </button>
+      </button>-->
+
+      <app-buttons
+        [buttonText] = "'Create Group'"
+        [buttonStyleClass] = "'btn-create-group'"
+        [buttonType]="'submit'"
+        (click) = "toggleCreateForm()">
+      >
+
+      </app-buttons>
     </div>
   </header>
 
