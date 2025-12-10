@@ -15,7 +15,16 @@
 .navbar-left {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 15px;
 }
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
 .product-text {
   font-weight: bold;
   font-size: 1.2em;

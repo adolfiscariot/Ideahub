@@ -1,57 +1,53 @@
 <div class="navbar">
   <div class="navbar-left">
-    <img src="assets/adept-logo.png" alt="Logo" class="logo-image" />
+    @if (loggedInStatus | async; as isLoggedIn) {
+    <a [routerLink]="'/home'">
+      <img src="assets/adeptwebp.webp" alt="Logo" class="logo-image" />
+    </a>
+    } @else {
+    <a [routerLink]="'/'">
+      <img src="assets/adeptwebp.webp" alt="Logo" class="logo-image" />
+    </a>
+    }
 
     <!--If logged out this text should lead to the landing page otherwise
     it should lead to the home page-->
     @if (loggedInStatus | async; as isLoggedIn) {
-      <a class="product-text" [routerLink]="'/home'">Ideahub</a>
+    <a class="product-text" [routerLink]="'/home'">Ideahub</a>
     } @else {
-      <a class="product-text" [routerLink]="'/'">Ideahub</a>
+    <a class="product-text" [routerLink]="'/'">Ideahub</a>
     }
 
   </div>
   @if (loggedInStatus | async; as isLoggedIn) {
-    <nav class="nav-items">
-      <a routerLink="/home" class="nav-link">Home</a>
-      <a routerLink="/ideas" class="nav-link">Ideas</a>
-      <a routerLink="/groups" class="nav-link">Groups</a>
-      <a routerLink="/projects" class="nav-link">Projects</a>
-      <a routerLink="/user-manual" class="nav-link">User Manual</a>
-    </nav>
+  <nav class="nav-items">
+    <a routerLink="/home" class="nav-link">Home</a>
+    <a routerLink="/ideas" class="nav-link">Ideas</a>
+    <a routerLink="/groups" class="nav-link">Groups</a>
+    <a routerLink="/projects" class="nav-link">Projects</a>
+    <a routerLink="/user-manual" class="nav-link">User Manual</a>
+  </nav>
   } @else {
-    <nav class="nav-items">
-      <a routerLink="/about" class="nav-link">About</a>
-      <a routerLink="/pricing" class="nav-link">Pricing</a>
-      <a routerLink="/contacts" class="nav-link">Contacts</a>
-      <a routerLink="/documentation" class="nav-link">Documentation</a>
-    </nav>
+  <nav class="nav-items">
+    <a routerLink="/about" class="nav-link">About</a>
+    <a routerLink="/pricing" class="nav-link">Pricing</a>
+    <a routerLink="/contacts" class="nav-link">Contacts</a>
+    <a routerLink="/documentation" class="nav-link">Documentation</a>
+  </nav>
   }
 
 
 
   <div class="navbar-right">
     @if (loggedInStatus | async; as isLoggedIn) {
-      <app-buttons
-        [buttonText]="'LOG OUT'"
-        [buttonStyleClass]="'btn-logout-navbar'"
-        [buttonType]="'button'"
-        (click) = "onLogout()"
-        />
-      } @else {
-        <app-buttons
-          [buttonText]="'LOG IN'"
-          [buttonStyleClass]="'btn-login-navbar'"
-          [buttonType]="'button'"
-          [buttonLink]="'/login'"
-          />
-          <app-buttons
-            [buttonText]="'SIGN UP'"
-            [buttonStyleClass]="'btn-signup-navbar'"
-            [buttonType]="'button'"
-            [buttonLink]="'/register'"
-            />
-          }
+    <app-buttons [buttonText]="'LOG OUT'" [buttonStyleClass]="'btn-logout-navbar'" [buttonType]="'button'"
+      (click)="onLogout()" />
+    } @else {
+    <app-buttons [buttonText]="'LOG IN'" [buttonStyleClass]="'btn-login-navbar'" [buttonType]="'button'"
+      [buttonLink]="'/login'" />
+    <app-buttons [buttonText]="'SIGN UP'" [buttonStyleClass]="'btn-signup-navbar'" [buttonType]="'button'"
+      [buttonLink]="'/register'" />
+    }
 
-        </div>
-      </div>
+  </div>
+</div>

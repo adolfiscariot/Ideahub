@@ -1,9 +1,155 @@
-.home-page {
-    height: 100%;
+.dashboard-container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 85vh;
     display: flex;
+    flex-direction: column;
+}
 
-    & .sidebar {
+.dashboard-header {
+    margin-bottom: 2rem;
 
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
     }
 
+    p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+}
+
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.list-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background-color: #fafafa;
+    }
+
+    .item-main {
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 0.25rem 0;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .item-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+
+        .author {
+            color: #95a5a6;
+        }
+
+        .date {
+            color: #bdc3c7;
+        }
+    }
+}
+
+.contributor-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+
+    .rank {
+        width: 30px;
+        height: 30px;
+        background-color: #f1c40f;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .item-main {
+        flex: 1;
+        min-width: 0;
+
+        .email {
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &.vote-badge {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    &.idea-badge {
+        background-color: #fff8e1;
+        color: #f57f17;
+    }
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #bdc3c7;
+    font-style: italic;
+}
+
+.personal-stats-section {
+    margin-top: auto;
+    padding-top: 2rem;
+
+    h2 {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .personal-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
 }
