@@ -6,8 +6,16 @@ import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
 import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
 import { PersonalStatCardComponent } from '../../Components/personal-stat-card/personal-stat-card.component';
+import {
+  MostVotedIdea,
+  TopContributor,
+  PromotedIdea,
+  IdeaStats,
+  GroupEngagement,
+  PersonalStats
+} from '../../Models/analytics.models';
 
-import { NgIcon, provideIcons } from '@ng-icons/core';
+import { provideIcons } from '@ng-icons/core';
 import {
   heroChartBar,
   heroLockOpen,
@@ -20,49 +28,6 @@ import {
   heroHandThumbUp,
   heroBriefcase
 } from '@ng-icons/heroicons/outline';
-
-interface MostVotedIdea {
-  id: string;
-  title: string;
-  description: string;
-  author: string;
-  groupName: string;
-  voteCount: number;
-}
-
-interface TopContributor {
-  displayName: string;
-  email: string;
-  ideaCount: number;
-}
-
-interface PromotedIdea {
-  id: string;
-  title: string;
-  description: string;
-  author: string;
-  groupName: string;
-  promotedDate: string;
-}
-
-interface IdeaStats {
-  total: number;
-  open: number;
-  promoted: number;
-  closed: number;
-}
-
-interface GroupEngagement {
-  name: string;
-  ideaCount: number;
-  voteCount: number;
-}
-
-interface PersonalStats {
-  ideasCreated: number;
-  votesCast: number;
-  projectsInvolved: number;
-}
 
 @Component({
   selector: 'app-home',
