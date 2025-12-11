@@ -80,3 +80,184 @@
   background-color: yellow;
   width: 100%;
 }
+
+/* Base vote button */
+.btn-vote {
+  background: transparent;
+  border: 1px solid purple;
+  color: purple;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  width: auto;          /* override the global 100px width */
+  height: auto;         /* override the global 30px height */
+  box-shadow: none;     /* override the global shadow */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* Hover state */
+.btn-vote:hover:not(:disabled) {
+  background: rgba(128, 0, 128, 0.1);
+}
+
+/* Active (voted) state */
+.btn-vote-active {
+  background: purple;
+  color: white;
+  border-color: purple;
+}
+
+/* Optional: vote count styling */
+.vote-count {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.btn-share-idea {
+  background: purple;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(95, 1, 95);
+  }
+}
+
+.btn-sort {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  color: purple;
+  font-size: 14px;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    color: rgb(95, 1, 95);
+  }
+}
+
+.btn-sort-active {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.btn-promote {
+  background: #ffffff;
+  color: purple;
+  border: 1px solid purple;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: rgba(128, 0, 128, 0.1);
+  }
+}
+
+.btn-delete {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: #d93636;
+  }
+}
+
+.btn-edit {
+  background: #ffffff;
+  color: #333;
+  border: 1px solid purple;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: rgba(128, 0, 128, 0.1);
+  }
+}
+
+.btn-view-voters {
+  background: white;
+  color: purple;
+  border: 1px solid purple;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: rgba(128, 0, 128, 0.1);
+  }
+}
+
+.btn-close-details {
+  background: transparent;
+  color: #333;
+  border: none;
+  font-size: 20px;
+  padding: 4px 8px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    color: purple;
+  }
+}
+
+.btn-leave-group {
+  background: red;
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: #ff4d4d;
+  }
+}
+
+.btn-view-requests {
+background: #ffcc00;
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: #e6b800;
+  }
+
+}

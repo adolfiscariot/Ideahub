@@ -242,45 +242,43 @@ public async Task<IActionResult> JoinGroup(int groupId)
 
     //Leave Group
     [HttpPost("leave-group")]
-    public async Task<IActionResult> LeaveGroup(int groupId)
+public async Task<IActionResult> LeaveGroup(int groupId)
+{
+    //Get user info
+    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrWhiteSpace(userId))
     {
-        //Get user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            _logger.LogError("User not found");
-            return NotFound(ApiResponse.Fail("User Not Found"));
-        }
-
-        //Get group info
-        var group = await _context.Groups.FindAsync(groupId);
-        if (group is null)
-        {
-            _logger.LogError("Group doesn't exist");
-            return NotFound(ApiResponse.Fail("Group not found"));
-        }
-        var groupName = group.Name;
-
-        //Verify user is in group
-        if (!_context.GroupMembershipRequests.Any(gmr => gmr.UserId == userId && gmr.GroupId == groupId))
-        {
-            return BadRequest(ApiResponse.Fail("You can't leave a group you're not a part of"));
-        }
-
-        //Remove them and save the new changes
-        var request = await _context.GroupMembershipRequests.FirstOrDefaultAsync(gmr => gmr.UserId == userId && gmr.GroupId == groupId);
-        if (request is null)
-        {
-            _logger.LogWarning("Group Membership Request doesn't exist");
-            return BadRequest(ApiResponse.Fail("Group membership doesn't exist"));
-        }
-        _context.GroupMembershipRequests.Remove(request);
-        await _context.SaveChangesAsync();
-
-        _logger.LogInformation("User {userEmail} has left group {groupName}", userEmail, groupName);
-        return Ok(ApiResponse.Ok($"User {userEmail} has left group {groupName}"));
+        _logger.LogError("User not found");
+        return NotFound(ApiResponse.Fail("User Not Found"));
     }
+
+    //Get group info
+    var group = await _context.Groups.FindAsync(groupId);
+    if (group is null)
+    {
+        _logger.LogError("Group doesn't exist");
+        return NotFound(ApiResponse.Fail("Group not found"));
+    }
+    var groupName = group.Name;
+
+    //Check membership
+    var userGroup = await _context.UserGroups
+        .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
+
+    if (userGroup is null)
+    {
+        _logger.LogWarning("User {userId} is not a member of group {groupId}", userId, groupId);
+        return BadRequest(ApiResponse.Fail("You can't leave a group you're not a member of"));
+    }
+
+    //Remove membership
+    _context.UserGroups.Remove(userGroup);
+    await _context.SaveChangesAsync();
+
+    _logger.LogInformation("User {userEmail} has left group {groupName}", userEmail, groupName);
+    return Ok(ApiResponse.Ok($"User {userEmail} has left group {groupName}"));
+}
 
     //View Individual Group
     [HttpGet("{groupId}")]
@@ -417,8 +415,8 @@ public async Task<IActionResult> JoinGroup(int groupId)
         }
 
         //Add user to group and save
-        _context.UserGroups.Add(new UserGroup { UserId = requestUserId, GroupId = groupId });
-        await _context.SaveChangesAsync();
+        _context.UserGroups.Add(new UserGroup { UserId = requestUserId, GroupId = groupId});
+        await _context.SaveChangesAsync();        
 
         _logger.LogInformation("User {userEmail} accepted to group: {groupName}",
             User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);

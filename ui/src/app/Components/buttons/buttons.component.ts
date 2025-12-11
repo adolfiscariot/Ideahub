@@ -17,5 +17,5 @@ export class ButtonsComponent {
  
   // Ideas
   @Input() disabled: boolean = false;
-  @Input() title: string = '';
+  @Input() title: string = ''; 
 }
