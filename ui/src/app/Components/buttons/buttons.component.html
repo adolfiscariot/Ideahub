@@ -4,6 +4,7 @@
     [type]="buttonType"
     [routerLink]="buttonType === 'button' ? buttonLink : null"
     [ngClass]="buttonStyleClass"
+    [disabled]="disabled"
   >
     {{ buttonText }}
   </button>

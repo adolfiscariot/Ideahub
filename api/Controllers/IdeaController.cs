@@ -119,7 +119,7 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.UserId, idea.Group.Name, idea.CreatedAt});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
         }
 
         

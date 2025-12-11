@@ -106,8 +106,8 @@
             <span class="stat-count">{{ group.memberCount || 0 }}</span>
           </div>
           <div class="stat">
-            <span class="stat-icon">💡</span> <span class="stat-count">{{ group.ideaCount || 0 }} </span>
-            
+            <span class="stat-icon">💡</span>
+            <span class="stat-count">{{ group.ideaCount || 0 }} </span>
           </div>
           <div class="stat">
             <span class="stat-icon">📅</span>
@@ -137,16 +137,6 @@
             Members
             <span *ngIf="group.memberCount" class="count-badge">{{ group.memberCount }}</span>
           </button>
-
-          <!-- Ideas (Member) -->
-          <button *ngIf="group.isMember"
-                  class="action-button"
-                  (click)="onViewIdeas(group.id)">
-            <span class="action-icon">💡</span>
-            View Ideas
-            <span *ngIf="group.ideaCount" class="count-badge">{{ group.ideaCount }}</span>
-          </button>
-
         </div>
       </div>
     </div>
