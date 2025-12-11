@@ -18,7 +18,7 @@
 
         <div class="analytics-grid">
             <!-- Most Voted Ideas -->
-            <app-dashboard-card title="Most Voted Ideas" icon="heroFire" variant="most-voted">
+            <app-dashboard-card title="Most Voted Ideas" variant="most-voted">
                 <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
                     <div *ngFor="let idea of mostVotedIdeas" class="list-item">
                         <div class="item-main">
@@ -37,7 +37,7 @@
             </app-dashboard-card>
 
             <!-- Top Contributors -->
-            <app-dashboard-card title="Top Contributors" icon="heroTrophy" variant="top-contributors">
+            <app-dashboard-card title="Top Contributors" variant="top-contributors">
                 <div *ngIf="topContributors.length > 0; else noContributors">
                     <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
                         <div class="rank">{{i + 1}}</div>
@@ -56,7 +56,7 @@
             </app-dashboard-card>
 
             <!-- Group Engagement -->
-            <app-dashboard-card title="Top Groups" icon="heroBuildingOffice2" variant="group-engagement">
+            <app-dashboard-card title="Top Groups" variant="group-engagement">
                 <div *ngIf="groupEngagement.length > 0; else noGroups">
                     <div *ngFor="let group of groupEngagement" class="list-item">
                         <div class="item-main">
@@ -74,7 +74,7 @@
             </app-dashboard-card>
 
             <!-- Promoted Ideas -->
-            <app-dashboard-card title="Promoted Ideas" icon="heroRocketLaunch" variant="promoted-ideas">
+            <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas">
                 <div *ngIf="promotedIdeas.length > 0; else noPromoted">
                     <div *ngFor="let idea of promotedIdeas" class="list-item">
                         <div class="item-main">

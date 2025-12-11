@@ -25,8 +25,9 @@ services:
       ASPNETCORE_HTTPS_PORTS: 7204
       ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_admin
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
+
     ports:
-      - "5065:5066"
+      - "5065:5065"
     depends_on:
       - ideahub-db
     restart: always
