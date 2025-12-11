@@ -254,31 +254,20 @@ loadGroupInfo(): void {
 
 openMembersModal() {
   console.log('Opening members modal for group:', this.groupId);
-
-  // Fetch members first
-  this.groupsService.getGroupMembers(this.groupId).subscribe({
-    next: (res: any) => {
-      const members = res.data || [];
-
-      // Open modal and pass actual members
-      this.dialog.open(GroupMembersModalComponent, {
-        width: '600px',
-        maxHeight: '90vh',
-        data: { 
-          group: {
-            id: this.groupId,
-            name: this.groupName,
-            memberCount: members.length,
-            members: members   // <-- pass the array here
-          }
-        },
-        panelClass: 'custom-modal'
-      });
+  
+  this.dialog.open(GroupMembersModalComponent, {
+    width: '600px',
+    maxHeight: '90vh',
+    data: { 
+      group: {
+        id: this.groupId,
+        name: this.groupName,
+        memberCount: this.membersCount
+      }
     },
-   
+    panelClass: 'custom-modal'
   });
 }
-
 
 // closeMembersModal() {
 //   this.showMembersModal = false;
@@ -572,6 +561,10 @@ isGroupCreator(): boolean {
           // Increment vote count locally
           idea.voteCount = (idea.voteCount || 0) + 1;
           
+
+          if (voteId) idea.userVoteId=voteId.toString();
+  
+          
           console.log(`Updated idea "${idea.title}":`, {
             userVoted: idea.userVoted,
             voteCount: idea.voteCount,
@@ -583,6 +576,7 @@ isGroupCreator(): boolean {
         if (this.selectedIdea && this.selectedIdea.id === ideaId) {
           this.selectedIdea.userVoted = true;
           this.selectedIdea.voteCount = (this.selectedIdea.voteCount || 0) + 1;
+
           if (voteId) {
             this.selectedIdea.userVoteId = voteId.toString();
           }
