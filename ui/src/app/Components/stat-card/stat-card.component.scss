@@ -13,14 +13,12 @@
     }
 
     .stat-icon {
-        font-size: 2rem;
+        font-size: 1.5rem;
         background: #f8f9fa;
-        width: 50px;
-        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
+        margin-left: auto;
     }
 
     .stat-info {
@@ -39,7 +37,6 @@
         color: #000;
         font-size: 1.25rem;
         font-weight: 600;
-        text-transform: uppercase;
     }
 
     &.total {
