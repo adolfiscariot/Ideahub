@@ -97,12 +97,14 @@
         <div class="personal-stats-section" *ngIf="personalStats">
             <h2>Your Impact</h2>
             <div class="personal-stats-grid">
-                <app-personal-stat-card label="Ideas Created" [value]="personalStats.ideasCreated"
-                    icon="heroLightBulb"></app-personal-stat-card>
-                <app-personal-stat-card label="Votes Cast" [value]="personalStats.votesCast"
-                    icon="heroHandThumbUp"></app-personal-stat-card>
-                <app-personal-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved"
-                    icon="heroBriefcase"></app-personal-stat-card>
+                <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated" icon="heroLightBulb"
+                    variant="created"></app-stat-card>
+                <app-stat-card label="Votes Cast" [value]="personalStats.votesCast" icon="heroHandThumbUp"
+                    variant="votes"></app-stat-card>
+                <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved" icon="heroBriefcase"
+                    variant="projects"></app-stat-card>
+                <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated" icon="heroUserGroup"
+                    variant="groups"></app-stat-card>
             </div>
         </div>
 
