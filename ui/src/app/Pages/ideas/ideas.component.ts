@@ -9,6 +9,9 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ShareIdeaModalComponent } from '../../Components/modals/share-idea-modal/share-idea-modal.component';
 import { VoteService } from '../../Services/vote.service';
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
+import { MatDialog } from '@angular/material/dialog';
+import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 
 @Component({
   selector: 'app-ideas',
@@ -26,10 +29,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showShareModal: boolean = false;
   currentUserId: string = '';
   
-  isEditing: boolean = false;
-  editForm: FormGroup;
-  editLoading: boolean = false;
-  
   selectedIdea: any = null;
   membersCount: string = '';
 
@@ -40,12 +39,24 @@ export class IdeasComponent implements OnInit, OnDestroy {
   votersList: any[] = [];
 
   groupCreatorId: string = '';
+
+  //showMembersModal = false;
   
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
   groupCreatorIdFromState: string = ''; // set from route state
 
   isPromoting: boolean = false;
   currentlyPromotingIdeaId: string | null = null;
+
+  groupMembers: any[] = [];
+
+  isEditMode: boolean = false;
+
+  modalEditData: any = {
+  id: '',
+  title: '',
+  description: ''
+};
 
   private routeSub: Subscription = new Subscription();
 
@@ -56,14 +67,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
     private groupsService: GroupsService,
     private authService: AuthService,
     private voteService: VoteService,
+    private dialog: MatDialog,
     private fb: FormBuilder
   ) {
-    // Initialize edit form
-    this.editForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
-      status: ['Open']
-    });
   }
 
   ngOnInit(): void {
@@ -110,31 +116,99 @@ export class IdeasComponent implements OnInit, OnDestroy {
   }
   
   this.routeSub = this.route.params.subscribe(params => {
-    this.groupId = params['groupId'];
-    console.log('Group ID from route:', this.groupId);
-    
-    console.log('=== CURRENT STATE ===', {
-      groupCreatorId: this.groupCreatorId,
-      groupCreatorIdFromState: this.groupCreatorIdFromState,
-      isGroupCreatorFromState: this.isGroupCreatorFromState,
-      groupName: this.groupName
-    });
-    
-    // If we don't have creator ID, load from API
-    if (!this.groupCreatorId) {
-      console.log('No groupCreatorId, loading from API...');
-      this.loadGroupInfo();
-    } else {
-      console.log('Using existing groupCreatorId:', this.groupCreatorId);
-    }
-    
-    this.loadIdeas();
+  this.groupId = params['groupId'];
+  console.log('Group ID from route:', this.groupId);
+
+  console.log('=== CURRENT STATE ===', {
+    groupCreatorId: this.groupCreatorId,
+    groupCreatorIdFromState: this.groupCreatorIdFromState,
+    isGroupCreatorFromState: this.isGroupCreatorFromState,
+    groupName: this.groupName
   });
+
+  // If we don't have creator ID, load from API
+  if (!this.groupCreatorId) {
+    console.log('No groupCreatorId, loading from API...');
+    this.loadGroupInfo();
+  } else {
+    console.log('Using existing groupCreatorId:', this.groupCreatorId);
+  }
+  this.loadGroupMembers();
+
+  this.loadIdeas();
+});
+
 }
 
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
   }
+
+ openEditModal(idea: any) {
+    this.isEditMode = true;
+    this.modalEditData = { ...idea };
+  }
+
+// ... inside your IdeasComponent class, add these methods:
+
+selectIdea(idea: any): void {
+  console.log('Selecting idea:', idea);
+  this.selectedIdea = idea;
+}
+
+onUpdateIdeaFromModal(event: {title: string, description: string}): void {
+  if (!this.selectedIdea) {
+    console.log('No idea selected for modal update');
+    return;
+  }
+  
+  console.log('Updating idea from modal:', event);
+  
+  // Create the update data according to your interface
+  const updateData: IdeaUpdate = {
+    title: event.title,
+    description: event.description,
+    status: this.selectedIdea.status ?? "open"
+  };
+  
+
+  this.ideasService.updateIdea(this.selectedIdea.id, updateData).subscribe({
+    next: (response) => {
+      if (response.success) {
+        console.log('Idea updated from modal successfully');
+        
+        // Update the idea in the local array
+        const index = this.ideas.findIndex(i => i.id === this.selectedIdea.id);
+        if (index !== -1) {
+          this.ideas[index].title = event.title;
+          this.ideas[index].description = event.description;
+          this.ideas[index].updatedAt = new Date();
+          
+          // Update the ideas array reference
+          this.ideas = [...this.ideas];
+        }
+        
+        // Update selected idea
+        this.selectedIdea.title = event.title;
+        this.selectedIdea.description = event.description;
+        this.selectedIdea.updatedAt = new Date();
+        
+        // Close modal and reset
+        this.showShareModal = false;
+        this.isEditMode = false;
+        this.modalEditData = null;
+        
+        alert('Idea updated successfully!');
+      } else {
+        alert(`Failed to update idea: ${response.message}`);
+      }
+    },
+    error: (error) => {
+      console.error('Error updating idea from modal:', error);
+      alert('An error occurred while updating the idea.');
+    }
+  });
+}
 
 loadGroupInfo(): void {
   // Skip if we already have the info from route state
@@ -177,25 +251,38 @@ loadGroupInfo(): void {
   });
 }
 
-  selectIdea(idea: any): void {
-    this.selectedIdea = idea;
-    // Exit edit mode when selecting a different idea
-    if (this.isEditing) {
-      this.cancelEditing();
-    }
-  }
 
-  closeSidebar(): void {
-    this.selectedIdea = null;
-    // Exit edit mode when closing details
-    if (this.isEditing) {
-      this.cancelEditing();
-    }
-  }
+openMembersModal() {
+  console.log('Opening members modal for group:', this.groupId);
 
-  openMembersModal() {
-    console.log('Open members modal - to be implemented')
-  }
+  // Fetch members first
+  this.groupsService.getGroupMembers(this.groupId).subscribe({
+    next: (res: any) => {
+      const members = res.data || [];
+
+      // Open modal and pass actual members
+      this.dialog.open(GroupMembersModalComponent, {
+        width: '600px',
+        maxHeight: '90vh',
+        data: { 
+          group: {
+            id: this.groupId,
+            name: this.groupName,
+            memberCount: members.length,
+            members: members   // <-- pass the array here
+          }
+        },
+        panelClass: 'custom-modal'
+      });
+    },
+   
+  });
+}
+
+
+// closeMembersModal() {
+//   this.showMembersModal = false;
+// }
 
   formatIdeaDate(date: any): string {
     if (!date) return 'Unknown date';
@@ -211,18 +298,55 @@ loadGroupInfo(): void {
     }
   }
 
-  loadIdeas(): void {
+  
+loadGroupMembers(): void {
+  if (!this.groupId) {
+    console.warn("Cannot load members: groupId is missing");
+    return;
+  }
+
+  this.groupsService.getGroupMembers(this.groupId).subscribe({
+    next: (response) => {
+      if (response.success) {
+        console.log("Members fetched:", response.data);
+
+        // Save full list
+        this.groupMembers = response.data || [];
+
+        // Save count as string
+        this.membersCount = `${this.groupMembers.length}`;
+      } else {
+        console.warn("Failed to fetch members:", response.message);
+        this.groupMembers = [];
+        this.membersCount = "0";
+      }
+    },
+    error: (error) => {
+      console.error("Error fetching members:", error);
+      this.groupMembers = [];
+      this.membersCount = "0";
+    }
+  });
+}
+
+
+    loadIdeas(): void {
   this.isLoading = true;
   this.ideasService.getIdeasByGroup(this.groupId).subscribe({
     next: async (response) => {
       this.isLoading = false;
       console.log('=== LOADING IDEAS ===');
-      console.log('API Response success:', response.success);
-      console.log('Number of ideas:', response.data?.length || 0);
+      console.log('API Response:', response);
       
       if (response.success && response.data) {
-        // First, map basic idea information from API
+        // First, map the ideas from API - MAKE SURE TO INCLUDE isPromotedToProject
         this.ideas = response.data.map((idea: any) => {
+          console.log(`Mapping idea "${idea.title}":`, {
+            id: idea.id,
+            isPromotedToProject: idea.isPromotedToProject,
+            isDeleted: idea.isDeleted
+          });
+          
           const mappedIdea: Idea = {
             id: idea.id?.toString() || '',
             title: idea.title || '',
@@ -230,28 +354,31 @@ loadGroupInfo(): void {
             UserId: idea.userId || idea.UserId || '',
             userId: idea.userId || idea.UserId || '',
             groupId: this.groupId,
-            isPromotedToProject: idea.isPromotedToProject || false,
+            isPromotedToProject: idea.isPromotedToProject || false, // THIS IS THE KEY LINE!
             isDeleted: idea.isDeleted || false,
             createdAt: new Date(idea.createdAt || new Date()),
             updatedAt: new Date(idea.updatedAt || new Date()),
             status: idea.status || 'Open',
             deletedAt: idea.deletedAt ? new Date(idea.deletedAt) : undefined,
             voteCount: 0, // Will be updated by fetchAndUpdateVoteCounts
-            commentCount: 0, // Not available in API
+            commentCount: 0,
             userVoted: false, // Will be updated by fetchAndUpdateVoteCounts
-            userName: idea.userName || '', // Not available in API
+            userName: idea.userName || '',
             userVoteId: undefined, // Will be updated by fetchAndUpdateVoteCounts
             groupName: idea.name || '',
             name: idea.name || ''
           };
           
-          console.log(`Mapped idea: "${mappedIdea.title}" (ID: ${mappedIdea.id})`);
           return mappedIdea;
         });
         
         console.log(`Mapped ${this.ideas.length} ideas`);
+        console.log('Promotion status:', this.ideas.map(i => ({
+          title: i.title,
+          promoted: i.isPromotedToProject
+        })));
         
-        // Now fetch vote counts for all ideas
+        // Then fetch vote counts for all ideas
         if (this.ideas.length > 0) {
           await this.fetchAndUpdateVoteCounts();
         } else {
@@ -263,12 +390,11 @@ loadGroupInfo(): void {
           const updatedSelectedIdea = this.ideas.find(i => i.id === this.selectedIdea?.id);
           if (updatedSelectedIdea) {
             this.selectedIdea = updatedSelectedIdea;
-            console.log('Updated selected idea with vote count:', this.selectedIdea.voteCount);
+            console.log('Updated selected idea with promotion status:', this.selectedIdea.isPromotedToProject);
           }
         }
         
         console.log('=== IDEAS LOADING COMPLETE ===');
-        console.log(`Total ideas: ${this.ideas.length}`);
       } else {
         console.warn('Failed to load ideas:', response.message);
         this.ideas = [];
@@ -280,7 +406,7 @@ loadGroupInfo(): void {
       this.ideas = [];
     }
   });
-}   
+}
 
   // Check if current user is the owner of an idea
   isUserIdeaOwner(idea: any): boolean {
@@ -371,8 +497,11 @@ isGroupCreator(): boolean {
   this.showShareModal = true;
 }
   closeShareModal(): void {
-    this.showShareModal = false;
-  }
+  this.showShareModal = false;
+  this.isEditMode = false;
+  this.modalEditData = null;
+}
+
 
   onShareIdea(ideaData: {title: string, description: string}): void {
     this.isSubmitting = true;
@@ -745,86 +874,14 @@ closeVotersView(): void {
 
   // EDIT IDEA METHODS
   startEditing(): void {
-    if (!this.selectedIdea) return;
-    
-    this.isEditing = true;
-    this.editForm.patchValue({
-      title: this.selectedIdea.title,
-      description: this.selectedIdea.description,
-      status: this.selectedIdea.status || 'Open'
-    });
-    
-    console.log('Started editing idea:', this.selectedIdea);
-  }
+  this.showShareModal = true;
+  this.isEditMode = true;
 
-  cancelEditing(): void {
-    this.isEditing = false;
-    this.editForm.reset();
-    console.log('Cancelled editing');
-  }
-
-  onUpdateIdea(): void {
-    if (this.editForm.invalid || !this.selectedIdea) {
-      this.editForm.markAllAsTouched();
-      return;
-    }
-
-    this.editLoading = true;
-    const updateData: IdeaUpdate = this.editForm.value;
-    
-    console.log('Updating idea:', this.selectedIdea.id, updateData);
-    
-    this.ideasService.updateIdea(this.selectedIdea.id, updateData).subscribe({
-      next: (response) => {
-        this.editLoading = false;
-        
-        if (response.success && response.data) {
-          console.log('Update successful:', response);
-          
-          // Update the idea in the local array
-          const index = this.ideas.findIndex(idea => idea.id === this.selectedIdea.id);
-          if (index !== -1) {
-            // Update the idea with new data
-            this.ideas[index] = {
-              ...this.ideas[index],
-              title: updateData.title || this.ideas[index].title,
-              description: updateData.description || this.ideas[index].description,
-              status: updateData.status || this.ideas[index].status,
-              updatedAt: new Date()
-            };
-            
-            // Update selected idea
-            this.selectedIdea = this.ideas[index];
-            
-            // Refresh the array to trigger change detection
-            this.ideas = [...this.ideas];
-          }
-          
-          // Exit edit mode
-          this.isEditing = false;
-          this.editForm.reset();
-          
-          alert('Idea updated successfully!');
-        } else {
-          alert(`Failed to update idea: ${response.message}`);
-        }
-      },
-      error: (error) => {
-        this.editLoading = false;
-        console.error('Error updating idea:', error);
-        
-        if (error.status === 401) {
-          alert('Please login to update ideas.');
-        } else if (error.status === 404) {
-          alert('Idea not found.');
-        } else if (error.status === 403) {
-          alert('You do not have permission to update this idea.'); //is this really necessary or does edit show only for the currently logged in users ideas contributed
-        } else {
-          alert('An error occurred while updating the idea.');
-        }
-      }
-    });
-  }
+  this.modalEditData = {
+    title: this.selectedIdea.title,
+    description: this.selectedIdea.description
+  };
+}
 
   // Method to fetch and update vote counts for all ideas
 async fetchAndUpdateVoteCounts(): Promise<void> {
@@ -879,16 +936,19 @@ async fetchAndUpdateVoteCounts(): Promise<void> {
   });
 }
 
-// Method to promote an idea to a project
+// Promote Idea to Project
 onPromoteIdea(idea: Idea, event?: Event): void {
-  if (event) event.stopPropagation(); // Prevent event bubbling
+  if (event) event.stopPropagation();
   
   console.log(`=== PROMOTING IDEA TO PROJECT ===`);
-  console.log('Idea:', {
-    id: idea.id,
-    title: idea.title,
-    currentStatus: idea.status
-  });
+  console.log('Current promotion status:', idea.isPromotedToProject);
+  
+  // If already promoted, don't do anything
+  if (idea.isPromotedToProject) {
+    console.log('Idea already promoted, skipping');
+    alert('This idea is already promoted to a project!');
+    return;
+  }
   
   // Confirm with the user
   if (!confirm(`Are you sure you want to promote "${idea.title}" to a project?\n\nThis will move the idea to the projects section.`)) {
@@ -903,30 +963,34 @@ onPromoteIdea(idea: Idea, event?: Event): void {
     groupId: this.groupId
   };
   
+  console.log('Calling backend with:', request);
+  
   this.ideasService.promoteIdea(request).subscribe({
     next: (response) => {
       this.isPromoting = false;
       this.currentlyPromotingIdeaId = null;
       
-      console.log('Promote response:', response);
+      console.log('Promote response from backend:', response);
       
       if (response.success) {
         // Update the idea status locally
-        idea.status = 'Promoted';
         idea.isPromotedToProject = true;
+        idea.status = 'Promoted';
         
         // Update selected idea if it's the same one
         if (this.selectedIdea && this.selectedIdea.id === idea.id) {
-          this.selectedIdea.status = 'Promoted';
           this.selectedIdea.isPromotedToProject = true;
+          this.selectedIdea.status = 'Promoted';
         }
         
-        alert(`✅ Idea "${idea.title}" has been promoted to a project!\n\nIt will now appear in the projects section.`);
+        // Update the array to trigger change detection
+        this.ideas = [...this.ideas];
         
-        // Optional: Remove from ideas list or mark it differently
+        alert(`Idea "${idea.title}" has been promoted to a project!\n\nIt will now appear in the projects section.`);
+        
         console.log(`Idea "${idea.title}" promoted successfully`);
       } else {
-        alert(`❌ Failed to promote idea: ${response.message}`);
+        alert(`Failed to promote idea: ${response.message}`);
       }
     },
     error: (error) => {
@@ -983,7 +1047,7 @@ onPromoteIdea(idea: Idea, event?: Event): void {
             // 2. If we're viewing this idea in details panel, close it
             if (this.selectedIdea && this.selectedIdea.id === ideaId) {
               this.selectedIdea = null;
-              this.isEditing = false; // Exit edit mode if open
+              this.isEditMode = false; // Exit edit mode if open
               console.log('Closed details panel for deleted idea');
             }
             

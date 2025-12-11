@@ -1,12 +1,13 @@
 <div class="modal-overlay" (click)="closeModal()">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>Share Your Idea</h2>
+      <h2 *ngIf="!isEditMode">Share Your Idea</h2>
+      <h2 *ngIf="isEditMode">Edit Idea</h2>
       <button class="close-btn" (click)="closeModal()">×</button>
     </div>
     
     <div class="modal-body">
-      <form [formGroup]="ideaForm" (ngSubmit)="submitIdea()">
+      <form [formGroup]="ideaForm" (ngSubmit)="submit()">
         <!-- Title Field -->
         <div class="form-group">
           <div class="form-label-row">
@@ -120,8 +121,13 @@
             class="submit-btn"
             [disabled]="!ideaForm.valid || isSubmitting || isTitleError || isDescriptionError"
           >
-            <span *ngIf="isSubmitting">Sharing...</span>
-            <span *ngIf="!isSubmitting">Share Idea</span>
+            <span *ngIf="isSubmitting">
+              {{ isEditMode ? 'Saving...' : 'Sharing...' }}
+            </span>
+
+            <span *ngIf="!isSubmitting">
+              {{ isEditMode ? 'Save Changes' : 'Share Idea' }}
+            </span>
           </button>
         </div>
       </form>

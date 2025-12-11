@@ -1,6 +1,6 @@
 <div class="modal-container">
   <div class="modal-header">
-    <h2>Group Members</h2>
+    <h2>Group Members - {{ data.group.name }}</h2>
     <div class="header-info">
       <span class="member-count">{{ members.length }} members</span>
       <button mat-icon-button (click)="close()" class="close-btn">
@@ -15,16 +15,24 @@
       <p>Loading members...</p>
     </div>
     
+    <div *ngIf="!isLoading && members.length === 0" class="no-members">
+      <p>No members found in this group.</p>
+    </div>
+    
     <div *ngIf="!isLoading && members.length > 0" class="members-list">
+      <!-- LOOK HERE: We're now using 'member' variable, not 'data.group' -->
       <div *ngFor="let member of members" class="member-item">
         <div class="member-avatar">
-          {{ getInitials(member.displayName || member.UserName) }}
+          {{ getInitials(member.displayName || member.userName || member.name || member.email) }}
         </div>
         <div class="member-info">
-          <span class="detail-value">{{ data.group.createdByUser?.displayName || 'Unknown' }}</span>
-        </div>
-        <div *ngIf="member.role" class="member-role">
-          <span class="role-badge">{{ member.role }}</span>
+          <div class="member-name">
+            <!-- Show the ACTUAL member's name -->
+            {{ member.displayName || member.userName || member.name || 'Unknown User' }}
+            
+            <!-- Show creator badge only if this member created the group -->
+            <span *ngIf="member.id === data.group.createdByUserId || member.userId === data.group.createdByUserId" class="creator-badge"></span> <!-- MAYBE OR MAYBE NOT -->
+          </div>
         </div>
       </div>
     </div>

@@ -59,6 +59,38 @@
   margin-bottom: 20px;
 }
 
+/* Parent container */
+.details-idea-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Row 1: title left, everything else right */
+.details-row-1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Right-side actions in row 1 */
+.details-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* spacing between icons/buttons */
+}
+
+/* Row 2: only date, aligned left */
+.details-row-2 {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: small;
+  color: #800080;
+  margin-bottom: 20px;
+}
+
+
 .details-title {
   font-size: 22px;
   font-weight: 700;
@@ -335,13 +367,24 @@
 }
 
 .idea-card {
-  background: white;
-  padding: 24px;
-  border: 1px solid #e0e0e0;
-  border-radius: 0;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  word-wrap: break-word;
+  position: relative; /* important for absolute badge positioning */
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.promoted-badge-top-right {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ee82ee; /* violet */
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  box-shadow: 0 0 6px rgba(238, 130, 238, 0.5);
 }
 
 .idea-card:hover {
@@ -424,6 +467,7 @@
   /* Additional styles specific to details panel */
   padding: 8px 16px;
   font-size: 15px;
+  display: flex;
 }
 
 .idea-title {
