@@ -39,4 +39,5 @@ export interface PersonalStats {
     ideasCreated: number;
     votesCast: number;
     projectsInvolved: number;
+    groupsCreated: number;
 }

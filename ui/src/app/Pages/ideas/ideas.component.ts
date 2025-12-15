@@ -732,7 +732,7 @@ onUnvote(idea: Idea, event?: Event): void {
   });
 }  
 
-// iewing voters (admin only)
+// Viewing voters (admin only)
 onViewVoters(idea: Idea, event?: Event): void {
   if (event) event.stopPropagation();
   

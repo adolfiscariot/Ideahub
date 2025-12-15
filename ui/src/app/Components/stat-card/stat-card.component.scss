@@ -54,4 +54,20 @@
     &.closed {
         border-left: 4px solid #95a5a6;
     }
+
+    &.created {
+        border-left: 4px solid #f39c12;
+    }
+
+    &.votes {
+        border-left: 4px solid #e74c3c;
+    }
+
+    &.projects {
+        border-left: 4px solid #34495e;
+    }
+
+    &.groups {
+        border-left: 4px solid #1abc9c;
+    }
 }
