@@ -35,7 +35,8 @@
 
     .stat-label {
         color: #000;
-        font-size: 1.25rem;
+        font-size: 1rem;
+        /* Set to 1rem for consistent sizing */
         font-weight: 600;
     }
 
@@ -48,7 +49,8 @@
     }
 
     &.promoted {
-        border-left: 4px solid #9b59b6;
+        border-left: 4px solid #95a5a6;
+        /* Changed to Greyish Blue */
     }
 
     &.closed {

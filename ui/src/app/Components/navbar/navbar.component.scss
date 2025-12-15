@@ -1,5 +1,10 @@
+:host {
+  display: block;
+}
+
 .navbar {
-  padding: 20px 50px;
+  padding: 0 50px;
+  /* Vertical centering via flexbox */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,9 +12,14 @@
   position: fixed;
   width: 100%;
   top: 0;
-  z-index: 100;
+  left: 0;
+  z-index: 1000;
+  /* Higher than sidebar */
   height: 70px;
   gap: 30px;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  /* Optional: adds separation */
 }
 
 .navbar-left {

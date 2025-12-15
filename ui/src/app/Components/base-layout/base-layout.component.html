@@ -1,8 +1,8 @@
 <div class="base-layout-component">
-    <app-sidebar/>
+    <div class="sidebar-wrapper">
+        <app-sidebar />
+    </div>
     <div class="main-content">
-        <router-outlet>
-            <ng-content></ng-content>
-        </router-outlet>
+        <ng-content></ng-content>
     </div>
 </div>
