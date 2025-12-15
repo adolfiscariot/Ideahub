@@ -8,19 +8,19 @@
     <div class="sidebar-content" [ngClass]="{'closed' : !isSidebarExpanded}">
         <ul>
             <li>
-                <a routerLink="/home">
+                <a routerLink="/home" routerLinkActive="active" aria-label="Navigate to Ideas page">
                     <mat-icon>lightbulb</mat-icon>
                     <span class="link-text">Ideas</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/groups">
+                <a routerLink="/groups" routerLinkActive="active" aria-label="Navigate to Groups page">
                     <mat-icon>groups</mat-icon>
                     <span class="link-text">Groups</span>
                 </a>
             </li>
             <li>
-                <a routerLink="/projects">
+                <a routerLink="/projects" routerLinkActive="active" aria-label="Navigate to Projects page">
                     <mat-icon>topic</mat-icon>
                     <span class="link-text">Projects</span>
                 </a>

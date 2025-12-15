@@ -15,6 +15,7 @@
     display: inline-block;
     font-size: 2em;
     color: black;
+    font-weight: 700;
 }
 
 .header-text::after {
@@ -27,7 +28,6 @@
     height: 5px;
     left: 50%;
     bottom: -10px;
-    /* Adjusted spacing */
 }
 
 .header-underline {
@@ -38,6 +38,5 @@
 .subheader-text {
     font-size: 2em;
     font-weight: 500;
-    /* medium */
     color: black;
 }
