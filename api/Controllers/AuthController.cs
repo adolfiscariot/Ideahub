@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
-    private readonly string homepageUrl = Environment.GetEnvironmentVariable("HOMEPAGE_URL") ?? "http://41.211.34.131:5065/home";
+    private readonly string homepageUrl = Environment.GetEnvironmentVariable("HOMEPAGE_URL") ?? "http://44.211.34.131:5065/home";
 
     //constructor
     public AuthController(
