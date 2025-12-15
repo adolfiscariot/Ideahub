@@ -120,15 +120,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
     );
 });
-//builder.Services.AddCors(options =>
-//{
-    //options.AddPolicy("AllowedOrigins", policy =>
-        //policy.AllowAnyOrigin()
-              //.AllowAnyHeader()
-              //.AllowAnyMethod()
-    //);
-//});
-
 
 //2.7 Customizing ModelState Validation
 builder.Services.Configure<ApiBehaviorOptions>(options =>
