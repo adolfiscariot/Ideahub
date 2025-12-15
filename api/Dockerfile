@@ -1,17 +1,18 @@
-# /api/Dockerfile
-
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy ONLY the csproj since we have only one project
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy the rest of the backend code
-COPY . .
+COPY . ./
+# Ensure Migrations/ folder exists in your project
 RUN dotnet publish -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+# Final stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app ./
+
+EXPOSE 5065
 ENTRYPOINT ["dotnet", "Ideahub.dll"]
