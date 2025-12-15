@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, finalize } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
@@ -63,34 +63,56 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<any>{
-    console.log("User logging out...")
+  logout(): Observable<any> {
+    console.log("User logging out...");
 
+    // Helper to perform local cleanup
+    const localCleanup = () => {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('refreshTokenExpiry');
+      this._isLoggedIn.next(false);
+      this.router.navigate(['/']); // Redirect to landing/login
+    };
+
+    // 1. Check if token is invalid/expired before sending request
+    if (!this.isTokenValid()) {
+      console.log("Token expired or invalid, performing local logout only.");
+      localCleanup();
+      return new BehaviorSubject(true).asObservable(); // Return instant success
+    }
+
+    // 2. Attempt server-side logout
     return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
-      tap(()=>{
-
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('refreshTokenExpiry');
-
-        this._isLoggedIn.next(false);
-
-        this.router.navigate(['/']);
+      tap(() => {
+        console.log("Server logout successful");
       }),
-      catchError((error: HttpErrorResponse)=>{
-        
-        if(error.status == 401 || error.status == 403 || error.status == 400){
-
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('refreshTokenExpiry');
-
-          this._isLoggedIn.next(false);
-          this.router.navigate(['/']);
-        }
-        return throwError(() => new Error(`Status: ${error.status}, Message: ${error.message || 'Unknown error'}`))
+      catchError((error: HttpErrorResponse) => {
+        console.error("Server logout failed, forcing local logout", error);
+        // Even if server fails, we continue to finally block
+        return throwError(() => error);
+      }),
+      // 3. Always clean up locally, regardless of server response
+      finalize(() => {
+        localCleanup();
       })
-    )
+    );
+  }
+
+  // Helper to check token validity
+  private isTokenValid(): boolean {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.exp) return true; // No expiry? assume valid or let backend decide
+
+      const expiry = payload.exp * 1000;
+      return Date.now() < expiry;
+    } catch (e) {
+      return false; // Invalid token format
+    }
   }
 
   // ===== PERMISSION CHECKING METHODS =====
@@ -102,35 +124,35 @@ export class AuthService {
   }
 
   // Get current user
- getCurrentUser(): any {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
+  getCurrentUser(): any {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
 
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
 
-    const userId =
-      payload.sub ||
-      payload.nameid ||
-      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      const userId =
+        payload.sub ||
+        payload.nameid ||
+        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-    return {
-      id: userId,
-      email:
-        payload.email ||
-        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-      roles:
-        payload.role ||
-        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-        []
-    };
+      return {
+        id: userId,
+        email:
+          payload.email ||
+          payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+        roles:
+          payload.role ||
+          payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+          []
+      };
 
-  } catch {
-    return null;
+    } catch {
+      return null;
+    }
   }
-}
 
-///======= IS THIS NECESSARY? =======
+  ///======= IS THIS NECESSARY? =======
   // Get user roles from token
   getCurrentUserRoles(): string[] {
     const user = this.getCurrentUser();
@@ -141,8 +163,8 @@ export class AuthService {
   hasRole(roleName: string): boolean {
     const roles = this.getCurrentUserRoles();
     // Check both exact match and case-insensitive
-    return roles.some(role => 
-      role === roleName || 
+    return roles.some(role =>
+      role === roleName ||
       role.toLowerCase() === roleName.toLowerCase()
     );
   }
