@@ -1,9 +1,5 @@
 import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
-<<<<<<< Updated upstream
-import { catchError, Observable, tap, throwError } from 'rxjs';
-=======
 import { catchError, Observable, tap, throwError, switchMap } from 'rxjs';
->>>>>>> Stashed changes
 import { inject } from '@angular/core';
 import { AuthService } from '../../Services/auth/auth.service';
 
@@ -23,19 +19,6 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
   return next(newRequest).pipe(
     tap((event) => {
       // Log successful responses if needed
-<<<<<<< Updated upstream
-      // if (event.type === HttpEventType.Response) { ... }
-    }),
-    catchError((error: HttpErrorResponse) => {
-      console.error(`Request to ${newRequest.urlWithParams} failed`, error);
-
-      // Global 401 handling
-      if (error.status === 401) {
-        console.warn("Unauthorized request - handling token expiration");
-        authService.performLocalLogout();
-      }
-
-=======
     }),
     catchError((error: HttpErrorResponse) => {
 
@@ -81,7 +64,6 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       }
 
       console.error(`Request to ${newRequest.urlWithParams} failed`, error);
->>>>>>> Stashed changes
       return throwError(() => error);
     })
   );

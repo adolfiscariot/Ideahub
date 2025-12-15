@@ -69,11 +69,7 @@ export class AuthService {
     // 1. Check if token is invalid/expired before sending request
     if (!this.isTokenValid()) {
       console.log("Token expired or invalid, performing local logout only.");
-<<<<<<< Updated upstream
-      this.performLocalLogout();
-=======
       this.logoutLocal();
->>>>>>> Stashed changes
       return of(true); // Return instant success
     }
 
@@ -84,19 +80,11 @@ export class AuthService {
       }),
       catchError((error: HttpErrorResponse) => {
         console.error("Server logout failed, forcing local logout", error);
-<<<<<<< Updated upstream
-        // Even if server fails, we continue to finally block
-=======
->>>>>>> Stashed changes
         return throwError(() => error);
       }),
       // 3. Always clean up locally, regardless of server response
       finalize(() => {
-<<<<<<< Updated upstream
-        this.performLocalLogout();
-=======
         this.logoutLocal();
->>>>>>> Stashed changes
       })
     );
   }

@@ -15,7 +15,7 @@ import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.co
 
 @Component({
   selector: 'app-groups',
-  templateUrl: './group.component.html',
+  templateUrl: './group.component.html', 
   styleUrls: ['./group.component.scss'],
   standalone: true,
   imports: [
