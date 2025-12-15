@@ -254,31 +254,20 @@ loadGroupInfo(): void {
 
 openMembersModal() {
   console.log('Opening members modal for group:', this.groupId);
-
-  // Fetch members first
-  this.groupsService.getGroupMembers(this.groupId).subscribe({
-    next: (res: any) => {
-      const members = res.data || [];
-
-      // Open modal and pass actual members
-      this.dialog.open(GroupMembersModalComponent, {
-        width: '600px',
-        maxHeight: '90vh',
-        data: { 
-          group: {
-            id: this.groupId,
-            name: this.groupName,
-            memberCount: members.length,
-            members: members   // <-- pass the array here
-          }
-        },
-        panelClass: 'custom-modal'
-      });
+  
+  this.dialog.open(GroupMembersModalComponent, {
+    width: '600px',
+    maxHeight: '90vh',
+    data: { 
+      group: {
+        id: this.groupId,
+        name: this.groupName,
+        memberCount: this.membersCount
+      }
     },
-   
+    panelClass: 'custom-modal'
   });
 }
-
 
 // closeMembersModal() {
 //   this.showMembersModal = false;
@@ -570,21 +559,13 @@ isGroupCreator(): boolean {
           idea.userVoteId = voteId?.toString();
           
           // Increment vote count locally
-          idea.voteCount = (idea.voteCount || 0) + 1;
           
-          console.log(`Updated idea "${idea.title}":`, {
-            userVoted: idea.userVoted,
-            voteCount: idea.voteCount,
-            userVoteId: idea.userVoteId
-          });
-        }
-        
-        // Update selected idea if it's the same one
-        if (this.selectedIdea && this.selectedIdea.id === ideaId) {
-          this.selectedIdea.userVoted = true;
-          this.selectedIdea.voteCount = (this.selectedIdea.voteCount || 0) + 1;
-          if (voteId) {
-            this.selectedIdea.userVoteId = voteId.toString();
+          idea.voteCount = (idea.voteCount || 0) + 1;
+          idea.userVoted = true;
+          idea.userVoteId = voteId?.toString();
+
+          if (this.selectedIdea && this.selectedIdea.id === ideaId) {
+            this.selectedIdea = {...idea}
           }
         }
         
@@ -650,57 +631,9 @@ onUnvote(idea: Idea, event?: Event): void {
       }
     }
   });
+}  
 
-  
-  this.isUnvoting = true;
-  this.ideasService.removeVote(idea.userVoteId).subscribe({
-    next: (response) => {
-      this.isUnvoting = false;
-      console.log('Unvote response:', response);
-      
-      if (response.success) {
-        // Update local state
-        idea.userVoted = false;
-        idea.voteCount = Math.max(0, (idea.voteCount || 1) - 1);
-        idea.userVoteId = undefined;
-        
-        // If this idea is currently selected, update it too
-        if (this.selectedIdea && this.selectedIdea.id === idea.id) {
-          this.selectedIdea.userVoted = false;
-          this.selectedIdea.voteCount = idea.voteCount;
-          this.selectedIdea.userVoteId = undefined;
-        }
-        
-        // Refresh vote status
-        this.checkUserVotesForAllIdeas().then(() => {
-          console.log('Vote status refreshed after unvoting');
-        });
-        
-        console.log('✓ Unvote successful!');
-      } else {
-        alert(`Failed to unvote: ${response.message}`);
-      }
-    },
-    error: (error) => {
-      this.isUnvoting = false;
-      console.error('Error unvoting:', error);
-      
-      if (error.status === 404) {
-        alert('Vote not found. It may have already been removed.');
-        // Force refresh the idea
-        idea.userVoted = false;
-        idea.userVoteId = undefined;
-      } else {
-        alert('An error occurred while unvoting.');
-      }
-    }
-  });
-}
-      
-     
-        
-
-// Add this method for viewing voters (admin only)
+// Viewing voters (admin only)
 onViewVoters(idea: Idea, event?: Event): void {
   if (event) event.stopPropagation();
   
@@ -725,8 +658,6 @@ onViewVoters(idea: Idea, event?: Event): void {
     }
   });
 }
-
-// Add these methods to your component
 
 /**
  * Check votes for all ideas in the list
