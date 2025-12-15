@@ -22,7 +22,7 @@ services:
   ideahub-backend:
     build:
       context: ./
-      dockerfile: api/Dockerfile
+      dockerfile: Dockerfile
     container_name: ideahub-backend
     environment:
       ASPNETCORE_ENVIRONMENT: Production
