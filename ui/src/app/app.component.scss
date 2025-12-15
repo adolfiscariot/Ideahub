@@ -1,6 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .router-outlet {
-  height: calc(100vh - 70px - 30px);
+  flex: 1;
+  /* Take remaining space */
   width: 100%;
   margin-top: 70px;
+  /* Navbar height */
   box-sizing: border-box;
+  overflow: hidden;
+  /* Prevent internal scroll here, pass to children */
+  position: relative;
 }

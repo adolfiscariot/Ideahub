@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';    
+import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { NgClass } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [MatIconModule, MatButtonModule, NgClass],
+  imports: [MatIconModule, MatButtonModule, NgClass, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
   isSidebarExpanded: boolean = false;
 
-  toggleSidebar(){
+  toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;
     console.log("The state is: %s", this.isSidebarExpanded);
   }

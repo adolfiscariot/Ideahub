@@ -1,5 +1,14 @@
 /* Global Styles & Design System */
 
+/* Reset & Base */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* CRITICAL: Prevent window scrolling */
+}
+
 /* Variables */
 :root {
     /* Brand Colors */

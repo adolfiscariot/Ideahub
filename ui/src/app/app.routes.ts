@@ -44,6 +44,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/group/group.component').then((m) => m.GroupsComponent),
   },
+  {
+    path: 'projects',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/projects/projects.component').then((m) => m.ProjectsComponent),
+  },
 
   {
     path: 'groups/:groupId/ideas',

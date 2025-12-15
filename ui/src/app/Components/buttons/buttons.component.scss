@@ -233,7 +233,7 @@
 
 .btn-leave-group {
   background: red;
-  color: #333;
+  color: #fff;
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
@@ -259,5 +259,89 @@ background: #ffcc00;
   &:hover {
     background: #e6b800;
   }
+}
 
+.btn-view-ideas {
+  background: purple;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  min-width: 50%;
+  margin-right: 50%;
+  &:hover {
+    background: #ee82ee;
+  }
+}
+
+
+.btn-join-group {
+  background: purple;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-shadow: none;
+
+  &:hover {
+    background: #ee82ee;
+  }
+}
+
+.btn-group-details {
+ 
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 1px purple;
+  box-shadow: none;
+
+  &:hover {
+    background: #ee82ee;
+  }
+}
+
+.btn-group-members {
+ 
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 1px purple;
+  box-shadow: none;
+
+  &:hover {
+    background: #ee82ee;
+  }
+}
+
+.btn-delete-group {
+  background: red;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-shadow: none;
+  border: 1px purple;
+
+  &:hover {
+    background: #ef4444;
+  }
 }

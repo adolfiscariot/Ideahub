@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
+import { catchError, tap, finalize } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
@@ -64,37 +64,117 @@ export class AuthService {
     );
   }
 
-  logout(): Observable<any>{
-    console.log("User logging out...")
+  logout(): Observable<any> {
+    console.log("User logging out...");
 
+    // 1. Check if token is invalid/expired before sending request
+    if (!this.isTokenValid()) {
+      console.log("Token expired or invalid, performing local logout only.");
+      this.logoutLocal();
+      return of(true); // Return instant success
+    }
+
+    // 2. Attempt server-side logout
     return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
-      tap(()=>{
-
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('refreshTokenExpiry');
-
-        this._isLoggedIn.next(false);
-
-        this.router.navigate(['/']);
+      tap(() => {
+        console.log("Server logout successful");
       }),
-      catchError((error: HttpErrorResponse)=>{
-        
-        if(error.status == 401 || error.status == 403 || error.status == 400){
-
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('refreshTokenExpiry');
-
-          this._isLoggedIn.next(false);
-          this.router.navigate(['/']);
-        }
-        return throwError(() => new Error(`Status: ${error.status}, Message: ${error.message || 'Unknown error'}`))
+      catchError((error: HttpErrorResponse) => {
+        console.error("Server logout failed, forcing local logout", error);
+        return throwError(() => error);
+      }),
+      // 3. Always clean up locally, regardless of server response
+      finalize(() => {
+        this.logoutLocal();
       })
-    )
+    );
+  }
+
+  /**
+   * Refreshes the JWT access token using the refresh token.
+   * If successful, updates local storage with new tokens and keeps user logged in.
+   * If failed, logs the user out locally.
+   * @returns Observable of the refresh response
+   */
+  refreshToken(): Observable<any> {
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (!accessToken || !refreshToken) {
+      this.logoutLocal();
+      return throwError(() => new Error('No tokens found'));
+    }
+
+    const payload = {
+      accessToken,
+      refreshToken
+    };
+
+    return this.http.post<any>(`${this.authUrl}/refresh-token`, payload).pipe(
+      tap((response) => {
+        // Handle backend returning { AccessToken: ..., RefreshToken: ... } directly
+        // usually ASP.NET Core serializes to camelCase, check both just in case
+        const newAccessToken = response.accessToken || response.AccessToken;
+        const newRefreshToken = response.refreshToken || response.RefreshToken;
+
+        if (newAccessToken && newRefreshToken) {
+          localStorage.setItem('accessToken', newAccessToken);
+          localStorage.setItem('refreshToken', newRefreshToken);
+          // Backend might not return expiry in refresh, calculate or assume valid
+          this._isLoggedIn.next(true);
+          console.log("Token refreshed successfully");
+        } else {
+          console.warn("Refresh succeeded but tokens were missing in response", response);
+        }
+      }),
+      catchError((error) => {
+        console.error("Token refresh failed", error);
+        this.logoutLocal();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Performs local cleanup of auth state (tokens, subject) and redirects to login.
+   * Public to allow Interceptor to trigger logout on critical failures (e.g. failed refresh).
+   */
+  public logoutLocal() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('refreshTokenExpiry');
+    this._isLoggedIn.next(false);
+    this.router.navigate(['/']);
   }
 
   // ===== PERMISSION CHECKING METHODS =====
+
+  /**
+   * Validates the structure and expiry of the current access token.
+   * @returns true if token exists, is well-formed, and has not expired.
+   */
+  private isTokenValid(): boolean {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return false;
+
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return false; // Malformed token
+      }
+
+      const payload = JSON.parse(atob(parts[1]));
+
+      if (!payload.exp) {
+        return false; // Treat missing expiry as invalid for security
+      }
+
+      const expiry = payload.exp * 1000;
+      return Date.now() < expiry;
+    } catch (e) {
+      return false; // Invalid token format
+    }
+  }
 
   // Check if user is logged in
   isLoggedIn(): boolean {
@@ -103,35 +183,35 @@ export class AuthService {
   }
 
   // Get current user
- getCurrentUser(): any {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
+  getCurrentUser(): any {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
 
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
 
-    const userId =
-      payload.sub ||
-      payload.nameid ||
-      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+      const userId =
+        payload.sub ||
+        payload.nameid ||
+        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-    return {
-      id: userId,
-      email:
-        payload.email ||
-        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-      roles:
-        payload.role ||
-        payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-        []
-    };
+      return {
+        id: userId,
+        email:
+          payload.email ||
+          payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+        roles:
+          payload.role ||
+          payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+          []
+      };
 
-  } catch {
-    return null;
+    } catch {
+      return null;
+    }
   }
-}
 
-///======= IS THIS NECESSARY? =======
+  ///======= IS THIS NECESSARY? =======
   // Get user roles from token
   getCurrentUserRoles(): string[] {
     const user = this.getCurrentUser();
@@ -142,8 +222,8 @@ export class AuthService {
   hasRole(roleName: string): boolean {
     const roles = this.getCurrentUserRoles();
     // Check both exact match and case-insensitive
-    return roles.some(role => 
-      role === roleName || 
+    return roles.some(role =>
+      role === roleName ||
       role.toLowerCase() === roleName.toLowerCase()
     );
   }
