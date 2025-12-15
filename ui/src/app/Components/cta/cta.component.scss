@@ -1,4 +1,4 @@
-.cta-component{
+.cta-component {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,16 +6,18 @@
     height: 100%
 }
 
-.cta-header{
+.cta-header {
     font-size: xx-large;
 }
 
-.header-text{
+.header-text {
     position: relative;
     display: inline-block;
+    font-size: 2em;
+    color: black;
 }
 
-.header-text::after{
+.header-text::after {
     content: '';
     border-radius: 2px;
     background-color: purple;
@@ -24,15 +26,18 @@
     transform: translate(-50%);
     height: 5px;
     left: 50%;
-    bottom: -20px;
+    bottom: -10px;
+    /* Adjusted spacing */
 }
 
-.header-underline{
+.header-underline {
     margin-top: 10px;
     width: 30px;
 }
 
-.subheader-text{
+.subheader-text {
     font-size: 2em;
-    font-weight: medium;
+    font-weight: 500;
+    /* medium */
+    color: black;
 }

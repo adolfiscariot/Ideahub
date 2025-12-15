@@ -35,7 +35,8 @@
 
     .stat-label {
         color: #000;
-        font-size: 1.25rem;
+        font-size: 1rem;
+        /* Updated to 1em equivalent */
         font-weight: 600;
     }
 
@@ -49,6 +50,7 @@
 
     &.promoted {
         border-left: 4px solid #9b59b6;
+        /* Updated color */
     }
 
     &.closed {
