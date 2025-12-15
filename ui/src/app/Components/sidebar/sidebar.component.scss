@@ -1,10 +1,27 @@
-.sidebar-content{
-    width: 150px;
-    position: sticky;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px (0, 0 0, 0.05);
+:host {
+    display: block;
     height: 100%;
+}
+
+.sidebar-component {
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    /* Keep it fixed in viewport */
+    top: 0;
+}
+
+.sidebar-content {
+    width: 150px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    /* Fill remaining height instead of fixed 100% + header */
     box-sizing: border-box;
+    overflow: hidden;
+    /* Optional: if content inside needs to scroll, set overflow-y: auto here */
 }
 
 .sidebar-content.closed {
@@ -12,17 +29,19 @@
     box-shadow: none;
 }
 
-.sidebar-content.closed a {
+.sidebar-content.closed .link-text {
     display: none;
 }
 
-.sidebar-toggle-icon{
+.sidebar-toggle-icon {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding-bottom: 10px;
+    /* Separator spacing */
 }
 
-.sidebar-toggle-icon:hover{
+.sidebar-toggle-icon:hover {
     color: violet;
     cursor: pointer;
 }
@@ -31,26 +50,27 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    
+
 }
 
 .sidebar-content li {
+    width: 100%;
+}
+
+.sidebar-content a {
     display: flex;
     align-items: center;
     padding: 12px 0px;
     gap: 10px;
     width: 100%;
     justify-content: center;
-}
-
-.sidebar-content li:hover{
-    cursor: pointer;
-    background-color: violet;
-}
-
-.sidebar-content a {
     color: #222;
     text-decoration: none;
     font-weight: 500;
     font-size: 16px;
+    cursor: pointer;
+}
+
+.sidebar-content a:hover {
+    background-color: violet;
 }

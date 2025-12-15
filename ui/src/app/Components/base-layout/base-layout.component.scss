@@ -1,9 +1,21 @@
-.base-layout-component{
-    display: flex;
-    height: calc(100vh - 70px - 30px); //remove the header and footer
-    flex: 1;
+:host {
+    display: block;
+    height: 100%;
+}
 
-    .main-content{
+.base-layout-component {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    /* Prevent base layout from scrolling */
+
+    .sidebar-wrapper {
+        flex-shrink: 0;
+        /* Prevent sidebar from shrinking */
+    }
+
+    .main-content {
         flex: 1;
         padding: 16px;
         overflow-y: auto;

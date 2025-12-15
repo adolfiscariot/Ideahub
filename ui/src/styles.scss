@@ -1,5 +1,14 @@
 /* Global Styles & Design System */
 
+/* Reset & Base */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* CRITICAL: Prevent window scrolling */
+}
+
 /* Variables */
 :root {
     /* Brand Colors */
@@ -209,3 +218,9 @@ a {
 
 /* CDK Overlay */
 @import '@angular/cdk/overlay-prebuilt.css';
+
+.slogan-classifier {
+    font-size: 2em;
+    color: black;
+    font-weight: 700;
+}
