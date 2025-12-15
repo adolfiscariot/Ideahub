@@ -9,12 +9,13 @@ import {
   VoteDetails, 
   ApiResponse 
 } from '../Interfaces/Ideas/idea-interfaces';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VoteService {
-  private apiUrl = 'http://localhost:5065/api/vote';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

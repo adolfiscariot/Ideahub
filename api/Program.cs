@@ -112,22 +112,22 @@ builder.Services.AddAuthorization(options =>
 });
 
 //2.6 CORS Service
-//builder.Services.AddCors(options =>
-//{
-    //options.AddPolicy(AllowedOrigins, policy =>
-        //policy.WithOrigins("http://localhost:4200")
-              //.AllowAnyHeader()
-              //.AllowAnyMethod()
-    //);
-//});
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowedOrigins", policy =>
-        policy.AllowAnyOrigin()
+    options.AddPolicy(AllowedOrigins, policy =>
+        policy.WithOrigins("http://41.211.34.131:5065")
               .AllowAnyHeader()
               .AllowAnyMethod()
     );
 });
+//builder.Services.AddCors(options =>
+//{
+    //options.AddPolicy("AllowedOrigins", policy =>
+        //policy.AllowAnyOrigin()
+              //.AllowAnyHeader()
+              //.AllowAnyMethod()
+    //);
+//});
 
 
 //2.7 Customizing ModelState Validation

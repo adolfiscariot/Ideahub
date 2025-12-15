@@ -6,6 +6,7 @@ import { Registration } from '../../Interfaces/Registration/registration-interfa
 import { Login } from '../../Interfaces/Login/login-interface';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ import { Router } from '@angular/router';
 export class AuthService {
   router = inject(Router);
 
-  private readonly authUrl = 'http://localhost:5065/api/auth';
+  private readonly authUrl = environment.apiUrl;
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
