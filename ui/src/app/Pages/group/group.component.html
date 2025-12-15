@@ -1,47 +1,41 @@
-<div class="groups-container">
+<app-base-layout>
+  <div class="groups-container">
 
-  <!-- Header Section with Create Button -->
-  <header class="groups-header">
-    <div class="header-content">
-      <div class="header-text">
-        <h1 class="page-title">{{ title }}</h1>
-        <p class="page-subtitle">{{ subtitle }}</p>
+    <!-- Header Section with Create Button -->
+    <header class="groups-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">{{ title }}</h1>
+          <p class="page-subtitle">{{ subtitle }}</p>
+        </div>
+
+        <app-buttons *ngIf="!showCreateForm && !isLoading && groups.length > 0" [buttonText]="'Create Group'"
+          [buttonStyleClass]="'btn-create-group'" [buttonType]="'button'" (click)="toggleCreateForm()">
+        </app-buttons>
       </div>
+    </header>
 
-      <app-buttons
-        *ngIf="!showCreateForm && !isLoading && groups.length > 0"
-        [buttonText]="'Create Group'"
-        [buttonStyleClass]="'btn-create-group'"
-        [buttonType]="'button'"
-        (click)="toggleCreateForm()">
-      </app-buttons>
+    <hr class="divider">
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading groups...</p>
     </div>
-  </header>
 
-  <hr class="divider">
+    <!-- Groups List -->
+    <div *ngIf="!isLoading" class="groups-list">
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading">
-    <div class="spinner"></div>
-    <p>Loading groups...</p>
-  </div>
+      <!-- No Groups State -->
+      <div *ngIf="groups.length === 0" class="no-groups">
+        <div class="no-groups-icon">+</div>
+        <h3>No groups yet</h3>
+        <p>Be the first to create a group and start collaborating!</p>
 
-  <!-- Groups List -->
-  <div *ngIf="!isLoading" class="groups-list">
-
-    <!-- No Groups State -->
-    <div *ngIf="groups.length === 0" class="no-groups">
-      <div class="no-groups-icon">+</div>
-      <h3>No groups yet</h3>
-      <p>Be the first to create a group and start collaborating!</p>
-      
-      <app-buttons
-        [buttonText]="'+ Create First Group'"
-        [buttonStyleClass]="'btn-create-first-group'"
-        [buttonType]="'button'"
-        (click)="toggleCreateForm()">
-      </app-buttons>
-    </div>
+        <app-buttons [buttonText]="'+ Create First Group'" [buttonStyleClass]="'btn-create-first-group'"
+          [buttonType]="'button'" (click)="toggleCreateForm()">
+        </app-buttons>
+      </div>
 
     <!-- GRID VIEW -->
    <div *ngIf="groups.length > 0" class="groups-grid">
@@ -151,61 +145,45 @@
 </div>
 
 
-  <!-- Create Group Modal -->
-  <div *ngIf="showCreateForm" class="create-group-modal-overlay">
-    <div class="create-group-modal">
-      <div class="modal-header">
-        <h3>Create New Group</h3>
-        
-        <app-buttons
-          [buttonText]="'×'"
-          [buttonStyleClass]="'btn-modal-close'"
-          [buttonType]="'button'"
-          [title]="'Close'"
-          (click)="onCancelCreate()">
-        </app-buttons>
+    <!-- Create Group Modal -->
+    <div *ngIf="showCreateForm" class="create-group-modal-overlay">
+      <div class="create-group-modal">
+        <div class="modal-header">
+          <h3>Create New Group</h3>
+
+          <app-buttons [buttonText]="'×'" [buttonStyleClass]="'btn-modal-close'" [buttonType]="'button'"
+            [title]="'Close'" (click)="onCancelCreate()">
+          </app-buttons>
+        </div>
+
+        <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
+
+          <div class="form-group">
+            <label for="groupName">Group Name</label>
+            <input id="groupName" type="text" formControlName="name" placeholder="Enter group name" class="form-control"
+              [class.error]="name?.invalid && name?.touched">
+          </div>
+
+          <div class="form-group">
+            <label for="groupDescription">Description</label>
+            <textarea id="groupDescription" formControlName="description"
+              placeholder="Describe what your group is about" rows="3" class="form-control"
+              [class.error]="description?.invalid && description?.touched"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" [buttonType]="'button'"
+              [disabled]="isSubmitting" (click)="onCancelCreate()">
+            </app-buttons>
+
+            <app-buttons [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
+              [buttonStyleClass]="'btn-modal-submit'" [buttonType]="'submit'"
+              [disabled]="createGroupForm.invalid || isSubmitting">
+            </app-buttons>
+          </div>
+
+        </form>
       </div>
-
-      <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
-
-        <div class="form-group">
-          <label for="groupName">Group Name</label>
-          <input id="groupName"
-                 type="text"
-                 formControlName="name"
-                 placeholder="Enter group name"
-                 class="form-control"
-                 [class.error]="name?.invalid && name?.touched">
-        </div>
-
-        <div class="form-group">
-          <label for="groupDescription">Description</label>
-          <textarea id="groupDescription"
-                    formControlName="description"
-                    placeholder="Describe what your group is about"
-                    rows="3"
-                    class="form-control"
-                    [class.error]="description?.invalid && description?.touched"></textarea>
-        </div>
-
-        <div class="modal-actions">
-          <app-buttons
-            [buttonText]="'Cancel'"
-            [buttonStyleClass]="'btn-modal-cancel'"
-            [buttonType]="'button'"
-            [disabled]="isSubmitting"
-            (click)="onCancelCreate()">
-          </app-buttons>
-
-          <app-buttons
-            [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
-            [buttonStyleClass]="'btn-modal-submit'"
-            [buttonType]="'submit'"
-            [disabled]="createGroupForm.invalid || isSubmitting">
-          </app-buttons>
-        </div>
-
-      </form>
     </div>
   </div>
-</div>
+</app-base-layout>

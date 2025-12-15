@@ -112,14 +112,23 @@ builder.Services.AddAuthorization(options =>
 });
 
 //2.6 CORS Service
+//builder.Services.AddCors(options =>
+//{
+    //options.AddPolicy(AllowedOrigins, policy =>
+        //policy.WithOrigins("http://localhost:4200")
+              //.AllowAnyHeader()
+              //.AllowAnyMethod()
+    //);
+//});
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(AllowedOrigins, policy =>
-        policy.WithOrigins("http://localhost:4200")
+    options.AddPolicy("AllowedOrigins", policy =>
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod()
     );
 });
+
 
 //2.7 Customizing ModelState Validation
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -153,28 +162,45 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // APPLY EF MIGRATIONS HERE
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
-    db.Database.Migrate();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+    //var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+    //db.Database.Migrate();
+//}
 
 //Seed Roles at App Startup
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
+//using (var scope = app.Services.CreateScope())
+//{
+    //var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    //var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
 
-    foreach (var role in roles)
+    //foreach (var role in roles)
+    //{
+        //if (!await roleManager.RoleExistsAsync(role))
+        //{
+            //await roleManager.CreateAsync(new IdentityRole(role));
+        //}
+    //}
+//}
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+
+var retries = 10;
+while (retries > 0)
+{
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
+        db.Database.Migrate(); // apply migrations
+        break;
+    }
+    catch (Npgsql.NpgsqlException)
+    {
+        retries--;
+        Console.WriteLine("Waiting for database to be ready...");
+        await Task.Delay(5000); // wait 5s
     }
 }
-
-
 
 //4. Add MiddleWare
 if (app.Environment.IsDevelopment())
@@ -192,6 +218,7 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();

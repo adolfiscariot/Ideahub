@@ -55,7 +55,7 @@ nunit-*.xml
 
 # Angular
 node_modules
-dist/
+wwwroot/
 
 # Docker
 docker-compose.override.yml

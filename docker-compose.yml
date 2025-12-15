@@ -4,57 +4,44 @@ services:
     container_name: ideahub-db
     environment:
       POSTGRES_USER: ideahub_user
-      POSTGRES_PASSWORD: ideahub_admin
+      POSTGRES_PASSWORD: ideahub_password
       POSTGRES_DB: ideahub_db
     ports:
-      - "5432:5432" # expose DB to host
+      - "5433:5432"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db"] # Checks if the DB is accepting connections
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - ideahub-net
 
   ideahub-backend:
     build:
-      context: ./api
+      context: ./
       dockerfile: Dockerfile
     container_name: ideahub-backend
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_admin
+      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5433;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
 
     ports:
       - "5065:5065"
     depends_on:
-      - ideahub-db
+      ideahub-db:
+        condition: service_healthy #Wait until DB passes healthcheck
     restart: always
-    networks:
-      - ideahub-net
-
-  ideahub-frontend:
-    build:
-      context: ./ui
-      dockerfile: Dockerfile
-    container_name: ideahub-frontend
-    command: [ "npm", "start" ]
-    environment:
-      ANGULAR_API_URL: "http://localhost:5065"
-    volumes:
-      - ./ui:/app
-      - /app/node_modules
-    ports:
-      - "4200:4200" # Angular default dev server port
-    depends_on:
-      - ideahub-backend
     networks:
       - ideahub-net
 
 volumes:
   ideahub_data:
-
 
 networks:
   ideahub-net:
