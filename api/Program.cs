@@ -161,43 +161,24 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // APPLY EF MIGRATIONS HERE
-//using (var scope = app.Services.CreateScope())
-//{
-    //var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
-    //db.Database.Migrate();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+    db.Database.Migrate();
+}
 
 //Seed Roles at App Startup
-//using (var scope = app.Services.CreateScope())
-//{
-    //var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    //var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
-
-    //foreach (var role in roles)
-    //{
-        //if (!await roleManager.RoleExistsAsync(role))
-        //{
-            //await roleManager.CreateAsync(new IdentityRole(role));
-        //}
-    //}
-//}
-
-using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
-
-var retries = 10;
-while (retries > 0)
+using (var scope = app.Services.CreateScope())
 {
-    try
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
+
+    foreach (var role in roles)
     {
-        db.Database.Migrate(); // apply migrations
-        break;
-    }
-    catch (Npgsql.NpgsqlException)
-    {
-        retries--;
-        Console.WriteLine("Waiting for database to be ready...");
-        await Task.Delay(5000); // wait 5s
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 
