@@ -7,10 +7,15 @@ services:
       POSTGRES_PASSWORD: ideahub_password
       POSTGRES_DB: ideahub_db
     ports:
-      - "5433:5433" # expose DB to host
+      - "5433:5432"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db"] # Checks if the DB is accepting connections
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - ideahub-net
 
@@ -29,29 +34,14 @@ services:
     ports:
       - "5065:5065"
     depends_on:
-      - ideahub-db
+      ideahub-db:
+        condition: service_healthy #Wait until DB passes healthcheck
     restart: always
     networks:
       - ideahub-net
 
-  ideahub-frontend:
-    build:
-      context: ./ui
-      dockerfile: Dockerfile
-    container_name: ideahub-frontend-prod
-    environment:
-      ANGULAR_API_URL: "http://ideahub-backend:5065"  # use container name
-    ports:
-      - "2400:80"  # host:container
-    depends_on:
-      - ideahub-backend
-    networks:
-      - ideahub-net
-
-
 volumes:
   ideahub_data:
-
 
 networks:
   ideahub-net:

@@ -53,5 +53,14 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
-#Angular
+# Angular
 node_modules
+dist/
+wwwroot/
+
+# Docker
+docker-compose.override.yml
+.env
+
+# Secrets
+api/appsettings.json

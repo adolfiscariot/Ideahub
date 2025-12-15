@@ -1,19 +1,3 @@
-# Primary Colors
-
-#ee82ee
-
-rgba(238, 130, 238)
-
-
-#800080
-
-rgba(128, 0, 128)
-
-
-#000000
-
-rgba(0, 0, 0)
-
 # Auth
 
 - Have user friendly errors on the authentication part for the user like invalid password your password must contain or even like a checkbox for their password on register
@@ -22,11 +6,9 @@ rgba(0, 0, 0)
 
 - Either show and tell the user their session has expired and they should log out after a reasonable amount of time or automatically refresh their token through that endpoint confirm what the endpoint was for
 
-# Missing Backend Endpoints 
+# TO BE DONE
 
-- get-requests
-- reject-requests
-- leave-group
+- Group Controller - accept and reject request should return the Timestamp in the DB for AcceptedOrRejectedAt column
 
 # Ideas tab checklist
 
@@ -54,23 +36,23 @@ rgba(0, 0, 0)
 
 - IDEA DELETION - connect to endpoint
 
-## TO BE DONE
-
-- Remove Console logs when completely done with ideas 
-
 - Update Idea - connect to endpoint
 
 - Viewing endpoint - connect to it - although i dont think its really necessary when we are on the ideas page since frontend handles that already
 
-- Pagination
+- Vote on Ideas connect to backend endpoints
+
+- IF admin for the group show a promote button it should be like left click and get options that should show the admin the promote idea option - think about this... 
 
 - Member fetching for this particular group and also display when that member thing is clicked also the member count
 
-- Vote on Ideas connect to backend endpoints
-
 - Small UI touch up
 
-- IF admin for the group show a promote button it should be like left click and get options that should show the admin the promote idea option - think about this... 
+## TO BE DONE
+
+- Remove Console logs when completely done with ideas 
+
+- Pagination
 
 **Considerations for the Idea opening and viewing popup**
 
@@ -79,8 +61,6 @@ OR INSTEAD OF A POPUP HAVE THE PAGE DIVIDED INTO THREE SECTIONS: MEMBERS ON THEF
 THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING TO THE USER CLICK IDEA VIEW CLOSE CLICK ANOTHER ONE CLOSE YEAH I DONT WANT THAT 
 
 ## NICE TO HAVE
-
-- IDEA DISPLAY UI - SORT OF LIKE A STICKY NOTE SITUATION - YEAH SOMETHING RETRO - THINK ABOUT IT - INSTEAD OF GENERIC CARD STACKING
 
 - POSSIBLY HAVE A COMMENT SECTION
 
@@ -127,10 +107,6 @@ THINK OF A WAY THAT DOES NOT HAVE A POPUP, HAVING A POPUP SOUNDS TOO EXHAUSTING 
 - PLACE THAT DELETE ICON OR BUTTON SOMEWHERE BETTER - ALSO CHANGE HOW IT LOOKS DOES NOT LOOK GOOD
 
 - Edit that out ? logo - have something else in place maybe an avatar or think of something
-
-- Have it as either member or admin tag (remove the "you are")
-
-- Have it as either member or admin tag (remove the "you are")
 
 - Ensure the information and components inside each group card is level with those around it
 

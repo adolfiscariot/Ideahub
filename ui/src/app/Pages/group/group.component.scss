@@ -9,8 +9,9 @@ html, body {
 
 /* Groups Container */
 .groups-container {
-  padding: 24px;
-  max-width: 2000px;
+  padding-left: 150px;
+ 
+  max-width: 1700px;
   margin: 0 auto;
 }
 
@@ -149,6 +150,9 @@ html, body {
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 /* Group Header */
@@ -176,7 +180,7 @@ html, body {
   line-height: 1.5;
   margin: 0 0 20px;
   font-size: 14px;
-  max-height: 70px;
+  max-height: 100px;
 }
 
 /* Stats */

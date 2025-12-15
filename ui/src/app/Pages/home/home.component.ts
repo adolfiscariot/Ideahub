@@ -5,7 +5,6 @@ import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
 import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
-import { PersonalStatCardComponent } from '../../Components/personal-stat-card/personal-stat-card.component';
 import {
   MostVotedIdea,
   TopContributor,
@@ -26,7 +25,8 @@ import {
   heroBuildingOffice2,
   heroLightBulb,
   heroHandThumbUp,
-  heroBriefcase
+  heroBriefcase,
+  heroUserGroup
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -36,8 +36,7 @@ import {
     BaseLayoutComponent,
     CommonModule,
     StatCardComponent,
-    DashboardCardComponent,
-    PersonalStatCardComponent
+    DashboardCardComponent
   ],
   viewProviders: [provideIcons({
     heroChartBar,
@@ -49,7 +48,8 @@ import {
     heroBuildingOffice2,
     heroLightBulb,
     heroHandThumbUp,
-    heroBriefcase
+    heroBriefcase,
+    heroUserGroup
   })],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'

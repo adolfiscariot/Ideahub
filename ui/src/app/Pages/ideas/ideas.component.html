@@ -20,10 +20,60 @@
             </div>
           </div>  
 
-          <!-- Share Idea Button -->
-          <button *ngIf="!showShareModal" class="create-idea-btn" (click)="openShareModal()">
-            <span class="create-icon">+</span> Share Idea
-          </button>
+          <!-- View Requests Button (only for group creator) -->
+<app-buttons
+  *ngIf="isGroupCreator()"
+  buttonText="View Requests"
+  buttonStyleClass="btn-view-requests"
+  (click)="viewRequests(groupId)"
+  [disabled]="false"
+  title="View pending join requests"
+></app-buttons>
+
+<!-- Requests Modal -->
+<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Pending Requests ({{ pendingRequests.length }})</h2>
+
+    <div *ngIf="loadingRequests">Loading...</div>
+    <div *ngIf="errorRequests">{{ errorRequests }}</div>
+
+    <ul *ngIf="!loadingRequests && !errorRequests">
+      <li *ngFor="let req of pendingRequests" class="request-item">
+        <span>User ID: {{ req.userId }}</span>
+        <button (click)="acceptRequest(groupId, req.userId)" class="btn-accept">Accept</button>
+        <button (click)="rejectRequest(groupId, req.userId)" class="btn-reject">Reject</button>
+      </li>
+    </ul>
+
+    <button (click)="showRequestsModal = false" class="btn-close-modal">Close</button>
+  </div>
+</div>
+
+
+
+
+          <!-- Share Idea Button (Fixed - with + icon) -->
+          <app-buttons
+            *ngIf="!showShareModal"
+            buttonText="Share Idea"
+            buttonStyleClass="btn-share-idea"
+            (click)="openShareModal()"
+            [disabled]="false"
+            title="Share a new idea with the group"
+          >
+            <span class="create-icon">+</span> 
+          </app-buttons>
+
+        <app-buttons
+        buttonStyleClass="btn-leave-group"
+        (click)="confirmLeaveGroup()"
+        [disabled]="false"
+        title="Leave this group"
+      >
+        🚪 Leave Group
+      </app-buttons>
+    
         </div>
       </div>
     </header>
@@ -34,9 +84,27 @@
       <div class="section-sort">
         <span class="sort-label">Sort by:</span>
         <div class="sort-options">
-          <button class="sort-option active">Top Voted</button>
+          <!-- Sort Option: Top Voted (Fixed) -->
+          <app-buttons
+            [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
+            (click)="setSortMode('top')"
+            [disabled]="false"
+            title="Sort ideas by most votes"
+          >
+            Top Voted
+          </app-buttons>
+
           <div class="sort-separator">|</div>
-          <button class="sort-option">Newest</button>
+
+          <!-- Sort Option: Newest (Fixed) -->
+          <app-buttons
+            [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
+            (click)="setSortMode('newest')"
+            [disabled]="false"
+            title="Sort ideas by newest first"
+          >
+            Newest
+          </app-buttons>
         </div>
       </div>
     </div>
@@ -53,9 +121,17 @@
         <div class="no-ideas-icon">💡</div>
         <h3>No ideas yet</h3>
         <p>Be the first to share an idea with the group!</p>
-        <button class="create-idea-btn" (click)="openShareModal()">
+        <app-buttons
+          buttonStyleClass="btn-share-idea"
+          (click)="openShareModal()"
+          [disabled]="false"
+          title="Share a new idea with the group"
+        >
           <span class="create-icon">+</span> Share Idea
-        </button>
+        </app-buttons>
+
+          <!-- Leave Group -->
+    
       </div>
     </div>
 
@@ -70,42 +146,42 @@
           <div class="idea-card-header">
             <div class="idea-header-top">
               <h3 class="idea-title">{{ idea.title }}</h3>
-              <span *ngIf="idea.isPromotedToProject" class="promoted-badge-top-right">✔ Promoted</span>
-
               
-              <!-- Idea Action Buttons -->
-              <div class="idea-header-actions">
-                <!-- Promote button for admins only -->
-                <button *ngIf="isGroupCreator() && !idea.isPromotedToProject" 
-                        class="promote-btn" 
-                        (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
-                        [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id"
-                        title="Promote to Project">
-                  <span class="promote-icon">🚀</span>
-                </button>
-                
-                <!-- Delete button for idea owner -->
-                <button *ngIf="isUserIdeaOwner(idea)" 
-                        class="delete-btn" 
-                        (click)="$event.stopPropagation(); onDeleteIdea(idea.id, $event)"
-                        title="Delete idea">
-                  <span class="delete-icon">✕</span>
-                </button>
-              </div>
+              <!-- Idea Action Buttons-->
+              <div class="idea-footer-actions">
+
+  <!-- Promote button -->
+  <app-buttons
+    *ngIf="isGroupCreator() && !idea.isPromotedToProject"
+    buttonStyleClass="btn-promote"
+    (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
+    [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id"
+    title="Promote to Project"
+  >
+    Promote
+  </app-buttons>
+
+  <!-- Promoted badge -->
+  <span *ngIf="idea.isPromotedToProject" class="promoted-badge-footer">
+    ✔ Promoted
+  </span>
+
+  <!-- Vote button -->
+  <app-buttons
+    [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
+    (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
+    [disabled]="isVoting || isUnvoting"
+    title="Vote for this idea"
+  >
+    ⮝
+    <span *ngIf="isGroupCreator()" class="vote-count">{{ idea.voteCount || 0 }}</span>
+  </app-buttons>
+
+</div>
+
             </div>
             
             <div class="idea-card-meta">
-              <button class="vote-toggle-btn" 
-                      [class.voted]="idea.userVoted"
-                      (click)="idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
-                      [disabled]="isVoting || isUnvoting"
-                      [title]="idea.userVoted ? 'Remove your vote' : 'Vote for this idea'">
-                <span class="vote-icon">⮝</span>
-                <!-- Only show count if user is group creator -->
-                <span *ngIf="isGroupCreator()" class="vote-count">
-                  {{ idea.voteCount || 0 }}
-                </span>
-              </button>
               
               <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
             </div>
@@ -122,22 +198,21 @@
         </div>
       </ng-container>
     </div>
-
-    <!-- Leave Group Button -->
-    <div class="leave-group-section">
-      <button class="leave-group-btn">
-        Leave Group
-      </button>
-    </div>
   </div>
 
   <!-- Right Panel: Idea Details (Split View) -->
   <div *ngIf="selectedIdea" class="idea-details-panel">
     <div class="details-panel-header">
       <h2 class="details-title">Idea Details</h2>
-      <button class="close-details-btn" (click)="selectedIdea = null" title="Close details">
-        <span>×</span>
-      </button>
+      <!-- Close Details Button (Fixed - with ×) -->
+      <app-buttons
+        buttonStyleClass="btn-close-details"
+        (click)="selectedIdea = null"
+        [disabled]="false"
+        title="Close details"
+      >
+        ×
+      </app-buttons>
     </div>
     
     <div class="details-panel-content">
@@ -147,48 +222,71 @@
           <!-- ROW 1 -->
           <div class="details-row-1">
             <h3 class="details-idea-title">{{ selectedIdea.title }}
-              <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge">✔ Promoted</span>
+             
             </h3>
 
             <div class="details-actions-right">
-              <!-- Edit button opens modal -->
-              <button *ngIf="isUserIdeaOwner(selectedIdea)" class="edit-btn" (click)="startEditing()" title="Edit idea">✎</button>
+              <!-- Edit button opens modal (Fixed - with ✎) -->
+              <app-buttons
+                *ngIf="isUserIdeaOwner(selectedIdea)"
+                buttonStyleClass="btn-edit"
+                (click)="startEditing()"
+                [disabled]="false"
+                title="Edit idea"
+              >
+                ✎
+              </app-buttons>
               
-              <!-- Promote button for admins only -->
-              <button *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject" 
-                      class="promote-btn" 
-                      (click)="onPromoteIdea(selectedIdea, $event)"
-                      [disabled]="isPromoting"
-                      title="Promote to Project">
+              <!-- Promote button for admins only (Fixed - with 🚀) -->
+              <app-buttons
+                *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
+                buttonStyleClass="btn-promote"
+                (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event)"
+                [disabled]="isPromoting"
+                title="Promote to Project"
+              >
                 🚀
-              </button>
+              </app-buttons>
               
-              <!-- View voters button for admins -->
-              <button *ngIf="isGroupCreator() && selectedIdea.voteCount > 0"
-                      class="view-voters-btn"
-                      (click)="onViewVoters(selectedIdea, $event)"
-                      title="View voters">
+              <!-- View voters button for admins (Fixed - with 👁️) -->
+              <app-buttons
+                *ngIf="isGroupCreator() && selectedIdea.voteCount > 0"
+                buttonStyleClass="btn-view-voters"
+                (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)"
+                [disabled]="false"
+                title="View voters"
+              >
                 👁️
-              </button>
+              </app-buttons>
               
-              <!-- Delete button for idea owner -->
-              <button *ngIf="isUserIdeaOwner(selectedIdea)" class="details-delete-btn" (click)="onDeleteIdea(selectedIdea.id)" title="Delete idea">✕</button>
+              <!-- Delete button for idea owner (Fixed - with ✕) -->
+              <app-buttons
+                *ngIf="isUserIdeaOwner(selectedIdea)"
+                buttonStyleClass="btn-delete"
+                (click)="$event.stopPropagation(); onDeleteIdea(selectedIdea.id)"
+                [disabled]="false"
+                title="Delete idea"
+              >
+                ✕
+              </app-buttons>
               
-              <!-- Vote button -->
-              <button class="vote-toggle-btn details-vote-btn"
-                      [class.voted]="selectedIdea.userVoted"
-                      (click)="selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                      [disabled]="isVoting || isUnvoting"
-                      title="Vote for this idea">
+              <!-- Vote button (Fixed - with ⮝ and count) -->
+              <app-buttons
+                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
+                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
+                [disabled]="isVoting || isUnvoting"
+                title="Vote for this idea"
+              >
                 ⮝
                 <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
-              </button>
+              </app-buttons>
             </div>
           </div> 
 
           <!-- ROW 2 -->
           <div class="details-row-2">
             <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
+             <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge">✔ Promoted</span>
           </div>
         </div>
         

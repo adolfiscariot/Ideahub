@@ -16,7 +16,7 @@ import { GroupMembersModalComponent } from '../../Components/modals/group-member
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent,ButtonsComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -30,7 +30,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   currentUserId: string = '';
   
   selectedIdea: any = null;
-  membersCount: string = '';
+  membersCount: string = '0';
 
   isVoting: boolean = false;
   isUnvoting: boolean = false;
@@ -57,6 +57,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
   title: '',
   description: ''
 };
+
+  sortMode: 'top' | 'newest' = 'top';
+
+  showRequestsModal = false;
+  pendingRequests: any[] = [];
+  loadingRequests = false;
+  errorRequests = '';
+
 
   private routeSub: Subscription = new Subscription();
 
@@ -149,12 +157,106 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.modalEditData = { ...idea };
   }
 
-// ... inside your IdeasComponent class, add these methods:
+setSortMode(mode: 'top' | 'newest'): void {
+  this.sortMode = mode;
+  this.sortIdeas();
+}
+
+sortIdeas(): void {
+  if (!this.ideas) return;
+
+  if(this.sortMode === 'top') {
+    this.ideas.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
+  } else if (this.sortMode === 'newest') {
+    this.ideas.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+}
 
 selectIdea(idea: any): void {
   console.log('Selecting idea:', idea);
   this.selectedIdea = idea;
 }
+
+viewRequests(groupId: string) {
+  console.log('Fetching pending requests for group:', groupId);
+  this.showRequestsModal = true;
+  this.loadingRequests = true;
+  this.errorRequests = '';
+
+  this.groupsService.viewRequests(groupId).subscribe({
+    next: (res: any) => {
+      console.log('Pending requests received:', res);
+      this.pendingRequests = res.data.map((userId:string) => ({ userId})) // res should be an array of { userId, ... }
+      this.loadingRequests = false;
+    },
+    error: (err) => {
+      console.error('Error fetching requests:', err);
+      this.errorRequests = 'Failed to load requests';
+      this.loadingRequests = false;
+    }
+  });
+}
+
+// ideas.component.ts
+
+confirmLeaveGroup() {
+  // optional: show a confirmation toast/modal
+  const confirmLeave = confirm('Are you sure you want to leave this group?');
+  if (confirmLeave) {
+    this.leaveGroup();
+  }
+}
+
+leaveGroup() {
+  if (!this.groupId) return;
+
+  this.groupsService.leaveGroup(this.groupId).subscribe({
+    next: (res) => {
+      console.log('Left group response:', res); // check backend response
+      alert('You have left the group');          // simple feedback for now
+      this.router.navigate(['/groups']);         // redirect after leaving
+    },
+    error: (err) => {
+      console.error('Failed to leave group:', err);
+      alert('Failed to leave the group');       // simple error feedback
+    }
+  });
+}
+
+
+
+acceptRequest(groupId: string, requestUserId: string) {
+  console.log('Accept request:', requestUserId);
+  this.groupsService.acceptRequest(groupId, requestUserId).subscribe({
+    next: () => {
+      console.log('Request accepted for user:', requestUserId);
+      this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+    },
+    error: (err) => console.error('Error accepting request:', err)
+  });
+}
+
+rejectRequest(groupId: string, requestUserId: string) {
+  console.log('Reject request:', requestUserId);
+  this.groupsService.rejectRequest(groupId, requestUserId).subscribe({
+    next: () => {
+      console.log('Request rejected for user:', requestUserId);
+      this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+    },
+    error: (err) => console.error('Error rejecting request:', err)
+  });
+
+
+
+}
+
+closeRequestsModal() {
+  this.showRequestsModal = false;
+}
+
+
 
 onUpdateIdeaFromModal(event: {title: string, description: string}): void {
   if (!this.selectedIdea) {
@@ -254,35 +356,20 @@ loadGroupInfo(): void {
 
 openMembersModal() {
   console.log('Opening members modal for group:', this.groupId);
-
-  // Fetch members first
-  this.groupsService.getGroupMembers(this.groupId).subscribe({
-    next: (res: any) => {
-      const members = res.data || [];
-
-      // Open modal and pass actual members
-      this.dialog.open(GroupMembersModalComponent, {
-        width: '600px',
-        maxHeight: '90vh',
-        data: { 
-          group: {
-            id: this.groupId,
-            name: this.groupName,
-            memberCount: members.length,
-            members: members   // <-- pass the array here
-          }
-        },
-        panelClass: 'custom-modal'
-      });
+  
+  this.dialog.open(GroupMembersModalComponent, {
+    width: '600px',
+    maxHeight: '90vh',
+    data: { 
+      group: {
+        id: this.groupId,
+        name: this.groupName,
+        memberCount: this.membersCount
+      }
     },
-   
+    panelClass: 'custom-modal'
   });
 }
-
-
-// closeMembersModal() {
-//   this.showMembersModal = false;
-// }
 
   formatIdeaDate(date: any): string {
     if (!date) return 'Unknown date';
@@ -330,7 +417,7 @@ loadGroupMembers(): void {
 }
 
 
-    loadIdeas(): void {
+  loadIdeas(): void {
   this.isLoading = true;
   this.ideasService.getIdeasByGroup(this.groupId).subscribe({
     next: async (response) => {
@@ -339,7 +426,6 @@ loadGroupMembers(): void {
       console.log('API Response:', response);
       
       if (response.success && response.data) {
-        // First, map the ideas from API - MAKE SURE TO INCLUDE isPromotedToProject
         this.ideas = response.data.map((idea: any) => {
           console.log(`Mapping idea "${idea.title}":`, {
             id: idea.id,
@@ -354,7 +440,7 @@ loadGroupMembers(): void {
             UserId: idea.userId || idea.UserId || '',
             userId: idea.userId || idea.UserId || '',
             groupId: this.groupId,
-            isPromotedToProject: idea.isPromotedToProject || false, // THIS IS THE KEY LINE!
+            isPromotedToProject: idea.isPromotedToProject || false,
             isDeleted: idea.isDeleted || false,
             createdAt: new Date(idea.createdAt || new Date()),
             updatedAt: new Date(idea.updatedAt || new Date()),
@@ -384,6 +470,8 @@ loadGroupMembers(): void {
         } else {
           console.log('No ideas to fetch vote counts for');
         }
+
+        this.sortIdeas();
         
         // Update selected idea if it exists
         if (this.selectedIdea) {
@@ -570,21 +658,13 @@ isGroupCreator(): boolean {
           idea.userVoteId = voteId?.toString();
           
           // Increment vote count locally
-          idea.voteCount = (idea.voteCount || 0) + 1;
           
-          console.log(`Updated idea "${idea.title}":`, {
-            userVoted: idea.userVoted,
-            voteCount: idea.voteCount,
-            userVoteId: idea.userVoteId
-          });
-        }
-        
-        // Update selected idea if it's the same one
-        if (this.selectedIdea && this.selectedIdea.id === ideaId) {
-          this.selectedIdea.userVoted = true;
-          this.selectedIdea.voteCount = (this.selectedIdea.voteCount || 0) + 1;
-          if (voteId) {
-            this.selectedIdea.userVoteId = voteId.toString();
+          idea.voteCount = (idea.voteCount || 0) + 1;
+          idea.userVoted = true;
+          idea.userVoteId = voteId?.toString();
+
+          if (this.selectedIdea && this.selectedIdea.id === ideaId) {
+            this.selectedIdea = {...idea}
           }
         }
         
@@ -650,57 +730,9 @@ onUnvote(idea: Idea, event?: Event): void {
       }
     }
   });
+}  
 
-  
-  this.isUnvoting = true;
-  this.ideasService.removeVote(idea.userVoteId).subscribe({
-    next: (response) => {
-      this.isUnvoting = false;
-      console.log('Unvote response:', response);
-      
-      if (response.success) {
-        // Update local state
-        idea.userVoted = false;
-        idea.voteCount = Math.max(0, (idea.voteCount || 1) - 1);
-        idea.userVoteId = undefined;
-        
-        // If this idea is currently selected, update it too
-        if (this.selectedIdea && this.selectedIdea.id === idea.id) {
-          this.selectedIdea.userVoted = false;
-          this.selectedIdea.voteCount = idea.voteCount;
-          this.selectedIdea.userVoteId = undefined;
-        }
-        
-        // Refresh vote status
-        this.checkUserVotesForAllIdeas().then(() => {
-          console.log('Vote status refreshed after unvoting');
-        });
-        
-        console.log('✓ Unvote successful!');
-      } else {
-        alert(`Failed to unvote: ${response.message}`);
-      }
-    },
-    error: (error) => {
-      this.isUnvoting = false;
-      console.error('Error unvoting:', error);
-      
-      if (error.status === 404) {
-        alert('Vote not found. It may have already been removed.');
-        // Force refresh the idea
-        idea.userVoted = false;
-        idea.userVoteId = undefined;
-      } else {
-        alert('An error occurred while unvoting.');
-      }
-    }
-  });
-}
-      
-     
-        
-
-// Add this method for viewing voters (admin only)
+// Viewing voters (admin only)
 onViewVoters(idea: Idea, event?: Event): void {
   if (event) event.stopPropagation();
   
@@ -725,8 +757,6 @@ onViewVoters(idea: Idea, event?: Event): void {
     }
   });
 }
-
-// Add these methods to your component
 
 /**
  * Check votes for all ideas in the list
@@ -1011,8 +1041,6 @@ onPromoteIdea(idea: Idea, event?: Event): void {
     }
   });
 }
-
-  
 
   // DELETE IDEA METHOD
   onDeleteIdea(ideaId: string, event?: Event): void {

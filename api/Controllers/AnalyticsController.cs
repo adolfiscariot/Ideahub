@@ -240,11 +240,14 @@ public class AnalyticsController : ControllerBase
             var votesCast = await _context.Votes.CountAsync(v => v.UserId == userId && !v.IsDeleted);
             var projectsInvolved = await _context.Projects.CountAsync(p => !p.IsDeleted && (p.CreatedByUserId == userId || p.OverseenByUserId == userId));
 
+            var groupsCreated = await _context.Groups.CountAsync(g => g.CreatedByUserId == userId && !g.IsDeleted);
+
             var stats = new
             {
                 IdeasCreated = ideasCreated,
                 VotesCast = votesCast,
-                ProjectsInvolved = projectsInvolved
+                ProjectsInvolved = projectsInvolved,
+                GroupsCreated = groupsCreated
             };
 
             return Ok(ApiResponse.Ok("Personal statistics", stats));
