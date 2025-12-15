@@ -28,7 +28,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5433;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
+      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
 
     ports:
