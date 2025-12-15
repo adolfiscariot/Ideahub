@@ -1,6 +1,6 @@
 .ideas-container {
   max-width: 1650px;
-  margin: 0 auto;
+  margin-left: 100px;
   padding: 20px;
   background: #ffffff;
   min-height: 80vh;
@@ -24,13 +24,22 @@
   
 }
 
+
+
 .idea-footer-actions {
   display: flex;
-  align-items: center;
+  align-items: self-end;
+  justify-content: flex-end;
   gap: 10px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
+  padding-top: 0px;
+}
+
+.promoted-badge-left {
+  background: purple;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 .promoted-badge-footer {
@@ -183,6 +192,7 @@
   font-size: small;
   color: #800080;
   margin-bottom: 20px;
+  justify-content: space-between;
 }
 
 
@@ -463,7 +473,7 @@
 
 .idea-card {
   position: relative; /* important for absolute badge positioning */
-  padding: 15px;
+  padding: 5px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
@@ -568,22 +578,19 @@
 
 .idea-title {
   flex: 1; /* take up middle space */
-  margin: 0;
+  margin-left: 5px;
+  margin-top: 5px;
+  border-bottom: 1px solid #eee;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+
 }
 
 .idea-date {
   margin-left: auto; /* push to far right */
   font-size: 0.9rem;
   color: #666;
-}
-
-
-.idea-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  flex: 1;
 }
 
 .idea-card-meta {
@@ -619,6 +626,7 @@
   line-height: 1.6;
   margin: 0;
   padding-left: 4px;
+  padding-top: 15px;
 }
 
 .read-more {

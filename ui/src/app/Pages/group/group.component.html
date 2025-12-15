@@ -37,89 +37,113 @@
         </app-buttons>
       </div>
 
-      <!-- GRID VIEW -->
-      <div *ngIf="groups.length > 0" class="groups-grid">
-        <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
+    <!-- GRID VIEW -->
+   <div *ngIf="groups.length > 0" class="groups-grid">
+  <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
 
-          <!-- Group Header -->
-          <div class="group-header">
-            <div class="group-title-section">
-              <h2 class="group-name">{{ group.name }}</h2>
-              <div class="group-status">
-                <span *ngIf="!group.isActive" class="status-badge inactive">Inactive</span>
-                <span *ngIf="group.isDeleted" class="status-badge deleted">Deleted</span>
-              </div>
-            </div>
 
-            <div class="group-header-right">
-              <div class="group-join-section">
+    <div class="group-top">
 
-                <!-- Member: View Ideas Button -->
-                <app-buttons *ngIf="group.isMember" [buttonText]="'💡 View Ideas'" [buttonStyleClass]="'btn-view-ideas'"
-                  [buttonType]="'button'" (click)="onViewIdeas(group.id)">
-                </app-buttons>
+      <!-- Group Header -->
+      <div class="group-header">
+        <div class="group-title-section">
+          <h2 class="group-name">{{ group.name }}</h2>
+        </div>
 
-                <!-- Pending -->
-                <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
-                  ⏳ Pending Approval
-                </div>
-
-                <!-- Join Button -->
-                <app-buttons *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
-                  [buttonText]="'Join Group'" [buttonStyleClass]="'btn-join-group'" [buttonType]="'button'"
-                  (click)="onJoinGroup(group.id)">
-                </app-buttons>
-              </div>
-
-              <!-- Delete Button -->
-              <app-buttons *ngIf="canConfigureGroup(group)" [buttonText]="'🗑️'" [buttonStyleClass]="'btn-delete-group'"
-                [buttonType]="'button'" [title]="'Delete Group'" (click)="onDeleteGroup(group)">
-              </app-buttons>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <p class="group-description">{{ group.description }}</p>
-
-          <!-- Stats -->
-          <div class="group-stats">
-            <div class="stat">
-              <span class="stat-icon">👥</span>
-              <span class="stat-count">{{ group.memberCount || 0 }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">💡</span>
-              <span class="stat-count">{{ group.ideaCount || 0 }} </span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">📅</span>
-              <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
-            </div>
-          </div>
-
-          <!-- Admin -->
-          <div *ngIf="canConfigureGroup(group)" class="admin-info">
-            <span class="admin-badge">admin</span>
-          </div>
-
-          <hr class="group-divider">
-
-          <!-- Actions -->
-          <div class="group-actions">
-
-            <!-- Details Button -->
-            <app-buttons [buttonText]="'📋 Details'" [buttonStyleClass]="'btn-group-details'" [buttonType]="'button'"
-              (click)="openDetailsModal(group)">
-            </app-buttons>
-
-            <!-- Members Button -->
-            <app-buttons [buttonText]="'👥 Members'" [buttonStyleClass]="'btn-group-members'" [buttonType]="'button'"
-              (click)="openMembersModal(group)">
-            </app-buttons>
-          </div>
+        <!-- Admin -->
+        <div *ngIf="canConfigureGroup(group)" class="admin-info">
+          <span class="admin-badge">admin</span>
         </div>
       </div>
+
+      <!-- Description -->
+      <p class="group-description">{{ group.description }}</p>
+
+    </div> 
+
+
+    <!-- Stats -->
+    <div class="group-stats">
+      <div class="stat">
+        <span class="stat-icon">👥</span>
+        <span class="stat-count">{{ group.memberCount || 0 }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">💡</span>
+        <span class="stat-count">{{ group.ideaCount || 0 }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">📅</span>
+        <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+      </div>
     </div>
+
+    <hr class="group-divider">
+
+
+    <!-- BOTTOM SECTION -->
+    <div class="group-bottom">
+
+      <!-- Member: View Ideas Button -->
+      <app-buttons
+        *ngIf="group.isMember"
+        [buttonText]="'💡 View Ideas'"
+        [buttonStyleClass]="'btn-view-ideas'"
+        [buttonType]="'button'"
+        (click)="onViewIdeas(group.id)">
+      </app-buttons>
+
+      <!-- Pending -->
+      <div *ngIf="!group.isMember && group.hasPendingRequest"
+           class="pending-status">
+        ⏳ Pending Approval
+      </div>
+
+      <!-- Join Button -->
+      <app-buttons
+        *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+        [buttonText]="'Join Group'"
+        [buttonStyleClass]="'btn-join-group'"
+        [buttonType]="'button'"
+        (click)="onJoinGroup(group.id)">
+      </app-buttons>
+
+      <!-- Actions -->
+      <div class="group-actions">
+
+        <!-- Details Button -->
+        <app-buttons
+          [buttonText]="'📋 Details'"
+          [buttonStyleClass]="'btn-group-details'"
+          [buttonType]="'button'"
+          (click)="openDetailsModal(group)">
+        </app-buttons>
+
+        <!-- Members Button -->
+        <app-buttons
+          [buttonText]="'👥 Members'"
+          [buttonStyleClass]="'btn-group-members'"
+          [buttonType]="'button'"
+          (click)="openMembersModal(group)">
+        </app-buttons>
+
+        <!-- Delete Button -->
+        <app-buttons
+          *ngIf="canConfigureGroup(group)"
+          [buttonText]="'🗑️ Delete'"
+          [buttonStyleClass]="'btn-delete-group'"
+          [buttonType]="'button'"
+          [title]="'Delete Group'"
+          (click)="onDeleteGroup(group)">
+        </app-buttons>
+
+      </div> 
+
+    </div> 
+
+  </div>
+</div>
+
 
     <!-- Create Group Modal -->
     <div *ngIf="showCreateForm" class="create-group-modal-overlay">

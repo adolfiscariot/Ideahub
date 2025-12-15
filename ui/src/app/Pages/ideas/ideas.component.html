@@ -146,12 +146,33 @@
           <div class="idea-card-header">
             <div class="idea-header-top">
               <h3 class="idea-title">{{ idea.title }}</h3>
+            </div>
+            
+            <div class="idea-card-meta">
               
-              <!-- Idea Action Buttons-->
-              <div class="idea-footer-actions">
+              <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
+            </div>
+          </div>
+          <p class="idea-description">
+            {{ idea.description.length > 150 ? (idea.description | slice:0:150) + '...' : idea.description }}
+            <span *ngIf="idea.description.length > 150" class="read-more">Read more</span>
+          </p>
 
-  <!-- Promote button -->
+ <!-- Idea Action Buttons-->
+<div class="idea-footer-actions">
+           <!-- Vote button -->
   <app-buttons
+    [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
+    (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
+    [disabled]="isVoting || isUnvoting"
+    title="Vote for this idea"
+  >
+    👍
+    <span *ngIf="isGroupCreator()" class="vote-count">{{ idea.voteCount || 0 }}</span>
+  </app-buttons>
+
+            <!-- Promote button -->
+          <app-buttons
     *ngIf="isGroupCreator() && !idea.isPromotedToProject"
     buttonStyleClass="btn-promote"
     (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
@@ -165,31 +186,8 @@
   <span *ngIf="idea.isPromotedToProject" class="promoted-badge-footer">
     ✔ Promoted
   </span>
-
-  <!-- Vote button -->
-  <app-buttons
-    [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
-    (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
-    [disabled]="isVoting || isUnvoting"
-    title="Vote for this idea"
-  >
-    ⮝
-    <span *ngIf="isGroupCreator()" class="vote-count">{{ idea.voteCount || 0 }}</span>
-  </app-buttons>
-
 </div>
 
-            </div>
-            
-            <div class="idea-card-meta">
-              
-              <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
-            </div>
-          </div>
-          <p class="idea-description">
-            {{ idea.description.length > 150 ? (idea.description | slice:0:150) + '...' : idea.description }}
-            <span *ngIf="idea.description.length > 150" class="read-more">Read more</span>
-          </p>
         </div>
         
         <!-- Divider -->
@@ -270,14 +268,14 @@
                 ✕
               </app-buttons>
               
-              <!-- Vote button (Fixed - with ⮝ and count) -->
+              <!-- Vote button (Fixed - with 👍 and count) -->
               <app-buttons
                 [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
                 (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
                 [disabled]="isVoting || isUnvoting"
                 title="Vote for this idea"
               >
-                ⮝
+                👍
                 <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
               </app-buttons>
             </div>
@@ -286,7 +284,7 @@
           <!-- ROW 2 -->
           <div class="details-row-2">
             <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
-             <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge">✔ Promoted</span>
+             <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge-left">✔ Promoted</span>
           </div>
         </div>
         
