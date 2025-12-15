@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { catchError, tap, finalize } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
@@ -66,20 +66,11 @@ export class AuthService {
   logout(): Observable<any> {
     console.log("User logging out...");
 
-    // Helper to perform local cleanup
-    const localCleanup = () => {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('refreshTokenExpiry');
-      this._isLoggedIn.next(false);
-      this.router.navigate(['/']); // Redirect to landing/login
-    };
-
     // 1. Check if token is invalid/expired before sending request
     if (!this.isTokenValid()) {
       console.log("Token expired or invalid, performing local logout only.");
-      localCleanup();
-      return new BehaviorSubject(true).asObservable(); // Return instant success
+      this.performLocalLogout();
+      return of(true); // Return instant success
     }
 
     // 2. Attempt server-side logout
@@ -94,9 +85,18 @@ export class AuthService {
       }),
       // 3. Always clean up locally, regardless of server response
       finalize(() => {
-        localCleanup();
+        this.performLocalLogout();
       })
     );
+  }
+
+  // Helper to perform local cleanup
+  performLocalLogout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('refreshTokenExpiry');
+    this._isLoggedIn.next(false);
+    this.router.navigate(['/']); // Redirect to landing/login
   }
 
   // Helper to check token validity
@@ -105,7 +105,12 @@ export class AuthService {
     if (!token) return false;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return false; // Malformed token
+      }
+
+      const payload = JSON.parse(atob(parts[1]));
       if (!payload.exp) return true; // No expiry? assume valid or let backend decide
 
       const expiry = payload.exp * 1000;

@@ -1,12 +1,12 @@
-import { HttpEvent, HttpEventType, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
+import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { AuthService } from '../../Services/auth/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
   console.log("Interceptor working");
   const accessToken = localStorage.getItem('accessToken');
-  const router = inject(Router);
+  const authService = inject(AuthService);
 
   // Clone request with header if token exists
   let newRequest = req;
@@ -27,14 +27,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       // Global 401 handling
       if (error.status === 401) {
         console.warn("Unauthorized request - handling token expiration");
-
-        // Clear auth state
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('refreshTokenExpiry');
-
-        // Redirect to login/landing
-        router.navigate(['/']);
+        authService.performLocalLogout();
       }
 
       return throwError(() => error);
