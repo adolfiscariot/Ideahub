@@ -16,7 +16,7 @@ import { GroupMembersModalComponent } from '../../Components/modals/group-member
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent,ButtonsComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -30,7 +30,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   currentUserId: string = '';
   
   selectedIdea: any = null;
-  membersCount: string = '';
+  membersCount: string = '0';
 
   isVoting: boolean = false;
   isUnvoting: boolean = false;
@@ -57,6 +57,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
   title: '',
   description: ''
 };
+
+  sortMode: 'top' | 'newest' = 'top';
+
+  showRequestsModal = false;
+  pendingRequests: any[] = [];
+  loadingRequests = false;
+  errorRequests = '';
+
 
   private routeSub: Subscription = new Subscription();
 
@@ -149,12 +157,106 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.modalEditData = { ...idea };
   }
 
-// ... inside your IdeasComponent class, add these methods:
+setSortMode(mode: 'top' | 'newest'): void {
+  this.sortMode = mode;
+  this.sortIdeas();
+}
+
+sortIdeas(): void {
+  if (!this.ideas) return;
+
+  if(this.sortMode === 'top') {
+    this.ideas.sort((a, b) => (b.voteCount || 0) - (a.voteCount || 0));
+  } else if (this.sortMode === 'newest') {
+    this.ideas.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+}
 
 selectIdea(idea: any): void {
   console.log('Selecting idea:', idea);
   this.selectedIdea = idea;
 }
+
+viewRequests(groupId: string) {
+  console.log('Fetching pending requests for group:', groupId);
+  this.showRequestsModal = true;
+  this.loadingRequests = true;
+  this.errorRequests = '';
+
+  this.groupsService.viewRequests(groupId).subscribe({
+    next: (res: any) => {
+      console.log('Pending requests received:', res);
+      this.pendingRequests = res.data.map((userId:string) => ({ userId})) // res should be an array of { userId, ... }
+      this.loadingRequests = false;
+    },
+    error: (err) => {
+      console.error('Error fetching requests:', err);
+      this.errorRequests = 'Failed to load requests';
+      this.loadingRequests = false;
+    }
+  });
+}
+
+// ideas.component.ts
+
+confirmLeaveGroup() {
+  // optional: show a confirmation toast/modal
+  const confirmLeave = confirm('Are you sure you want to leave this group?');
+  if (confirmLeave) {
+    this.leaveGroup();
+  }
+}
+
+leaveGroup() {
+  if (!this.groupId) return;
+
+  this.groupsService.leaveGroup(this.groupId).subscribe({
+    next: (res) => {
+      console.log('Left group response:', res); // check backend response
+      alert('You have left the group');          // simple feedback for now
+      this.router.navigate(['/groups']);         // redirect after leaving
+    },
+    error: (err) => {
+      console.error('Failed to leave group:', err);
+      alert('Failed to leave the group');       // simple error feedback
+    }
+  });
+}
+
+
+
+acceptRequest(groupId: string, requestUserId: string) {
+  console.log('Accept request:', requestUserId);
+  this.groupsService.acceptRequest(groupId, requestUserId).subscribe({
+    next: () => {
+      console.log('Request accepted for user:', requestUserId);
+      this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+    },
+    error: (err) => console.error('Error accepting request:', err)
+  });
+}
+
+rejectRequest(groupId: string, requestUserId: string) {
+  console.log('Reject request:', requestUserId);
+  this.groupsService.rejectRequest(groupId, requestUserId).subscribe({
+    next: () => {
+      console.log('Request rejected for user:', requestUserId);
+      this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+    },
+    error: (err) => console.error('Error rejecting request:', err)
+  });
+
+
+
+}
+
+closeRequestsModal() {
+  this.showRequestsModal = false;
+}
+
+
 
 onUpdateIdeaFromModal(event: {title: string, description: string}): void {
   if (!this.selectedIdea) {
@@ -269,10 +371,6 @@ openMembersModal() {
   });
 }
 
-// closeMembersModal() {
-//   this.showMembersModal = false;
-// }
-
   formatIdeaDate(date: any): string {
     if (!date) return 'Unknown date';
     try {
@@ -319,7 +417,7 @@ loadGroupMembers(): void {
 }
 
 
-    loadIdeas(): void {
+  loadIdeas(): void {
   this.isLoading = true;
   this.ideasService.getIdeasByGroup(this.groupId).subscribe({
     next: async (response) => {
@@ -328,7 +426,6 @@ loadGroupMembers(): void {
       console.log('API Response:', response);
       
       if (response.success && response.data) {
-        // First, map the ideas from API - MAKE SURE TO INCLUDE isPromotedToProject
         this.ideas = response.data.map((idea: any) => {
           console.log(`Mapping idea "${idea.title}":`, {
             id: idea.id,
@@ -343,7 +440,7 @@ loadGroupMembers(): void {
             UserId: idea.userId || idea.UserId || '',
             userId: idea.userId || idea.UserId || '',
             groupId: this.groupId,
-            isPromotedToProject: idea.isPromotedToProject || false, // THIS IS THE KEY LINE!
+            isPromotedToProject: idea.isPromotedToProject || false,
             isDeleted: idea.isDeleted || false,
             createdAt: new Date(idea.createdAt || new Date()),
             updatedAt: new Date(idea.updatedAt || new Date()),
@@ -373,6 +470,8 @@ loadGroupMembers(): void {
         } else {
           console.log('No ideas to fetch vote counts for');
         }
+
+        this.sortIdeas();
         
         // Update selected idea if it exists
         if (this.selectedIdea) {
@@ -942,8 +1041,6 @@ onPromoteIdea(idea: Idea, event?: Event): void {
     }
   });
 }
-
-  
 
   // DELETE IDEA METHOD
   onDeleteIdea(ideaId: string, event?: Event): void {

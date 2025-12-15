@@ -1,11 +1,29 @@
 <div class="button">
+
+  <!-- CASE 1: Navigation button -->
+  <a *ngIf="buttonLink" [routerLink]="buttonLink">
+    <button
+      class="btn"
+      [type]="buttonType"
+      [ngClass]="buttonStyleClass"
+      [disabled]="disabled"
+      [attr.title]="title"
+    >
+      {{ buttonText }}
+      <ng-content></ng-content>
+    </button>
+  </a>
+
+  <!-- CASE 2: Normal button (no navigation) -->
   <button
+    *ngIf="!buttonLink"
     class="btn"
     [type]="buttonType"
-    [routerLink]="buttonType === 'button' ? buttonLink : null"
     [ngClass]="buttonStyleClass"
     [disabled]="disabled"
+    [attr.title]="title"
   >
     {{ buttonText }}
+    <ng-content></ng-content>
   </button>
 </div>
