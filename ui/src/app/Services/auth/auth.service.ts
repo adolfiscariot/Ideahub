@@ -69,7 +69,11 @@ export class AuthService {
     // 1. Check if token is invalid/expired before sending request
     if (!this.isTokenValid()) {
       console.log("Token expired or invalid, performing local logout only.");
+<<<<<<< Updated upstream
       this.performLocalLogout();
+=======
+      this.logoutLocal();
+>>>>>>> Stashed changes
       return of(true); // Return instant success
     }
 
@@ -80,26 +84,86 @@ export class AuthService {
       }),
       catchError((error: HttpErrorResponse) => {
         console.error("Server logout failed, forcing local logout", error);
+<<<<<<< Updated upstream
         // Even if server fails, we continue to finally block
+=======
+>>>>>>> Stashed changes
         return throwError(() => error);
       }),
       // 3. Always clean up locally, regardless of server response
       finalize(() => {
+<<<<<<< Updated upstream
         this.performLocalLogout();
+=======
+        this.logoutLocal();
+>>>>>>> Stashed changes
       })
     );
   }
 
-  // Helper to perform local cleanup
-  performLocalLogout() {
+  /**
+   * Refreshes the JWT access token using the refresh token.
+   * If successful, updates local storage with new tokens and keeps user logged in.
+   * If failed, logs the user out locally.
+   * @returns Observable of the refresh response
+   */
+  refreshToken(): Observable<any> {
+    const accessToken = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (!accessToken || !refreshToken) {
+      this.logoutLocal();
+      return throwError(() => new Error('No tokens found'));
+    }
+
+    const payload = {
+      accessToken,
+      refreshToken
+    };
+
+    return this.http.post<any>(`${this.authUrl}/refresh-token`, payload).pipe(
+      tap((response) => {
+        // Handle backend returning { AccessToken: ..., RefreshToken: ... } directly
+        // usually ASP.NET Core serializes to camelCase, check both just in case
+        const newAccessToken = response.accessToken || response.AccessToken;
+        const newRefreshToken = response.refreshToken || response.RefreshToken;
+
+        if (newAccessToken && newRefreshToken) {
+          localStorage.setItem('accessToken', newAccessToken);
+          localStorage.setItem('refreshToken', newRefreshToken);
+          // Backend might not return expiry in refresh, calculate or assume valid
+          this._isLoggedIn.next(true);
+          console.log("Token refreshed successfully");
+        } else {
+          console.warn("Refresh succeeded but tokens were missing in response", response);
+        }
+      }),
+      catchError((error) => {
+        console.error("Token refresh failed", error);
+        this.logoutLocal();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Performs local cleanup of auth state (tokens, subject) and redirects to login.
+   * Public to allow Interceptor to trigger logout on critical failures (e.g. failed refresh).
+   */
+  public logoutLocal() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('refreshTokenExpiry');
     this._isLoggedIn.next(false);
-    this.router.navigate(['/']); // Redirect to landing/login
+    this.router.navigate(['/']);
   }
 
-  // Helper to check token validity
+  // ===== PERMISSION CHECKING METHODS =====
+
+  /**
+   * Validates the structure and expiry of the current access token.
+   * @returns true if token exists, is well-formed, and has not expired.
+   */
   private isTokenValid(): boolean {
     const token = localStorage.getItem('accessToken');
     if (!token) return false;
@@ -111,7 +175,10 @@ export class AuthService {
       }
 
       const payload = JSON.parse(atob(parts[1]));
-      if (!payload.exp) return true; // No expiry? assume valid or let backend decide
+
+      if (!payload.exp) {
+        return false; // Treat missing expiry as invalid for security
+      }
 
       const expiry = payload.exp * 1000;
       return Date.now() < expiry;
@@ -119,8 +186,6 @@ export class AuthService {
       return false; // Invalid token format
     }
   }
-
-  // ===== PERMISSION CHECKING METHODS =====
 
   // Check if user is logged in
   isLoggedIn(): boolean {
