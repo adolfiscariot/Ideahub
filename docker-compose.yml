@@ -4,7 +4,7 @@ services:
     container_name: ideahub-db
     environment:
       POSTGRES_USER: ideahub_user
-      POSTGRES_PASSWORD: ideahub_password
+      POSTGRES_PASSWORD: ideahub_admin
       POSTGRES_DB: ideahub_db
     ports:
       - "5433:5432"
@@ -28,7 +28,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
+      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_admin
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
 
     ports:
