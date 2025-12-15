@@ -264,14 +264,11 @@ background: #ffcc00;
 .btn-view-ideas {
   background: purple;
   color: #fff;
-  padding: 8px 12px;
   border-radius: 4px;
   font-size: 13px;
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-
+  min-width: 50%;
+  margin-right: 50%;
   &:hover {
     background: #ee82ee;
   }
