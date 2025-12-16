@@ -324,3 +324,37 @@
   (share)="onShareIdea($event)"
   (update)="onUpdateIdeaFromModal($event)">
 </app-share-idea-modal>
+
+<!-- Admin Leave Group Modal -->
+<div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <h2>You are the group admin</h2>
+    <p>You must either delete the group or transfer ownership before leaving.</p>
+
+    <div class="modal-actions">
+      <app-buttons 
+        [buttonText]="'Delete Group'"
+        [buttonStyleClass]="'btn-delete-group'"
+        [buttonType]="'button'"
+        (click)="deleteGroup()"
+        >
+      </app-buttons>
+
+      <app-buttons 
+        [buttonText]="'Transfer Ownership'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        >
+      </app-buttons>
+
+      <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-promote'"
+          [buttonType]="'button'"
+          (click)="showAdminLeaveModal = false"
+          >
+      </app-buttons>
+    </div>
+  </div>
+</div>

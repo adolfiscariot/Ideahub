@@ -42,6 +42,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   groupCreatorId: string = '';
 
   //showMembersModal = false;
+  showAdminLeaveModal: boolean = false;
+  showTransferOwnershipModal: boolean = true;
 
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
   groupCreatorIdFromState: string = ''; // set from route state
@@ -204,10 +206,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
   // ideas.component.ts
 
   confirmLeaveGroup() {
-    // optional: show a confirmation toast/modal
-    const confirmLeave = confirm('Are you sure you want to leave this group?');
-    if (confirmLeave) {
-      this.leaveGroup();
+    if (this.isGroupCreator()){
+      this.showAdminLeaveModal = true;
+    }
+    else {
+      const confirmLeave = confirm('Are you sure you want to leave this group?');
+      if (confirmLeave) {
+        this.leaveGroup();
+      }
     }
   }
 
@@ -1097,4 +1103,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
       });
     }
   }
+  deleteGroup() {
+    this.groupsService.deleteGroup(this.groupId).subscribe({
+      next: () => {
+        this.router.navigate(['/groups']);
+      },
+      error: () => {
+        alert('Failed to delete group');
+      }
+    });
+  }
+  openTransferOwnershipModal() {
+    this.showAdminLeaveModal = false;
+    this.showTransferOwnershipModal = true;
+  }
+
 }
