@@ -15,7 +15,7 @@ export class ToastService {
     private toastsSubject = new BehaviorSubject<Toast[]>([]);
     public toasts$ = this.toastsSubject.asObservable();
     private counter = 0;
-    private timeouts: Map<number, any> = new Map();
+    private timeouts: Map<number, ReturnType<typeof setTimeout>> = new Map();
 
     show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', duration: number = 3000) {
         const id = this.counter++;
