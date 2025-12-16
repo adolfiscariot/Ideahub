@@ -7,7 +7,7 @@
 
         <!-- Idea Statistics Summary -->
         <div class="stats-summary" *ngIf="ideaStats">
-            <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroChartBar"
+            <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
                 variant="total"></app-stat-card>
             <app-stat-card label="Open" [value]="ideaStats.open" icon="heroLockOpen" variant="open"></app-stat-card>
             <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
@@ -18,7 +18,7 @@
 
         <div class="analytics-grid">
             <!-- Most Voted Ideas -->
-            <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroLightBulb">
+            <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
                 <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
                     <div *ngFor="let idea of mostVotedIdeas" class="list-item">
                         <div class="item-main">
