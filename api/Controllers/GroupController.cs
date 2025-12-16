@@ -213,32 +213,50 @@ public async Task<IActionResult> JoinGroup(int groupId)
         return BadRequest(ApiResponse.Fail("You are already a member of this group"));
     }
 
-    // Check if user already has a PENDING request
-    var hasPendingRequest = await _context.GroupMembershipRequests
-        .AnyAsync(gmr => gmr.GroupId == groupId && 
-                        gmr.UserId == userId && 
-                        gmr.Status == Status.Pending);
-    
-    if (hasPendingRequest)
-    {
-        _logger.LogWarning("User {userEmail} already has a pending request for group {GroupName}", userEmail, groupName);
-        return BadRequest(ApiResponse.Fail("You already have a pending request to join this group"));
-    }
+    //Public Group? Join immediately, no requests
+    if (group.IsPublic)
+        {
+            _context.UserGroups.Add(new UserGroup
+            {
+                UserId = userId,
+                GroupId = groupId
+            });
 
-    // Create a PENDING request (not immediate membership)
-    var request = new GroupMembershipRequest
-    {
-        UserId = userId,
-        GroupId = groupId,
-        Status = Status.Pending,
-        RequestedAt = DateTime.UtcNow
-    };
+            await _context.SaveChangesAsync();
 
-    _context.GroupMembershipRequests.Add(request);
-    await _context.SaveChangesAsync();
+            _logger.LogInformation("User {userEmail} joined PUBLIC group {groupName}", userEmail, groupName);
+            return Ok(ApiResponse.Ok($"You have joined {groupName}."));
+        }
 
-    _logger.LogInformation("User {userEmail} requested to join group {groupName} (pending approval)", userEmail, groupName);
-    return Ok(ApiResponse.Ok($"Join request sent to group {groupName}. Waiting for admin approval."));
+        else
+        {
+            // Check if user already has a PENDING request
+            var hasPendingRequest = await _context.GroupMembershipRequests
+                .AnyAsync(gmr => gmr.GroupId == groupId && 
+                                gmr.UserId == userId && 
+                                gmr.Status == Status.Pending);
+            
+            if (hasPendingRequest)
+            {
+                _logger.LogWarning("User {userEmail} already has a pending request for group {GroupName}", userEmail, groupName);
+                return BadRequest(ApiResponse.Fail("You already have a pending request to join this group"));
+            }
+
+            // Create a PENDING request (not immediate membership)
+            var request = new GroupMembershipRequest
+            {
+                UserId = userId,
+                GroupId = groupId,
+                Status = Status.Pending,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            _context.GroupMembershipRequests.Add(request);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("User {userEmail} requested to join group {groupName} (pending approval)", userEmail, groupName);
+            return Ok(ApiResponse.Ok($"Join request sent to group {groupName}. Waiting for admin approval."));
+        }
 }
 
     //Leave Group
