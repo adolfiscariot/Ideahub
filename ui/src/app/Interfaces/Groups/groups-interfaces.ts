@@ -41,6 +41,7 @@ export interface GroupMember {
 export interface AddGroup {
   name: string;
   description: string;
+  privacy: string;
 }
 
 export interface UserWithRoles {

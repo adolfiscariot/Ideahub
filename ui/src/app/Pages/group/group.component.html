@@ -171,6 +171,15 @@
               class="form-control" [class.error]="description?.invalid && description?.touched"></textarea>
           </div>
 
+          <div class="form-group">
+            <label for="groupPrivacy">Privacy Status</label>
+            <select id="groupPrivacy" formControlName="privacy" class="form-control" 
+              [class.error]="privacy?.invalid && privacy?.touched">
+              <option [ngValue]="1">Public</option>
+              <option [ngValue]="0">Private</option>
+            </select>
+          </div>
+
           <div class="modal-actions">
             <app-buttons
               [buttonText]="'Cancel'"

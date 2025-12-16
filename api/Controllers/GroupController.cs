@@ -151,6 +151,7 @@ public async Task<IActionResult> ViewGroups()
                 g.CreatedByUser.DisplayName,
                 g.CreatedByUser.Email
             },
+            g.IsPublic, //Private or public
             
             // CRITICAL: Check if current user is a member
             IsMember = _context.UserGroups

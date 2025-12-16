@@ -50,6 +50,11 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             g.Property(g => g.IsDeletedBy)
                 .HasColumnName("DeletedByUserId");
 
+            g.Property(g => g.IsPublic)
+                .HasColumnName("IsPublic")
+                .IsRequired()
+                .HasDefaultValue(true);
+
             //Foreign Key
             g.HasOne(g => g.CreatedByUser)
                 .WithMany(u => u.GroupsCreated)

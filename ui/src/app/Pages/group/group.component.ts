@@ -48,6 +48,7 @@ export class GroupsComponent implements OnInit {
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
 
+
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
@@ -59,6 +60,7 @@ export class GroupsComponent implements OnInit {
     this.createGroupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      privacy: [1, Validators.required]
     });
   }
 
@@ -386,4 +388,9 @@ export class GroupsComponent implements OnInit {
   get description() {
     return this.createGroupForm.get('description');
   }
+
+  get privacy() {
+    return this.createGroupForm.get('privacy');
+  }
 }
+  
