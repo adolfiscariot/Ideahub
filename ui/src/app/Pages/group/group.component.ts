@@ -89,7 +89,8 @@ export class GroupsComponent implements OnInit {
               isMember: group.isMember,
               hasPendingRequest: group.hasPendingRequest,
               createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId
+              isCreator: group.createdByUserId === this.currentUserId,
+              isPublic: group.isPublic
             });
 
             return {
@@ -108,7 +109,14 @@ export class GroupsComponent implements OnInit {
               createdByUser: group.createdByUser || group.CreatedByUser || {
                 displayName: 'Unknown',
                 email: ''
-              }
+              },
+              isPublic:
+                group.isPublic === true ||
+                group.isPublic === 'true' ||
+                group.IsPublic === true ||
+                group.IsPublic === 'true'
+                  ? 'Public'
+                  : 'Private',
             };
           });
 
