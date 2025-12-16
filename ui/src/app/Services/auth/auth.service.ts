@@ -34,7 +34,8 @@ export class AuthService {
         );
       }),
       catchError((e) => {
-        throw new Error(`Registration failed: ${e}`);
+        const errorMessage = e.error?.message || e.message || 'Registration failed';
+        throw new Error(errorMessage);
       })
     );
   }
@@ -58,7 +59,8 @@ export class AuthService {
         }
       }),
       catchError((e) => {
-        throw new Error(`Login failed: ${e.message}`);
+        const errorMessage = e.error?.message || e.message || 'Login failed';
+        throw new Error(errorMessage);
       })
     );
   }
