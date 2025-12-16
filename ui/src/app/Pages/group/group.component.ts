@@ -48,6 +48,7 @@ export class GroupsComponent implements OnInit {
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
 
+
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
@@ -59,6 +60,7 @@ export class GroupsComponent implements OnInit {
     this.createGroupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      isPublic: [true, Validators.required]
     });
   }
 
@@ -87,7 +89,8 @@ export class GroupsComponent implements OnInit {
               isMember: group.isMember,
               hasPendingRequest: group.hasPendingRequest,
               createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId
+              isCreator: group.createdByUserId === this.currentUserId,
+              isPublic: group.isPublic
             });
 
             return {
@@ -106,7 +109,14 @@ export class GroupsComponent implements OnInit {
               createdByUser: group.createdByUser || group.CreatedByUser || {
                 displayName: 'Unknown',
                 email: ''
-              }
+              },
+              isPublic:
+                group.isPublic === true ||
+                group.isPublic === 'true' ||
+                group.IsPublic === true ||
+                group.IsPublic === 'true'
+                  ? 'Public'
+                  : 'Private',
             };
           });
 
@@ -191,10 +201,15 @@ export class GroupsComponent implements OnInit {
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess) {
-          this.toastService.show('Join request sent! Waiting for admin approval.', 'success');
+        if (isSuccess && group.isPublic == 'false') {
+          this.toastService.show('Request sent! Waiting for admin approval.', 'success');
           this.loadGroups();
-        } else {
+        } 
+        else if (isSuccess && group.isPublic == 'true'){
+          this.toastService.show('Joined successfully', 'success');
+          this.onViewIdeas(groupId);
+        }
+        else {
           if (response.message?.includes('already a member')) {
             this.toastService.show('You are already a member of this group!', 'info');
             this.loadGroups();
@@ -386,4 +401,9 @@ export class GroupsComponent implements OnInit {
   get description() {
     return this.createGroupForm.get('description');
   }
+
+  get privacy() {
+    return this.createGroupForm.get('isPublic');
+  }
 }
+  

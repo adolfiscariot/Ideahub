@@ -82,6 +82,10 @@
                 <span class="stat-icon">📅</span>
                 <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
               </div>
+              <div class="stat">
+                <span class="stat-icon">🔐</span>
+                <span class="stat-privacy">{{ group.isPublic }}</span>
+              </div>
             </div>
 
             <hr class="group-divider">
@@ -169,6 +173,15 @@
             <textarea id="groupDescription" formControlName="description"
               placeholder="Describe what your group is about" rows="3"
               class="form-control" [class.error]="description?.invalid && description?.touched"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="groupPrivacy">Privacy Status</label>
+            <select id="groupPrivacy" formControlName="isPublic" class="form-control" 
+              [class.error]="privacy?.invalid && privacy?.touched">
+              <option [ngValue]="true">Public</option>
+              <option [ngValue]="false">Private</option>
+            </select>
           </div>
 
           <div class="modal-actions">
