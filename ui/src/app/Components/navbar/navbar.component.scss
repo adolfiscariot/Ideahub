@@ -61,6 +61,31 @@
   gap: 20px;
 }
 
+.notification-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    transform: scale(1.05);
+  }
+
+  .bell-icon {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+  }
+}
+
 .btn-signup {
   background-color: violet;
 }
