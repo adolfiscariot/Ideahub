@@ -8,7 +8,7 @@ import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
 })
 export class GroupsService {
   private apiUrl = 'http://localhost:5065/api/group';
-  
+
   constructor(private http: HttpClient) { }
 
   // Helper method to convert backend response to our interface
@@ -54,31 +54,31 @@ export class GroupsService {
 
   // GET /api/group/view-requests?groupId={guid}
   viewRequests(groupId: string): Observable<ApiResponse<any>> {
-  const params = new HttpParams().set('groupId', groupId);
+    const params = new HttpParams().set('groupId', groupId);
 
-  return this.http.get<any>(`${this.apiUrl}/view-requests`, { params }).pipe(
-    map(response => this.convertResponse<any>(response))
-  );
-}
+    return this.http.get<any>(`${this.apiUrl}/view-requests`, { params }).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
 
- // POST /api/group/leave-group?groupId={guid}
+  // POST /api/group/leave-group?groupId={guid}
 
- rejectRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
-  const params = new HttpParams()
-    .set('groupId', groupId)
-    .set('requestUserId', requestUserId);
+  rejectRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
+    const params = new HttpParams()
+      .set('groupId', groupId)
+      .set('requestUserId', requestUserId);
 
-  return this.http.post<any>(`${this.apiUrl}/reject-request`, {}, { params }).pipe(
-    map(response => this.convertResponse<any>(response))
-  );
-}
+    return this.http.post<any>(`${this.apiUrl}/reject-request`, {}, { params }).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
 
   // POST /api/group/accept-request?groupId={guid}&requestUserId={userId}
   acceptRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('requestUserId', requestUserId);
-    
+
     return this.http.post<any>(`${this.apiUrl}/accept-request`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
@@ -87,16 +87,27 @@ export class GroupsService {
   // POST /api/group/leave-group?groupId={guid}
 
   leaveGroup(groupId: string): Observable<ApiResponse<any>> {
-  const params = new HttpParams().set('groupId', groupId);
+    const params = new HttpParams().set('groupId', groupId);
 
-  return this.http.post<any>(`${this.apiUrl}/leave-group`, {}, { params }).pipe(
-    map(response => this.convertResponse<any>(response))
-  );
-}
+    return this.http.post<any>(`${this.apiUrl}/leave-group`, {}, { params }).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
 
   // DELETE /api/group/{groupId}
   deleteGroup(groupId: string): Observable<ApiResponse<any>> {
     return this.http.delete<any>(`${this.apiUrl}/${groupId}`).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
+
+  // POST /api/group/transfer-ownership
+  transferOwnership(groupId: string, newOwnerEmail: string): Observable<ApiResponse<any>> {
+    const params = new HttpParams()
+      .set('groupId', groupId)
+      .set('newOwnerEmail', newOwnerEmail);
+
+    return this.http.post<any>(`${this.apiUrl}/transfer-ownership`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }

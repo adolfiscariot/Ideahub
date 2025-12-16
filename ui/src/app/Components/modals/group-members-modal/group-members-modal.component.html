@@ -8,17 +8,17 @@
       </button>
     </div>
   </div>
-  
+
   <div class="modal-content">
     <div *ngIf="isLoading" class="loading">
       <div class="spinner"></div>
       <p>Loading members...</p>
     </div>
-    
+
     <div *ngIf="!isLoading && members.length === 0" class="no-members">
       <p>No members found in this group.</p>
     </div>
-    
+
     <div *ngIf="!isLoading && members.length > 0" class="members-list">
       <!-- LOOK HERE: We're now using 'member' variable, not 'data.group' -->
       <div *ngFor="let member of members" class="member-item">
@@ -29,9 +29,17 @@
           <div class="member-name">
             <!-- Show the ACTUAL member's name -->
             {{ member.displayName || member.userName || member.name || 'Unknown User' }}
-            
+
             <!-- Show creator badge only if this member created the group -->
-            <span *ngIf="member.id === data.group.createdByUserId || member.userId === data.group.createdByUserId" class="creator-badge"></span> <!-- MAYBE OR MAYBE NOT -->
+            <span *ngIf="member.id === data.group.createdByUserId || member.userId === data.group.createdByUserId"
+              class="creator-badge"> (Owner)</span>
+          </div>
+          <!-- Transfer Ownership Action -->
+          <div class="member-actions"
+            *ngIf="isOwner && member.id !== data.group.createdByUserId && member.userId !== data.group.createdByUserId">
+            <button class="transfer-btn" (click)="transferOwnership(member)" title="Transfer Ownership">
+              <mat-icon>swap_horiz</mat-icon>
+            </button>
           </div>
         </div>
       </div>

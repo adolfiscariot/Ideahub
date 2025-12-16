@@ -73,8 +73,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .no-members {
@@ -166,7 +171,33 @@
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
+  font-weight: 500;
 }
+
+.member-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.transfer-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background-color: #fee2e2; // Light red background
+    color: #ef4444; // Red icon
+  }
+}
+
 
 .modal-footer {
   padding: 16px 24px;
