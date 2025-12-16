@@ -56,7 +56,7 @@
             </app-dashboard-card>
 
             <!-- Group Engagement -->
-            <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUsersGroup">
+            <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
                 <div *ngIf="groupEngagement.length > 0; else noGroups">
                     <div *ngFor="let group of groupEngagement" class="list-item">
                         <div class="item-main">
@@ -74,7 +74,7 @@
             </app-dashboard-card>
 
             <!-- Promoted Ideas -->
-            <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroBadgeCheck">
+            <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
                 <div *ngIf="promotedIdeas.length > 0; else noPromoted">
                     <div *ngFor="let idea of promotedIdeas" class="list-item">
                         <div class="item-main">
