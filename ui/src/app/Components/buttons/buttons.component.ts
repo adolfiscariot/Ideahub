@@ -14,8 +14,9 @@ export class ButtonsComponent {
   @Input() buttonStyleClass: string = '';
   @Input() buttonLink: string = '';
   @Input() buttonType: 'submit' | 'button' | 'reset' = 'button';
- 
+
   // Ideas
   @Input() disabled: boolean = false;
-  @Input() title: string = ''; 
+  @Input() title: string = '';
+  @Input() isLoading: boolean = false;
 }

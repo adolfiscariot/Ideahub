@@ -27,8 +27,9 @@ import { RouterLink } from '@angular/router';
 export class RegistrationInputComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
+  isLoading = false;
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   registrationForm = new FormGroup(
     {
@@ -60,22 +61,25 @@ export class RegistrationInputComponent implements OnInit {
 
   onSubmit(event: Event) {
     if (this.registrationForm.valid) {
+      this.isLoading = true;
       const registrationData: Registration =
         this.registrationForm.getRawValue();
       this.authService.register(registrationData).subscribe({
         next: (response) => {
+          this.isLoading = false;
           console.log(`Registration was successful: ${response.message}`);
           alert('Registration was successful');
           this.router.navigate(['/confirm-registration']);
+          this.registrationForm.reset();
         },
         error: (errorMessage) => {
+          this.isLoading = false;
           console.error(`Registration unsuccessful: ${errorMessage.errors}`);
           alert(
             `Registration failed.${errorMessage.value || 'Please try again'}`
           );
         },
       });
-      this.registrationForm.reset();
     } else {
       event.preventDefault();
       this.registrationForm.markAllAsTouched();

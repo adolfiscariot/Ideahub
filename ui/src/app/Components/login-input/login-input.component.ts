@@ -21,8 +21,9 @@ import { Router } from '@angular/router';
 export class LoginInputComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
+  isLoading = false;
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -39,21 +40,22 @@ export class LoginInputComponent implements OnInit {
     console.log(`${this.loginForm.value.email} is logging in...`);
 
     if (this.loginForm.valid) {
+      this.isLoading = true;
       const loginData: Login = this.loginForm.getRawValue();
 
       this.authService.login(loginData).subscribe({
         next: (response) => {
+          this.isLoading = false;
           console.log(response.message);
           this.router.navigate(['/home']);
+          this.loginForm.reset();
         },
         error: (error) => {
+          this.isLoading = false;
           console.error('Login failed: ', error.message);
           alert(error.message);
-          throw new Error(error.message);
         },
       });
-
-      this.loginForm.reset();
     } else {
       event.preventDefault();
       console.error('Please input valid data in the login form');
