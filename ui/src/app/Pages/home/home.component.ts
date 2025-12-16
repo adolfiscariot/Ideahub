@@ -26,7 +26,8 @@ import {
   heroLightBulb,
   heroHandThumbUp,
   heroBriefcase,
-  heroUserGroup
+  heroUserGroup,
+  heroStar
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -49,7 +50,8 @@ import {
     heroLightBulb,
     heroHandThumbUp,
     heroBriefcase,
-    heroUserGroup
+    heroUserGroup,
+    heroStar
   })],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
