@@ -21,6 +21,7 @@
 
     <hr class="divider">
 
+<<<<<<< HEAD
     <!-- Loading State -->
     <div *ngIf="isLoading" class="loading">
       <div class="spinner"></div>
@@ -29,6 +30,35 @@
 
     <!-- Groups List -->
     <div *ngIf="!isLoading" class="groups-list">
+=======
+  <hr class="divider">
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading groups...</p>
+  </div>
+
+  <!-- Groups List -->
+  <div *ngIf="!isLoading" class="groups-list">
+
+    <!-- No Groups State -->
+    <div *ngIf="groups.length === 0" class="no-groups">
+      <h3>No groups yet</h3>
+      <p>Be the first to create a group and start collaborating!</p>
+      
+      <app-buttons
+        [buttonText]="'+ Create First Group'"
+        [buttonStyleClass]="'btn-create-first-group'"
+        [buttonType]="'button'"
+        (click)="toggleCreateForm()">
+      </app-buttons>
+    </div>
+
+    <!-- GRID VIEW -->
+  <div *ngIf="groups.length > 0" class="groups-grid">
+  <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
 
       <!-- No Groups State -->
       <ng-container *ngIf="groups.length === 0; else gridView">
@@ -37,6 +67,7 @@
           <h3>No groups yet</h3>
           <p>Be the first to create a group and start collaborating!</p>
 
+<<<<<<< HEAD
           <app-buttons
             [buttonText]="' + Create First Group'"
             [buttonStyleClass]="'btn-create-first-group'"
@@ -191,5 +222,320 @@
       </div>
     </div>
 
+=======
+    <div class="group-top">
+
+      <!-- Group Header -->
+      <div class="group-header">
+        <div class="group-title-section">
+          <h2 class="group-name">{{ group.name }}</h2>
+        </div>
+
+        <!-- Admin -->
+        <div *ngIf="canConfigureGroup(group)" class="admin-info">
+          <span class="admin-badge">admin</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p class="group-description">{{ group.description }}</p>
+
+    </div> 
+
+
+    <!-- Stats -->
+    <div class="group-stats">
+      <div class="stat">
+        <span class="stat-icon">👥</span>
+        <span class="stat-count">{{ group.memberCount || 0 }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">💡</span>
+        <span class="stat-count">{{ group.ideaCount || 0 }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">📅</span>
+        <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+      </div>
+    </div>
+
+    <hr class="group-divider">
+
+
+    <!-- BOTTOM SECTION -->
+    <div class="group-bottom">
+
+      <!-- Member: View Ideas Button -->
+      <app-buttons
+        *ngIf="group.isMember"
+        [buttonText]="'💡 View Ideas'"
+        [buttonStyleClass]="'btn-view-ideas'"
+        [buttonType]="'button'"
+        (click)="onViewIdeas(group.id)">
+      </app-buttons>
+
+      <!-- Pending -->
+      <div *ngIf="!group.isMember && group.hasPendingRequest"
+           class="pending-status">
+        ⏳ Pending Approval
+      </div>
+
+      <!-- Join Button -->
+      <app-buttons
+        *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+        [buttonText]="'Join Group'"
+        [buttonStyleClass]="'btn-join-group'"
+        [buttonType]="'button'"
+        (click)="onJoinGroup(group.id)">
+      </app-buttons>
+
+      <!-- Actions -->
+      <div class="group-actions">
+
+        <!-- Details Button -->
+        <app-buttons
+          [buttonText]="'📋 Details'"
+          [buttonStyleClass]="'btn-group-details'"
+          [buttonType]="'button'"
+          (click)="openDetailsModal(group)">
+        </app-buttons>
+
+        <!-- Members Button -->
+        <app-buttons
+          [buttonText]="'👥 Members'"
+          [buttonStyleClass]="'btn-group-members'"
+          [buttonType]="'button'"
+          (click)="openMembersModal(group)">
+        </app-buttons>
+
+        <!-- Delete Button -->
+        <app-buttons
+          *ngIf="canConfigureGroup(group)"
+          [buttonText]="'🗑️ Delete'"
+          [buttonStyleClass]="'btn-delete-group'"
+          [buttonType]="'button'"
+          [title]="'Delete Group'"
+          (click)="openDeleteModal(group)">
+        </app-buttons>
+
+      </div> 
+
+    </div> 
+
+  </div>
+</div>
+
+    <!-- Create Group Modal -->
+    <app-modal 
+      [isOpen]="showCreateForm" 
+      [title]="'Create New Group'"
+      [size]="'md'"
+      (closeModal)="onCancelCreate()">
+      
+      <div modal-body>
+        <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
+          <div class="form-group">
+            <label for="groupName">Group Name</label>
+            <input id="groupName"
+                   type="text"
+                   formControlName="name"
+                   placeholder="Enter group name"
+                   class="form-control"
+                   [class.error]="name?.invalid && name?.touched">
+          </div>
+
+          <div class="form-group">
+            <label for="groupDescription">Description</label>
+            <textarea id="groupDescription"
+                      formControlName="description"
+                      placeholder="Describe what your group is about"
+                      rows="3"
+                      class="form-control"
+                      [class.error]="description?.invalid && description?.touched"></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div modal-footer>
+        <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-modal-cancel'"
+          [buttonType]="'button'"
+          [disabled]="isSubmitting"
+          (click)="onCancelCreate()">
+        </app-buttons>
+
+        <app-buttons
+          [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
+          [buttonStyleClass]="'btn-modal-submit'"
+          [buttonType]="'submit'"
+          [disabled]="createGroupForm.invalid || isSubmitting"
+          (click)="onCreateGroup()">
+        </app-buttons>
+      </div>
+    </app-modal>
+
+    <!-- Group Details Modal -->
+    <app-modal
+      [isOpen]="showDetailsModal"
+      [title]="selectedGroup?.name + ' Details'"
+      [size]="'md'"
+      [showFooter]="false"
+      (closeModal)="closeDetailsModal()">
+      
+      <div modal-body>
+        <div class="group-details-container">
+          <div class="group-header-section">
+            <h3 class="group-detail-name">{{ selectedGroup?.name }}</h3>
+            <p class="group-detail-description">{{ selectedGroup?.description }}</p>
+          </div>
+          
+          <div class="group-info-grid">
+            <div class="info-item">
+              <div class="info-label">Status</div>
+              <div class="info-value">
+                <span [class.status-active]="selectedGroup?.isActive" [class.status-inactive]="!selectedGroup?.isActive" class="status-badge">
+                  {{ selectedGroup?.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Created</div>
+              <div class="info-value">{{ formatModalDate(selectedGroup?.createdAt) }}</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Members</div>
+              <div class="info-value">{{ selectedGroup?.memberCount || 0 }}</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Ideas</div>
+              <div class="info-value">{{ selectedGroup?.ideaCount || 0 }}</div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Created By</div>
+              <div class="info-value">{{ selectedGroup?.createdByUser?.displayName || 'Unknown' }}</div>
+            </div>
+          </div>
+          
+          <div *ngIf="selectedGroup?.hasPendingRequest" class="pending-notice">
+            <div class="pending-icon">⏳</div>
+            <div class="pending-text">
+              <strong>Pending Approval</strong>
+              <p>Your request to join this group is awaiting admin approval.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-modal>
+
+    <!-- Group Members Modal -->
+    <app-modal
+      [isOpen]="showMembersModal"
+      [title]="selectedGroup?.name + ' Members'"
+      [size]="'lg'"
+      (closeModal)="closeMembersModal()">
+      
+      <div modal-body>
+        <div class="members-container">
+          <div class="members-header">
+            <span class="members-count">{{ groupMembers.length }} members</span>
+          </div>
+          
+          <div class="members-content">
+            <div *ngIf="isLoadingMembers" class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading members...</p>
+            </div>
+            
+            <div *ngIf="!isLoadingMembers && groupMembers.length === 0" class="empty-state">
+              <div class="empty-icon">👥</div>
+              <p>No members found in this group.</p>
+            </div>
+            
+            <div *ngIf="!isLoadingMembers && groupMembers.length > 0" class="members-list">
+              <div *ngFor="let member of groupMembers" class="member-card">
+                <div class="member-avatar-circle">
+                  <span class="avatar-text">{{ getInitials(member.displayName || member.userName || member.name || member.email) }}</span>
+                </div>
+                
+                <div class="member-details">
+                  <div class="member-name-row">
+                    <span class="member-name">{{ member.displayName || member.userName || member.name || 'Unknown User' }}</span>
+                    <span *ngIf="member.id === selectedGroup?.createdByUserId || member.userId === selectedGroup?.createdByUserId" 
+                          class="creator-badge">👑 Creator</span>
+                  </div>
+                  <div class="member-extra">
+                    <span class="member-email">{{ member.email || '' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div modal-footer>
+        <app-buttons
+          [buttonText]="'Close'"
+          [buttonStyleClass]="'btn-modal-cancel'"
+          (click)="closeMembersModal()">
+        </app-buttons>
+      </div>
+    </app-modal>
+
+    <!-- Delete Confirmation Modal -->
+    <app-modal
+      [isOpen]="showDeleteModal"
+      [title]="'Delete Group'"
+      [size]="'sm'"
+      (closeModal)="closeDeleteModal()">
+      
+      <div modal-body>
+        <div class="delete-confirmation-content">
+          <div class="warning-icon-container">
+            <span class="warning-icon">⚠️</span>
+          </div>
+          
+          <h4 class="delete-title">Delete "{{selectedGroup?.name}}"?</h4>
+          
+          <p class="delete-message">
+            This will permanently delete the group and all its data including:
+          </p>
+          
+          <ul class="delete-list">
+            <li>All group ideas and discussions</li>
+            <li>Member information and contributions</li>
+            <li>Group settings and history</li>
+          </ul>
+          
+          <p class="delete-warning">
+            <strong>This action cannot be undone.</strong>
+          </p>
+        </div>
+      </div>
+      
+      <div modal-footer>
+        <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-modal-cancel'"
+          [buttonType]="'button'"
+          [disabled]="isDeleting"
+          (click)="closeDeleteModal()">
+        </app-buttons>
+        
+        <app-buttons
+          [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
+          [buttonStyleClass]="'btn-modal-danger'"
+          [buttonType]="'button'"
+          [disabled]="isDeleting"
+          (click)="deleteGroup(selectedGroup?.id)">
+        </app-buttons>
+      </div>
+    </app-modal>
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
   </div>
 </app-base-layout>
