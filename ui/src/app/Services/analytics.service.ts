@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment.prod';
     providedIn: 'root'
 })
 export class AnalyticsService {
-    private baseUrl = environment.apiUrl;
+    private baseUrl = `${environment.apiUrl}/analytics`;
 
     constructor(private http: HttpClient) { }
 

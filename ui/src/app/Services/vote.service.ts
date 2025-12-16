@@ -15,7 +15,7 @@ import { environment } from '../../environments/environment.prod';
   providedIn: 'root'
 })
 export class VoteService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/vote`;
 
   constructor(private http: HttpClient) {}
 

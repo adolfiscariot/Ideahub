@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment.prod';
   providedIn: 'root'
 })
 export class GroupsService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/group`;
   
   constructor(private http: HttpClient) { }
 

@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment.prod';
 export class AuthService {
   router = inject(Router);
 
-  private readonly authUrl = environment.apiUrl;
+  private readonly authUrl = `${environment.apiUrl}/auth`;
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
