@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("api/{controller}")]
+[Route("api/project")]
 [Authorize]
 public class ProjectController : ControllerBase
 {

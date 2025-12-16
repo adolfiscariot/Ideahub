@@ -20,7 +20,7 @@ namespace api.Controllers;
 
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<IdeahubUser> _userManager;

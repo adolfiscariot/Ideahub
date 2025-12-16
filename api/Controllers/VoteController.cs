@@ -10,7 +10,7 @@ using Npgsql;
 namespace api.Controllers;
 
 [ApiController]
-[Route("api/{controller}")]
+[Route("api/vote")]
 [Authorize]
 public class VoteController : ControllerBase
 {

@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/analytics")]
 [Authorize]
 public class AnalyticsController : ControllerBase
 {
