@@ -60,7 +60,7 @@ export class GroupsComponent implements OnInit {
     this.createGroupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-      privacy: [1, Validators.required]
+      isPublic: [true, Validators.required]
     });
   }
 
@@ -201,10 +201,15 @@ export class GroupsComponent implements OnInit {
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess) {
-          this.toastService.show('Join request sent! Waiting for admin approval.', 'success');
+        if (isSuccess && group.isPublic == 'false') {
+          this.toastService.show('Request sent! Waiting for admin approval.', 'success');
           this.loadGroups();
-        } else {
+        } 
+        else if (isSuccess && group.isPublic == 'true'){
+          this.toastService.show('Joined successfully', 'success');
+          this.onViewIdeas(groupId);
+        }
+        else {
           if (response.message?.includes('already a member')) {
             this.toastService.show('You are already a member of this group!', 'info');
             this.loadGroups();
@@ -398,7 +403,7 @@ export class GroupsComponent implements OnInit {
   }
 
   get privacy() {
-    return this.createGroupForm.get('privacy');
+    return this.createGroupForm.get('isPublic');
   }
 }
   

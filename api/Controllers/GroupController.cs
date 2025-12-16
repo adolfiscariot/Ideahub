@@ -52,6 +52,7 @@ public class GroupController : ControllerBase
         {
             Name = groupDto.Name,
             Description = groupDto.Description,
+            IsPublic = groupDto.IsPublic,
             CreatedByUserId = userId
         };
 
@@ -87,7 +88,7 @@ public class GroupController : ControllerBase
         await _context.UserGroups.AddAsync(new UserGroup { GroupId = group.Id, UserId = user.Id });
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("New group {groupName} created by {userEmail}", group.Name, userEmail);
+        _logger.LogInformation("New group {groupName} of type {groupPrivacy} created by {userEmail}", group.Name, group.IsPublic, userEmail);
         return Ok(ApiResponse.Ok($"New group {group.Name} created by {userEmail}"));
     }
 

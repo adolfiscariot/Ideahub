@@ -41,7 +41,7 @@ export interface GroupMember {
 export interface AddGroup {
   name: string;
   description: string;
-  privacy: string;
+  isPublic: boolean;
 }
 
 export interface UserWithRoles {

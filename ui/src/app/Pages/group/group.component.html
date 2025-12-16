@@ -177,10 +177,10 @@
 
           <div class="form-group">
             <label for="groupPrivacy">Privacy Status</label>
-            <select id="groupPrivacy" formControlName="privacy" class="form-control" 
+            <select id="groupPrivacy" formControlName="isPublic" class="form-control" 
               [class.error]="privacy?.invalid && privacy?.touched">
-              <option [ngValue]="1">Public</option>
-              <option [ngValue]="0">Private</option>
+              <option [ngValue]="true">Public</option>
+              <option [ngValue]="false">Private</option>
             </select>
           </div>
 
