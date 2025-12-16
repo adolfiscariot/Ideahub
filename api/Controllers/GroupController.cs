@@ -282,6 +282,13 @@ public async Task<IActionResult> LeaveGroup(int groupId)
     }
     var groupName = group.Name;
 
+    // Prevent creator from leaving
+    if (group.CreatedByUserId == userId)
+    {
+        _logger.LogWarning("Group creator {userId} attempted to leave group {groupId} without deleting it or transferring ownership", userId, groupId);
+        return BadRequest(ApiResponse.Fail("The group creator cannot leave the group. You must either delete the group or transfer ownership to another member first."));
+    }
+
     //Check membership
     var userGroup = await _context.UserGroups
         .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
