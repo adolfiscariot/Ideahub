@@ -187,6 +187,11 @@ html, body {
   margin-top: auto; 
 }
 
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
 
 /* Actions */
 .group-actions {

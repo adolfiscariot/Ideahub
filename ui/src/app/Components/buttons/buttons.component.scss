@@ -345,3 +345,34 @@ background: #ffcc00;
     background: #ef4444;
   }
 }
+
+.btn-modal-cancel,
+.btn-modal-submit {
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;          /* makes them equal width */
+  border: 1px solid purple;
+}
+
+.btn-create-first-group {
+  background: yellow;
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 50%;
+  border: 1px purple;
+  box-shadow: none;
+
+  &:hover {
+    background: #ee82ee;
+  }
+}

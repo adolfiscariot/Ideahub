@@ -1,16 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
-import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
-import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
+import { ModalComponent } from '../../Components/modal/modal.component';
 
 @Component({
   selector: 'app-groups',
@@ -20,12 +17,11 @@ import { ButtonsComponent } from "../../Components/buttons/buttons.component";
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ButtonsComponent
-]
+    ButtonsComponent,
+    ModalComponent
+  ]
 })
 export class GroupsComponent implements OnInit {
-  // viewMode: 'list' | 'grid' = 'list';
-  
   // Group data
   groups: any[] = [];
   
@@ -39,16 +35,25 @@ export class GroupsComponent implements OnInit {
   isSubmitting = false;
   isLoading: boolean = true;
   
+  // Modal states
+  showDetailsModal = false;
+  showMembersModal = false;
+  showDeleteModal = false;
+  selectedGroup: any = null;
+  
+  // Members data
+  groupMembers: any[] = [];
+  isLoadingMembers = false;
+  
+  // Delete state
+  isDeleting: boolean = false;
+  
   // Current user ID
   currentUserId: string | null = null;
   
-  // Store pending requests for each group
-  pendingRequests: Map<string, boolean> = new Map();
-
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
-    private dialog: MatDialog,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -58,8 +63,7 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
-    // Get current user ID first
+  ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
@@ -73,19 +77,8 @@ export class GroupsComponent implements OnInit {
       next: (response: any) => {
         this.isLoading = false;
         
-        console.log('DEBUG - Full API response:', response);
-        
         if (response.success && response.data) {
           this.groups = response.data.map((group: any) => {
-            console.log('Group:', {
-              id: group.id,
-              name: group.name,
-              isMember: group.isMember,
-              hasPendingRequest: group.hasPendingRequest,
-              createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId
-            });
-            
             return {
               ...group,
               id: group.id,
@@ -105,12 +98,6 @@ export class GroupsComponent implements OnInit {
               }
             };
           });
-          
-          console.log('Final groups state:');
-          this.groups.forEach((group, i) => {
-            console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
-          });
-          
         } else {
           console.error('Failed to load groups:', response.message);
           this.groups = [];
@@ -127,55 +114,82 @@ export class GroupsComponent implements OnInit {
   // ===== MODAL METHODS =====
 
   openDetailsModal(group: any): void {
-    this.dialog.open(GroupDetailsModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
-    });
+    this.selectedGroup = group;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedGroup = null;
   }
 
   openMembersModal(group: any): void {
-    this.dialog.open(GroupMembersModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
+    this.selectedGroup = group;
+    this.showMembersModal = true;
+    this.loadGroupMembers(group.id);
+  }
+
+  closeMembersModal(): void {
+    this.showMembersModal = false;
+    this.selectedGroup = null;
+    this.groupMembers = [];
+  }
+
+  openDeleteModal(group: any): void {
+    this.selectedGroup = group;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.selectedGroup = null;
+  }
+
+  // ===== DATA LOADING METHODS =====
+
+  loadGroupMembers(groupId: string): void {
+    this.isLoadingMembers = true;
+    this.groupsService.getGroupMembers(groupId).subscribe({
+      next: (response: any) => {
+        this.isLoadingMembers = false;
+        const isSuccess = response.success || response.status;
+        if (isSuccess && response.data) {
+          this.groupMembers = response.data;
+        }
+      },
+      error: (error: any) => {
+        this.isLoadingMembers = false;
+        console.error('Error loading members:', error);
+      }
     });
   }
 
-  openPendingRequestsModal(group: any): void {
-    alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
-  }
-
-  // ===== GROUP JOIN & VIEW IDEAS METHODS =====
+  // ===== GROUP JOIN & VIEW IDEAS =====
 
   onViewIdeas(groupId: string): void {
-  const group = this.groups.find(g => g.id === groupId);
-  
-  if (!group?.isMember) {
-    alert('You must be a member of this group to view ideas.');
-    return;
-  }
-  
-  // Check if user is group creator
-  const isGroupCreator = this.isGroupCreator(group);
-  
-  // Navigate to ideas page with state
-  this.router.navigate(['/groups', groupId, 'ideas'], {
-    state: {
-      isGroupCreator: isGroupCreator,
-      groupName: group.name,
-      groupCreatorId: group.createdByUserId
+    const group = this.groups.find(g => g.id === groupId);
+    
+    if (!group?.isMember) {
+      alert('You must be a member of this group to view ideas.');
+      return;
     }
-  });
-}
+    
+    const isGroupCreator = this.isGroupCreator(group);
+    
+    this.router.navigate(['/groups', groupId, 'ideas'], {
+      state: {
+        isGroupCreator: isGroupCreator,
+        groupName: group.name,
+        groupCreatorId: group.createdByUserId
+      }
+    });
+  }
 
   onJoinGroup(groupId: string): void {
     const group = this.groups.find(g => g.id === groupId);
     
     if (group?.isMember) {
-      alert('You are already a member of this group!'); // THIS WON'T BE TRIGGERED REALLY SINCE THE JOIN BUTTON ONLY SHOWS WHEN YOU ARE NOT A MEMBER
+      alert('You are already a member of this group!');
       return;
     }
     
@@ -265,22 +279,8 @@ export class GroupsComponent implements OnInit {
     this.showCreateForm = false;
     this.createGroupForm.reset();
   }
+
   // ===== GROUP DELETION METHODS =====
-
-  isDeleting: boolean = false;
-
-  onDeleteGroup(group: any): void {
-    const dialogRef = this.dialog.open(DeleteGroupModalComponent, {
-      width: '400px',
-      data: { groupName: group.name }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        this.deleteGroup(group.id);
-      }
-    });
-  }
 
   deleteGroup(groupId: string): void {
     this.isDeleting = true;
@@ -288,6 +288,7 @@ export class GroupsComponent implements OnInit {
     this.groupsService.deleteGroup(groupId).subscribe({
       next: (response: any) => {
         this.isDeleting = false;
+        this.closeDeleteModal();
         
         if (response.success) {
           alert('Group deleted successfully!');
@@ -327,22 +328,42 @@ export class GroupsComponent implements OnInit {
   // ===== HELPER METHODS =====
 
   formatDate(date: any): string {
-  if (!date) return 'Unknown date';
-  try {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  } catch {
-    return 'Invalid date';
+    if (!date) return 'Unknown date';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch {
+      return 'Invalid date';
+    }
   }
-}
 
-  formatMemberCount(count: number): string {
-    if (!count || count === 0) return '0 members';
-    return count === 1 ? '1 member' : `${count} members`;
+  formatModalDate(date: any): string {
+    if (!date) return 'Unknown';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 
   trackById(index: number, item: any): string {
@@ -354,11 +375,8 @@ export class GroupsComponent implements OnInit {
   isGroupCreator(group: any): boolean {
     if (!group || !group.createdByUserId || !this.currentUserId) return false;
     
-    // Normalize both IDs (trim and lowercase)
     const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
     const currentId = this.currentUserId.toString().trim().toLowerCase();
-    
-    console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
     
     return groupCreatorId === currentId;
   }
@@ -367,13 +385,7 @@ export class GroupsComponent implements OnInit {
     return this.isGroupCreator(group);
   }
 
-  // ===== PENDING REQUEST METHODS =====
-
-  hasPendingRequest(groupId: string): boolean {
-    return this.pendingRequests.get(groupId) || false;
-  }
-
-  // ===== FORM GETTER METHODS ===== // SHOULD BE REMOVED AND MOVED TO 
+  // ===== FORM GETTER METHODS =====
 
   get name() { 
     return this.createGroupForm.get('name'); 

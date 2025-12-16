@@ -1,0 +1,23 @@
+<div *ngIf="isOpen" class="modal-overlay" [class]="overlayClass" (click)="onOverlayClick($event)">
+  <div class="modal" [class]="modalClass" [ngClass]="{'modal-sm': size === 'sm', 'modal-md': size === 'md', 'modal-lg': size === 'lg', 'modal-xl': size === 'xl'}">
+    <div class="modal-header">
+      <h3 *ngIf="title">{{ title }}</h3>
+      <ng-content select="[modal-header]"></ng-content>
+      
+      <button *ngIf="showCloseButton" 
+              class="btn-modal-close" 
+              (click)="close()"
+              title="Close">
+        ×
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <ng-content select="[modal-body]"></ng-content>
+    </div>
+
+    <div *ngIf="showFooter" class="modal-footer">
+      <ng-content select="[modal-footer]"></ng-content>
+    </div>
+  </div>
+</div>
