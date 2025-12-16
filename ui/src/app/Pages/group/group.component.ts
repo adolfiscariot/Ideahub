@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
-import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
-import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
+<<<<<<< HEAD
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
+=======
+import { ModalComponent } from '../../Components/modal/modal.component';
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
 
 @Component({
   selector: 'app-groups',
@@ -22,12 +22,19 @@ import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.co
     CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
+<<<<<<< HEAD
     BaseLayoutComponent
   ]
 })
 export class GroupsComponent implements OnInit {
   // viewMode: 'list' | 'grid' = 'list';
 
+=======
+    ModalComponent
+  ]
+})
+export class GroupsComponent implements OnInit {
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
   // Group data
   groups: any[] = [];
 
@@ -40,6 +47,7 @@ export class GroupsComponent implements OnInit {
   createGroupForm: FormGroup;
   isSubmitting = false;
   isLoading: boolean = true;
+<<<<<<< HEAD
 
   // Current user ID
   currentUserId: string | null = null;
@@ -47,10 +55,28 @@ export class GroupsComponent implements OnInit {
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
 
+=======
+  
+  // Modal states
+  showDetailsModal = false;
+  showMembersModal = false;
+  showDeleteModal = false;
+  selectedGroup: any = null;
+  
+  // Members data
+  groupMembers: any[] = [];
+  isLoadingMembers = false;
+  
+  // Delete state
+  isDeleting: boolean = false;
+  
+  // Current user ID
+  currentUserId: string | null = null;
+  
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
-    private dialog: MatDialog,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -60,8 +86,7 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
-    // Get current user ID first
+  ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
@@ -74,6 +99,7 @@ export class GroupsComponent implements OnInit {
     this.groupsService.getGroups().subscribe({
       next: (response: any) => {
         this.isLoading = false;
+<<<<<<< HEAD
 
         console.log('DEBUG - Full API response:', response);
 
@@ -88,6 +114,11 @@ export class GroupsComponent implements OnInit {
               isCreator: group.createdByUserId === this.currentUserId
             });
 
+=======
+        
+        if (response.success && response.data) {
+          this.groups = response.data.map((group: any) => {
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
             return {
               ...group,
               id: group.id,
@@ -107,12 +138,15 @@ export class GroupsComponent implements OnInit {
               }
             };
           });
+<<<<<<< HEAD
 
           console.log('Final groups state:');
           this.groups.forEach((group, i) => {
             console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
           });
 
+=======
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
         } else {
           console.error('Failed to load groups:', response.message);
           this.groups = [];
@@ -129,41 +163,80 @@ export class GroupsComponent implements OnInit {
   // ===== MODAL METHODS =====
 
   openDetailsModal(group: any): void {
-    this.dialog.open(GroupDetailsModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
-    });
+    this.selectedGroup = group;
+    this.showDetailsModal = true;
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedGroup = null;
   }
 
   openMembersModal(group: any): void {
-    this.dialog.open(GroupMembersModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
+    this.selectedGroup = group;
+    this.showMembersModal = true;
+    this.loadGroupMembers(group.id);
+  }
+
+  closeMembersModal(): void {
+    this.showMembersModal = false;
+    this.selectedGroup = null;
+    this.groupMembers = [];
+  }
+
+  openDeleteModal(group: any): void {
+    this.selectedGroup = group;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.selectedGroup = null;
+  }
+
+  // ===== DATA LOADING METHODS =====
+
+  loadGroupMembers(groupId: string): void {
+    this.isLoadingMembers = true;
+    this.groupsService.getGroupMembers(groupId).subscribe({
+      next: (response: any) => {
+        this.isLoadingMembers = false;
+        const isSuccess = response.success || response.status;
+        if (isSuccess && response.data) {
+          this.groupMembers = response.data;
+        }
+      },
+      error: (error: any) => {
+        this.isLoadingMembers = false;
+        console.error('Error loading members:', error);
+      }
     });
   }
 
-  openPendingRequestsModal(group: any): void {
-    alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
-  }
-
-  // ===== GROUP JOIN & VIEW IDEAS METHODS =====
+  // ===== GROUP JOIN & VIEW IDEAS =====
 
   onViewIdeas(groupId: string): void {
     const group = this.groups.find(g => g.id === groupId);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
     if (!group?.isMember) {
       alert('You must be a member of this group to view ideas.');
       return;
     }
+<<<<<<< HEAD
 
     // Check if user is group creator
     const isGroupCreator = this.isGroupCreator(group);
 
     // Navigate to ideas page with state
+=======
+    
+    const isGroupCreator = this.isGroupCreator(group);
+    
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
     this.router.navigate(['/groups', groupId, 'ideas'], {
       state: {
         isGroupCreator: isGroupCreator,
@@ -177,7 +250,7 @@ export class GroupsComponent implements OnInit {
     const group = this.groups.find(g => g.id === groupId);
 
     if (group?.isMember) {
-      alert('You are already a member of this group!'); // THIS WON'T BE TRIGGERED REALLY SINCE THE JOIN BUTTON ONLY SHOWS WHEN YOU ARE NOT A MEMBER
+      alert('You are already a member of this group!');
       return;
     }
 
@@ -267,22 +340,8 @@ export class GroupsComponent implements OnInit {
     this.showCreateForm = false;
     this.createGroupForm.reset();
   }
+
   // ===== GROUP DELETION METHODS =====
-
-  isDeleting: boolean = false;
-
-  onDeleteGroup(group: any): void {
-    const dialogRef = this.dialog.open(DeleteGroupModalComponent, {
-      width: '400px',
-      data: { groupName: group.name }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        this.deleteGroup(group.id);
-      }
-    });
-  }
 
   deleteGroup(groupId: string): void {
     this.isDeleting = true;
@@ -290,7 +349,12 @@ export class GroupsComponent implements OnInit {
     this.groupsService.deleteGroup(groupId).subscribe({
       next: (response: any) => {
         this.isDeleting = false;
+<<<<<<< HEAD
 
+=======
+        this.closeDeleteModal();
+        
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
         if (response.success) {
           alert('Group deleted successfully!');
           this.groups = this.groups.filter(group => group.id !== groupId);
@@ -332,19 +396,46 @@ export class GroupsComponent implements OnInit {
     if (!date) return 'Unknown date';
     try {
       const d = new Date(date);
+<<<<<<< HEAD
       return d.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
+=======
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
       });
     } catch {
       return 'Invalid date';
     }
   }
 
-  formatMemberCount(count: number): string {
-    if (!count || count === 0) return '0 members';
-    return count === 1 ? '1 member' : `${count} members`;
+  formatModalDate(date: any): string {
+    if (!date) return 'Unknown';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 
   trackById(index: number, item: any): string {
@@ -355,6 +446,7 @@ export class GroupsComponent implements OnInit {
 
   isGroupCreator(group: any): boolean {
     if (!group || !group.createdByUserId || !this.currentUserId) return false;
+<<<<<<< HEAD
 
     // Normalize both IDs (trim and lowercase)
     const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
@@ -362,6 +454,12 @@ export class GroupsComponent implements OnInit {
 
     console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
 
+=======
+    
+    const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
+    const currentId = this.currentUserId.toString().trim().toLowerCase();
+    
+>>>>>>> 95cee52 (deleted individual modals, create a single modal popup component and implement it in group and ideas page)
     return groupCreatorId === currentId;
   }
 
@@ -369,13 +467,7 @@ export class GroupsComponent implements OnInit {
     return this.isGroupCreator(group);
   }
 
-  // ===== PENDING REQUEST METHODS =====
-
-  hasPendingRequest(groupId: string): boolean {
-    return this.pendingRequests.get(groupId) || false;
-  }
-
-  // ===== FORM GETTER METHODS ===== // SHOULD BE REMOVED AND MOVED TO 
+  // ===== FORM GETTER METHODS =====
 
   get name() {
     return this.createGroupForm.get('name');
