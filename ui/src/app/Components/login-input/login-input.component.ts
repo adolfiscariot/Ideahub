@@ -54,7 +54,6 @@ export class LoginInputComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          console.error('Login failed: ', error.message);
           this.toastService.show(error.message, 'error');
         },
       });

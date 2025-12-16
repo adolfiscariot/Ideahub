@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
+import { ToastService } from '../../Services/toast.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
@@ -15,7 +16,7 @@ import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.co
 
 @Component({
   selector: 'app-groups',
-  templateUrl: './group.component.html', 
+  templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
   standalone: true,
   imports: [
@@ -50,6 +51,7 @@ export class GroupsComponent implements OnInit {
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
+    private toastService: ToastService,
     private dialog: MatDialog,
     private router: Router,
     private fb: FormBuilder
@@ -147,7 +149,7 @@ export class GroupsComponent implements OnInit {
   }
 
   openPendingRequestsModal(group: any): void {
-    alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
+    this.toastService.show(`Pending requests for ${group.name}:\n\nFeature coming soon!`, 'info');
   }
 
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
@@ -156,7 +158,7 @@ export class GroupsComponent implements OnInit {
     const group = this.groups.find(g => g.id === groupId);
 
     if (!group?.isMember) {
-      alert('You must be a member of this group to view ideas.');
+      this.toastService.show('You must be a member of this group to view ideas.', 'info');
       return;
     }
 
@@ -177,12 +179,12 @@ export class GroupsComponent implements OnInit {
     const group = this.groups.find(g => g.id === groupId);
 
     if (group?.isMember) {
-      alert('You are already a member of this group!'); // THIS WON'T BE TRIGGERED REALLY SINCE THE JOIN BUTTON ONLY SHOWS WHEN YOU ARE NOT A MEMBER
+      this.toastService.show('You are already a member of this group!', 'info');
       return;
     }
 
     if (group?.hasPendingRequest) {
-      alert('You already have a pending request for this group!');
+      this.toastService.show('You already have a pending request for this group!', 'info');
       return;
     }
 
@@ -190,23 +192,23 @@ export class GroupsComponent implements OnInit {
       next: (response: any) => {
         const isSuccess = response.success || response.status;
         if (isSuccess) {
-          alert('Join request sent! Waiting for admin approval.');
+          this.toastService.show('Join request sent! Waiting for admin approval.', 'success');
           this.loadGroups();
         } else {
           if (response.message?.includes('already a member')) {
-            alert('You are already a member of this group!');
+            this.toastService.show('You are already a member of this group!', 'info');
             this.loadGroups();
           } else if (response.message?.includes('pending request')) {
-            alert('You already have a pending request for this group!');
+            this.toastService.show('You already have a pending request for this group!', 'info');
             this.loadGroups();
           } else {
-            alert(response.message || 'Failed to send join request.');
+            this.toastService.show(response.message || 'Failed to send join request.', 'error');
           }
         }
       },
       error: (error: any) => {
         console.error('Error joining group:', error);
-        alert('Failed to send join request. Please try again.');
+        this.toastService.show('Failed to send join request. Please try again.', 'error');
       }
     });
   }
@@ -234,7 +236,7 @@ export class GroupsComponent implements OnInit {
         this.isSubmitting = false;
         const isSuccess = response.success || response.status;
         if (isSuccess) {
-          alert('Group created successfully!');
+          this.toastService.show('Group created successfully!', 'success');
           this.loadGroups();
           this.createGroupForm.reset();
           this.showCreateForm = false;
@@ -242,9 +244,9 @@ export class GroupsComponent implements OnInit {
           if (response.message?.includes('authenticated') ||
             response.message?.includes('User ID') ||
             response.message?.includes('login')) {
-            alert('Please login to create a group.');
+            this.toastService.show('Please login to create a group.', 'warning');
           } else {
-            alert(response.message || 'Failed to create group.');
+            this.toastService.show(response.message || 'Failed to create group.', 'error');
           }
         }
       },
@@ -253,11 +255,11 @@ export class GroupsComponent implements OnInit {
         console.error('Error creating group:', error);
 
         if (error.status === 401) {
-          alert('Please login to create a group.');
+          this.toastService.show('Please login to create a group.', 'warning');
         } else if (error.status === 400) {
-          alert('Invalid group data. Please check your input.');
+          this.toastService.show('Invalid group data. Please check your input.', 'error');
         } else {
-          alert('Failed to create group. Please try again.');
+          this.toastService.show('Failed to create group. Please try again.', 'error');
         }
       }
     });
@@ -292,7 +294,7 @@ export class GroupsComponent implements OnInit {
         this.isDeleting = false;
 
         if (response.success) {
-          alert('Group deleted successfully!');
+          this.toastService.show('Group deleted successfully!', 'success');
           this.groups = this.groups.filter(group => group.id !== groupId);
 
           if (this.groups.length === 0) {
@@ -300,12 +302,12 @@ export class GroupsComponent implements OnInit {
             this.subtitle = 'All groups have been deleted.';
           }
         } else {
-          alert(response.message || 'Failed to delete group');
+          this.toastService.show(response.message || 'Failed to delete group', 'error');
 
           if (response.message?.includes('permission') ||
             response.message?.includes('admin') ||
             response.message?.includes('not allowed')) {
-            alert('Only group admin can delete groups.');
+            this.toastService.show('Only group admin can delete groups.', 'warning');
           }
         }
       },
@@ -314,13 +316,13 @@ export class GroupsComponent implements OnInit {
         console.error('Error deleting group:', error);
 
         if (error.status === 401) {
-          alert('Please login to delete groups.');
+          this.toastService.show('Please login to delete groups.', 'warning');
         } else if (error.status === 403) {
-          alert('You do not have permission to delete this group.');
+          this.toastService.show('You do not have permission to delete this group.', 'warning');
         } else if (error.status === 404) {
-          alert('Group not found.');
+          this.toastService.show('Group not found.', 'error');
         } else {
-          alert('Failed to delete group. Please try again.');
+          this.toastService.show('Failed to delete group. Please try again.', 'error');
         }
       }
     });
