@@ -9,6 +9,7 @@ import {
   FormGroup,
 } from '@angular/forms';
 import { AuthService } from '../../Services/auth/auth.service';
+import { ToastService } from '../../Services/toast.service';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
 
@@ -20,6 +21,7 @@ import { Router } from '@angular/router';
 })
 export class LoginInputComponent implements OnInit {
   authService = inject(AuthService);
+  toastService = inject(ToastService);
   router = inject(Router);
   isLoading = false;
 
@@ -46,19 +48,19 @@ export class LoginInputComponent implements OnInit {
       this.authService.login(loginData).subscribe({
         next: (response) => {
           this.isLoading = false;
-          console.log(response.message);
+          this.toastService.show(response.message, 'success');
           this.router.navigate(['/home']);
           this.loginForm.reset();
         },
         error: (error) => {
           this.isLoading = false;
           console.error('Login failed: ', error.message);
-          alert(error.message);
+          this.toastService.show(error.message, 'error');
         },
       });
     } else {
       event.preventDefault();
-      console.error('Please input valid data in the login form');
+      this.toastService.show('Please input valid data in the login form', 'warning');
     }
   }
 }
