@@ -1,103 +1,65 @@
 <div class="registration">
-  <form
-    class="registration-form"
-    id="registration-form"
-    [formGroup]="registrationForm"
-    (ngSubmit)="onSubmit($event)"
-    >
+  <form class="registration-form" id="registration-form" [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)">
     <div class="page-header">Register</div>
     <div class="form-section">
-      <input
-        id="name-input"
-        type="text"
-        placeholder="Name"
-        formControlName="displayName"
-        />
-      </div>
-      @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.errors?.['required']) {
-        <div
-          class="error-message"
-          >
-          Please enter your name
-        </div>
+      <input id="name-input" type="text" placeholder="Name" formControlName="displayName" />
+    </div>
+    @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.errors?.['required']) {
+    <div class="error-message">
+      Please enter your name
+    </div>
+    }
+
+    <div class="form-section">
+      <input id="email-input" type="email" placeholder="Email" formControlName="email" />
+    </div>
+    @if (registrationForm.get('email')?.touched) {
+    <div class="error-message">
+      @if (registrationForm.get('email')?.errors?.['required']) {
+      <span>
+        Please enter your email</span>
       }
+      @if (registrationForm.get('email')?.errors?.['email']) {
+      <span>
+        Please enter a valid email
+      </span>
+      }
+    </div>
+    }
 
-      <div class="form-section">
-        <input
-          id="email-input"
-          type="email"
-          placeholder="Email"
-          formControlName="email"
-          />
-        </div>
-        @if (registrationForm.get('email')?.touched) {
-          <div class="error-message">
-            @if (registrationForm.get('email')?.errors?.['required']) {
-              <span>
-                Please enter your email</span
-                >
-            }
-            @if (registrationForm.get('email')?.errors?.['email']) {
-              <span>
-                Please enter a valid email
-              </span>
-            }
-          </div>
-        }
+    <div class="form-section">
+      <input id="password-input" type="password" placeholder="Password" formControlName="password" />
+    </div>
 
-        <div class="form-section">
-          <input
-            id="password-input"
-            type="password"
-            placeholder="Password"
-            formControlName="password"
-            />
-          </div>
+    @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.errors?.['required']) {
+    <div class="error-message">
+      Please enter your password
+    </div>
+    }
 
-          @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.errors?.['required']) {
-            <div
-              class="error-message"
-              >
-              Please enter your password
-            </div>
-          }
+    <div class="form-section">
+      <input id="confirm-password-input" type="password" placeholder="Confirm password"
+        formControlName="confirmPassword" />
+    </div>
+    @if (
+    registrationForm.get('confirmPassword')?.invalid &&
+    registrationForm.get('confirmPassword')?.touched
+    ) {
+    <div class="error-message">
+      @if (registrationForm.get('confirmPassword')?.errors?.['required']) {
+      <span>Confirm Password field is required</span>
+      }
+      @if (registrationForm.get('confirmPassword')?.errors?.['passwordsDontMatch']) {
+      <span>Passwords don't match</span>
+      }
+    </div>
+    }
 
-          <div class="form-section">
-            <input
-              id="confirm-password-input"
-              type="password"
-              placeholder="Confirm password"
-              formControlName="confirmPassword"
-              />
-            </div>
-            @if (
-              registrationForm.get('confirmPassword')?.invalid &&
-              registrationForm.get('confirmPassword')?.touched
-              ) {
-              <div
-                class="error-message"
-                >
-                @if (registrationForm.get('confirmPassword')?.errors?.['required']) {
-                  <span
-                    >Confirm Password field is required</span
-                    >
-                }
-                @if (registrationForm.get('confirmPassword')?.errors?.['passwordsDontMatch']) {
-                  <span
-                    >Passwords don't match</span
-                    >
-                  }
-                </div>
-              }
-
-              <div class="submit-button">
-                <app-buttons
-                  [buttonText]="'Register'"
-                  [buttonStyleClass]="'btn-registration'"
-                  [buttonType]="'submit'"
-                  />
-                  <p>Already have an account?</p>
-                  <a routerLink="/login"><u>Login here</u></a>
-                </div>
-              </form>
-            </div>
+    <div class="submit-button">
+      <app-buttons [buttonText]="'Register'" [buttonStyleClass]="'btn-registration'" [buttonType]="'submit'"
+        [isLoading]="isLoading" />
+      <p>Already have an account?</p>
+      <a routerLink="/login"><u>Login here</u></a>
+    </div>
+  </form>
+</div>

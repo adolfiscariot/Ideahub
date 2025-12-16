@@ -76,7 +76,7 @@
   font-weight: 400;
 }
 
-.btn-create-group{
+.btn-create-group {
   background-color: yellow;
   width: 100%;
 }
@@ -89,9 +89,12 @@
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 14px;
-  width: auto;          /* override the global 100px width */
-  height: auto;         /* override the global 30px height */
-  box-shadow: none;     /* override the global shadow */
+  width: auto;
+  /* override the global 100px width */
+  height: auto;
+  /* override the global 30px height */
+  box-shadow: none;
+  /* override the global shadow */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -247,7 +250,7 @@
 }
 
 .btn-view-requests {
-background: #ffcc00;
+  background: #ffcc00;
   color: #333;
   border: none;
   padding: 8px 14px;
@@ -269,6 +272,7 @@ background: #ffcc00;
   display: inline-flex;
   min-width: 50%;
   margin-right: 50%;
+
   &:hover {
     background: #ee82ee;
   }
@@ -293,7 +297,7 @@ background: #ffcc00;
 }
 
 .btn-group-details {
- 
+
   color: #000;
   padding: 8px 12px;
   border-radius: 4px;
@@ -311,7 +315,7 @@ background: #ffcc00;
 }
 
 .btn-group-members {
- 
+
   color: #000;
   padding: 8px 12px;
   border-radius: 4px;
@@ -343,5 +347,21 @@ background: #ffcc00;
 
   &:hover {
     background: #ef4444;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
