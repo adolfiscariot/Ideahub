@@ -54,7 +54,7 @@
                                 <span *ngIf="!project.endedAt" class="text-muted">-</span>
                             </td>
                             <td class="cell-actions">
-                                <button class="btn-icon" title="Edit Project">
+                                <button class="btn-icon" title="Edit Project" (click)="openEditModal(project)">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn-icon" title="View Details">

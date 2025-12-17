@@ -1,0 +1,25 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    min-width: 400px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    gap: 1rem;
+}
+
+.half-width {
+    flex: 1;
+}
+
+/* Adjust Material styles if needed */
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: var(--radius-lg) !important;
+}
