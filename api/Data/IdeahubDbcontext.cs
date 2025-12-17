@@ -48,7 +48,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasColumnName("DeletedAt");
 
             g.Property(g => g.IsDeletedBy)
-                .HasColumnName("DeletedByUserId");
+                .HasColumnName("IsDeletedBy");
 
             g.Property(g => g.IsPublic)
                 .HasColumnName("IsPublic")
