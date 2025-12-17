@@ -43,7 +43,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   //showMembersModal = false;
   showAdminLeaveModal: boolean = false;
-  showTransferOwnershipModal: boolean = true;
+  showTransferOwnershipModal: boolean = false;
 
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
   groupCreatorIdFromState: string = ''; // set from route state
