@@ -12,7 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Cryptography;
 using api.Data;
-using System.Runtime.Intrinsics.Arm;
+using api.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +20,17 @@ namespace api.Controllers;
 
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    // ...
+
+    [HttpGet("ping")]
+    public IActionResult Ping()
+    {
+        return Ok("pong");
+    }
+
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly SignInManager<IdeahubUser> _signInManager;
     private readonly ILogger<AuthController> _logger;

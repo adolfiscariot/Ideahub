@@ -72,12 +72,11 @@ export class RegistrationInputComponent implements OnInit {
           this.router.navigate(['/confirm-registration']);
           this.registrationForm.reset();
         },
-        error: (errorMessage) => {
+        error: (error) => {
           this.isLoading = false;
-          console.error(`Registration unsuccessful: ${errorMessage.errors}`);
-          alert(
-            `Registration failed.${errorMessage.value || 'Please try again'}`
-          );
+          console.error(`Registration unsuccessful:`, error);
+          const msg = error.message || 'Unknown error';
+          alert(`Registration failed. ${msg}`);
         },
       });
     } else {

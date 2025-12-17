@@ -5,12 +5,6 @@
                 <h1 class="page-title">Projects</h1>
                 <p class="page-subtitle">Manage and oversee ongoing initiatives.</p>
             </div>
-            <!-- Potential for future actions like filtering or exporting -->
-            <div class="header-actions">
-                <button class="btn btn-secondary">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-            </div>
         </header>
 
         <div class="card projects-card">
@@ -28,7 +22,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let project of projects">
+                        <tr *ngFor="let project of projects" (click)="openEditModal(project)" class="clickable-row">
                             <td class="cell-title">
                                 <div class="title-wrapper">
                                     <span class="project-title-text">{{ project.title }}</span>
