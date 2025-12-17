@@ -1,12 +1,224 @@
-:host {
-    display: block;
-    height: 100%;
+.projects-page-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-md);
 }
 
-.projects-container {
-    padding: 20px;
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
 
-    h1 {
-        margin-bottom: 10px;
+    .page-title {
+        margin-bottom: var(--spacing-xs);
+        font-size: 1.75rem;
+        color: var(--text-main);
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        margin: 0;
+        font-size: 1rem;
+    }
+}
+
+.projects-card {
+    padding: 0;
+    /* Let table fill the card */
+    overflow: hidden;
+    /* For rounded corners */
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    /* Ensure content doesn't squash too much */
+
+    th,
+    td {
+        padding: var(--spacing-md) var(--spacing-lg);
+        text-align: left;
+    }
+
+    th {
+        background-color: var(--background-color);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    td {
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main);
+        font-size: 0.95rem;
+        transition: background-color 0.15s;
+    }
+
+    tbody tr {
+        &:last-child td {
+            border-bottom: none;
+        }
+
+        &:hover td {
+            background-color: rgba(99, 102, 241, 0.02);
+            /* Very subtle primary tint */
+        }
+    }
+}
+
+/* Column Specifics */
+.col-title {
+    width: 20%;
+}
+
+.col-desc {
+    width: 25%;
+}
+
+.col-overseer {
+    width: 15%;
+}
+
+.col-status {
+    width: 10%;
+}
+
+.col-date {
+    width: 10%;
+}
+
+.col-actions {
+    width: 10%;
+}
+
+.project-title-text {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.cell-desc {
+    max-width: 300px;
+
+    .desc-text {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+}
+
+/* Status Badges - Mapping to component logic */
+.status-planning {
+    @extend .badge;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--info-color);
+}
+
+.status-active {
+    @extend .badge;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.status-completed {
+    @extend .badge;
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+}
+
+.status-shelved {
+    @extend .badge;
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.status-cancelled {
+    @extend .badge;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+/* Actions */
+.cell-actions {
+    white-space: nowrap;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    margin-right: var(--spacing-xs);
+
+    &:hover {
+        background-color: var(--background-color);
+        color: var(--primary-color);
+    }
+}
+
+/* Empty State */
+.empty-state-row td {
+    padding: var(--spacing-2xl);
+    text-align: center;
+    background-color: transparent !important;
+    /* Override hover */
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+
+    i {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: 1.1rem;
+        margin: 0;
     }
 }
