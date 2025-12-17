@@ -245,3 +245,16 @@
     }
 }
 
+
+.clickable-row {
+    cursor: pointer;
+    
+    &:hover {
+        background-color: var(--background-color);
+
+        td {
+            background-color: rgba(99, 102, 241, 0.04) !important;
+        }
+    }
+}
+
