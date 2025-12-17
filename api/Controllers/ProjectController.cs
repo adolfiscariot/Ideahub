@@ -191,7 +191,7 @@ public class ProjectController : ControllerBase
                 project.EndedAt,
                 OverseenByUserName = project.OverseenByUser?.DisplayName ?? "Unknown",
                 OverseenByUserId = project.OverseenByUserId,
-                Status = project.Status.ToString(),
+                Status = (int)project.Status,
                 IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name,
                 IsPublic = project.Group.IsPublic

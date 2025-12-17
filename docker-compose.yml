@@ -12,7 +12,7 @@ services:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db"] # Checks if the DB is accepting connections
+      test: [ "CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db" ] # Checks if the DB is accepting connections
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,7 +28,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5433;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
+      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5432;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
       PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
 
     ports:
@@ -42,6 +42,7 @@ services:
 
 volumes:
   ideahub_data:
+
 
 networks:
   ideahub-net:

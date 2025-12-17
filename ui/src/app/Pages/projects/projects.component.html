@@ -22,7 +22,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let project of projects" (click)="openEditModal(project)" class="clickable-row">
+                        <tr *ngFor="let project of projects" (click)="canEdit(project) ? openEditModal(project) : null"
+                            [class.clickable-row]="canEdit(project)" [class.readonly-row]="!canEdit(project)">
                             <td class="cell-title">
                                 <div class="title-wrapper">
                                     <span class="project-title-text">{{ project.title }}</span>
@@ -58,10 +59,11 @@
                                 <span *ngIf="!project.endedAt" class="text-muted">-</span>
                             </td>
                             <td class="cell-actions">
-                                <button class="btn-icon" title="Edit Project" (click)="openEditModal(project)">
+                                <button *ngIf="canEdit(project)" class="btn-icon" title="Edit Project"
+                                    (click)="openEditModal(project); $event.stopPropagation()">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-icon" title="View Details">
+                                <button class="btn-icon" title="View Details" (click)="$event.stopPropagation()">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </td>

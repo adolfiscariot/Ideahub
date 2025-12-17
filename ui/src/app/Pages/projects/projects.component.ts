@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProjectModalComponent } from '../../Components/modals/edit-project-modal/edit-project-modal.component';
 import { ProjectsService } from '../../Services/projects/projects.service';
+import { AuthService } from '../../Services/auth/auth.service';
 
 @Component({
     selector: 'app-projects',
@@ -20,11 +21,19 @@ export class ProjectsComponent implements OnInit {
 
     private projectsService = inject(ProjectsService);
     private dialog = inject(MatDialog);
+    private authService = inject(AuthService);
+    currentUserId: string = '';
 
     constructor() { }
 
     ngOnInit(): void {
+        this.currentUserId = this.authService.getUserId();
         this.loadProjects();
+    }
+
+    canEdit(project: Project): boolean {
+        // Strict check: Only overseer can edit
+        return this.currentUserId === project.overseenById;
     }
 
     loadProjects(): void {
