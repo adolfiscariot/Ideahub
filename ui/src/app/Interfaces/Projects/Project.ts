@@ -7,6 +7,8 @@ export interface Project {
     endedAt?: string;
     overseenBy: string; // User name or email, depending on what we display
     overseenById: string;
+    groupName?: string;
+    ideaTitle?: string;
 }
 
 export enum ProjectStatus {

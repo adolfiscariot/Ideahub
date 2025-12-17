@@ -30,7 +30,17 @@
                     <tbody>
                         <tr *ngFor="let project of projects">
                             <td class="cell-title">
-                                <span class="project-title-text">{{ project.title }}</span>
+                                <div class="title-wrapper">
+                                    <span class="project-title-text">{{ project.title }}</span>
+                                    <div class="metadata-badges">
+                                        <span class="meta-badge" *ngIf="project.groupName">
+                                            <i class="fas fa-users"></i> {{ project.groupName }}
+                                        </span>
+                                        <span class="meta-badge" *ngIf="project.ideaTitle">
+                                            <i class="fas fa-lightbulb"></i> Idea: {{ project.ideaTitle }}
+                                        </span>
+                                    </div>
+                                </div>
                             </td>
                             <td class="cell-desc">
                                 <span class="desc-text" [title]="project.description">{{ project.description }}</span>

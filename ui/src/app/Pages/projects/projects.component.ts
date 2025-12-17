@@ -29,7 +29,9 @@ export class ProjectsComponent implements OnInit {
                 status: ProjectStatus.Active,
                 createdAt: '2023-10-15T09:00:00Z',
                 overseenBy: 'Alice Johnson',
-                overseenById: 'user1'
+                overseenById: 'user1',
+                groupName: 'Green Earth Group',
+                ideaTitle: 'Urban Farming Plot'
             },
             {
                 id: 2,
@@ -38,7 +40,9 @@ export class ProjectsComponent implements OnInit {
                 status: ProjectStatus.Planning,
                 createdAt: '2023-11-02T14:30:00Z',
                 overseenBy: 'Bob Smith',
-                overseenById: 'user2'
+                overseenById: 'user2',
+                groupName: 'Digital Literacy Squad',
+                ideaTitle: 'Seniors Online'
             },
             {
                 id: 3,
@@ -48,7 +52,9 @@ export class ProjectsComponent implements OnInit {
                 createdAt: '2023-09-10T08:00:00Z',
                 endedAt: '2023-09-10T17:00:00Z',
                 overseenBy: 'Charlie Brown',
-                overseenById: 'user3'
+                overseenById: 'user3',
+                groupName: 'Eco Warriors',
+                ideaTitle: 'Save the River'
             },
             {
                 id: 4,
@@ -57,7 +63,9 @@ export class ProjectsComponent implements OnInit {
                 status: ProjectStatus.Active,
                 createdAt: '2023-12-01T10:00:00Z',
                 overseenBy: 'Diana Ross',
-                overseenById: 'user4'
+                overseenById: 'user4',
+                groupName: 'Health For All',
+                ideaTitle: 'Wheels of Wellness'
             }
         ];
     }
