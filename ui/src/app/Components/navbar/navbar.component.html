@@ -26,11 +26,10 @@
   }
 
 
-
   <div class="navbar-right">
     @if (loggedInStatus | async; as isLoggedIn) {
     <button class="notification-btn" aria-label="Notifications">
-      <ng-icon [name]="heroBell" size="24" class="bell-icon"></ng-icon>
+      <ng-icon [name]="'heroBell'" size="24" class="bell-icon"></ng-icon>
     </button>
     <app-buttons [buttonText]="'LOG OUT'" [buttonStyleClass]="'btn-logout-navbar'" [buttonType]="'button'"
       (click)="onLogout()" />

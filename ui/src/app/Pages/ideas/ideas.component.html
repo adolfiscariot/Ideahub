@@ -324,3 +324,73 @@
   (share)="onShareIdea($event)"
   (update)="onUpdateIdeaFromModal($event)">
 </app-share-idea-modal>
+
+<!-- Admin Leave Group Modal -->
+<div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <h2>You are the group admin</h2>
+    <p>You must either delete the group or transfer ownership before leaving.</p>
+
+    <div class="modal-actions">
+      <app-buttons 
+        [buttonText]="'Delete Group'"
+        [buttonStyleClass]="'btn-delete-group'"
+        [buttonType]="'button'"
+        (click)="deleteGroup()"
+        >
+      </app-buttons>
+
+      <app-buttons 
+        [buttonText]="'Transfer Ownership'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        (click)="openTransferOwnershipModal()"
+        >
+      </app-buttons>
+
+      <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-promote'"
+          [buttonType]="'button'"
+          (click)="showAdminLeaveModal = false"
+          >
+      </app-buttons>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Ownership Modal -->
+<div *ngIf="showTransferOwnershipModal"
+     class="modal-backdrop"
+     (click)="showTransferOwnershipModal = false">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Transfer Group Ownership</h2>
+    <p>Select a member to promote as the new admin.</p>
+
+    <select [(ngModel)]="newOwnerEmail" class="form-control">
+      <option value="" disabled selected>
+        Select new owner
+      </option>
+      <option *ngFor="let member of groupMembers"
+              [value]="member.email">
+        ({{ member.userName }}) ({{ member.email }})
+      </option>
+    </select>
+
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Confirm Transfer'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="transferOwnership()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-secondary'"
+        (click)="showTransferOwnershipModal = false">
+      </app-buttons>
+    </div>
+  </div>
+</div>

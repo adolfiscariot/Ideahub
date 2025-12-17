@@ -254,4 +254,15 @@ export class AuthService {
     const user = this.getCurrentUser();
     return user?.id || '';
   }
+
+  // Helper alias for getUserId
+  getUserId(): string {
+    return this.getCurrentUserId();
+  }
+
+  // Get current user Email
+  getEmail(): string {
+    const user = this.getCurrentUser();
+    return user?.email || '';
+  }
 }

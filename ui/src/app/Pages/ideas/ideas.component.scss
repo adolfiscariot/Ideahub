@@ -57,23 +57,40 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.5);
+
   display: flex;
   justify-content: center;
   align-items: center;
+
+  background: rgba(0, 0, 0, 0.6); /* 👈 THIS is the key */
+  backdrop-filter: blur(3px);     /* optional but nice */
+  -webkit-backdrop-filter: blur(3px);
+
   z-index: 9999;
 }
 
 /* Centered modal */
 .modal-content {
-  background: #1e1e2f;
-  color: #fff;
-  padding: 20px;
-  border-radius: 10px;
+  position: relative;            /* ensures it sits above backdrop */
+  z-index: 10000;
+
+  background: #ffffff;           /* solid background */
+  color: #111;
+
+  padding: 24px;
+  border-radius: 12px;
   min-width: 320px;
   max-width: 500px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
-  animation: fadeIn 0.3s ease;
+
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-actions{
+  display: flex;
+  gap: 0.5em;
+  justify-content: space-evenly;
+  font-size: 1em;
 }
 
 /* Request items styling */
@@ -83,49 +100,6 @@
   align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid #333;
-}
-
-/* Accept / Reject buttons */
-.btn-accept {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  margin-left: 6px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.btn-reject {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  margin-left: 6px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.btn-accept:hover {
-  background: #45a049;
-}
-.btn-reject:hover {
-  background: #d32f2f;
-}
-
-/* Close button */
-.btn-close-modal {
-  margin-top: 15px;
-  padding: 6px 12px;
-  background: #555;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.btn-close-modal:hover {
-  background: #444;
 }
 
 /* Fade in animation */

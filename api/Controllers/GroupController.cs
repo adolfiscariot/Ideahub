@@ -282,6 +282,13 @@ public async Task<IActionResult> LeaveGroup(int groupId)
     }
     var groupName = group.Name;
 
+    // Prevent creator from leaving
+    if (group.CreatedByUserId == userId)
+    {
+        _logger.LogWarning("Group creator {userId} attempted to leave group {groupId} without deleting it or transferring ownership", userId, groupId);
+        return BadRequest(ApiResponse.Fail("The group creator cannot leave the group. You must either delete the group or transfer ownership to another member first."));
+    }
+
     //Check membership
     var userGroup = await _context.UserGroups
         .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
@@ -522,5 +529,64 @@ public async Task<IActionResult> LeaveGroup(int groupId)
 
         _logger.LogInformation("{memberCount} members found", membersList.Count);
         return Ok(ApiResponse.Ok($"{membersList.Count} members found", membersList));
+    }
+    // Transfer Ownership
+    [HttpPost("transfer-ownership")]
+    [Authorize(Policy = "GroupAdminOnly")]
+    public async Task<IActionResult> TransferOwnership(int groupId, string newOwnerEmail)
+    {
+        // Get current admin info
+        var currentAdminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(currentAdminId))
+        {
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
+        }
+
+        // Get group
+        var group = await _context.Groups.FindAsync(groupId);
+        if (group is null)
+        {
+            return NotFound(ApiResponse.Fail("Group not found"));
+        }
+
+        // Validate current user is the owner
+        if (group.CreatedByUserId != currentAdminId)
+        {
+            return BadRequest(ApiResponse.Fail("Only the group creator can transfer ownership"));
+        }
+
+        // Find new owner
+        var newOwner = await _userManager.FindByEmailAsync(newOwnerEmail);
+        if (newOwner is null)
+        {
+            return NotFound(ApiResponse.Fail("New owner user not found"));
+        }
+
+        // Validate new owner is a member of the group
+        var isMember = await _context.UserGroups
+            .AnyAsync(ug => ug.GroupId == groupId && ug.UserId == newOwner.Id);
+        
+        if (!isMember)
+        {
+            return BadRequest(ApiResponse.Fail("The new owner must be a member of the group"));
+        }
+
+        // Transfer ownership
+        group.CreatedByUserId = newOwner.Id;
+        
+        // Ensure new owner has GroupAdmin role if not already
+        var isInRole = await _userManager.IsInRoleAsync(newOwner, RoleConstants.GroupAdmin);
+        if (!isInRole)
+        {
+            await _userManager.AddToRoleAsync(newOwner, RoleConstants.GroupAdmin);
+        }
+
+        await _context.SaveChangesAsync();
+
+        //Ensure former admin leaves group
+        await LeaveGroup(groupId);
+
+        _logger.LogInformation("Ownership of group {groupName} transferred to {newOwnerEmail}", group.Name, newOwnerEmail);
+        return Ok(ApiResponse.Ok($"Ownership transferred to {newOwnerEmail} successfully"));
     }
 }
