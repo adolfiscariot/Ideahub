@@ -3,17 +3,21 @@ import { CommonModule } from '@angular/common';
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { EditProjectModalComponent } from '../../Components/modals/edit-project-modal/edit-project-modal.component';
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, BaseLayoutComponent, FormsModule],
+    imports: [CommonModule, BaseLayoutComponent, FormsModule, MatDialogModule],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
 export class ProjectsComponent implements OnInit {
     projects: Project[] = [];
     ProjectStatus = ProjectStatus;
+
+    constructor(private dialog: MatDialog) { }
 
     ngOnInit(): void {
         // Mock Data
@@ -72,4 +76,22 @@ export class ProjectsComponent implements OnInit {
             default: return '';
         }
     }
+
+    openEditModal(project: Project): void {
+        const dialogRef = this.dialog.open(EditProjectModalComponent, {
+            width: '500px',
+            data: { project }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                // Update the project in the list (mock update)
+                const index = this.projects.findIndex(p => p.id === result.id);
+                if (index !== -1) {
+                    this.projects[index] = result;
+                }
+            }
+        });
+    }
 }
+
