@@ -23,12 +23,12 @@
           <!-- View Requests Button (only for group creator) -->
 <app-buttons
   *ngIf="isGroupCreator()"
-  buttonText="View Requests"
   buttonStyleClass="btn-view-requests"
   (click)="viewRequests(groupId)"
   [disabled]="false"
   title="View pending join requests"
-></app-buttons>
+> ⓘ  View Requests
+</app-buttons>
 
 <!-- Requests Modal -->
 <div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
@@ -56,13 +56,12 @@
           <!-- Share Idea Button (Fixed - with + icon) -->
           <app-buttons
             *ngIf="!showShareModal"
-            buttonText="Share Idea"
             buttonStyleClass="btn-share-idea"
             (click)="openShareModal()"
             [disabled]="false"
             title="Share a new idea with the group"
           >
-            <span class="create-icon">+</span> 
+          ✚  Share Idea
           </app-buttons>
 
         <app-buttons
