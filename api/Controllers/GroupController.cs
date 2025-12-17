@@ -583,6 +583,9 @@ public async Task<IActionResult> LeaveGroup(int groupId)
 
         await _context.SaveChangesAsync();
 
+        //Ensure former admin leaves group
+        await LeaveGroup(groupId);
+
         _logger.LogInformation("Ownership of group {groupName} transferred to {newOwnerEmail}", group.Name, newOwnerEmail);
         return Ok(ApiResponse.Ok($"Ownership transferred to {newOwnerEmail} successfully"));
     }

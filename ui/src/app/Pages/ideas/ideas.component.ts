@@ -1128,9 +1128,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
         next:()=>{
           this.showTransferOwnershipModal = false;
           this.router.navigate(['/groups']);
+          this.toastService.show(`Transfer of ownership successfully transferred to ${this.newOwnerEmail}`, 'success')
         },
         error:()=>{
-          alert('Failed to transfer ownership');
+          this.toastService.show('Failed to transfer ownership', 'error');
         }
       });
   }

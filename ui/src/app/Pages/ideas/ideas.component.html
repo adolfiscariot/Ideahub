@@ -370,9 +370,12 @@
     <p>Select a member to promote as the new admin.</p>
 
     <select [(ngModel)]="newOwnerEmail" class="form-control">
+      <option value="" disabled selected>
+        Select new owner
+      </option>
       <option *ngFor="let member of groupMembers"
-              [value]="member.userId">
-        {{ member.displayName }}
+              [value]="member.email">
+        ({{ member.userName }}) ({{ member.email }})
       </option>
     </select>
 
