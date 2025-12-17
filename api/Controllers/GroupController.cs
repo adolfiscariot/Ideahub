@@ -375,8 +375,12 @@ public async Task<IActionResult> LeaveGroup(int groupId)
         foreach (var request in pendingRequests)
         {
             var requestUserId = request.UserId;
-            _logger.LogInformation("Requests: {userId}", requestUserId);
-            req.Add(requestUserId);
+
+            //Use user's id to find their email
+            var requestUser = await _context.Users.FirstAsync(u => u.Id == requestUserId);
+            var requestUserEmail = requestUser.Email;
+            _logger.LogInformation("Requests: {userId}", requestUserEmail);
+            req.Add(requestUserEmail!);
         }
 
         _logger.LogInformation("The group has {pendingRequestsCount} pending requests", pendingRequests.Count());
@@ -386,8 +390,9 @@ public async Task<IActionResult> LeaveGroup(int groupId)
     //Accept user's requests
     [Authorize(Policy = "GroupAdminOnly")]
     [HttpPost("accept-request")]
-    public async Task<IActionResult> AcceptRequest(int groupId, string requestUserId)
+    public async Task<IActionResult> AcceptRequest(int groupId, string requestUserEmail)
     {
+        _logger.LogInformation("Accepting ${requestUserEmail}'s request...", requestUserEmail);
         //get group admin's id
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(adminId))
@@ -411,6 +416,10 @@ public async Task<IActionResult> LeaveGroup(int groupId)
             _logger.LogInformation("User is not group admin");
             return BadRequest(ApiResponse.Fail("User is not group admin"));
         }
+
+        //Find user's id based on their email
+        var requestUser = await _context.Users.FirstAsync(u => u.Email == requestUserEmail);
+        var requestUserId = requestUser.Id;
 
         //Fetch pending requests from a specific user
         var userRequest = await _context.GroupMembershipRequests
@@ -453,7 +462,7 @@ public async Task<IActionResult> LeaveGroup(int groupId)
     //Reject user's requests
     [Authorize(Policy = "GroupAdminOnly")]
     [HttpPost("reject-request")]
-    public async Task<IActionResult> RejectRequest(int groupId, string requestUserId)
+    public async Task<IActionResult> RejectRequest(int groupId, string requestUserEmail)
     {
         //get group admin's id
         var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -479,6 +488,10 @@ public async Task<IActionResult> LeaveGroup(int groupId)
             return BadRequest(ApiResponse.Fail("User is not group admin"));
         }
 
+        //Find user's id based on their email
+        var requestUser = await _context.Users.FirstAsync(u => u.Email == requestUserEmail);
+        var requestUserId = requestUser.Id;
+
         //Fetch pending requests from a specific user
         var userRequest = await _context.GroupMembershipRequests
             .FirstOrDefaultAsync(gmr =>
@@ -497,7 +510,7 @@ public async Task<IActionResult> LeaveGroup(int groupId)
 
         await _context.SaveChangesAsync();
 
-        _logger.LogError("User {userEmail} request rejected from group: {groupName}",
+        _logger.LogInformation("User {userEmail} request rejected from group: {groupName}",
             User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
         return Ok(ApiResponse.Ok("User request rejected"));
     }

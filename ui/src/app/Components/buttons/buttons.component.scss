@@ -173,6 +173,38 @@
     background: rgba(128, 0, 128, 0.1);
   }
 }
+.btn-accept {
+  background: #ffffff;
+  color: green;
+  border: 1px solid green;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: green;
+    color: white;
+  }
+}
+
+
+.btn-reject {
+  background: #ffffff;
+  color: red;
+  border: 1px solid red;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: red;
+    color: white;
+  }
+}
 
 .btn-delete {
   background: #ff4d4d;

@@ -202,7 +202,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.groupsService.viewRequests(groupId).subscribe({
       next: (res: any) => {
         console.log('Pending requests received:', res);
-        this.pendingRequests = res.data.map((userId: string) => ({ userId })) // res should be an array of { userId, ... }
+        this.pendingRequests = res.data.map((email: string) => ({ email })) // res should be an array of { userId, ... }
         this.loadingRequests = false;
       },
       error: (err) => {
@@ -243,25 +243,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
-  acceptRequest(groupId: string, requestUserId: string) {
-    console.log('Accept request:', requestUserId);
-    this.groupsService.acceptRequest(groupId, requestUserId).subscribe({
+  acceptRequest(groupId: string, requestUserEmail: string) {
+    console.log('Accept request:', requestUserEmail);
+    this.groupsService.acceptRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request accepted for user:', requestUserId);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+        console.log('Request accepted for user:', requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
       },
       error: (err) => console.error('Error accepting request:', err)
     });
   }
 
-  rejectRequest(groupId: string, requestUserId: string) {
-    console.log('Reject request:', requestUserId);
-    this.groupsService.rejectRequest(groupId, requestUserId).subscribe({
+  rejectRequest(groupId: string, requestUserEmail: string) {
+    console.log('Reject request:', requestUserEmail);
+    this.groupsService.rejectRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request rejected for user:', requestUserId);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+        console.log('Request rejected for user:', requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
       },
       error: (err) => console.error('Error rejecting request:', err)
     });

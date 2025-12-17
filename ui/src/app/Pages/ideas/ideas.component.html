@@ -23,30 +23,49 @@
           <!-- View Requests Button (only for group creator) -->
 <app-buttons
   *ngIf="isGroupCreator()"
+  [buttonText]="'👁️ View Requests'"
   buttonStyleClass="btn-view-requests"
   (click)="viewRequests(groupId)"
   [disabled]="false"
   title="View pending join requests"
-> ⓘ  View Requests
+> 
 </app-buttons>
 
 <!-- Requests Modal -->
 <div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Pending Requests ({{ pendingRequests.length }})</h2>
+    <h3>Pending Requests ({{ pendingRequests.length }})</h3>
 
     <div *ngIf="loadingRequests">Loading...</div>
     <div *ngIf="errorRequests">{{ errorRequests }}</div>
 
-    <ul *ngIf="!loadingRequests && !errorRequests">
+    <ul *ngIf="!loadingRequests && !errorRequests" class="request-list">
       <li *ngFor="let req of pendingRequests" class="request-item">
-        <span>User ID: {{ req.userId }}</span>
-        <button (click)="acceptRequest(groupId, req.userId)" class="btn-accept">Accept</button>
-        <button (click)="rejectRequest(groupId, req.userId)" class="btn-reject">Reject</button>
+        <span><b>Email: </b> {{ req.email }}</span>
+        <app-buttons
+          [buttonText]="'Accept'"
+          [buttonStyleClass]="'btn-accept'"
+          [buttonType]="'button'"
+          (click)="acceptRequest(groupId, req.email)"
+          >
+        </app-buttons>
+        <app-buttons
+          [buttonText]="'Reject'"
+          [buttonStyleClass]="'btn-reject'"
+          [buttonType]="'button'"
+          (click)="rejectRequest(groupId, req.email)"
+          >
+        </app-buttons>
       </li>
     </ul>
 
-    <button (click)="showRequestsModal = false" class="btn-close-modal">Close</button>
+      <app-buttons
+        [buttonText]="'Close'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        (click)="showRequestsModal = false"
+        >
+      </app-buttons>
   </div>
 </div>
 

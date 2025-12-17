@@ -61,12 +61,11 @@ export class GroupsService {
     );
   }
 
-  // POST /api/group/leave-group?groupId={guid}
 
-  rejectRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
+  rejectRequest(groupId: string, requestUserEmail: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
       .set('groupId', groupId)
-      .set('requestUserId', requestUserId);
+      .set('requestUserEmail', requestUserEmail);
 
     return this.http.post<any>(`${this.apiUrl}/reject-request`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
@@ -74,10 +73,10 @@ export class GroupsService {
   }
 
   // POST /api/group/accept-request?groupId={guid}&requestUserId={userId}
-  acceptRequest(groupId: string, requestUserId: string): Observable<ApiResponse<any>> {
+  acceptRequest(groupId: string, requestUserEmail: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
       .set('groupId', groupId)
-      .set('requestUserId', requestUserId);
+      .set('requestUserEmail', requestUserEmail);
 
     return this.http.post<any>(`${this.apiUrl}/accept-request`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))

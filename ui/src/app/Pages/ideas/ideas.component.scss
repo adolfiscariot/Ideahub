@@ -113,12 +113,17 @@
 }
 
 /* Request items styling */
+.request-list{
+  padding-left:0;
+}
+
 .request-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid #333;
+  gap: 10px;
 }
 
 /* Fade in animation */
