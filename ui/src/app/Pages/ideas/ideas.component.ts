@@ -13,6 +13,8 @@ import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { ToastService } from '../../Services/toast.service';
+import { ProjectService } from '../../Services/project.service';
+import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse} from '../../Interfaces/Projects/project-interface';
 
 @Component({
   selector: 'app-ideas',
@@ -69,6 +71,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
   errorRequests = '';
   newOwnerEmail!: string;
 
+  showProjectModal = false;
+  currentIdeaToPromote: Idea | null = null;
+  projectData: CreateProjectRequest = {
+    title: '',
+    description: '',
+    overseenByEmail: ''
+  };
 
   private routeSub: Subscription = new Subscription();
 
@@ -81,6 +90,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     private voteService: VoteService,
     private toastService: ToastService,
     private dialog: MatDialog,
+    private projectService: ProjectService,
     private fb: FormBuilder
   ) {
   }
@@ -192,7 +202,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.groupsService.viewRequests(groupId).subscribe({
       next: (res: any) => {
         console.log('Pending requests received:', res);
-        this.pendingRequests = res.data.map((userId: string) => ({ userId })) // res should be an array of { userId, ... }
+        this.pendingRequests = res.data.map((email: string) => ({ email })) // res should be an array of { userId, ... }
         this.loadingRequests = false;
       },
       error: (err) => {
@@ -233,25 +243,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-
-
-  acceptRequest(groupId: string, requestUserId: string) {
-    console.log('Accept request:', requestUserId);
-    this.groupsService.acceptRequest(groupId, requestUserId).subscribe({
+  acceptRequest(groupId: string, requestUserEmail: string) {
+    console.log('Accept request:', requestUserEmail);
+    this.groupsService.acceptRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request accepted for user:', requestUserId);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+        console.log('Request accepted for user:', requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
       },
       error: (err) => console.error('Error accepting request:', err)
     });
   }
 
-  rejectRequest(groupId: string, requestUserId: string) {
-    console.log('Reject request:', requestUserId);
-    this.groupsService.rejectRequest(groupId, requestUserId).subscribe({
+  rejectRequest(groupId: string, requestUserEmail: string) {
+    console.log('Reject request:', requestUserEmail);
+    this.groupsService.rejectRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request rejected for user:', requestUserId);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserId);
+        console.log('Request rejected for user:', requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
       },
       error: (err) => console.error('Error rejecting request:', err)
     });
@@ -974,82 +982,99 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Promote Idea to Project
+  //Promote Idea to project and create project
   onPromoteIdea(idea: Idea, event?: Event): void {
-    if (event) event.stopPropagation();
-
-    console.log(`=== PROMOTING IDEA TO PROJECT ===`);
-    console.log('Current promotion status:', idea.isPromotedToProject);
-
-    // If already promoted, don't do anything
-    if (idea.isPromotedToProject) {
-      console.log('Idea already promoted, skipping');
-      alert('This idea is already promoted to a project!');
-      return;
-    }
-
-    // Confirm with the user
-    if (!confirm(`Are you sure you want to promote "${idea.title}" to a project?\n\nThis will move the idea to the projects section.`)) {
-      return;
-    }
-
-    this.isPromoting = true;
-    this.currentlyPromotingIdeaId = idea.id;
-
-    const request: PromoteRequest = {
-      ideaId: idea.id,
-      groupId: this.groupId
-    };
-
-    console.log('Calling backend with:', request);
-
-    this.ideasService.promoteIdea(request).subscribe({
-      next: (response) => {
-        this.isPromoting = false;
-        this.currentlyPromotingIdeaId = null;
-
-        console.log('Promote response from backend:', response);
-
-        if (response.success) {
-          // Update the idea status locally
-          idea.isPromotedToProject = true;
-          idea.status = 'Promoted';
-
-          // Update selected idea if it's the same one
-          if (this.selectedIdea && this.selectedIdea.id === idea.id) {
-            this.selectedIdea.isPromotedToProject = true;
-            this.selectedIdea.status = 'Promoted';
-          }
-
-          // Update the array to trigger change detection
-          this.ideas = [...this.ideas];
-
-          alert(`Idea "${idea.title}" has been promoted to a project!\n\nIt will now appear in the projects section.`);
-
-          console.log(`Idea "${idea.title}" promoted successfully`);
-        } else {
-          alert(`Failed to promote idea: ${response.message}`);
-        }
-      },
-      error: (error) => {
-        this.isPromoting = false;
-        this.currentlyPromotingIdeaId = null;
-
-        console.error('Error promoting idea:', error);
-
-        if (error.status === 401) {
-          alert('Please login to promote ideas.');
-        } else if (error.status === 403) {
-          alert('You do not have permission to promote ideas. Only group creators can promote ideas.');
-        } else if (error.status === 404) {
-          alert('Idea not found.');
-        } else {
-          alert('An error occurred while promoting the idea.');
-        }
-      }
-    });
+  event?.stopPropagation();
+  
+  if (idea.isPromotedToProject) {
+    alert('Already promoted!');
+    return;
   }
 
+  this.currentIdeaToPromote = idea;
+  this.projectData = {
+    title: idea.title,
+    description: idea.description,
+    overseenByEmail: ''
+  };
+  this.showProjectModal = true;
+}
+
+createProjectFromIdea(): void {
+  if (!this.currentIdeaToPromote || !this.groupId) return;
+  if (!this.projectData.overseenByEmail) {
+    alert('Enter overseer email');
+    return;
+  }
+
+  this.isPromoting = true;
+  const idea = this.currentIdeaToPromote;
+
+  this.ideasService.promoteIdea({
+    ideaId: idea.id,
+    groupId: this.groupId
+  }).subscribe({
+    next: (promoteRes) => {
+      if (promoteRes.success) {
+        this.projectService.createProject(
+          this.groupId, 
+          idea.id, 
+          this.projectData
+        ).subscribe({
+          next: (projectRes) => this.handleSuccess(idea, projectRes),
+          error: (err) => this.handleProjectError(err)
+        });
+      } else {
+        this.isPromoting = false;
+        alert('Promotion failed');
+      }
+    },
+    error: (err) => {
+      this.isPromoting = false;
+      alert('Error promoting');
+    }
+  });
+}
+
+private handleSuccess(idea: Idea, response: any): void {
+  this.isPromoting = false;
+  this.showProjectModal = false;
+
+  if (response.success) {
+    idea.isPromotedToProject = true;
+    idea.status = 'Promoted';
+    
+    if (this.selectedIdea?.id === idea.id) {
+      this.selectedIdea.isPromotedToProject = true;
+      this.selectedIdea.status = 'Promoted';
+    }
+    
+    this.ideas = [...this.ideas];
+    alert('Project created');
+    
+    this.currentIdeaToPromote = null;
+    this.projectData = { title: '', description: '', overseenByEmail: '' };
+  } else {
+    alert('Project creation failed');
+  }
+}
+
+private handleProjectError(error: any): void {
+  this.isPromoting = false;
+  
+  if (error.status === 404) {
+    alert(`User not found: ${this.projectData.overseenByEmail}`);
+  } else {
+    alert('Failed to create project');
+  }
+}
+
+closeProjectModal(): void {
+  if (!this.isPromoting) {
+    this.showProjectModal = false;
+    this.currentIdeaToPromote = null;
+  }
+}
   // DELETE IDEA METHOD
   onDeleteIdea(ideaId: string, event?: Event): void {
     if (event) {

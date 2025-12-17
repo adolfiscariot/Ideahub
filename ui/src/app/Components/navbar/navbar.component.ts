@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../Services/auth/auth.service';
 import { AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
-import { NgIcon } from '@ng-icons/core';
+import { CommonModule } from '@angular/common';
+import { NgIconsModule } from '@ng-icons/core';
 
 @Component({
   selector: 'app-navbar',
-  imports: [ButtonsComponent, RouterModule, AsyncPipe, NgIcon],
+  imports: [ButtonsComponent, RouterModule, AsyncPipe, CommonModule, NgIconsModule],
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',

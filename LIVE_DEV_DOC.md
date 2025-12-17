@@ -136,3 +136,9 @@ REMOVE UNNECESSARY COMMENTS
 # BY MARK
 ## TO DO
 - Add tab to show global ideas which user can filter by group
+
+# By Joy
+## Issues Noted
+
+- The login is still showing backend errors - they need to be made user friendly
+- 

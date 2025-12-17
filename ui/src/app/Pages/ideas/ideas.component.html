@@ -23,30 +23,49 @@
           <!-- View Requests Button (only for group creator) -->
 <app-buttons
   *ngIf="isGroupCreator()"
-  buttonText="View Requests"
+  [buttonText]="'👁️ View Requests'"
   buttonStyleClass="btn-view-requests"
   (click)="viewRequests(groupId)"
   [disabled]="false"
   title="View pending join requests"
-></app-buttons>
+> 
+</app-buttons>
 
 <!-- Requests Modal -->
 <div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Pending Requests ({{ pendingRequests.length }})</h2>
+    <h3>Pending Requests ({{ pendingRequests.length }})</h3>
 
     <div *ngIf="loadingRequests">Loading...</div>
     <div *ngIf="errorRequests">{{ errorRequests }}</div>
 
-    <ul *ngIf="!loadingRequests && !errorRequests">
+    <ul *ngIf="!loadingRequests && !errorRequests" class="request-list">
       <li *ngFor="let req of pendingRequests" class="request-item">
-        <span>User ID: {{ req.userId }}</span>
-        <button (click)="acceptRequest(groupId, req.userId)" class="btn-accept">Accept</button>
-        <button (click)="rejectRequest(groupId, req.userId)" class="btn-reject">Reject</button>
+        <span><b>Email: </b> {{ req.email }}</span>
+        <app-buttons
+          [buttonText]="'Accept'"
+          [buttonStyleClass]="'btn-accept'"
+          [buttonType]="'button'"
+          (click)="acceptRequest(groupId, req.email)"
+          >
+        </app-buttons>
+        <app-buttons
+          [buttonText]="'Reject'"
+          [buttonStyleClass]="'btn-reject'"
+          [buttonType]="'button'"
+          (click)="rejectRequest(groupId, req.email)"
+          >
+        </app-buttons>
       </li>
     </ul>
 
-    <button (click)="showRequestsModal = false" class="btn-close-modal">Close</button>
+      <app-buttons
+        [buttonText]="'Close'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        (click)="showRequestsModal = false"
+        >
+      </app-buttons>
   </div>
 </div>
 
@@ -56,13 +75,12 @@
           <!-- Share Idea Button (Fixed - with + icon) -->
           <app-buttons
             *ngIf="!showShareModal"
-            buttonText="Share Idea"
             buttonStyleClass="btn-share-idea"
             (click)="openShareModal()"
             [disabled]="false"
             title="Share a new idea with the group"
           >
-            <span class="create-icon">+</span> 
+          ✚  Share Idea
           </app-buttons>
 
         <app-buttons
@@ -324,6 +342,72 @@
   (share)="onShareIdea($event)"
   (update)="onUpdateIdeaFromModal($event)">
 </app-share-idea-modal>
+
+<!-- Project Creation Modal -->
+<div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
+  <div class="project-modal-content" (click)="$event.stopPropagation()">
+    <div class="project-modal-header">
+      <h3>Create Project from Idea</h3>
+      <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
+    </div>
+    
+    <div class="project-modal-body">
+      <p class="project-modal-subtitle">
+        You're promoting "<strong>{{currentIdeaToPromote?.title}}</strong>" to a project.
+      </p>
+      
+      <div class="form-group">
+        <label>Project Title</label>
+        <input 
+          type="text" 
+          [(ngModel)]="projectData.title" 
+          class="form-control"
+          placeholder="Enter project title"
+          [disabled]="isPromoting">
+      </div>
+      
+      <div class="form-group">
+        <label>Project Description</label>
+        <textarea 
+          [(ngModel)]="projectData.description" 
+          class="form-control"
+          rows="3"
+          placeholder="Enter project description"
+          [disabled]="isPromoting"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Project Overseer Email *</label>
+        <input 
+          type="email" 
+          [(ngModel)]="projectData.overseenByEmail" 
+          class="form-control"
+          required
+          placeholder="Enter email of project overseer"
+          [disabled]="isPromoting">
+        <small>Must be a registered user with confirmed email</small>
+      </div>
+    </div>
+    
+    <div class="project-modal-footer">
+      <button 
+        type="button" 
+        class="btn-cancel" 
+        (click)="closeProjectModal()"
+        [disabled]="isPromoting">
+        Cancel
+      </button>
+      <button 
+        type="button" 
+        class="btn-create" 
+        (click)="createProjectFromIdea()"
+        [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title">
+        <span *ngIf="isPromoting">Creating Project...</span>
+        <span *ngIf="!isPromoting">Create Project</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Admin Leave Group Modal -->
 <div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">

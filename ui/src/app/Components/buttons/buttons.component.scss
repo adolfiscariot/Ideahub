@@ -173,6 +173,38 @@
     background: rgba(128, 0, 128, 0.1);
   }
 }
+.btn-accept {
+  background: #ffffff;
+  color: green;
+  border: 1px solid green;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: green;
+    color: white;
+  }
+}
+
+
+.btn-reject {
+  background: #ffffff;
+  color: red;
+  border: 1px solid red;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+
+  &:hover {
+    background: red;
+    color: white;
+  }
+}
 
 .btn-delete {
   background: #ff4d4d;
@@ -265,8 +297,8 @@
 }
 
 .btn-view-ideas {
-  background: purple;
-  color: #fff;
+  background: #ee82ee;
+  color: #000;
   border-radius: 4px;
   font-size: 13px;
   display: inline-flex;
@@ -315,7 +347,7 @@
 }
 
 .btn-group-members {
-
+  
   color: #000;
   padding: 8px 12px;
   border-radius: 4px;
@@ -333,7 +365,7 @@
 }
 
 .btn-delete-group {
-  background: red;
+  background: purple;
   color: #fff;
   padding: 8px 12px;
   border-radius: 4px;
