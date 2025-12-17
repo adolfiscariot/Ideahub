@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -30,6 +31,7 @@ var connectionString = builder.Configuration.GetConnectionString("IdeahubString"
 
 builder.Services.AddDbContext<IdeahubDbContext>(options =>
     options.UseNpgsql(connectionString)
+           .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning))
 );
 
 //2.3 Identity Service
@@ -214,7 +216,7 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors(AllowedOrigins);
+app.UseCors("AllowedOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
