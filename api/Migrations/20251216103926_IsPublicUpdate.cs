@@ -12,10 +12,6 @@ namespace Ideahub.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "GroupPrivacy",
-                table: "Groups");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsPublic",
                 table: "Groups",

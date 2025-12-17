@@ -323,3 +323,69 @@
   (share)="onShareIdea($event)"
   (update)="onUpdateIdeaFromModal($event)">
 </app-share-idea-modal>
+
+<!-- Project Creation Modal -->
+<div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
+  <div class="project-modal-content" (click)="$event.stopPropagation()">
+    <div class="project-modal-header">
+      <h3>Create Project from Idea</h3>
+      <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
+    </div>
+    
+    <div class="project-modal-body">
+      <p class="project-modal-subtitle">
+        You're promoting "<strong>{{currentIdeaToPromote?.title}}</strong>" to a project.
+      </p>
+      
+      <div class="form-group">
+        <label>Project Title</label>
+        <input 
+          type="text" 
+          [(ngModel)]="projectData.title" 
+          class="form-control"
+          placeholder="Enter project title"
+          [disabled]="isPromoting">
+      </div>
+      
+      <div class="form-group">
+        <label>Project Description</label>
+        <textarea 
+          [(ngModel)]="projectData.description" 
+          class="form-control"
+          rows="3"
+          placeholder="Enter project description"
+          [disabled]="isPromoting"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Project Overseer Email *</label>
+        <input 
+          type="email" 
+          [(ngModel)]="projectData.overseenByEmail" 
+          class="form-control"
+          required
+          placeholder="Enter email of project overseer"
+          [disabled]="isPromoting">
+        <small>Must be a registered user with confirmed email</small>
+      </div>
+    </div>
+    
+    <div class="project-modal-footer">
+      <button 
+        type="button" 
+        class="btn-cancel" 
+        (click)="closeProjectModal()"
+        [disabled]="isPromoting">
+        Cancel
+      </button>
+      <button 
+        type="button" 
+        class="btn-create" 
+        (click)="createProjectFromIdea()"
+        [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title">
+        <span *ngIf="isPromoting">Creating Project...</span>
+        <span *ngIf="!isPromoting">Create Project</span>
+      </button>
+    </div>
+  </div>
+</div>

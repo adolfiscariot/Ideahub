@@ -140,6 +140,5 @@ REMOVE UNNECESSARY COMMENTS
 # By Joy
 ## Issues Noted
 
-- When i click the public option when creating a group it does not show public or pick public it picks private
 - The login is still showing backend errors - they need to be made user friendly
 - 
