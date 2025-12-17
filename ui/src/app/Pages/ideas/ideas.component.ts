@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -17,7 +17,7 @@ import { ToastService } from '../../Services/toast.service';
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent, ButtonsComponent],
+  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent, ButtonsComponent, FormsModule],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -67,6 +67,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   pendingRequests: any[] = [];
   loadingRequests = false;
   errorRequests = '';
+  newOwnerEmail!: string;
 
 
   private routeSub: Subscription = new Subscription();
@@ -146,7 +147,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
         console.log('Using existing groupCreatorId:', this.groupCreatorId);
       }
       this.loadGroupMembers();
-
       this.loadIdeas();
     });
 
@@ -1117,5 +1117,21 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.showAdminLeaveModal = false;
     this.showTransferOwnershipModal = true;
   }
+  transferOwnership(){
+    if(!this.newOwnerEmail){
+      alert('Please select a member');
+      return;
+    }
 
+    this.groupsService.transferOwnership(this.groupId, this.newOwnerEmail)
+      .subscribe({
+        next:()=>{
+          this.showTransferOwnershipModal = false;
+          this.router.navigate(['/groups']);
+        },
+        error:()=>{
+          alert('Failed to transfer ownership');
+        }
+      });
+  }
 }

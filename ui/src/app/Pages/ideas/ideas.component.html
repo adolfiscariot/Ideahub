@@ -359,3 +359,35 @@
     </div>
   </div>
 </div>
+
+<!-- Transfer Ownership Modal -->
+<div *ngIf="showTransferOwnershipModal"
+     class="modal-backdrop"
+     (click)="showTransferOwnershipModal = false">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Transfer Group Ownership</h2>
+    <p>Select a member to promote as the new admin.</p>
+
+    <select [(ngModel)]="newOwnerEmail" class="form-control">
+      <option *ngFor="let member of groupMembers"
+              [value]="member.userId">
+        {{ member.displayName }}
+      </option>
+    </select>
+
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Confirm Transfer'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="transferOwnership()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-secondary'"
+        (click)="showTransferOwnershipModal = false">
+      </app-buttons>
+    </div>
+  </div>
+</div>
