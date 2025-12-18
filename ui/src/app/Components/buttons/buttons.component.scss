@@ -173,6 +173,22 @@
     background: rgba(128, 0, 128, 0.1);
   }
 }
+
+.btn-view-ideas {
+  background: #ffffff;
+  color: purple;
+  border: 1px solid purple;
+  font-size: 13px;
+  display: inline-flex;
+  width: 50%;
+  margin-right: 50%;
+
+  &:hover {
+    background: #ee82ee;
+    color: #ffffff;
+  }
+}
+
 .btn-accept {
   background: #ffffff;
   color: green;
@@ -293,20 +309,6 @@
 
   &:hover {
     background: #e6b800;
-  }
-}
-
-.btn-view-ideas {
-  background: #ee82ee;
-  color: #000;
-  border-radius: 4px;
-  font-size: 13px;
-  display: inline-flex;
-  min-width: 50%;
-  margin-right: 50%;
-
-  &:hover {
-    background: #ee82ee;
   }
 }
 

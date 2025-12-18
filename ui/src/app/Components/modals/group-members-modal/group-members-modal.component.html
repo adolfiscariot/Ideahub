@@ -31,8 +31,8 @@
             {{ member.displayName || member.userName || member.name || 'Unknown User' }}
 
             <!-- Show creator badge only if this member created the group -->
-            <span *ngIf="member.id === data.group.createdByUserId || member.userId === data.group.createdByUserId"
-              class="creator-badge"> (Owner)</span>
+           <!-- <span *ngIf="member.email === data.group.email|| member.userId === data.group.createdByUserId"
+              class="creator-badge"> (Owner)</span> -->
           </div>
           <!-- Transfer Ownership Action -->
           <div class="member-actions"

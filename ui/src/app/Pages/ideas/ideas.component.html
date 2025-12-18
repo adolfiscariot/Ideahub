@@ -1,3 +1,4 @@
+<app-base-layout>
 <div class="ideas-container" [class.split-view]="selectedIdea">
   
   <!-- Left Panel: Ideas List -->
@@ -32,14 +33,20 @@
 </app-buttons>
 
 <!-- Requests Modal -->
-<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
+<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="closeRequestsModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <h3>Pending Requests ({{ pendingRequests.length }})</h3>
 
     <div *ngIf="loadingRequests">Loading...</div>
     <div *ngIf="errorRequests">{{ errorRequests }}</div>
 
-    <ul *ngIf="!loadingRequests && !errorRequests" class="request-list">
+    <div *ngIf="!loadingRequests && !errorRequests && pendingRequests.length === 0" 
+         class="no-requests-message">
+      <p>No pending requests</p>
+    </div>
+
+    <ul *ngIf="!loadingRequests && !errorRequests && pendingRequests.length > 0" 
+        class="request-list">
       <li *ngFor="let req of pendingRequests" class="request-item">
         <span><b>Email: </b> {{ req.email }}</span>
         <app-buttons
@@ -59,18 +66,15 @@
       </li>
     </ul>
 
-      <app-buttons
-        [buttonText]="'Close'"
-        [buttonStyleClass]="'btn-promote'"
-        [buttonType]="'button'"
-        (click)="showRequestsModal = false"
-        >
-      </app-buttons>
+    <app-buttons
+      [buttonText]="'Close'"
+      [buttonStyleClass]="'btn-promote'"
+      [buttonType]="'button'"
+      (click)="closeRequestsModal()"
+      >
+    </app-buttons>
   </div>
 </div>
-
-
-
 
           <!-- Share Idea Button (Fixed - with + icon) -->
           <app-buttons
@@ -332,16 +336,99 @@
   </div>
 </div>
 
-<!-- Share Idea Modal Component -->
-<app-share-idea-modal 
-  *ngIf="showShareModal"
-  [isVisible]="showShareModal"
-  [isEditMode]="isEditMode"
-  [editData]="modalEditData"
-  (close)="closeShareModal()"
-  (share)="onShareIdea($event)"
-  (update)="onUpdateIdeaFromModal($event)">
-</app-share-idea-modal>
+<!-- Share Idea Modal -->
+<app-modal
+  [isOpen]="showShareModal"
+  [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'"
+  [size]="'md'"
+  (closeModal)="closeShareModal()">
+
+  <div modal-body>
+    <div class="share-idea-form">
+      <div class="form-group">
+  <label for="ideaTitle">Idea Title</label>
+
+  <input
+    type="text"
+    id="ideaTitle"
+    class="form-control"
+    [(ngModel)]="modalEditData.title"
+    name="ideaTitle"
+    #titleModel="ngModel"
+    required
+    minlength="3"
+    maxlength="100"
+    (input)="updateShareIdeaCounts()"
+    placeholder="Enter a descriptive title for your idea">
+
+  <div class="char-count">
+    {{ shareTitleCount }}/100
+  </div>
+  <div *ngIf="shareTitleCount >= 100" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+
+  <div *ngIf="titleModel.invalid && titleModel.touched" class="error-message">
+    <div *ngIf="titleModel.errors?.['required']">Title is required</div>
+    <div *ngIf="titleModel.errors?.['minlength']">Title must be at least 3 characters</div>
+    <div *ngIf="titleModel.errors?.['maxlength']">Title cannot exceed 100 characters</div>
+  </div>
+</div>
+
+
+      <div class="form-group">
+  <label for="ideaDescription">Description</label>
+
+  <textarea
+    id="ideaDescription"
+    class="form-control-description"
+    [(ngModel)]="modalEditData.description"
+    name="ideaDescription"
+    #descModel="ngModel"
+    required
+    minlength="10"
+    maxlength="1000"
+    (input)="updateShareIdeaCounts()"
+    rows="3"
+    placeholder="Describe your idea in detail..."></textarea>
+
+  <div class="char-count">
+    {{ shareDescCount }}/1000
+  </div>
+  <div *ngIf="shareDescCount >= 1000" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+
+  <div *ngIf="descModel.invalid && descModel.touched" class="error-message">
+    <div *ngIf="descModel.errors?.['required']">Description is required</div>
+    <div *ngIf="descModel.errors?.['minlength']">Description must be at least 10 characters</div>
+    <div *ngIf="descModel.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
+  </div>
+</div>
+
+
+    </div>
+  </div>
+
+  <div modal-footer>
+    <div class="footer-buttons">
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        (click)="showShareModal = false">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="isEditMode ? onUpdateIdeaFromModal(modalEditData) : onShareIdea(modalEditData)">
+      </app-buttons>
+    </div>
+  </div>
+
+</app-modal>
 
 <!-- Project Creation Modal -->
 <div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
@@ -377,35 +464,37 @@
       </div>
       
       <div class="form-group">
-        <label>Project Overseer Email *</label>
-        <input 
-          type="email" 
-          [(ngModel)]="projectData.overseenByEmail" 
-          class="form-control"
-          required
-          placeholder="Enter email of project overseer"
-          [disabled]="isPromoting">
-        <small>Must be a registered user with confirmed email</small>
-      </div>
+  <label>Project Overseer Email *</label>
+  <select 
+    [(ngModel)]="projectData.overseenByEmail"
+    class="form-control"
+    required
+    [disabled]="isPromoting || !groupMembers.length">
+    <option value="" disabled selected>Select project overseer</option>
+    <option *ngFor="let member of groupMembers" [value]="member.email">
+      {{member.userName || 'Unnamed User'}} - {{member.email}}
+    </option>
+  </select>
+</div>
     </div>
-    
-    <div class="project-modal-footer">
-      <button 
-        type="button" 
-        class="btn-cancel" 
-        (click)="closeProjectModal()"
-        [disabled]="isPromoting">
-        Cancel
-      </button>
-      <button 
-        type="button" 
-        class="btn-create" 
-        (click)="createProjectFromIdea()"
-        [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title">
-        <span *ngIf="isPromoting">Creating Project...</span>
-        <span *ngIf="!isPromoting">Create Project</span>
-      </button>
-    </div>
+  <div modal-footer>
+  <div class="footer-buttons">
+    <app-buttons
+      [buttonText]="'Cancel'"
+      [buttonStyleClass]="'btn-modal-cancel'"
+      [disabled]="isPromoting"
+      (click)="closeProjectModal()">
+    </app-buttons>
+
+    <app-buttons
+      [buttonText]="isPromoting ? 'Creating Project...' : 'Create Project'"
+      [buttonStyleClass]="'btn-promote'"
+      [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
+      (click)="createProjectFromIdea()">
+    </app-buttons>
+  </div>
+</div>
+
   </div>
 </div>
 
@@ -419,7 +508,7 @@
     <div class="modal-actions">
       <app-buttons 
         [buttonText]="'Delete Group'"
-        [buttonStyleClass]="'btn-delete-group'"
+        [buttonStyleClass]="'btn-reject'"
         [buttonType]="'button'"
         (click)="deleteGroup()"
         >
@@ -478,3 +567,38 @@
     </div>
   </div>
 </div>
+
+<!-- Member Leave Group Modal -->
+<app-modal
+  [isOpen]="showMemberLeaveModal"
+  title="Leave Group"
+  size="md"
+  (closeModal)="cancelMemberLeave()">
+
+  <div modal-body>
+    <div class="member-leave-group">
+    <p>Are you sure you want to leave this group?</p>
+    <p class="warning-text">You will lose access to all group content.</p>
+  </div>
+  </div>
+
+  <div modal-footer>
+    <div class="footer-buttons">
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        (click)="cancelMemberLeave()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Leave Group'"
+        [buttonStyleClass]="'btn-reject'"
+        (click)="confirmMemberLeave()">
+      </app-buttons>
+
+    </div>
+  </div>
+</app-modal>
+
+</app-base-layout>

@@ -10,11 +10,11 @@
         </div>
 
         <app-buttons
-          *ngIf="!showCreateForm && !isLoading && groups.length > 0"
+          *ngIf="!showCreateModal && !isLoading && groups.length > 0"
           [buttonText]="'Create Group'"
           [buttonStyleClass]="'btn-create-group'"
           [buttonType]="'button'"
-          (click)="toggleCreateForm()">
+          (click)="openCreateModal()">
         </app-buttons>
       </div>
     </header>
@@ -41,7 +41,7 @@
             [buttonText]="' + Create First Group'"
             [buttonStyleClass]="'btn-create-first-group'"
             [buttonType]="'button'"
-            (click)="toggleCreateForm()">
+            (click)="openCreateModal()">
           </app-buttons>
         </div>
       </ng-container>
@@ -134,10 +134,10 @@
                 <app-buttons
                   *ngIf="canConfigureGroup(group)"
                   [buttonText]="'🗑️ Delete'"
-                  [buttonStyleClass]="'btn-delete-group'"
+                  [buttonStyleClass]="'btn-reject'"
                   [buttonType]="'button'"
                   [title]="'Delete Group'"
-                  (click)="onDeleteGroup(group)">
+                  (click)="openDeleteModal(group)">
                 </app-buttons>
               </div>
             </div> 
@@ -145,64 +145,193 @@
         </div>
       </ng-template>
     </div>
-
-    <!-- Create Group Modal -->
-    <div *ngIf="showCreateForm" class="create-group-modal-overlay">
-      <div class="create-group-modal">
-        <div class="modal-header">
-          <h3>Create New Group</h3>
-
-          <app-buttons
-            [buttonText]="'×'"
-            [buttonStyleClass]="'btn-modal-close'"
-            [buttonType]="'button'"
-            [title]="'Close'"
-            (click)="onCancelCreate()">
-          </app-buttons>
-        </div>
-
-        <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
-          <div class="form-group">
-            <label for="groupName">Group Name</label>
-            <input id="groupName" type="text" formControlName="name" placeholder="Enter group name"
-              class="form-control" [class.error]="name?.invalid && name?.touched">
-          </div>
-
-          <div class="form-group">
-            <label for="groupDescription">Description</label>
-            <textarea id="groupDescription" formControlName="description"
-              placeholder="Describe what your group is about" rows="3"
-              class="form-control" [class.error]="description?.invalid && description?.touched"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="groupPrivacy">Privacy Status</label>
-            <select id="groupPrivacy" formControlName="isPublic" class="form-control" 
-              [class.error]="privacy?.invalid && privacy?.touched">
-              <option [ngValue]="true">Public</option>
-              <option [ngValue]="false">Private</option>
-            </select>
-          </div>
-
-          <div class="modal-actions">
-            <app-buttons
-              [buttonText]="'Cancel'"
-              [buttonStyleClass]="'btn-modal-cancel'"
-              [buttonType]="'button'"
-              [disabled]="isSubmitting"
-              (click)="onCancelCreate()">
-            </app-buttons>
-
-            <app-buttons
-              [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
-              [buttonStyleClass]="'btn-promote'"
-              [buttonType]="'submit'"
-              [disabled]="createGroupForm.invalid || isSubmitting">
-            </app-buttons>
-          </div>
-        </form>
-      </div>
-    </div>
-
   </div>
 </app-base-layout>
+
+<!-- Group Details Modal -->
+<app-modal 
+  [isOpen]="showDetailsModal"
+  [title]="selectedGroup?.name + ' Details'"
+  size="md"
+  (closeModal)="closeDetailsModal()">
+  
+  <div modal-body *ngIf="selectedGroup">
+    <div class="group-details-content">
+      <div class="detail-row">
+        <strong>Description:</strong>
+        <p>{{ selectedGroup.description }}</p>
+      </div>
+      
+      <div class="detail-row">
+        <strong>Created By</strong>
+        <p>{{ selectedGroup.createdByUser?.displayName || 'Unknown' }}</p>
+      </div>
+      
+      <div class="detail-row">
+        <strong>Created On</strong>
+        <p>{{ formatDate(selectedGroup.createdAt) }}</p>
+      </div>
+      
+      <div class="detail-row">
+        <strong>Privacy</strong>
+        <p>{{ selectedGroup.isPublic }}</p>
+      </div>
+      
+      <div class="detail-row">
+        <strong>Members</strong>
+        <p>{{ formatMemberCount(selectedGroup.memberCount)}}</p>
+      </div>
+      
+      <div class="detail-row">
+        <strong>Ideas</strong>
+        <p>{{ selectedGroup.ideaCount || 0 }}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Close'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        (click)="closeDetailsModal()">
+      </app-buttons>
+    </div>
+  </div>
+</app-modal>
+
+<!-- Create Group Modal -->
+<app-modal 
+  [isOpen]="showCreateModal"
+  title="Create New Group"
+  size="md"
+  (closeModal)="closeCreateModal()">
+  
+  <div modal-body>
+    <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
+      <div class="form-group">
+        <label for="groupName">Group Name</label>
+
+        <input id="groupName" type="text" formControlName="name"
+          placeholder="Enter group name"
+          class="form-control"
+          (input)="updateCharCounts()"
+          [class.error]="name?.invalid && name?.touched">
+        <div class="char-count">
+          {{ nameCount }}/100
+        </div>
+               <div *ngIf="nameLimitReached" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+        <div *ngIf="name?.invalid && name?.touched" class="error-message">
+          <div *ngIf="name?.errors?.['required']">Group name is required</div>
+          <div *ngIf="name?.errors?.['minlength']">Group name must be at least 3 characters</div>
+          <div *ngIf="name?.errors?.['maxlength']">Group name cannot exceed 100 characters</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="groupDescription">Description</label>
+        <textarea id="groupDescription" formControlName="description"
+          placeholder="Describe what your group is about"
+          rows="3"
+          class="form-control auto-expand"
+          (input)="updateCharCounts();"
+          [class.error]="description?.invalid && description?.touched"></textarea>
+
+        <div class="char-count">
+          {{ descCount }}/500
+        </div>
+        <div *ngIf="descLimitReached" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+        <div *ngIf="description?.invalid && description?.touched" class="error-message">
+          <div *ngIf="description?.errors?.['required']">Description is required</div>
+          <div *ngIf="description?.errors?.['minlength']">Description must be at least 10 characters</div>
+          <div *ngIf="description?.errors?.['maxlength']">Description cannot exceed 500 characters</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="groupPrivacy">Privacy Status</label>
+        <select id="groupPrivacy" formControlName="isPublic"
+          class="form-control"
+          [class.error]="privacy?.invalid && privacy?.touched">
+          <option [ngValue]="true">Public</option>
+          <option [ngValue]="false">Private</option>
+        </select>
+        <div *ngIf="privacy?.invalid && privacy?.touched" class="error-message">
+          Privacy status is required
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div modal-footer>
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        [buttonType]="'button'"
+        [disabled]="isSubmitting"
+        (click)="closeCreateModal()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'submit'"
+        [disabled]="createGroupForm.invalid || isSubmitting"
+        (click)="onCreateGroup()">
+      </app-buttons>
+    </div>
+  </div>
+</app-modal>
+
+<!-- Delete Group Modal -->
+<app-modal 
+  [isOpen]="showDeleteModal"
+  title="Confirm Delete"
+  size="md"
+  (closeModal)="closeDeleteModal()">
+  
+  <div modal-body *ngIf="selectedGroup">
+    <div class="delete-confirm-content">
+      <p>Are you sure you want to delete the group <strong>"{{ selectedGroup.name }}"</strong>?</p>
+      <p class="warning-text">This action cannot be undone. All group data, ideas, and memberships will be permanently deleted.</p>
+
+      <div class="type-confirm-section">
+         <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
+      <input 
+        #confirmInput
+        type="text" 
+        [placeholder]="'Enter group name here'"
+        (input)="onConfirmationInput($event.target.value)"
+        [class.error]="confirmationInput !== selectedGroup.name"
+        [disabled]="isDeleting"
+      />
+      </div>
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        [buttonType]="'button'"
+        [disabled]="isDeleting || isDeletedDisabled"
+        (click)="closeDeleteModal()">
+      </app-buttons>
+      
+      <app-buttons
+        [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
+        [buttonStyleClass]="'btn-reject'"
+        [buttonType]="'button'"
+        [disabled]="isDeleting"
+        (click)="deleteGroup(selectedGroup.id)">
+      </app-buttons>
+    </div>
+  </div>
+</app-modal>

@@ -72,6 +72,106 @@
   transition: 0.2s;
 }
 
+/*.group-details-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-left: 50px;
+}*/
+
+/* Grid container */
+[modal-body] .group-details-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columns */
+  gap: 20px;
+  padding: 10px 5px;
+}
+
+/* Make the first item (Description) span full width */
+[modal-body] .group-details-content .detail-row:first-child {
+  grid-column: 1 / -1; /* spans both columns */
+  background: #fafafa;
+}
+
+/* Detail block styling */
+.detail-row {
+ 
+  
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Label */
+.detail-row strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Value */
+.detail-row p {
+  margin: 0;
+  font-size: 15px;
+  color: #222;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.type-confirm-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e1e4e8;
+}
+
+.type-confirm-section input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  box-sizing: border-box;
+}
+
+.type-confirm-section input.error {
+  border-color: #cb2431;
+}
+
+.input-hint {
+  font-size: 0.85rem;
+  color: #cb2431;
+  margin-top: 0.25rem;
+}
+
+.delete-confirm-content{
+  margin: 50px;
+}
+
+.form-control {
+  resize: vertical;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: 4px;
+  margin-right: 7px;
+}
+
+.auto-expand {
+  overflow-y: auto;       /* allow scrolling */
+  resize: none;           /* prevent manual drag */
+  max-height: 500px;      /* stop growing after this */
+}
+
 .create-group-header-btn:hover,
 .create-button:hover {
   background: rgba(128, 0, 128, 0.9);
@@ -415,6 +515,7 @@
   background: rgba(244, 67, 54, 0.1);
 }
 
+
 /* Modal */
 .create-group-modal-overlay {
   position: fixed;
@@ -514,7 +615,8 @@ form {
 }
 
 /* Error Message */
-.error-message {
+.error-message,
+.limit-message {
   color: #dc3545;
   font-size: 12px;
   margin-top: 6px;
@@ -527,7 +629,6 @@ form {
 /* Form Control */
 .form-control {
   width: 100%;
-  padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
@@ -556,8 +657,8 @@ textarea.form-control {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
   padding-top: 20px;
+  margin: 20px;
   border-top: 1px solid #e5e7eb;
 }
 
@@ -607,9 +708,7 @@ textarea.form-control {
 }
 
 .form-control {
-  max-width: 420px;
   width: 100%;
-  margin: 0 auto;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -635,29 +734,7 @@ textarea.form-control {
   display: block;
 }
 
-/* Modal actions */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
 
-.modal-actions button {
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.modal-actions button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .btn-secondary {
   background: white;
