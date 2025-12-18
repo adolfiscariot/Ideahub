@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
@@ -7,12 +7,11 @@ import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
-import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
-import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
+import { ModalComponent } from '../../Components/modal/modal.component';
+import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 
 @Component({
   selector: 'app-groups',
@@ -23,7 +22,10 @@ import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.co
     CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
-    BaseLayoutComponent
+    BaseLayoutComponent,
+    ModalComponent,
+    FormsModule,
+    GroupMembersModalComponent
   ]
 })
 export class GroupsComponent implements OnInit {
@@ -37,17 +39,30 @@ export class GroupsComponent implements OnInit {
   subtitle = 'Explore and join groups to collaborate on ideas and projects.';
 
   // Form state
-  showCreateForm = false;
+  showCreateModal = false;
   createGroupForm: FormGroup;
   isSubmitting = false;
   isLoading: boolean = true;
+  showDetailsModal = false;
+  showMembersModal = false;
+  showDeleteModal = false;
+  selectedGroup: any = null;
+  groupMembers: any[] = [];
+  isLoadingMembers = false;
+  isDeleting: boolean = false;
+  confirmationInput: string = '';
+  isDeletedDisabled: boolean = true;
+  nameCount = 0;
+  descCount = 0;
+  nameLimitReached = false;
+  descLimitReached = false;
+
 
   // Current user ID
   currentUserId: string | null = null;
 
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
-
 
   constructor(
     private groupsService: GroupsService,
@@ -69,8 +84,45 @@ export class GroupsComponent implements OnInit {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
+    this.updateCharCounts();
   }
 
+  updateCharCounts() {
+  const nameControl = this.createGroupForm.get('name');
+  const descControl = this.createGroupForm.get('description');
+
+  const nameValue = nameControl?.value || '';
+  const descValue = descControl?.value || '';
+
+  this.nameCount = nameValue.length;
+  this.descCount = descValue.length;
+
+  // NAME
+  if (this.nameCount > 100) {
+    this.nameLimitReached = true;
+    nameControl?.setValue(nameValue.substring(0, 100), { emitEvent: false });
+    this.nameCount = 100;
+  } else {
+    this.nameLimitReached = false;
+  }
+
+  // DESCRIPTION
+  if (this.descCount > 500) {
+    this.descLimitReached = true;
+    descControl?.setValue(descValue.substring(0, 500), { emitEvent: false });
+    this.descCount = 500;
+  } else {
+    this.descLimitReached = false;
+  }
+}
+
+
+
+  autoGrow(event: any) {
+  const textarea = event.target;
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
@@ -140,16 +192,17 @@ export class GroupsComponent implements OnInit {
 
   // ===== MODAL METHODS =====
 
-  openDetailsModal(group: any): void {
-    this.dialog.open(GroupDetailsModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
-    });
-  }
+ openDetailsModal(group: any): void {
+  this.selectedGroup = group;
+  this.showDetailsModal = true;
+}
 
-  openMembersModal(group: any): void {
+closeDetailsModal(): void {
+  this.showDetailsModal = false;
+  this.selectedGroup = null;
+}
+
+openMembersModal(group: any): void {
     this.dialog.open(GroupMembersModalComponent, {
       width: '600px',
       maxHeight: '90vh',
@@ -158,10 +211,35 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  openPendingRequestsModal(group: any): void {
-    this.toastService.show(`Pending requests for ${group.name}:\n\nFeature coming soon!`, 'info');
-  }
+closeMembersModal(): void {
+  this.showMembersModal = false;
+  this.selectedGroup = null;
+  this.groupMembers = [];
+}
 
+openCreateModal(): void {
+  this.showCreateModal = true;
+}
+
+closeCreateModal(): void {
+  this.showCreateModal = false;
+  this.createGroupForm.reset();
+}
+
+openDeleteModal(group: any): void {
+  this.selectedGroup = group;
+  this.showDeleteModal = true;
+}
+
+closeDeleteModal(): void {
+  this.showDeleteModal = false;
+  this.selectedGroup = null;
+}
+
+onConfirmationInput(value: string): void {
+  this.confirmationInput = value;
+  this.isDeletedDisabled = value !== this.selectedGroup?.name;
+}
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
@@ -230,12 +308,13 @@ export class GroupsComponent implements OnInit {
 
   // ===== GROUP CREATION METHODS =====
 
-  toggleCreateForm(): void {
-    this.showCreateForm = !this.showCreateForm;
-    if (!this.showCreateForm) {
-      this.createGroupForm.reset();
-    }
+ toggleCreateForm(): void {
+  if (this.showCreateModal) {
+    this.closeCreateModal();
+  } else {
+    this.openCreateModal();
   }
+}
 
   onCreateGroup(): void {
     if (this.createGroupForm.invalid) {
@@ -254,7 +333,7 @@ export class GroupsComponent implements OnInit {
           this.toastService.show('Group created successfully!', 'success');
           this.loadGroups();
           this.createGroupForm.reset();
-          this.showCreateForm = false;
+          this.closeCreateModal();
         } else {
           if (response.message?.includes('authenticated') ||
             response.message?.includes('User ID') ||
@@ -280,26 +359,40 @@ export class GroupsComponent implements OnInit {
     });
   }
 
+  loadGroupMembers(groupId: string): void {
+  this.isLoadingMembers = true;
+  this.groupMembers = [];
+  
+  this.groupsService.getGroupMembers(groupId).subscribe({
+    next: (response: any) => {
+      this.isLoadingMembers = false;
+      if (response.success && response.data) {
+        this.groupMembers = response.data.map((member: any) => ({
+          id: member.userId ?? member.id,
+          userId: member.userId || member.id,
+          name: member.name,
+          displayName: member.displayName || member.name,
+          userName: member.userName,
+          email: member.email,
+          createdByUserId: member.createdByUserId
+        }));
+      } else {
+        console.error('Failed to load group members:', response.message);
+        this.groupMembers = [];
+      }
+    },
+    error: (error: any) => {
+      this.isLoadingMembers = false;
+      console.error('Error loading group members:', error);
+      this.groupMembers = [];
+    }
+  });
+}
+
   onCancelCreate(): void {
-    this.showCreateForm = false;
-    this.createGroupForm.reset();
+    this.closeCreateModal();
   }
   // ===== GROUP DELETION METHODS =====
-
-  isDeleting: boolean = false;
-
-  onDeleteGroup(group: any): void {
-    const dialogRef = this.dialog.open(DeleteGroupModalComponent, {
-      width: '400px',
-      data: { groupName: group.name }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        this.deleteGroup(group.id);
-      }
-    });
-  }
 
   deleteGroup(groupId: string): void {
     this.isDeleting = true;
@@ -311,6 +404,7 @@ export class GroupsComponent implements OnInit {
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
           this.groups = this.groups.filter(group => group.id !== groupId);
+          this.closeDeleteModal();
 
           if (this.groups.length === 0) {
             this.title = 'No Groups';
@@ -322,7 +416,7 @@ export class GroupsComponent implements OnInit {
           if (response.message?.includes('permission') ||
             response.message?.includes('admin') ||
             response.message?.includes('not allowed')) {
-            this.toastService.show('Only group admin can delete groups.', 'warning');
+            this.toastService.show('Only group admin can delete groups.', 'warning'); 
           }
         }
       },
@@ -367,6 +461,15 @@ export class GroupsComponent implements OnInit {
   trackById(index: number, item: any): string {
     return item.id || index.toString();
   }
+
+  getInitials(name: string): string {
+  if (!name) return '?';
+  return name.split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+}
 
   // ===== PERMISSION METHODS =====
 

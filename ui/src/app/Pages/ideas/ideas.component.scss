@@ -1,7 +1,7 @@
 .ideas-container {
   max-width: 1650px;
-  margin-left: 100px;
-  padding: 20px;
+  margin-left: 40px;
+  padding: 10px;
   background: #ffffff;
   min-height: 80vh;
   width: 100%;
@@ -9,7 +9,7 @@
   display: flex;              /* side-by-side layout */
   flex-direction: row;        /* horizontal split */
   align-items: flex-start;
-  gap: 20px;                  /* spacing between panels */
+  gap: 20px;               /* spacing between panels */
 }
 
 /* ============================
@@ -21,7 +21,19 @@
   border-right: 1px solid #e0e0e0;
   padding-right: 20px;
   word-wrap: break-word;
+  overflow-y: auto;
   
+}
+
+.share-idea-form {
+  margin: 30px;
+}
+
+.footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px;
+  gap: 20px;
 }
 
 .project-modal-overlay {
@@ -36,14 +48,57 @@
   justify-content: center;
   z-index: 1000;
 }
+.member-leave-group {
+  margin: 30px;
+}
+
+.form-control {
+  resize: vertical;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+  margin-top: 4px;
+  margin-right: 7px;
+}
+
+.auto-expand {
+  overflow-y: auto;       /* allow scrolling */
+  resize: none;           /* prevent manual drag */
+  max-height: 500px;      /* stop growing after this */
+}
+
+/* Error Message */
+.error-message,
+.limit-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 3px;
+
+  div {
+    margin: 2px 0;
+  }
+}
 
 .project-modal-content {
   background: white;
   padding: 20px;
   border-radius: 8px;
   width: 90%;
-  max-width: 400px;
+  max-width: 600px;
 }
+
+.project-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
 
 .idea-footer-actions {
   display: flex;
@@ -111,6 +166,92 @@
   justify-content: space-evenly;
   font-size: 1em;
 }
+
+.project-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.project-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.project-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.project-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #555;
+  transition: 0.2s;
+}
+
+.project-modal-close:hover {
+  color: #800080;
+}
+
+.project-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.project-modal-subtitle {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.form-control-description {
+  height: 150px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  transition: border-color 0.2s;
+
+}
+
+.form-control:focus,
+.form-control-description:focus {
+  border-color: #800080;
+  outline: none;
+}
+
 
 /* Request items styling */
 .request-list{
