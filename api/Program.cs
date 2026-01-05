@@ -15,9 +15,6 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-//Cors allowed origins
-var AllowedOrigins = "AllowedOrigins";
-
 //1. Create the builder
 var builder = WebApplication.CreateBuilder(args);
 

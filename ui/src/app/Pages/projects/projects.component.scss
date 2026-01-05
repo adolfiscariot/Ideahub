@@ -49,13 +49,13 @@
 
     th {
         background-color: var(--background-color);
-        color: var(--text-muted);
         font-weight: 600;
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         border-bottom: 1px solid var(--border-color);
         white-space: nowrap;
+        color:black;
     }
 
     td {

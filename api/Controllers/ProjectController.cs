@@ -194,7 +194,7 @@ public class ProjectController : ControllerBase
                 Status = (int)project.Status,
                 IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name,
-                IsPublic = project.Group.IsPublic
+                IsPublic = project.Group?.IsPublic
             }).ToList();
 
             return Ok(ApiResponse.Ok($"{projects.Count} projects found", projectList));
