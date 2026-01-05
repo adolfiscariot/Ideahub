@@ -7,19 +7,20 @@ import { AuthService } from '../../Services/auth/auth.service';
 import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest } from '../../Interfaces/Ideas/idea-interfaces';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { ShareIdeaModalComponent } from '../../Components/modals/share-idea-modal/share-idea-modal.component';
 import { VoteService } from '../../Services/vote.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
-import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse} from '../../Interfaces/Projects/project-interface';
+import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
+import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
+import { ModalComponent } from '../../Components/modal/modal.component';
 
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ShareIdeaModalComponent, ButtonsComponent, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, BaseLayoutComponent, ModalComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -78,6 +79,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     description: '',
     overseenByEmail: ''
   };
+  showMemberLeaveModal = false;
+  titleLength = 0;
+  descLength = 0;
+  isFormValid = false;
+  shareTitleCount = 0;
+  shareDescCount =0;
+
+  shareIdeaForm!: FormGroup;
 
   private routeSub: Subscription = new Subscription();
 
@@ -213,19 +222,34 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ideas.component.ts
+updateShareIdeaCounts() {
+  this.shareTitleCount = this.modalEditData.title?.length || 0;
+  this.shareDescCount = this.modalEditData.description?.length || 0;
+}
+
+autoGrow(event: any) {
+  const textarea = event.target;
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
 
   confirmLeaveGroup() {
     if (this.isGroupCreator()){
       this.showAdminLeaveModal = true;
     }
     else {
-      const confirmLeave = confirm('Are you sure you want to leave this group?');
-      if (confirmLeave) {
-        this.leaveGroup();
-      }
+      this.showMemberLeaveModal = true;
     }
   }
+
+  confirmMemberLeave() {
+  this.showMemberLeaveModal = false;
+  this.leaveGroup();
+}
+
+cancelMemberLeave() {
+  this.showMemberLeaveModal = false;
+}
 
   leaveGroup() {
     if (!this.groupId) return;
@@ -248,7 +272,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.groupsService.acceptRequest(groupId, requestUserEmail).subscribe({
       next: () => {
         console.log('Request accepted for user:', requestUserEmail);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
+        
+        if (this.pendingRequests.length === 0) {
+          this.closeRequestsModal();
+          this.toastService.show('Accepted User request', 'success');
+        }
+        this.loadGroupMembers();
       },
       error: (err) => console.error('Error accepting request:', err)
     });
@@ -259,7 +289,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.groupsService.rejectRequest(groupId, requestUserEmail).subscribe({
       next: () => {
         console.log('Request rejected for user:', requestUserEmail);
-        this.pendingRequests = this.pendingRequests.filter(r => r.userId !== requestUserEmail);
+        this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
+
+        if (this.pendingRequests.length === 0) {
+          this.closeRequestsModal();
+          this.toastService.show('Rejected User request', 'success');
+        }
+        this.loadGroupMembers();
       },
       error: (err) => console.error('Error rejecting request:', err)
     });
@@ -314,7 +350,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
           // Close modal and reset
           this.showShareModal = false;
           this.isEditMode = false;
-          this.modalEditData = null;
 
           this.toastService.show('Idea updated successfully!', 'success');
         } else {
@@ -597,13 +632,34 @@ export class IdeasComponent implements OnInit, OnDestroy {
     return isCreator;
   }
 
-  openShareModal(): void {
-    this.showShareModal = true;
+  openShareModal(editMode = false, editData: any = null): void {
+  console.log('Opening share modal in edit mode:', editMode);
+  console.log('Edit data:', editData);
+
+  this.isEditMode = editMode;
+
+  // Always reset modalEditData to a valid object
+  this.modalEditData = {
+    id: '',
+    title: '',
+    description: ''
+  };
+
+  // If in edit mode, populate with the idea data
+  if (editMode && editData) {
+    this.modalEditData = {
+      id: editData.id || '',
+      title: editData.title || '',
+      description: editData.description || ''
+    };
   }
+
+  this.showShareModal = true;
+  console.log('Modal edit data set to:', this.modalEditData);
+}
   closeShareModal(): void {
     this.showShareModal = false;
     this.isEditMode = false;
-    this.modalEditData = null;
   }
 
 
@@ -748,31 +804,69 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Viewing voters (admin only)
-  onViewVoters(idea: Idea, event?: Event): void {
-    if (event) event.stopPropagation();
+  // Add property
+showVotersModalView = false; 
 
-    this.isViewingVoters = true;
-    this.selectedIdeaForVoters = idea;
+// Update onViewVoters method
+onViewVoters(idea: Idea, event?: Event): void {
+  if (event) event.stopPropagation();
 
-    this.ideasService.getVotesForIdea(idea.id).subscribe({
-      next: (response) => {
-        this.isViewingVoters = false;
-        if (response.success && response.data) {
-          this.votersList = response.data;
+  this.isViewingVoters = true;
+  this.selectedIdeaForVoters = idea;
+  this.showVotersModalView = true;
 
-          // You can display this in a modal or alert
-          this.showVotersModal(idea, response.data);
-        } else {
-          this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
-        }
-      },
-      error: (error) => {
-        this.isViewingVoters = false;
-        console.error('Error fetching voters:', error);
+  this.ideasService.getVotesForIdea(idea.id).subscribe({
+    next: (response) => {
+      this.isViewingVoters = false;
+      if (response.success && response.data) {
+        this.votersList = response.data;
+      } else {
+        this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
+        this.closeVotersModal();
       }
+    },
+    error: (error) => {
+      this.isViewingVoters = false;
+      console.error('Error fetching voters:', error);
+      this.toastService.show('Failed to load voters', 'error');
+      this.closeVotersModal();
+    }
+  });
+}
+
+// Close voters modal
+closeVotersModal(): void {
+  this.showVotersModalView = false;
+  this.selectedIdeaForVoters = null;
+  this.votersList = [];
+}
+
+// Helper method for voter initials
+getVoterInitials(name: string): string {
+  if (!name) return '?';
+  return name.split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+}
+
+// Format vote date
+formatVoteDate(date: any): string {
+  if (!date) return 'unknown date';
+  try {
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+  } catch {
+    return 'invalid date';
   }
+}
 
   /**
    * Check votes for all ideas in the list
