@@ -155,6 +155,55 @@ public class ProjectController : ControllerBase
         }
     }
 
+    //View all global projects (Public groups + User's private groups)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllProjects()
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(ApiResponse.Fail("User Id is null"));
+            }
+
+            // Fetch projects:
+            // 1. Project is not deleted
+            // 2. AND (Group is Public OR User is member of Group)
+            var projects = await _context.Projects
+                .Include(p => p.Group)
+                .Include(p => p.OverseenByUser)
+                .Include(p => p.Idea)
+                .Where(p => 
+                    !p.IsDeleted && 
+                    (p.Group.IsPublic || p.Group.UserGroups.Any(ug => ug.UserId == userId)))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var projectList = projects.Select(project => new
+            {
+                project.Id,
+                project.Title,
+                project.Description,
+                project.CreatedAt,
+                project.EndedAt,
+                OverseenByUserName = project.OverseenByUser?.DisplayName ?? "Unknown",
+                OverseenByUserId = project.OverseenByUserId,
+                Status = (int)project.Status,
+                IdeaName = project.Idea?.Title,
+                GroupName = project.Group?.Name,
+                IsPublic = project.Group?.IsPublic
+            }).ToList();
+
+            return Ok(ApiResponse.Ok($"{projects.Count} projects found", projectList));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "GetAllProjects: Failed to fetch projects");
+            return StatusCode(500, ApiResponse.Fail("An internal server error occurred"));
+        }
+    }
+
     //Open a project
     [HttpGet("open-project")]
     public async Task<IActionResult> OpenProject(int groupId, int projectId)
@@ -289,6 +338,11 @@ public class ProjectController : ControllerBase
                     _logger.LogWarning("Update Project: Unable to parse the updated status for project {projectTitle}", project.Title);
                     return BadRequest(ApiResponse.Fail("Unable to parse updated status"));
                 }
+                }
+
+            if (projectUpdateDto.EndedAt is not null)
+            {
+                project.EndedAt = projectUpdateDto.EndedAt;
             }
 
             //add updatedAt time

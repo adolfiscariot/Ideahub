@@ -43,6 +43,7 @@ services:
 volumes:
   ideahub_data:
 
+
 networks:
   ideahub-net:
     driver: bridge
