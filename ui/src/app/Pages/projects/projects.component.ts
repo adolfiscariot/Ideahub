@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProjectModalComponent } from '../../Components/modals/edit-project-modal/edit-project-modal.component';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
+import { Toast, ToastService } from '../../Services/toast.service';
 
 @Component({
     selector: 'app-projects',
@@ -24,7 +25,9 @@ export class ProjectsComponent implements OnInit {
     private authService = inject(AuthService);
     currentUserId: string = '';
 
-    constructor() { }
+    constructor(
+        private toastService: ToastService
+    ) {}
 
     ngOnInit(): void {
         this.currentUserId = this.authService.getUserId();
@@ -78,17 +81,17 @@ export class ProjectsComponent implements OnInit {
                     // Convert numeric enum to string key for backend
                     status: ProjectStatus[result.status],
                     endedAt: result.endedAt ? new Date(result.endedAt).toISOString() : null
-                    // Overseer update logic could go here if the modal supports it
                 };
 
                 this.projectsService.updateProject(project.id, updateDto).subscribe({
                     next: (updatedProject) => {
                         console.log('Project updated successfully');
+                        this.toastService.show('Project updated successfuly', 'success');
                         this.loadProjects(); // Reload to get fresh data
                     },
                     error: (err) => {
                         console.error('Failed to update project', err);
-                        alert('Failed to update project');
+                        this.toastService.show('Failed to update project', 'error');
                     }
                 });
             }

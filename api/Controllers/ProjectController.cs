@@ -162,8 +162,6 @@ public class ProjectController : ControllerBase
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // Allow unauthenticated viewing of public projects? User flow implies auth is present.
-            // Using existing auth check for now.
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return Unauthorized(ApiResponse.Fail("User Id is null"));
