@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-
+import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { AuthService } from '../../Services/auth/auth.service';
 import {
@@ -29,6 +29,8 @@ export class RegistrationInputComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
   isLoading = false;
+
+  constructor(private toastService: ToastService){}
 
   ngOnInit(): void { }
 
@@ -74,18 +76,17 @@ export class RegistrationInputComponent implements OnInit {
           this.router.navigate(['/login']);
           this.registrationForm.reset();
         },
-        error: (errorMessage) => {
+        error: (error) => {
           this.isLoading = false;
-          console.error(`Registration unsuccessful: ${errorMessage.errors}`);
-          alert(
-            `Registration failed.${errorMessage.value || 'Please try again'}`
-          );
+          console.error(`Registration unsuccessful:`, error);
+          const msg = error.message || 'Unknown error';
+          this.toastService.show(`Registration failed. ${msg}`, 'error');
         },
       });
     } else {
       event.preventDefault();
       this.registrationForm.markAllAsTouched();
-      alert('Please fill the form correctly');
+      this.toastService.show('Please fill the form correctly', 'info');
     }
   }
 }

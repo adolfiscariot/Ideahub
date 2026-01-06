@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
