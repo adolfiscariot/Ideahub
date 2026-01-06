@@ -71,7 +71,7 @@ export class RegistrationInputComponent implements OnInit {
         next: (response) => {
           this.isLoading = false;
           console.log(`Registration was successful: ${response.message}`);
-          alert('Registration was successful');
+          this.toastService.show('Registration was successful', 'success');
           // this.router.navigate(['/confirm-registration']);
           this.router.navigate(['/login']);
           this.registrationForm.reset();
