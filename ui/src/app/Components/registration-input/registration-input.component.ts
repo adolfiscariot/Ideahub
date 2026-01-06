@@ -14,7 +14,8 @@ import {
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { confirmPasswordValidator } from '../../Validators/password-match.validators';
 import { Router } from '@angular/router';
-import { ConfirmRegistrationComponent } from '../../Pages/confirm-registration/confirm-registration.component';
+//import { ConfirmRegistrationComponent } from '../../Pages/confirm-registration/confirm-registration.component';
+import { LoginPageComponent } from '../../Pages/login-page/login-page.component';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -71,7 +72,8 @@ export class RegistrationInputComponent implements OnInit {
           this.isLoading = false;
           console.log(`Registration was successful: ${response.message}`);
           this.toastService.show('Registration was successful', 'success');
-          this.router.navigate(['/confirm-registration']);
+          // this.router.navigate(['/confirm-registration']);
+          this.router.navigate(['/login']);
           this.registrationForm.reset();
         },
         error: (error) => {

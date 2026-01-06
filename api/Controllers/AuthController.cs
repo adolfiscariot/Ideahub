@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
-    private readonly string homepageUrl = "http://localhost:4200";
+    //private readonly string homepageUrl = "http://localhost:4200";
 
     //constructor
     public AuthController(
@@ -94,38 +94,38 @@ public class AuthController : ControllerBase
             }
 
             //create email confirmation token
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = Url.Action(
-                nameof(ConfirmEmail),
-                "Auth",
-                new { userId = user.Id, token },
-                Request.Scheme
-            );
-            _logger.LogInformation("Email confirmation token created");
+            // var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            // var confirmationLink = Url.Action(
+            //     nameof(ConfirmEmail),
+            //     "Auth",
+            //     new { userId = user.Id, token },
+            //     Request.Scheme
+            // );
+            // _logger.LogInformation("Email confirmation token created");
 
-            //send token to user's email
-            _logger.LogInformation("Confirmation Email sending....");
-            var userEmail = user.Email;
-            var userName = user.DisplayName;
-            var subject = "Ideahub Email Confirmation";
-            var message = $"Hello {userName}, Click this link to confirm your account {confirmationLink}";
-            try
-            {
-                await _emailSender.SendEmailAsync(
-                    userEmail,
-                    subject,
-                    message
-                );
-            }
-            //if it fails rollback the registration
-            catch (Exception e)
-            {
-                _logger.LogError("Confirmation Email Not Sent: {Message}", e.Message);
-                await _userManager.DeleteAsync(user);
-                return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email"));
-            }
+            // //send token to user's email
+            // _logger.LogInformation("Confirmation Email sending....");
+            // var userEmail = user.Email;
+            // var userName = user.DisplayName;
+            // var subject = "Ideahub Email Confirmation";
+            // var message = $"Hello {userName}, Click this link to confirm your account {confirmationLink}";
+            // try
+            // {
+            //     await _emailSender.SendEmailAsync(
+            //         userEmail,
+            //         subject,
+            //         message
+            //     );
+            // }
+            // //if it fails rollback the registration
+            // catch (Exception e)
+            // {
+            //     _logger.LogError("Confirmation Email Not Sent: {Message}", e.Message);
+            //     await _userManager.DeleteAsync(user);
+            //     return StatusCode(500, ApiResponse.Fail("Failed to send confirmation email"));
+            // }
 
-            _logger.LogInformation("Account Registration email sent");
+            // _logger.LogInformation("Account Registration email sent");
 
             _logger.LogInformation($"User: {registerDto.Email}, Role: {RoleConstants.RegularUser}");
             return Ok(ApiResponse.Ok("User was created and added to the default role successfully"));
@@ -138,94 +138,94 @@ public class AuthController : ControllerBase
     }
 
     //Validate the email confirmation
-    [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail(string userId, string token)
-    {
-        //check if the token or user is null
-        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
-        {
-            _logger.LogError("Token or user Id is null");
-            return BadRequest(ApiResponse.Fail("Invalid Credentials"));
-        }
+    // [HttpGet("confirm-email")]
+    // public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    // {
+    //     //check if the token or user is null
+    //     if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
+    //     {
+    //         _logger.LogError("Token or user Id is null");
+    //         return BadRequest(ApiResponse.Fail("Invalid Credentials"));
+    //     }
 
-        //find user
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-        {
-            return NotFound(ApiResponse.Fail("User Not Found"));
-        }
+    //     //find user
+    //     var user = await _userManager.FindByIdAsync(userId);
+    //     if (user is null)
+    //     {
+    //         return NotFound(ApiResponse.Fail("User Not Found"));
+    //     }
 
-        //check if email has already been confirmed
-        if (user.EmailConfirmed)
-        {
-            return Redirect(homepageUrl);
-        }
+    //     //check if email has already been confirmed
+    //     if (user.EmailConfirmed)
+    //     {
+    //         return Redirect(homepageUrl);
+    //     }
 
-        //otherwise confirm the email
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        if (result.Succeeded) {
-            return Redirect(homepageUrl);
-        } else {
-            return BadRequest(ApiResponse.Fail(
-                "Email Confirmation Failed",
-                result.Errors.Select(e => e.Description).ToList()));
-        }
-    }
+    //     //otherwise confirm the email
+    //     var result = await _userManager.ConfirmEmailAsync(user, token);
+    //     if (result.Succeeded) {
+    //         return Redirect(homepageUrl);
+    //     } else {
+    //         return BadRequest(ApiResponse.Fail(
+    //             "Email Confirmation Failed",
+    //             result.Errors.Select(e => e.Description).ToList()));
+    //     }
+    // }
 
     //resend email
-    [HttpPost("resend-email")]
-    public async Task<IActionResult> ResendEmail(string email)
-    {
-        if (email is null)
-        {
-            _logger.LogError("Empty email attempted to resend confirmation");
-            return BadRequest(ApiResponse.Fail("Email is required"));
-        }
+    // [HttpPost("resend-email")]
+    // public async Task<IActionResult> ResendEmail(string email)
+    // {
+    //     if (email is null)
+    //     {
+    //         _logger.LogError("Empty email attempted to resend confirmation");
+    //         return BadRequest(ApiResponse.Fail("Email is required"));
+    //     }
 
-        //fetch user
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user is null)
-        {
-            _logger.LogError("User Not Found");
-            return BadRequest(ApiResponse.Fail("User Not Found"));
-        }
+    //     //fetch user
+    //     var user = await _userManager.FindByEmailAsync(email);
+    //     if (user is null)
+    //     {
+    //         _logger.LogError("User Not Found");
+    //         return BadRequest(ApiResponse.Fail("User Not Found"));
+    //     }
 
-        try
-        {
-            //generate another token
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    //     try
+    //     {
+    //         //generate another token
+    //         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            //confirmation link
-            var confirmationLink = Url.Action(
-                nameof(ConfirmEmail),
-                "Auth",
-                new { userId = user.Id, token },
-                Request.Scheme
-            );
-            var subject = "Email Reconfirmation";
-            var message = $"Use this link to reconfirm your email: {confirmationLink}";
+    //         //confirmation link
+    //         var confirmationLink = Url.Action(
+    //             nameof(ConfirmEmail),
+    //             "Auth",
+    //             new { userId = user.Id, token },
+    //             Request.Scheme
+    //         );
+    //         var subject = "Email Reconfirmation";
+    //         var message = $"Use this link to reconfirm your email: {confirmationLink}";
 
-            //send token via email
-            if (string.IsNullOrWhiteSpace(user.Email))
-            {
-                return BadRequest(ApiResponse.Fail("Email not found"));
-            }
-            await _emailSender.SendEmailAsync(
-                user.Email,
-                subject,
-                message
-            );
+    //         //send token via email
+    //         if (string.IsNullOrWhiteSpace(user.Email))
+    //         {
+    //             return BadRequest(ApiResponse.Fail("Email not found"));
+    //         }
+    //         await _emailSender.SendEmailAsync(
+    //             user.Email,
+    //             subject,
+    //             message
+    //         );
 
-            _logger.LogInformation("Account Confirmation Email Re-sent to {UserEmail}", user.Email);
-            return Ok(ApiResponse.Ok("Confirmation Email Re-sent"));
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Error resending confirmation email to {UserEmail}: {e}", user.Email, e);
-            return StatusCode(500, ApiResponse.Fail("Failed to resend confirmation email"));
-        }
+    //         _logger.LogInformation("Account Confirmation Email Re-sent to {UserEmail}", user.Email);
+    //         return Ok(ApiResponse.Ok("Confirmation Email Re-sent"));
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         _logger.LogError("Error resending confirmation email to {UserEmail}: {e}", user.Email, e);
+    //         return StatusCode(500, ApiResponse.Fail("Failed to resend confirmation email"));
+    //     }
 
-    }
+    // }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
@@ -239,11 +239,11 @@ public class AuthController : ControllerBase
         }
 
         //check email confirmation
-        if (!user.EmailConfirmed)
-        {
-            _logger.LogWarning("Please confirm your email before logging in");
-            return BadRequest(ApiResponse.Fail("Please confirm your email before logging in"));
-        }
+        // if (!user.EmailConfirmed)
+        // {
+        //     _logger.LogWarning("Please confirm your email before logging in");
+        //     return BadRequest(ApiResponse.Fail("Please confirm your email before logging in"));
+        // }
 
         //login the user
         var loginResult = await _signInManager.PasswordSignInAsync(user, loginDto.Password, isPersistent: true, lockoutOnFailure: false);
