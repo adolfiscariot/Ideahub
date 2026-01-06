@@ -279,12 +279,14 @@ onConfirmationInput(value: string): void {
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess && group.isPublic == 'false') {
+        if (isSuccess || group.isPublic == false) {
           this.toastService.show('Request sent! Waiting for admin approval.', 'success');
+          group.isMember=false;
           this.loadGroups();
         } 
-        else if (isSuccess && group.isPublic == 'true'){
-          this.toastService.show('Joined successfully', 'success');
+        else if (isSuccess || group.isPublic==true){
+          this.toastService.show('Joined successfully', 'success'); 
+          group.isMember=true;
           this.onViewIdeas(groupId);
         }
         else {
