@@ -387,6 +387,42 @@ public async Task<IActionResult> LeaveGroup(int groupId)
         return Ok(ApiResponse.Ok($"{pendingRequests.Count()} Pending requests found", req));
     }
 
+    //Global view group requests
+    [Authorize(Policy = "GroupAdminOnly")]
+[HttpGet("view-global-requests")]
+public async Task<IActionResult> ViewAllGroupRequests()
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (string.IsNullOrWhiteSpace(userId))
+        return NotFound(ApiResponse.Fail("User ID is null"));
+
+    // Only groups this admin manages
+    var adminGroupIds = await _context.Groups
+        .Where(g => g.CreatedByUserId == userId)
+        .Select(g => g.Id)
+        .ToListAsync();
+
+    if (!adminGroupIds.Any())
+        return Ok(ApiResponse.Ok("No groups managed", new List<object>()));
+
+    var pendingRequests = await _context.GroupMembershipRequests
+    .Where(r =>
+        adminGroupIds.Contains(r.GroupId) &&
+        r.Status.ToString() == "Pending")
+    .Select(r => new
+    {
+        r.GroupId,
+        GroupName = r.Group.Name,
+        RequestUserEmail = r.User.Email
+    })
+    .ToListAsync();
+
+        
+    return Ok(ApiResponse.Ok($"{pendingRequests.Count} pending requests", pendingRequests));
+}
+
+
+
     //Accept user's requests
     [Authorize(Policy = "GroupAdminOnly")]
     [HttpPost("accept-request")]
