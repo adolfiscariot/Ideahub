@@ -413,7 +413,7 @@ public async Task<IActionResult> ViewAllGroupRequests()
     {
         r.GroupId,
         GroupName = r.Group.Name,
-        RequestUserEmail = r.User.Email
+        UserEmail = r.User.Email
     })
     .ToListAsync();
 

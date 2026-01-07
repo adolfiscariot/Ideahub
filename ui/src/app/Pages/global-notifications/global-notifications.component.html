@@ -1,1 +1,30 @@
-<p>global-notifications works!</p>
+<div *ngIf="loadingRequests" class="loading">Loading pending requests...</div>
+<div *ngIf="errorRequests" class="error">{{ errorRequests }}</div>
+<div *ngIf="!loadingRequests && groupedRequests.length === 0" class="no-requests">
+  No pending requests
+</div>
+
+<div *ngFor="let group of groupedRequests" class="group-panel">
+  <!-- Header -->
+  <div class="group-header" (click)="toggleGroup(group)">
+    <span class="group-name">{{ group.groupName }}</span>
+    <span class="badge">{{ group.requests.length }}</span>
+    <span class="arrow">{{ group.open ? '▲' : '▼' }}</span>
+  </div>
+
+  <!-- Requests -->
+  <div *ngIf="group.open" class="requests-container">
+    <div class="group-actions">
+      <button *ngIf="group.requests.length > 1" (click)="acceptAll(group)" class="accept-all">Accept All</button>
+      <button *ngIf="group.requests.length > 1" (click)="rejectAll(group)" class="reject-all">Reject All</button>
+    </div>
+
+    <div *ngFor="let req of group.requests" class="request-card">
+      <div class="request-email">{{ req.userEmail }}</div>
+      <div class="request-actions">
+        <button class="accept-btn" (click)="acceptRequest(req)">Accept</button>
+        <button class="reject-btn" (click)="rejectRequest(req)">Reject</button>
+      </div>
+    </div>
+  </div>
+</div>

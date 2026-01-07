@@ -1,0 +1,98 @@
+.group-panel {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+  .group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(90deg, #eef2f7, #fff);
+    border-bottom: 1px solid #ddd;
+
+    .badge {
+      background-color: #007bff;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+
+    .arrow {
+      font-size: 0.9rem;
+    }
+  }
+
+  .requests-container {
+    padding: 0.5rem 1rem;
+
+    .group-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
+
+      button {
+        margin-left: 0.5rem;
+        border: none;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .accept-all {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .reject-all {
+        background-color: #dc3545;
+        color: white;
+      }
+    }
+
+    .request-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      margin-bottom: 0.25rem;
+      border-radius: 6px;
+      background-color: #f9f9f9;
+      transition: box-shadow 0.2s;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      .request-actions button {
+        margin-left: 0.5rem;
+        border: none;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .accept-btn {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .reject-btn {
+        background-color: #dc3545;
+        color: white;
+      }
+    }
+  }
+}
+
+.loading, .error, .no-requests {
+  padding: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
