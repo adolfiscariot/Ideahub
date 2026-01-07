@@ -279,12 +279,14 @@ onConfirmationInput(value: string): void {
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess && group.isPublic == 'false') {
+        if (isSuccess || group.isPublic == false) {
           this.toastService.show('Request sent! Waiting for admin approval.', 'success');
+          group.isMember=false;
           this.loadGroups();
         } 
-        else if (isSuccess && group.isPublic == 'true'){
-          this.toastService.show('Joined successfully', 'success');
+        else if (isSuccess || group.isPublic==true){
+          this.toastService.show('Joined successfully', 'success'); 
+          group.isMember=true;
           this.onViewIdeas(groupId);
         }
         else {
@@ -431,7 +433,7 @@ onConfirmationInput(value: string): void {
         } else if (error.status === 404) {
           this.toastService.show('Group not found.', 'error');
         } else {
-          this.toastService.show('Failed to delete group. Please try again.', 'error');
+          this.toastService.show('Failed to delete group. It may have linked ideas or projects', 'error');
         }
       }
     });
