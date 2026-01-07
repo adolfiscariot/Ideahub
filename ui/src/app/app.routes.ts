@@ -57,12 +57,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   },
-  // {
-  //   path: 'notifications',
-  //   canActivate: [AuthGuard],
-  //   loadComponent: () =>
-  //     import('./Pages/notifications/notifications.component').then(
-  //       (m) => m.NotificationsComponent
-  //     ),
-  // }
+   {
+    path: 'notifications',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/global-notifications/global-notifications.component').then(
+        (m) => m.GlobalNotificationsComponent
+      ),
+  }
 ];
