@@ -433,7 +433,7 @@ onConfirmationInput(value: string): void {
         } else if (error.status === 404) {
           this.toastService.show('Group not found.', 'error');
         } else {
-          this.toastService.show('Failed to delete group. It may have linked ideas or projects', 'error');
+          this.toastService.show('Failed to delete group. It may have linked projects', 'error');
         }
       }
     });
