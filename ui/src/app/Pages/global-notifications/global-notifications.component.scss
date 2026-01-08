@@ -1,98 +1,138 @@
-.group-panel {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-
-  .group-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    background: linear-gradient(90deg, #eef2f7, #fff);
-    border-bottom: 1px solid #ddd;
-
-    .badge {
-      background-color: #007bff;
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .arrow {
-      font-size: 0.9rem;
-    }
-  }
-
-  .requests-container {
-    padding: 0.5rem 1rem;
-
-    .group-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.5rem;
-
-      button {
-        margin-left: 0.5rem;
-        border: none;
-        padding: 0.3rem 0.6rem;
-        border-radius: 4px;
-        font-weight: 500;
-        cursor: pointer;
-      }
-
-      .accept-all {
-        background-color: #28a745;
-        color: white;
-      }
-
-      .reject-all {
-        background-color: #dc3545;
-        color: white;
-      }
-    }
-
-    .request-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem;
-      margin-bottom: 0.25rem;
-      border-radius: 6px;
-      background-color: #f9f9f9;
-      transition: box-shadow 0.2s;
-
-      &:hover {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      }
-
-      .request-actions button {
-        margin-left: 0.5rem;
-        border: none;
-        padding: 0.3rem 0.6rem;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-      .accept-btn {
-        background-color: #28a745;
-        color: white;
-      }
-
-      .reject-btn {
-        background-color: #dc3545;
-        color: white;
-      }
-    }
-  }
+/* Main container */
+.group-requests-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.loading, .error, .no-requests {
-  padding: 1rem;
+/* Header Section */
+.requests-header {
+  margin-bottom: 30px;
+}
+
+.header-title h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 4px 0;
+}
+
+.total-count {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Group Panel */
+.group-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fafafa;
+  cursor: pointer;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.group-header:hover {
+  background: #f5f5f5;
+}
+
+.group-name {
+  font-size: 16px;
   font-weight: 500;
+  color: #000;
+}
+
+.group-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.badge {
+  background: #e0e0e0;
+  color: #000;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 24px;
   text-align: center;
+}
+
+.arrow {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Requests Container */
+.requests-container {
+  padding: 0;
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.request-item:last-child {
+  border-bottom: none;
+}
+
+.request-email {
+  font-family: monospace;
+  flex-grow: 1;
+  margin-right: 16px; 
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* Group Action Buttons */
+.group-action-buttons {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: #f9f9f9;
+  border-top: 1px solid #f0f0f0;
+  gap: 0.75rem;
+}
+
+.separator {
+  width: 1px;
+  height: 16px;
+  background: #e0e0e0;
+  margin: 0 12px;
+}
+
+/* Status Messages */
+.loading, .error, .no-requests {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
 }

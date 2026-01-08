@@ -21,11 +21,19 @@
 
   <div class="navbar-right">
     @if (loggedInStatus | async; as isLoggedIn) {
-  <a routerLink="/notifications" class="nav-link">
-    <button class="notification-btn" aria-label="Notifications">
-      <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
-    </button>
-  </a>
+    <a routerLink="/notifications" class="nav-link">
+      <div class="notif-bell">
+        <button class="notification-btn" aria-label="Notifications">
+          <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
+        </button>
+
+         <span *ngIf="(notificationsService.pendingRequests$ | async) as count" 
+          class="notif-badge"
+          [innerText]="count > 9 ? '9+' : count">
+    </span>
+      </div>
+   </a>
+
     <app-buttons [buttonText]="'LOG OUT'" [buttonStyleClass]="'btn-logout-navbar'" [buttonType]="'button'"
       (click)="onLogout()" />
     } @else {

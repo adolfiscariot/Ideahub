@@ -4,26 +4,67 @@
   No pending requests
 </div>
 
-<div *ngFor="let group of groupedRequests" class="group-panel">
-  <!-- Header -->
-  <div class="group-header" (click)="toggleGroup(group)">
-    <span class="group-name">{{ group.groupName }}</span>
-    <span class="badge">{{ group.requests.length }}</span>
-    <span class="arrow">{{ group.open ? '▲' : '▼' }}</span>
+<div *ngIf="!loadingRequests && groupedRequests.length > 0" class="group-requests-container">
+  <!-- Header Section -->
+  <div class="requests-header">
+    <div class="header-title">
+      <h2>Group Requests</h2>
+      <span class="total-count">{{ totalRequests }} pending requests across {{ groupedRequests.length }} group (s)</span>
+    </div>
   </div>
 
-  <!-- Requests -->
-  <div *ngIf="group.open" class="requests-container">
-    <div class="group-actions">
-      <button *ngIf="group.requests.length > 1" (click)="acceptAll(group)" class="accept-all">Accept All</button>
-      <button *ngIf="group.requests.length > 1" (click)="rejectAll(group)" class="reject-all">Reject All</button>
+  <!-- Groups Section -->
+  <div *ngFor="let group of groupedRequests" class="group-panel">
+    <!-- Group Header -->
+    <div class="group-header" (click)="toggleGroup(group)">
+      <div class="group-title-section">
+        <span class="group-name">{{ group.groupName }}</span>
+      </div>
+      <div class="group-header-right">
+        <span class="badge">{{ group.requests.length }}</span>
+        <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
+      </div>
     </div>
 
-    <div *ngFor="let req of group.requests" class="request-card">
-      <div class="request-email">{{ req.userEmail }}</div>
-      <div class="request-actions">
-        <button class="accept-btn" (click)="acceptRequest(req)">Accept</button>
-        <button class="reject-btn" (click)="rejectRequest(req)">Reject</button>
+    <!-- Requests List (when open) -->
+    <div *ngIf="group.open" class="requests-container">
+      <div *ngFor="let req of group.requests" class="request-item">
+        <span class="request-email">{{ req.userEmail }}</span>
+      <div class="action-buttons">
+         <app-buttons
+            [buttonText]="'Accept'"
+            [buttonStyleClass]="'btn-accept'"
+            [buttonType]="'button'"
+            (click)="acceptRequest(req)">
+        </app-buttons>
+
+        <app-buttons
+        [buttonText]="'Reject'"
+        [buttonStyleClass]="'btn-reject'"
+        [buttonType]="'button'"
+        (click)="rejectRequest(req)">
+        </app-buttons>
+        </div>
+      </div>
+      
+      <!-- Group Action Buttons -->
+      <div class="group-action-buttons">
+        <app-buttons
+            *ngIf="group.requests.length > 1"
+            [buttonText]="'Reject All'"
+            [buttonStyleClass]="'btn-reject'"
+            [buttonType]="'button'"
+            (click)="rejectAll(group)">
+        </app-buttons>
+
+        <app-buttons
+        *ngIf="group.requests.length > 1"
+        [buttonText]="'Accept All'"
+        [buttonStyleClass]="'btn-accept'"
+        [buttonType]="'button'"
+        (click)="acceptAll(group)">
+        </app-buttons>
+
       </div>
     </div>
   </div>
