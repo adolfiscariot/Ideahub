@@ -303,14 +303,18 @@
 
       <div class="type-confirm-section">
          <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
-      <input 
-        #confirmInput
-        type="text" 
-        [placeholder]="'Enter group name here'"
-        (input)="onConfirmationInput($event.target.value)"
-        [class.error]="confirmationInput !== selectedGroup.name"
-        [disabled]="isDeleting"
-      />
+          <input
+            type="text"
+            [formControl]="deleteConfirmControl"
+            [placeholder]="'Enter group name here'"
+            [disabled]="isDeleting"
+            [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched"
+          />
+
+      <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched"
+          class="error-message">
+        Group name does not match.
+      </div>
       </div>
     </div>
   </div>
@@ -321,17 +325,19 @@
         [buttonText]="'Cancel'"
         [buttonStyleClass]="'btn-modal-cancel'"
         [buttonType]="'button'"
-        [disabled]="isDeleting || isDeletedDisabled"
-        (click)="closeDeleteModal()">
-      </app-buttons>
-      
-      <app-buttons
-        [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
-        [buttonStyleClass]="'btn-reject'"
-        [buttonType]="'button'"
         [disabled]="isDeleting"
-        (click)="deleteGroup(selectedGroup.id)">
-      </app-buttons>
+        (click)="closeDeleteModal()">
+        </app-buttons>
+
+      
+     <app-buttons
+      [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
+      [buttonStyleClass]="'btn-reject'"
+      [buttonType]="'button'"
+      [disabled]="deleteConfirmControl.invalid || isDeleting"
+      (click)="deleteGroup(selectedGroup.id)">
+    </app-buttons>
+
     </div>
   </div>
 </app-modal>
