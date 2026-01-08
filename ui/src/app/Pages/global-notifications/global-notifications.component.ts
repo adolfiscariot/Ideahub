@@ -27,16 +27,13 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   constructor(
     private groupsService: GroupsService,
     private toastService: ToastService,
-    private notificationsService: NotificationsService // << inject it
+    private notificationsService: NotificationsService
   ) {}
 
   ngOnInit(): void {
     this.viewRequests();
 
-    if (!this.groupedRequests.length) {
-    this.notificationsService.set(0); 
-
-  }
+   
   }
 
   ngOnDestroy(): void {}
