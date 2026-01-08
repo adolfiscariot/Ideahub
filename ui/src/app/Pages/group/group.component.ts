@@ -12,6 +12,7 @@ import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
   selector: 'app-groups',
@@ -56,8 +57,8 @@ export class GroupsComponent implements OnInit {
   descCount = 0;
   nameLimitReached = false;
   descLimitReached = false;
-
-
+  deleteConfirmControl: any;
+  
   // Current user ID
   currentUserId: string | null = null;
 
@@ -77,6 +78,7 @@ export class GroupsComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       isPublic: [true, Validators.required]
     });
+    this.deleteConfirmControl = this.fb.control('');
   }
 
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
@@ -84,7 +86,7 @@ export class GroupsComponent implements OnInit {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
-    this.updateCharCounts();
+    this.updateCharCounts(); 
   }
 
   updateCharCounts() {
@@ -197,7 +199,7 @@ export class GroupsComponent implements OnInit {
   this.showDetailsModal = true;
 }
 
-closeDetailsModal(): void {
+closeDetailsModal(): void {    
   this.showDetailsModal = false;
   this.selectedGroup = null;
 }
@@ -226,10 +228,20 @@ closeCreateModal(): void {
   this.createGroupForm.reset();
 }
 
-openDeleteModal(group: any): void {
+openDeleteModal(group: any) {
   this.selectedGroup = group;
   this.showDeleteModal = true;
+
+  this.deleteConfirmControl.setValue('');
+  this.deleteConfirmControl.setValidators([
+    Validators.required,
+    (control: AbstractControl) =>
+      control.value === group.name ? null : { mismatch: true }
+  ]);
+  this.deleteConfirmControl.updateValueAndValidity();
 }
+
+
 
 closeDeleteModal(): void {
   this.showDeleteModal = false;
