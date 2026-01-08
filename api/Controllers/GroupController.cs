@@ -226,7 +226,10 @@ public async Task<IActionResult> JoinGroup(int groupId)
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("User {userEmail} joined PUBLIC group {groupName}", userEmail, groupName);
-            return Ok(ApiResponse.Ok($"You have joined {groupName}."));
+            return Ok(ApiResponse.Ok(
+                $"You have joined. {groupName}.", new {
+                    isPublic = group.IsPublic,
+                }));
         }
 
         else
@@ -256,7 +259,9 @@ public async Task<IActionResult> JoinGroup(int groupId)
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("User {userEmail} requested to join group {groupName} (pending approval)", userEmail, groupName);
-            return Ok(ApiResponse.Ok($"Join request sent to group {groupName}. Waiting for admin approval."));
+            return Ok(ApiResponse.Ok($"Join request sent to group {groupName}. Waiting for admin approval.", new {
+                isPublic = group.IsPublic,
+            }));
         }
 }
 
