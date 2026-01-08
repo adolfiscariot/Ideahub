@@ -13,6 +13,7 @@ import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.co
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
+import { NotificationsService } from '../../Services/notifications';
 
 @Component({
   selector: 'app-groups',
@@ -58,7 +59,7 @@ export class GroupsComponent implements OnInit {
   nameLimitReached = false;
   descLimitReached = false;
   deleteConfirmControl: any;
-  
+
   // Current user ID
   currentUserId: string | null = null;
 
@@ -71,6 +72,7 @@ export class GroupsComponent implements OnInit {
     private toastService: ToastService,
     private dialog: MatDialog,
     private router: Router,
+    private notificationsService: NotificationsService,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
@@ -419,7 +421,9 @@ onConfirmationInput(value: string): void {
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
           this.groups = this.groups.filter(group => group.id !== groupId);
+          this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
+
 
           if (this.groups.length === 0) {
             this.title = 'No Groups';

@@ -311,11 +311,10 @@
             [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched"
           />
 
-    <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched"
-        class="error-message">
-      Group name does not match.
-    </div>
-
+      <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched"
+          class="error-message">
+        Group name does not match.
+      </div>
       </div>
     </div>
   </div>
@@ -323,21 +322,21 @@
   <div modal-footer>
     <div class="modal-actions">
       <app-buttons
-  [buttonText]="'Cancel'"
-  [buttonStyleClass]="'btn-modal-cancel'"
-  [buttonType]="'button'"
-  [disabled]="isDeleting"
-  (click)="closeDeleteModal()">
-</app-buttons>
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        [buttonType]="'button'"
+        [disabled]="isDeleting"
+        (click)="closeDeleteModal()">
+        </app-buttons>
 
       
      <app-buttons
-  [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
-  [buttonStyleClass]="'btn-reject'"
-  [buttonType]="'button'"
-  [disabled]="deleteConfirmControl.invalid || isDeleting"
-  (click)="deleteGroup(selectedGroup.id)">
-</app-buttons>
+      [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
+      [buttonStyleClass]="'btn-reject'"
+      [buttonType]="'button'"
+      [disabled]="deleteConfirmControl.invalid || isDeleting"
+      (click)="deleteGroup(selectedGroup.id)">
+    </app-buttons>
 
     </div>
   </div>
