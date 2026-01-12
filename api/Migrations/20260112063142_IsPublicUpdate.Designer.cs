@@ -12,7 +12,7 @@ using api.Data;
 namespace Ideahub.Migrations
 {
     [DbContext(typeof(IdeahubDbContext))]
-    [Migration("20251216103926_IsPublicUpdate")]
+    [Migration("20260112063142_IsPublicUpdate")]
     partial class IsPublicUpdate
     {
         /// <inheritdoc />
