@@ -1144,7 +1144,7 @@ private handleSuccess(idea: Idea, response: any): void {
     }
     
     this.ideas = [...this.ideas];
-    alert('Project created');
+    this.toastService.show('Project created', 'success');
     
     this.currentIdeaToPromote = null;
     this.projectData = { title: '', description: '', overseenByEmail: '' };
