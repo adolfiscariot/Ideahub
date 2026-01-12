@@ -14,13 +14,12 @@ import { GroupMembersModalComponent } from '../../Components/modals/group-member
 import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
 import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
-import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, BaseLayoutComponent, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })

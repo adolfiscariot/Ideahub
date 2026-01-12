@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
-import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
@@ -24,10 +23,9 @@ import { NotificationsService } from '../../Services/notifications';
     CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
-    BaseLayoutComponent,
     ModalComponent,
     FormsModule,
-    GroupMembersModalComponent
+    //GroupMembersModalComponent
   ]
 })
 export class GroupsComponent implements OnInit {
