@@ -163,29 +163,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // APPLY EF MIGRATIONS HERE
-//using (var scope = app.Services.CreateScope())
-//{
-    //var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
-    //db.Database.Migrate();
-//}
-
-//Seed Roles at App Startup
-//using (var scope = app.Services.CreateScope())
-//{
-    //var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    //var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
-
-    //foreach (var role in roles)
-    //{
-        //if (!await roleManager.RoleExistsAsync(role))
-        //{
-            //await roleManager.CreateAsync(new IdentityRole(role));
-        //}
-    //}
-//}
-
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+
 
 var retries = 10;
 
@@ -211,6 +191,18 @@ while (retries > 0)
             throw;
 
         await Task.Delay(5000);
+    }
+}
+
+// Seed roles after migrations
+var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
+
+foreach (var role in roles)
+{
+    if (!await roleManager.RoleExistsAsync(role))
+    {
+        await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
 
