@@ -188,18 +188,29 @@ using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
 
 var retries = 10;
+
 while (retries > 0)
 {
     try
     {
-        db.Database.Migrate(); // apply migrations
+        Console.WriteLine("Applying database migrations...");
+        db.Database.Migrate();
+        Console.WriteLine("Database migrations applied successfully.");
         break;
     }
-    catch (Npgsql.NpgsqlException)
+    catch (Exception ex) when (
+        ex is Npgsql.NpgsqlException ||
+        ex is TimeoutException
+    )
     {
         retries--;
-        Console.WriteLine("Waiting for database to be ready...");
-        await Task.Delay(5000); // wait 5s
+        Console.WriteLine($"Migration failed. Retries left: {retries}");
+        Console.WriteLine(ex.Message);
+
+        if (retries == 0)
+            throw;
+
+        await Task.Delay(5000);
     }
 }
 
