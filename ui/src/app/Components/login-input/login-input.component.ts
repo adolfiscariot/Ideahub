@@ -12,6 +12,7 @@ import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
+import { NotificationsService } from '../../Services/notifications';
 
 @Component({
   selector: 'app-login-input',
@@ -22,10 +23,11 @@ import { Router } from '@angular/router';
 export class LoginInputComponent implements OnInit {
   authService = inject(AuthService);
   toastService = inject(ToastService);
+  notificationsService = inject(NotificationsService);
   router = inject(Router);
   isLoading = false;
 
-  ngOnInit(): void { }
+  ngOnInit(): void {this.notificationsService}
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -50,6 +52,7 @@ export class LoginInputComponent implements OnInit {
           this.isLoading = false;
           this.toastService.show(response.message, 'success');
           this.router.navigate(['/home']);
+          this.notificationsService.refreshPendingRequests();
           this.loginForm.reset();
         },
         error: (error) => {

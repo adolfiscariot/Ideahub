@@ -12,6 +12,8 @@ import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
+import { AbstractControl } from '@angular/forms';
+import { NotificationsService } from '../../Services/notifications';
 
 @Component({
   selector: 'app-groups',
@@ -56,7 +58,7 @@ export class GroupsComponent implements OnInit {
   descCount = 0;
   nameLimitReached = false;
   descLimitReached = false;
-
+  deleteConfirmControl: any;
 
   // Current user ID
   currentUserId: string | null = null;
@@ -70,6 +72,7 @@ export class GroupsComponent implements OnInit {
     private toastService: ToastService,
     private dialog: MatDialog,
     private router: Router,
+    private notificationsService: NotificationsService,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
@@ -77,6 +80,7 @@ export class GroupsComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       isPublic: [true, Validators.required]
     });
+    this.deleteConfirmControl = this.fb.control('');
   }
 
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
@@ -84,7 +88,7 @@ export class GroupsComponent implements OnInit {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
-    this.updateCharCounts();
+    this.updateCharCounts(); 
   }
 
   updateCharCounts() {
@@ -197,7 +201,7 @@ export class GroupsComponent implements OnInit {
   this.showDetailsModal = true;
 }
 
-closeDetailsModal(): void {
+closeDetailsModal(): void {    
   this.showDetailsModal = false;
   this.selectedGroup = null;
 }
@@ -226,10 +230,20 @@ closeCreateModal(): void {
   this.createGroupForm.reset();
 }
 
-openDeleteModal(group: any): void {
+openDeleteModal(group: any) {
   this.selectedGroup = group;
   this.showDeleteModal = true;
+
+  this.deleteConfirmControl.setValue('');
+  this.deleteConfirmControl.setValidators([
+    Validators.required,
+    (control: AbstractControl) =>
+      control.value === group.name ? null : { mismatch: true }
+  ]);
+  this.deleteConfirmControl.updateValueAndValidity();
 }
+
+
 
 closeDeleteModal(): void {
   this.showDeleteModal = false;
@@ -279,12 +293,13 @@ onConfirmationInput(value: string): void {
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess || group.isPublic == false) {
+        const { isPublic } = response.data;
+        if (isSuccess && isPublic === false) {
           this.toastService.show('Request sent! Waiting for admin approval.', 'success');
           group.isMember=false;
           this.loadGroups();
         } 
-        else if (isSuccess || group.isPublic==true){
+        else if (isSuccess && isPublic === true){
           this.toastService.show('Joined successfully', 'success'); 
           group.isMember=true;
           this.onViewIdeas(groupId);
@@ -406,7 +421,9 @@ onConfirmationInput(value: string): void {
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
           this.groups = this.groups.filter(group => group.id !== groupId);
+          this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
+
 
           if (this.groups.length === 0) {
             this.title = 'No Groups';
@@ -433,7 +450,7 @@ onConfirmationInput(value: string): void {
         } else if (error.status === 404) {
           this.toastService.show('Group not found.', 'error');
         } else {
-          this.toastService.show('Failed to delete group. It may have linked ideas or projects', 'error');
+          this.toastService.show('Failed to delete group. It may have linked projects', 'error');
         }
       }
     });

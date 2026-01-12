@@ -61,6 +61,14 @@ export class GroupsService {
     );
   }
 
+  viewGlobalRequests(): Observable<ApiResponse<any>> {
+    const params = new HttpParams();
+
+    return this.http.get<any>(`${this.apiUrl}/view-global-requests`, { params }).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
+
 
   rejectRequest(groupId: string, requestUserEmail: string): Observable<ApiResponse<any>> {
     const params = new HttpParams()
