@@ -1,28 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
+import { ToastService } from '../../Services/toast.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
-import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
-import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
+import { ModalComponent } from '../../Components/modal/modal.component';
+import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
+import { AbstractControl } from '@angular/forms';
+import { NotificationsService } from '../../Services/notifications';
 
 @Component({
   selector: 'app-groups',
-  templateUrl: './group.component.html', 
+  templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
-    BaseLayoutComponent
+    BaseLayoutComponent,
+    ModalComponent,
+    FormsModule,
+    GroupMembersModalComponent
   ]
 })
 export class GroupsComponent implements OnInit {
@@ -36,10 +41,24 @@ export class GroupsComponent implements OnInit {
   subtitle = 'Explore and join groups to collaborate on ideas and projects.';
 
   // Form state
-  showCreateForm = false;
+  showCreateModal = false;
   createGroupForm: FormGroup;
   isSubmitting = false;
   isLoading: boolean = true;
+  showDetailsModal = false;
+  showMembersModal = false;
+  showDeleteModal = false;
+  selectedGroup: any = null;
+  groupMembers: any[] = [];
+  isLoadingMembers = false;
+  isDeleting: boolean = false;
+  confirmationInput: string = '';
+  isDeletedDisabled: boolean = true;
+  nameCount = 0;
+  descCount = 0;
+  nameLimitReached = false;
+  descLimitReached = false;
+  deleteConfirmControl: any;
 
   // Current user ID
   currentUserId: string | null = null;
@@ -50,14 +69,18 @@ export class GroupsComponent implements OnInit {
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
+    private toastService: ToastService,
     private dialog: MatDialog,
     private router: Router,
+    private notificationsService: NotificationsService,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      isPublic: [true, Validators.required]
     });
+    this.deleteConfirmControl = this.fb.control('');
   }
 
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
@@ -65,8 +88,45 @@ export class GroupsComponent implements OnInit {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
+    this.updateCharCounts(); 
   }
 
+  updateCharCounts() {
+  const nameControl = this.createGroupForm.get('name');
+  const descControl = this.createGroupForm.get('description');
+
+  const nameValue = nameControl?.value || '';
+  const descValue = descControl?.value || '';
+
+  this.nameCount = nameValue.length;
+  this.descCount = descValue.length;
+
+  // NAME
+  if (this.nameCount > 100) {
+    this.nameLimitReached = true;
+    nameControl?.setValue(nameValue.substring(0, 100), { emitEvent: false });
+    this.nameCount = 100;
+  } else {
+    this.nameLimitReached = false;
+  }
+
+  // DESCRIPTION
+  if (this.descCount > 500) {
+    this.descLimitReached = true;
+    descControl?.setValue(descValue.substring(0, 500), { emitEvent: false });
+    this.descCount = 500;
+  } else {
+    this.descLimitReached = false;
+  }
+}
+
+
+
+  autoGrow(event: any) {
+  const textarea = event.target;
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
@@ -85,7 +145,8 @@ export class GroupsComponent implements OnInit {
               isMember: group.isMember,
               hasPendingRequest: group.hasPendingRequest,
               createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId
+              isCreator: group.createdByUserId === this.currentUserId,
+              isPublic: group.isPublic
             });
 
             return {
@@ -104,7 +165,14 @@ export class GroupsComponent implements OnInit {
               createdByUser: group.createdByUser || group.CreatedByUser || {
                 displayName: 'Unknown',
                 email: ''
-              }
+              },
+              isPublic:
+                group.isPublic === true ||
+                group.isPublic === 'true' ||
+                group.IsPublic === true ||
+                group.IsPublic === 'true'
+                  ? 'Public'
+                  : 'Private',
             };
           });
 
@@ -128,16 +196,17 @@ export class GroupsComponent implements OnInit {
 
   // ===== MODAL METHODS =====
 
-  openDetailsModal(group: any): void {
-    this.dialog.open(GroupDetailsModalComponent, {
-      width: '600px',
-      maxHeight: '90vh',
-      data: { group: group },
-      panelClass: 'custom-modal'
-    });
-  }
+ openDetailsModal(group: any): void {
+  this.selectedGroup = group;
+  this.showDetailsModal = true;
+}
 
-  openMembersModal(group: any): void {
+closeDetailsModal(): void {    
+  this.showDetailsModal = false;
+  this.selectedGroup = null;
+}
+
+openMembersModal(group: any): void {
     this.dialog.open(GroupMembersModalComponent, {
       width: '600px',
       maxHeight: '90vh',
@@ -146,17 +215,52 @@ export class GroupsComponent implements OnInit {
     });
   }
 
-  openPendingRequestsModal(group: any): void {
-    alert(`Pending requests for ${group.name}:\n\nFeature coming soon!`);
-  }
+closeMembersModal(): void {
+  this.showMembersModal = false;
+  this.selectedGroup = null;
+  this.groupMembers = [];
+}
 
+openCreateModal(): void {
+  this.showCreateModal = true;
+}
+
+closeCreateModal(): void {
+  this.showCreateModal = false;
+  this.createGroupForm.reset();
+}
+
+openDeleteModal(group: any) {
+  this.selectedGroup = group;
+  this.showDeleteModal = true;
+
+  this.deleteConfirmControl.setValue('');
+  this.deleteConfirmControl.setValidators([
+    Validators.required,
+    (control: AbstractControl) =>
+      control.value === group.name ? null : { mismatch: true }
+  ]);
+  this.deleteConfirmControl.updateValueAndValidity();
+}
+
+
+
+closeDeleteModal(): void {
+  this.showDeleteModal = false;
+  this.selectedGroup = null;
+}
+
+onConfirmationInput(value: string): void {
+  this.confirmationInput = value;
+  this.isDeletedDisabled = value !== this.selectedGroup?.name;
+}
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
     const group = this.groups.find(g => g.id === groupId);
 
     if (!group?.isMember) {
-      alert('You must be a member of this group to view ideas.');
+      this.toastService.show('You must be a member of this group to view ideas.', 'info');
       return;
     }
 
@@ -177,48 +281,57 @@ export class GroupsComponent implements OnInit {
     const group = this.groups.find(g => g.id === groupId);
 
     if (group?.isMember) {
-      alert('You are already a member of this group!'); // THIS WON'T BE TRIGGERED REALLY SINCE THE JOIN BUTTON ONLY SHOWS WHEN YOU ARE NOT A MEMBER
+      this.toastService.show('You are already a member of this group!', 'info');
       return;
     }
 
     if (group?.hasPendingRequest) {
-      alert('You already have a pending request for this group!');
+      this.toastService.show('You already have a pending request for this group!', 'info');
       return;
     }
 
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: any) => {
         const isSuccess = response.success || response.status;
-        if (isSuccess) {
-          alert('Join request sent! Waiting for admin approval.');
+        const { isPublic } = response.data;
+        if (isSuccess && isPublic === false) {
+          this.toastService.show('Request sent! Waiting for admin approval.', 'success');
+          group.isMember=false;
           this.loadGroups();
-        } else {
+        } 
+        else if (isSuccess && isPublic === true){
+          this.toastService.show('Joined successfully', 'success'); 
+          group.isMember=true;
+          this.onViewIdeas(groupId);
+        }
+        else {
           if (response.message?.includes('already a member')) {
-            alert('You are already a member of this group!');
+            this.toastService.show('You are already a member of this group!', 'info');
             this.loadGroups();
           } else if (response.message?.includes('pending request')) {
-            alert('You already have a pending request for this group!');
+            this.toastService.show('You already have a pending request for this group!', 'info');
             this.loadGroups();
           } else {
-            alert(response.message || 'Failed to send join request.');
+            this.toastService.show(response.message || 'Failed to send join request.', 'error');
           }
         }
       },
       error: (error: any) => {
         console.error('Error joining group:', error);
-        alert('Failed to send join request. Please try again.');
+        this.toastService.show('Failed to send join request. Please try again.', 'error');
       }
     });
   }
 
   // ===== GROUP CREATION METHODS =====
 
-  toggleCreateForm(): void {
-    this.showCreateForm = !this.showCreateForm;
-    if (!this.showCreateForm) {
-      this.createGroupForm.reset();
-    }
+ toggleCreateForm(): void {
+  if (this.showCreateModal) {
+    this.closeCreateModal();
+  } else {
+    this.openCreateModal();
   }
+}
 
   onCreateGroup(): void {
     if (this.createGroupForm.invalid) {
@@ -234,17 +347,17 @@ export class GroupsComponent implements OnInit {
         this.isSubmitting = false;
         const isSuccess = response.success || response.status;
         if (isSuccess) {
-          alert('Group created successfully!');
+          this.toastService.show('Group created successfully!', 'success');
           this.loadGroups();
           this.createGroupForm.reset();
-          this.showCreateForm = false;
+          this.closeCreateModal();
         } else {
           if (response.message?.includes('authenticated') ||
             response.message?.includes('User ID') ||
             response.message?.includes('login')) {
-            alert('Please login to create a group.');
+            this.toastService.show('Please login to create a group.', 'warning');
           } else {
-            alert(response.message || 'Failed to create group.');
+            this.toastService.show(response.message || 'Failed to create group.', 'error');
           }
         }
       },
@@ -253,36 +366,50 @@ export class GroupsComponent implements OnInit {
         console.error('Error creating group:', error);
 
         if (error.status === 401) {
-          alert('Please login to create a group.');
+          this.toastService.show('Please login to create a group.', 'warning');
         } else if (error.status === 400) {
-          alert('Invalid group data. Please check your input.');
+          this.toastService.show('Invalid group data. Please check your input.', 'error');
         } else {
-          alert('Failed to create group. Please try again.');
+          this.toastService.show('Failed to create group. Please try again.', 'error');
         }
       }
     });
   }
 
+  loadGroupMembers(groupId: string): void {
+  this.isLoadingMembers = true;
+  this.groupMembers = [];
+  
+  this.groupsService.getGroupMembers(groupId).subscribe({
+    next: (response: any) => {
+      this.isLoadingMembers = false;
+      if (response.success && response.data) {
+        this.groupMembers = response.data.map((member: any) => ({
+          id: member.userId ?? member.id,
+          userId: member.userId || member.id,
+          name: member.name,
+          displayName: member.displayName || member.name,
+          userName: member.userName,
+          email: member.email,
+          createdByUserId: member.createdByUserId
+        }));
+      } else {
+        console.error('Failed to load group members:', response.message);
+        this.groupMembers = [];
+      }
+    },
+    error: (error: any) => {
+      this.isLoadingMembers = false;
+      console.error('Error loading group members:', error);
+      this.groupMembers = [];
+    }
+  });
+}
+
   onCancelCreate(): void {
-    this.showCreateForm = false;
-    this.createGroupForm.reset();
+    this.closeCreateModal();
   }
   // ===== GROUP DELETION METHODS =====
-
-  isDeleting: boolean = false;
-
-  onDeleteGroup(group: any): void {
-    const dialogRef = this.dialog.open(DeleteGroupModalComponent, {
-      width: '400px',
-      data: { groupName: group.name }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        this.deleteGroup(group.id);
-      }
-    });
-  }
 
   deleteGroup(groupId: string): void {
     this.isDeleting = true;
@@ -292,20 +419,23 @@ export class GroupsComponent implements OnInit {
         this.isDeleting = false;
 
         if (response.success) {
-          alert('Group deleted successfully!');
+          this.toastService.show('Group deleted successfully!', 'success');
           this.groups = this.groups.filter(group => group.id !== groupId);
+          this.notificationsService.refreshPendingRequests();
+          this.closeDeleteModal();
+
 
           if (this.groups.length === 0) {
             this.title = 'No Groups';
             this.subtitle = 'All groups have been deleted.';
           }
         } else {
-          alert(response.message || 'Failed to delete group');
+          this.toastService.show(response.message || 'Failed to delete group', 'error');
 
           if (response.message?.includes('permission') ||
             response.message?.includes('admin') ||
             response.message?.includes('not allowed')) {
-            alert('Only group admin can delete groups.');
+            this.toastService.show('Only group admin can delete groups.', 'warning'); 
           }
         }
       },
@@ -314,13 +444,13 @@ export class GroupsComponent implements OnInit {
         console.error('Error deleting group:', error);
 
         if (error.status === 401) {
-          alert('Please login to delete groups.');
+          this.toastService.show('Please login to delete groups.', 'warning');
         } else if (error.status === 403) {
-          alert('You do not have permission to delete this group.');
+          this.toastService.show('You do not have permission to delete this group.', 'warning');
         } else if (error.status === 404) {
-          alert('Group not found.');
+          this.toastService.show('Group not found.', 'error');
         } else {
-          alert('Failed to delete group. Please try again.');
+          this.toastService.show('Failed to delete group. It may have linked projects', 'error');
         }
       }
     });
@@ -350,6 +480,15 @@ export class GroupsComponent implements OnInit {
   trackById(index: number, item: any): string {
     return item.id || index.toString();
   }
+
+  getInitials(name: string): string {
+  if (!name) return '?';
+  return name.split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+}
 
   // ===== PERMISSION METHODS =====
 
@@ -384,4 +523,9 @@ export class GroupsComponent implements OnInit {
   get description() {
     return this.createGroupForm.get('description');
   }
+
+  get privacy() {
+    return this.createGroupForm.get('isPublic');
+  }
 }
+  

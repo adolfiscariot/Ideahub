@@ -191,6 +191,12 @@ namespace Ideahub.Migrations
                         .HasColumnType("text")
                         .HasColumnName("DeletedByUserId");
 
+                    b.Property<bool>("IsPublic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("IsPublic");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)

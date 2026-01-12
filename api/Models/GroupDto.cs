@@ -14,4 +14,8 @@ public class GroupDto
         [Required]
         [Column(TypeName = "text")]
         public string Description {get; set;} = string.Empty;
+
+        [Required(ErrorMessage = "Group privacy setting is required")]
+        public bool IsPublic {get; set;} = true;
+
 }

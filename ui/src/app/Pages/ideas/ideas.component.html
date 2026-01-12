@@ -1,3 +1,4 @@
+<app-base-layout>
 <div class="ideas-container" [class.split-view]="selectedIdea">
   
   <!-- Left Panel: Ideas List -->
@@ -23,46 +24,67 @@
           <!-- View Requests Button (only for group creator) -->
 <app-buttons
   *ngIf="isGroupCreator()"
-  buttonText="View Requests"
+  [buttonText]="'👁️ View Requests'"
   buttonStyleClass="btn-view-requests"
   (click)="viewRequests(groupId)"
   [disabled]="false"
   title="View pending join requests"
-></app-buttons>
+> 
+</app-buttons>
 
 <!-- Requests Modal -->
-<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="showRequestsModal = false">
+<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="closeRequestsModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Pending Requests ({{ pendingRequests.length }})</h2>
+    <h3>Pending Requests ({{ pendingRequests.length }})</h3>
 
     <div *ngIf="loadingRequests">Loading...</div>
     <div *ngIf="errorRequests">{{ errorRequests }}</div>
 
-    <ul *ngIf="!loadingRequests && !errorRequests">
+    <div *ngIf="!loadingRequests && !errorRequests && pendingRequests.length === 0" 
+         class="no-requests-message">
+      <p>No pending requests</p>
+    </div>
+
+    <ul *ngIf="!loadingRequests && !errorRequests && pendingRequests.length > 0" 
+        class="request-list">
       <li *ngFor="let req of pendingRequests" class="request-item">
-        <span>User ID: {{ req.userId }}</span>
-        <button (click)="acceptRequest(groupId, req.userId)" class="btn-accept">Accept</button>
-        <button (click)="rejectRequest(groupId, req.userId)" class="btn-reject">Reject</button>
+        <span><b>Email: </b> {{ req.email }}</span>
+        <app-buttons
+          [buttonText]="'Accept'"
+          [buttonStyleClass]="'btn-accept'"
+          [buttonType]="'button'"
+          (click)="acceptRequest(groupId, req.email)"
+          >
+        </app-buttons>
+        <app-buttons
+          [buttonText]="'Reject'"
+          [buttonStyleClass]="'btn-reject'"
+          [buttonType]="'button'"
+          (click)="rejectRequest(groupId, req.email)"
+          >
+        </app-buttons>
       </li>
     </ul>
 
-    <button (click)="showRequestsModal = false" class="btn-close-modal">Close</button>
+    <app-buttons
+      [buttonText]="'Close'"
+      [buttonStyleClass]="'btn-promote'"
+      [buttonType]="'button'"
+      (click)="closeRequestsModal()"
+      >
+    </app-buttons>
   </div>
 </div>
-
-
-
 
           <!-- Share Idea Button (Fixed - with + icon) -->
           <app-buttons
             *ngIf="!showShareModal"
-            buttonText="Share Idea"
             buttonStyleClass="btn-share-idea"
             (click)="openShareModal()"
             [disabled]="false"
             title="Share a new idea with the group"
           >
-            <span class="create-icon">+</span> 
+          ✚  Share Idea
           </app-buttons>
 
         <app-buttons
@@ -314,13 +336,269 @@
   </div>
 </div>
 
-<!-- Share Idea Modal Component -->
-<app-share-idea-modal 
-  *ngIf="showShareModal"
-  [isVisible]="showShareModal"
-  [isEditMode]="isEditMode"
-  [editData]="modalEditData"
-  (close)="closeShareModal()"
-  (share)="onShareIdea($event)"
-  (update)="onUpdateIdeaFromModal($event)">
-</app-share-idea-modal>
+<!-- Share Idea Modal -->
+<app-modal
+  [isOpen]="showShareModal"
+  [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'"
+  [size]="'md'"
+  (closeModal)="closeShareModal()">
+
+  <div modal-body>
+    <div class="share-idea-form">
+      <div class="form-group">
+  <label for="ideaTitle">Idea Title</label>
+
+  <input
+    type="text"
+    id="ideaTitle"
+    class="form-control"
+    [(ngModel)]="modalEditData.title"
+    name="ideaTitle"
+    #titleModel="ngModel"
+    required
+    minlength="3"
+    maxlength="100"
+    (input)="updateShareIdeaCounts()"
+    placeholder="Enter a descriptive title for your idea">
+
+  <div class="char-count">
+    {{ shareTitleCount }}/100
+  </div>
+  <div *ngIf="shareTitleCount >= 100" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+
+  <div *ngIf="titleModel.invalid && titleModel.touched" class="error-message">
+    <div *ngIf="titleModel.errors?.['required']">Title is required</div>
+    <div *ngIf="titleModel.errors?.['minlength']">Title must be at least 3 characters</div>
+    <div *ngIf="titleModel.errors?.['maxlength']">Title cannot exceed 100 characters</div>
+  </div>
+</div>
+
+
+      <div class="form-group">
+  <label for="ideaDescription">Description</label>
+
+  <textarea
+    id="ideaDescription"
+    class="form-control-description"
+    [(ngModel)]="modalEditData.description"
+    name="ideaDescription"
+    #descModel="ngModel"
+    required
+    minlength="10"
+    maxlength="1000"
+    (input)="updateShareIdeaCounts()"
+    rows="3"
+    placeholder="Describe your idea in detail..."></textarea>
+
+  <div class="char-count">
+    {{ shareDescCount }}/1000
+  </div>
+  <div *ngIf="shareDescCount >= 1000" class="limit-message">
+  You have reached the maximum allowed characters.
+</div>
+
+
+  <div *ngIf="descModel.invalid && descModel.touched" class="error-message">
+    <div *ngIf="descModel.errors?.['required']">Description is required</div>
+    <div *ngIf="descModel.errors?.['minlength']">Description must be at least 10 characters</div>
+    <div *ngIf="descModel.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
+  </div>
+</div>
+
+
+    </div>
+  </div>
+
+  <div modal-footer>
+    <div class="footer-buttons">
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        (click)="showShareModal = false">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="isEditMode ? onUpdateIdeaFromModal(modalEditData) : onShareIdea(modalEditData)">
+      </app-buttons>
+    </div>
+  </div>
+
+</app-modal>
+
+<!-- Project Creation Modal -->
+<div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
+  <div class="project-modal-content" (click)="$event.stopPropagation()">
+    <div class="project-modal-header">
+      <h3>Create Project from Idea</h3>
+      <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
+    </div>
+    
+    <div class="project-modal-body">
+      <p class="project-modal-subtitle">
+        You're promoting "<strong>{{currentIdeaToPromote?.title}}</strong>" to a project.
+      </p>
+      
+      <div class="form-group">
+        <label>Project Title</label>
+        <input 
+          type="text" 
+          [(ngModel)]="projectData.title" 
+          class="form-control"
+          placeholder="Enter project title"
+          [disabled]="isPromoting">
+      </div>
+      
+      <div class="form-group">
+        <label>Project Description</label>
+        <textarea 
+          [(ngModel)]="projectData.description" 
+          class="form-control"
+          rows="3"
+          placeholder="Enter project description"
+          [disabled]="isPromoting"></textarea>
+      </div>
+      
+      <div class="form-group">
+  <label>Project Overseer Email *</label>
+  <select 
+    [(ngModel)]="projectData.overseenByEmail"
+    class="form-control"
+    required
+    [disabled]="isPromoting || !groupMembers.length">
+    <option value="" disabled selected>Select project overseer</option>
+    <option *ngFor="let member of groupMembers" [value]="member.email">
+      {{member.userName || 'Unnamed User'}} - {{member.email}}
+    </option>
+  </select>
+</div>
+    </div>
+  <div modal-footer>
+  <div class="footer-buttons">
+    <app-buttons
+      [buttonText]="'Cancel'"
+      [buttonStyleClass]="'btn-modal-cancel'"
+      [disabled]="isPromoting"
+      (click)="closeProjectModal()">
+    </app-buttons>
+
+    <app-buttons
+      [buttonText]="isPromoting ? 'Creating Project...' : 'Create Project'"
+      [buttonStyleClass]="'btn-promote'"
+      [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
+      (click)="createProjectFromIdea()">
+    </app-buttons>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<!-- Admin Leave Group Modal -->
+<div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <h2>You are the group admin</h2>
+    <p>You must either delete the group or transfer ownership before leaving.</p>
+
+    <div class="modal-actions">
+      <app-buttons 
+        [buttonText]="'Delete Group'"
+        [buttonStyleClass]="'btn-reject'"
+        [buttonType]="'button'"
+        (click)="deleteGroup()"
+        >
+      </app-buttons>
+
+      <app-buttons 
+        [buttonText]="'Transfer Ownership'"
+        [buttonStyleClass]="'btn-promote'"
+        [buttonType]="'button'"
+        (click)="openTransferOwnershipModal()"
+        >
+      </app-buttons>
+
+      <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-promote'"
+          [buttonType]="'button'"
+          (click)="showAdminLeaveModal = false"
+          >
+      </app-buttons>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Ownership Modal -->
+<div *ngIf="showTransferOwnershipModal"
+     class="modal-backdrop"
+     (click)="showTransferOwnershipModal = false">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Transfer Group Ownership</h2>
+    <p>Select a member to promote as the new admin.</p>
+
+    <select [(ngModel)]="newOwnerEmail" class="form-control">
+      <option value="" disabled selected>
+        Select new owner
+      </option>
+      <option *ngFor="let member of groupMembers"
+              [value]="member.email">
+        ({{ member.userName }}) ({{ member.email }})
+      </option>
+    </select>
+
+    <div class="modal-actions">
+      <app-buttons
+        [buttonText]="'Confirm Transfer'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="transferOwnership()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-secondary'"
+        (click)="showTransferOwnershipModal = false">
+      </app-buttons>
+    </div>
+  </div>
+</div>
+
+<!-- Member Leave Group Modal -->
+<app-modal
+  [isOpen]="showMemberLeaveModal"
+  title="Leave Group"
+  size="md"
+  (closeModal)="cancelMemberLeave()">
+
+  <div modal-body>
+    <div class="member-leave-group">
+    <p>Are you sure you want to leave this group?</p>
+    <p class="warning-text">You will lose access to all group content.</p>
+  </div>
+  </div>
+
+  <div modal-footer>
+    <div class="footer-buttons">
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        (click)="cancelMemberLeave()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Leave Group'"
+        [buttonStyleClass]="'btn-reject'"
+        (click)="confirmMemberLeave()">
+      </app-buttons>
+
+    </div>
+  </div>
+</app-modal>
+
+</app-base-layout>

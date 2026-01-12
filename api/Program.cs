@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -43,7 +44,7 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
         //User Settings
         options.User.RequireUniqueEmail = true;
         //Sign In Settings
-        options.SignIn.RequireConfirmedEmail = true;
+        //options.SignIn.RequireConfirmedEmail = true;
     })
     .AddEntityFrameworkStores<IdeahubDbContext>()
     .AddDefaultTokenProviders();
@@ -161,26 +162,54 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // APPLY EF MIGRATIONS HERE
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
-    db.Database.Migrate();
-}
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
 
-//Seed Roles at App Startup
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
+var db = services.GetRequiredService<IdeahubDbContext>();
 
-    foreach (var role in roles)
+var retries = 10;
+while (retries > 0)
+{
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
+        Console.WriteLine("Applying database migrations...");
+        db.Database.Migrate();
+        Console.WriteLine("Database migrations applied successfully.");
+        break;
+    }
+    catch (Exception ex) when (
+        ex is Npgsql.NpgsqlException ||
+        ex is TimeoutException
+    )
+    {
+        retries--;
+        Console.WriteLine($"Migration failed. Retries left: {retries}");
+        Console.WriteLine(ex.Message);
+
+        if (retries == 0)
+            throw;
+
+        await Task.Delay(5000);
     }
 }
+
+// Seed roles AFTER migrations
+var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+var roles = new[]
+{
+    RoleConstants.SuperAdmin,
+    RoleConstants.GroupAdmin,
+    RoleConstants.RegularUser
+};
+
+foreach (var role in roles)
+{
+    if (!await roleManager.RoleExistsAsync(role))
+    {
+        await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
+
 
 //4. Add MiddleWare
 if (app.Environment.IsDevelopment())

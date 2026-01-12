@@ -35,7 +35,8 @@ export class AuthService {
         );
       }),
       catchError((e) => {
-        throw new Error(`Registration failed: ${e}`);
+        const errorMessage = e.error?.message || e.message || 'Registration failed';
+        throw new Error(errorMessage);
       })
     );
   }
@@ -59,7 +60,8 @@ export class AuthService {
         }
       }),
       catchError((e) => {
-        throw new Error(`Login failed: ${e.message}`);
+        const errorMessage = e.error?.message || e.message || 'Login failed';
+        throw new Error(errorMessage);
       })
     );
   }
@@ -252,5 +254,16 @@ export class AuthService {
   getCurrentUserId(): string {
     const user = this.getCurrentUser();
     return user?.id || '';
+  }
+
+  // Helper alias for getUserId
+  getUserId(): string {
+    return this.getCurrentUserId();
+  }
+
+  // Get current user Email
+  getEmail(): string {
+    const user = this.getCurrentUser();
+    return user?.email || '';
   }
 }

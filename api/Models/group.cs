@@ -24,6 +24,9 @@ public class Group
         public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
 
         [Required]
+        public bool IsPublic {get; set;} = true;
+
+        [Required]
         [ForeignKey ("CreatedByUser")]
         public string CreatedByUserId {get; set;} = string.Empty;
 

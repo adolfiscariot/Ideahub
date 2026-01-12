@@ -2,10 +2,12 @@ import { Routes } from '@angular/router';
 import { LandingPageComponent } from './Pages/landing-page/landing-page.component';
 import { RegisterComponent } from './Pages/register/register.component';
 import { AuthGuard } from './Guards/auth.guard';
+import { LandingGuard } from './Guards/landing.guard';
 
 export const routes: Routes = [
   {
     path: '',
+    canActivate: [LandingGuard],
     loadComponent: () =>
       import('./Pages/landing-page/landing-page.component').then(
         (m) => m.LandingPageComponent
@@ -57,12 +59,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   },
-  // {
-  //   path: 'notifications',
-  //   canActivate: [AuthGuard],
-  //   loadComponent: () =>
-  //     import('./Pages/notifications/notifications.component').then(
-  //       (m) => m.NotificationsComponent
-  //     ),
-  // }
+   {
+    path: 'notifications',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/global-notifications/global-notifications.component').then(
+        (m) => m.GlobalNotificationsComponent
+      ),
+  }
 ];

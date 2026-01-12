@@ -1,0 +1,13 @@
+<div class="toast-container">
+    @for (toast of toasts$ | async; track toast.id) {
+    <div class="toast" [ngClass]="toast.type" [@toastAnimation] (click)="remove(toast.id)">
+        <div class="icon">
+            @if (toast.type === 'success') { <span>✓</span> }
+            @else if (toast.type === 'error') { <span>✕</span> }
+            @else if (toast.type === 'warning') { <span>!</span> }
+            @else { <span>i</span> }
+        </div>
+        <div class="message">{{ toast.message }}</div>
+    </div>
+    }
+</div>

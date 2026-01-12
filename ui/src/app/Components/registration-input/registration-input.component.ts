@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-
+import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { AuthService } from '../../Services/auth/auth.service';
 import {
@@ -14,7 +14,8 @@ import {
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { confirmPasswordValidator } from '../../Validators/password-match.validators';
 import { Router } from '@angular/router';
-import { ConfirmRegistrationComponent } from '../../Pages/confirm-registration/confirm-registration.component';
+//import { ConfirmRegistrationComponent } from '../../Pages/confirm-registration/confirm-registration.component';
+import { LoginPageComponent } from '../../Pages/login-page/login-page.component';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -27,8 +28,11 @@ import { RouterLink } from '@angular/router';
 export class RegistrationInputComponent implements OnInit {
   authService = inject(AuthService);
   private router = inject(Router);
+  isLoading = false;
 
-  ngOnInit(): void {}
+  constructor(private toastService: ToastService){}
+
+  ngOnInit(): void { }
 
   registrationForm = new FormGroup(
     {
@@ -60,26 +64,29 @@ export class RegistrationInputComponent implements OnInit {
 
   onSubmit(event: Event) {
     if (this.registrationForm.valid) {
+      this.isLoading = true;
       const registrationData: Registration =
         this.registrationForm.getRawValue();
       this.authService.register(registrationData).subscribe({
         next: (response) => {
+          this.isLoading = false;
           console.log(`Registration was successful: ${response.message}`);
-          alert('Registration was successful');
-          this.router.navigate(['/confirm-registration']);
+          this.toastService.show('Registration was successful', 'success');
+          // this.router.navigate(['/confirm-registration']);
+          this.router.navigate(['/login']);
+          this.registrationForm.reset();
         },
-        error: (errorMessage) => {
-          console.error(`Registration unsuccessful: ${errorMessage.errors}`);
-          alert(
-            `Registration failed.${errorMessage.value || 'Please try again'}`
-          );
+        error: (error) => {
+          this.isLoading = false;
+          console.error(`Registration unsuccessful:`, error);
+          const msg = error.message || 'Unknown error';
+          this.toastService.show(`Registration failed. ${msg}`, 'error');
         },
       });
-      this.registrationForm.reset();
     } else {
       event.preventDefault();
       this.registrationForm.markAllAsTouched();
-      alert('Please fill the form correctly');
+      this.toastService.show('Please fill the form correctly', 'info');
     }
   }
 }

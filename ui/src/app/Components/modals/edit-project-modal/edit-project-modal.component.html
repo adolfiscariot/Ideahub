@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>Edit Project</h2>
+
+<mat-dialog-content>
+    <div class="form-container">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="editedProject.title" disabled>
+            <mat-hint>Project titles cannot be changed directly.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="editedProject.description" rows="4"></textarea>
+        </mat-form-field>
+
+        <div class="row">
+            <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Status</mat-label>
+                <mat-select [(ngModel)]="editedProject.status">
+                    <mat-option *ngFor="let status of statusOptions" [value]="status">
+                        {{ getStatusLabel(status) }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Ended At</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="editedProject.endedAt">
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSave()">Save Changes</button>
+</mat-dialog-actions>
