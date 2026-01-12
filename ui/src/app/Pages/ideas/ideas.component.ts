@@ -830,13 +830,13 @@ onViewVoters(idea: Idea, event?: Event): void {
 
   this.ideasService.getVotesForIdea(idea.id).subscribe({
     next: (response) => {
-      this.isViewingVoters = false;
       if (response.success && response.data) {
         this.votersList = response.data;
       } else {
         this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
         this.closeVotersModal();
       }
+      this.isViewingVoters = false;
     },
     error: (error) => {
       this.isViewingVoters = false;
@@ -846,7 +846,6 @@ onViewVoters(idea: Idea, event?: Event): void {
     }
   });
 }
-
 // Close voters modal
 closeVotersModal(): void {
   this.showVotersModalView = false;

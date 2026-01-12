@@ -633,3 +633,28 @@
     </div>
   </div>
 </app-modal>
+
+<!-- View voters modal -->
+<app-modal
+  [isOpen]="showVotersModalView"
+  title="{{ selectedIdeaForVoters?.title || 'Voters' }}"
+  size="md"
+  (closeModal)="closeVotersModal()">
+
+  <div modal-body>
+    <div *ngIf="isViewingVoters">
+      <p>Loading voters...</p>
+    </div>
+
+    <div *ngIf="!isViewingVoters && votersList.length === 0">
+      <p>No votes yet for this idea.</p>
+    </div>
+
+    <ul *ngIf="votersList.length > 0">
+      <li *ngFor="let voter of votersList; let i = index">
+        {{ voter.userName }}
+        <br/>
+      </li>
+    </ul>
+  </div>
+</app-modal>
