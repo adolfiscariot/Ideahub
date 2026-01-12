@@ -1,14 +1,14 @@
 .ideas-container {
   max-width: 1650px;
-  margin-left: 40px;
+  margin: 60px;
   padding: 10px;
   background: #ffffff;
-  min-height: 80vh;
+  height: 80vh;
   width: 100%;
   transition: all 0.35s ease;
   display: flex;              /* side-by-side layout */
   flex-direction: row;        /* horizontal split */
-  align-items: flex-start;
+  align-items: stretch;
   gap: 20px;               /* spacing between panels */
 }
 
