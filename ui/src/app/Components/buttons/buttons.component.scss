@@ -76,10 +76,6 @@
   font-weight: 400;
 }
 
-.btn-create-group {
-  background-color: yellow;
-  width: 100%;
-}
 
 /* Base vote button */
 .btn-vote {
@@ -160,7 +156,8 @@
 }
 
 .btn-promote,
-.btn-create-first-group
+.btn-create-first-group,
+.btn-create-group
 {
   background: #ffffff;
   color: purple;
