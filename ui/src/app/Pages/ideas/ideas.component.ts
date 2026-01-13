@@ -15,6 +15,8 @@ import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
 import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { updateCharCount } from '../../Components/utils/char-count-util';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-ideas',
@@ -113,6 +115,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID:', this.currentUserId);
 
+    this.shareIdeaForm = this.fb.group({
+    title: [''],
+    description: ['']
+  });
+
+  this.setupShareIdeaCharCounters();
     // Check browser history state FIRST (in case of page refresh)
     console.log('Browser history state:', history.state);
 
@@ -176,6 +184,24 @@ export class IdeasComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
   }
+
+  private destroy$ = new Subject<void>(); 
+  private setupShareIdeaCharCounters(): void {
+
+  this.shareIdeaForm.get('title')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+      this.shareTitleCount = res.count;
+    });
+
+  this.shareIdeaForm.get('description')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+      this.shareDescCount = res.count;
+    });
+}
 
   openEditModal(idea: any) {
     this.isEditMode = true;
