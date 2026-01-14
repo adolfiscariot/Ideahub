@@ -59,6 +59,16 @@ export class IdeasService {
     );
   }
 
+  // Close idea
+  closeIdea(ideaId: string): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(
+      `${this.apiUrl}/close-idea?ideaId=${ideaId}`,
+      null
+    ).pipe(
+      map(res => this.convertResponse<any>(res))
+    );
+  }
+
   // DELETE idea
   deleteIdea(ideaId: string): Observable<ApiResponse<any>> {
     return this.http.delete<any>(`${this.apiUrl}/${ideaId}`).pipe(

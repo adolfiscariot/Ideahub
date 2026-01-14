@@ -93,6 +93,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   showDeleteIdeaModal= false;
   ideaIdToDelete: string | null = null;
+  //showCloseIdea=false;
+  ideaIdToClose: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -288,6 +290,30 @@ openDeleteIdeaModal (ideaId: string) {
   this.ideaIdToDelete = ideaId;
   this.showDeleteIdeaModal = true;
 }
+
+closeIdeabtn (ideaId: string) {
+  this.ideaIdToClose = ideaId;
+  this.onCloseIdea();
+}
+
+onCloseIdea() {
+    if (!this.ideaIdToClose) return;
+      this.ideasService.closeIdea(this.ideaIdToClose).subscribe({
+        next: (response) => {
+
+          if (response.success) {
+            
+            this.toastService.show('Idea closed successfully!', 'success');
+          } else {
+            this.toastService.show('Failed to close idea: ${response.message}', 'error');
+          }
+        },
+
+        error: (error) => {
+          this.toastService.show('Failed to close idea. Idea has already being closed', 'error');
+        }
+      });
+    }
 
   leaveGroup() {
     if (!this.groupId) return;

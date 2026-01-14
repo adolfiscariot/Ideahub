@@ -278,6 +278,17 @@
               >
                 👁️
               </app-buttons>
+
+              <!-- Vote button (Fixed - with 👍 and count) -->
+              <app-buttons
+                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
+                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
+                [disabled]="isVoting || isUnvoting"
+                title="Vote for this idea"
+              >
+                👍
+                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+              </app-buttons>
               
               <!-- Delete button for idea owner (Fixed - with ✕) -->
               <app-buttons
@@ -289,16 +300,15 @@
               >
                 ✕
               </app-buttons>
-              
-              <!-- Vote button (Fixed - with 👍 and count) -->
+
               <app-buttons
-                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
-                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                [disabled]="isVoting || isUnvoting"
-                title="Vote for this idea"
+                *ngIf="isGroupCreator()"
+                buttonStyleClass="btn-promote"
+                (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)"
+                [disabled]="false"
+                title="Close Idea"
               >
-                👍
-                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+                🛑 Close Idea
               </app-buttons>
             </div>
           </div> 
@@ -407,7 +417,6 @@
               : onShareIdea(shareIdeaForm.value)
           ">
       </app-buttons>
-
     </div>
   </div>
 
