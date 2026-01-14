@@ -281,6 +281,7 @@ public class IdeaController : ControllerBase
             return NotFound(ApiResponse.Fail("Idea not found"));
         }
         idea.IsPromotedToProject = true;
+        idea.Status = IdeaStatus.Closed;
 
         await _context.SaveChangesAsync();
         _logger.LogInformation("Idea {ideaId} promoted to project", ideaId);
