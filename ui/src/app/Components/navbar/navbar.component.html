@@ -1,4 +1,4 @@
-<div class="navbar">
+ <div class="navbar">
   <div class="navbar-left">
 
     <!--If logged out this text should lead to the landing page otherwise
@@ -12,11 +12,20 @@
   </div>
   @if (loggedInStatus | async; as isLoggedIn) {
   <nav class="nav-items">
-    <a routerLink="/home" class="nav-link">Home</a>
-    <a routerLink="/groups" class="nav-link">Groups</a>
-    <a routerLink="/projects" class="nav-link">Projects</a>
+    <a routerLink="/home" routerLinkActive="active" aria-label="Navigate to Ideas page">
+                    <mat-icon>home</mat-icon>
+                    <span class="link-text">Home</span>
+                </a>
+      <a routerLink="/groups" routerLinkActive="active" aria-label="Navigate to Groups page">
+                    <mat-icon>groups</mat-icon>
+                    <span class="link-text">Groups</span>
+                </a>
+    <a routerLink="/projects" routerLinkActive="active" aria-label="Navigate to Projects page">
+                    <mat-icon>topic</mat-icon>
+                    <span class="link-text">Projects</span>
+                </a>
   </nav>
-  }
+  } 
 
 
   <div class="navbar-right">

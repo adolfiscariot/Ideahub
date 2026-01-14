@@ -5,11 +5,13 @@ import { AuthService } from '../../Services/auth/auth.service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { NgIconsModule } from '@ng-icons/core';
 import { NotificationsService } from '../../Services/notifications';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [ButtonsComponent, RouterModule, AsyncPipe, CommonModule, NgIconsModule],
+  imports: [ButtonsComponent, RouterModule, AsyncPipe, CommonModule, NgIconsModule,  MatButtonModule, MatIconModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })

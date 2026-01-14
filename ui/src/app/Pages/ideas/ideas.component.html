@@ -1,4 +1,4 @@
-<app-base-layout>
+
 <div class="ideas-container" [class.split-view]="selectedIdea">
   
   <!-- Left Panel: Ideas List -->
@@ -16,7 +16,7 @@
           <div class="members-section" (click)="openMembersModal()">
             <div class="members-icon">👥</div>
             <div class="members-info">
-              <div class="members-count">{{ membersCount || 0 }} members</div>
+              <div class="members-count">{{ membersCount || 0 }} member (s)</div>
               <div class="members-label">Click to view</div>
             </div>
           </div>  
@@ -283,7 +283,7 @@
               <app-buttons
                 *ngIf="isUserIdeaOwner(selectedIdea)"
                 buttonStyleClass="btn-delete"
-                (click)="$event.stopPropagation(); onDeleteIdea(selectedIdea.id)"
+                (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id)"
                 [disabled]="false"
                 title="Delete idea"
               >
@@ -344,72 +344,50 @@
   (closeModal)="closeShareModal()">
 
   <div modal-body>
-    <div class="share-idea-form">
-      <div class="form-group">
-  <label for="ideaTitle">Idea Title</label>
+    
+  <form [formGroup]="shareIdeaForm" class="share-idea-form">
 
-  <input
-    type="text"
-    id="ideaTitle"
-    class="form-control"
-    [(ngModel)]="modalEditData.title"
-    name="ideaTitle"
-    #titleModel="ngModel"
-    required
-    minlength="3"
-    maxlength="100"
-    (input)="updateShareIdeaCounts()"
-    placeholder="Enter a descriptive title for your idea">
+    <div class="form-group">
+      <label>Idea Title</label>
+      <input
+        type="text"
+        class="form-control"
+        formControlName="title"
+        placeholder="Enter a descriptive title for your idea">
+      <div *ngIf="shareTitleCount >= 100" class="limit-message">
+        You have reached the maximum allowed characters.
+      </div>
 
-  <div class="char-count">
-    {{ shareTitleCount }}/100
-  </div>
-  <div *ngIf="shareTitleCount >= 100" class="limit-message">
-  You have reached the maximum allowed characters.
-</div>
-
-
-  <div *ngIf="titleModel.invalid && titleModel.touched" class="error-message">
-    <div *ngIf="titleModel.errors?.['required']">Title is required</div>
-    <div *ngIf="titleModel.errors?.['minlength']">Title must be at least 3 characters</div>
-    <div *ngIf="titleModel.errors?.['maxlength']">Title cannot exceed 100 characters</div>
-  </div>
-</div>
-
-
-      <div class="form-group">
-  <label for="ideaDescription">Description</label>
-
-  <textarea
-    id="ideaDescription"
-    class="form-control-description"
-    [(ngModel)]="modalEditData.description"
-    name="ideaDescription"
-    #descModel="ngModel"
-    required
-    minlength="10"
-    maxlength="1000"
-    (input)="updateShareIdeaCounts()"
-    rows="3"
-    placeholder="Describe your idea in detail..."></textarea>
-
-  <div class="char-count">
-    {{ shareDescCount }}/1000
-  </div>
-  <div *ngIf="shareDescCount >= 1000" class="limit-message">
-  You have reached the maximum allowed characters.
-</div>
-
-
-  <div *ngIf="descModel.invalid && descModel.touched" class="error-message">
-    <div *ngIf="descModel.errors?.['required']">Description is required</div>
-    <div *ngIf="descModel.errors?.['minlength']">Description must be at least 10 characters</div>
-    <div *ngIf="descModel.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
-  </div>
-</div>
-
-
+      <div *ngIf="shareIdeaForm.get('title')?.invalid && shareIdeaForm.get('title')?.touched" class="error-message">
+        <div *ngIf="shareIdeaForm.get('title')?.errors?.['required']">Title is required</div>
+        <div *ngIf="shareIdeaForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</div>
+        <div *ngIf="shareIdeaForm.get('title')?.errors?.['maxlength']">Title cannot exceed 100 characters</div>
+      </div>
+        <div class="char-count">{{ shareTitleCount }}/100</div>
     </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea
+        class="form-control-description"
+        formControlName="description"
+        rows="3"
+        placeholder="Describe your idea in detail...">
+      </textarea>
+      <div class="char-count">{{ shareDescCount }}/1000</div>
+       <div *ngIf="shareDescCount >= 1000" class="limit-message">
+        You have reached the maximum allowed characters.
+      </div>
+
+      <div *ngIf="shareIdeaForm.get('description')?.invalid && shareIdeaForm.get('description')?.touched" class="error-message">
+        <div *ngIf="shareIdeaForm.get('description')?.errors?.['required']">Description is required</div>
+        <div *ngIf="shareIdeaForm.get('description')?.errors?.['minlength']">Description must be at least 10 characters</div>
+        <div *ngIf="shareIdeaForm.get('description')?.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
+      </div>
+    </div>
+
+  </form>
+
   </div>
 
   <div modal-footer>
@@ -421,10 +399,15 @@
       </app-buttons>
 
       <app-buttons
-        [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
-        [buttonStyleClass]="'btn-promote'"
-        (click)="isEditMode ? onUpdateIdeaFromModal(modalEditData) : onShareIdea(modalEditData)">
+          [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
+          [buttonStyleClass]="'btn-promote'"
+          (click)="
+            isEditMode
+              ? onUpdateIdeaFromModal(shareIdeaForm.value)
+              : onShareIdea(shareIdeaForm.value)
+          ">
       </app-buttons>
+
     </div>
   </div>
 
@@ -601,4 +584,60 @@
   </div>
 </app-modal>
 
-</app-base-layout>
+<!-- Delete IDEA -->
+<app-modal
+  [isOpen]="showDeleteIdeaModal"
+  title="Delete Idea"
+  size="md"
+  (closeModal)="cancelDeleteIdea()">
+
+  <div modal-body>
+    <div class="delete-idea">
+    <p>Are you sure you want to delete this idea? </p>
+    <p class="warning-text">This action cannot be undone.</p>
+  </div>
+  </div>
+
+  <div modal-footer>
+    <div class="footer-buttons">
+
+      <app-buttons
+        [buttonText]="'Cancel'"
+        [buttonStyleClass]="'btn-modal-cancel'"
+        (click)="cancelDeleteIdea()">
+      </app-buttons>
+
+      <app-buttons
+        [buttonText]="'Delete Idea'"
+        [buttonStyleClass]="'btn-reject'"
+        (click)="onDeleteIdea()">
+      </app-buttons>
+
+    </div>
+  </div>
+</app-modal>
+
+<!-- View voters modal -->
+<app-modal
+  [isOpen]="showVotersModalView"
+  title="{{ selectedIdeaForVoters?.title || 'Voters' }}"
+  size="md"
+  (closeModal)="closeVotersModal()">
+
+  <div modal-body>
+    <div *ngIf="isViewingVoters">
+      <p>Loading voters...</p>
+    </div>
+
+    <div *ngIf="!isViewingVoters && votersList.length === 0">
+      <p>No votes yet for this idea.</p>
+    </div>
+
+    <ul *ngIf="votersList.length > 0">
+      <li *ngFor="let voter of votersList; let i = index">
+        {{ voter.userName }}
+        <br/>
+      </li>
+    </ul>
+  </div>
+</app-modal>

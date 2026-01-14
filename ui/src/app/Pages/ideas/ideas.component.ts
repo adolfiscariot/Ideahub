@@ -14,13 +14,14 @@ import { GroupMembersModalComponent } from '../../Components/modals/group-member
 import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
 import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
-import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { updateCharCount } from '../../Components/utils/char-count-util';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, BaseLayoutComponent, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -90,6 +91,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   private routeSub: Subscription = new Subscription();
 
+  showDeleteIdeaModal= false;
+  ideaIdToDelete: string | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -111,6 +115,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID:', this.currentUserId);
 
+    this.shareIdeaForm = this.fb.group({
+    title: [''],
+    description: ['']
+  });
+
+  this.setupShareIdeaCharCounters();
     // Check browser history state FIRST (in case of page refresh)
     console.log('Browser history state:', history.state);
 
@@ -174,6 +184,24 @@ export class IdeasComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
   }
+
+  private destroy$ = new Subject<void>(); 
+  private setupShareIdeaCharCounters(): void {
+
+  this.shareIdeaForm.get('title')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+      this.shareTitleCount = res.count;
+    });
+
+  this.shareIdeaForm.get('description')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+      this.shareDescCount = res.count;
+    });
+}
 
   openEditModal(idea: any) {
     this.isEditMode = true;
@@ -249,6 +277,16 @@ autoGrow(event: any) {
 
 cancelMemberLeave() {
   this.showMemberLeaveModal = false;
+}
+
+cancelDeleteIdea () {
+  this.ideaIdToDelete = null;
+  this.showDeleteIdeaModal = false;
+}
+
+openDeleteIdeaModal (ideaId: string) {
+  this.ideaIdToDelete = ideaId;
+  this.showDeleteIdeaModal = true;
 }
 
   leaveGroup() {
@@ -817,13 +855,13 @@ onViewVoters(idea: Idea, event?: Event): void {
 
   this.ideasService.getVotesForIdea(idea.id).subscribe({
     next: (response) => {
-      this.isViewingVoters = false;
       if (response.success && response.data) {
         this.votersList = response.data;
       } else {
         this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
         this.closeVotersModal();
       }
+      this.isViewingVoters = false;
     },
     error: (error) => {
       this.isViewingVoters = false;
@@ -833,7 +871,6 @@ onViewVoters(idea: Idea, event?: Event): void {
     }
   });
 }
-
 // Close voters modal
 closeVotersModal(): void {
   this.showVotersModalView = false;
@@ -1144,7 +1181,7 @@ private handleSuccess(idea: Idea, response: any): void {
     }
     
     this.ideas = [...this.ideas];
-    alert('Project created');
+    this.toastService.show('Project created', 'success');
     
     this.currentIdeaToPromote = null;
     this.projectData = { title: '', description: '', overseenByEmail: '' };
@@ -1169,23 +1206,13 @@ closeProjectModal(): void {
     this.currentIdeaToPromote = null;
   }
 }
+
+
   // DELETE IDEA METHOD
-  onDeleteIdea(ideaId: string, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-      console.log('Delete button clicked for idea ID:', ideaId);
-    }
+  onDeleteIdea() {
+    if (!this.ideaIdToDelete) return;
 
-    console.log('==== DELETE ACTION STARTED ====');
-    console.log('Idea ID to delete:', ideaId);
-    console.log('Idea ID type:', typeof ideaId);
-    console.log('Idea ID value:', ideaId);
-
-    // Use confirmation dialog
-    if (confirm('Are you sure you want to delete this idea? This action cannot be undone.')) {
-      console.log('Deleting idea ID:', ideaId);
-
-      this.ideasService.deleteIdea(ideaId).subscribe({
+      this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
         next: (response) => {
           console.log('Delete response:', response);
 
@@ -1193,35 +1220,33 @@ closeProjectModal(): void {
             console.log('Delete successful');
 
             // 1. Remove from local ideas array (immediate UI update)
-            const index = this.ideas.findIndex(idea => idea.id === ideaId);
+            const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
             if (index !== -1) {
               this.ideas.splice(index, 1);
               this.ideas = [...this.ideas]; // Create new reference for change detection
             }
 
             // 2. If we're viewing this idea in details panel, close it
-            if (this.selectedIdea && this.selectedIdea.id === ideaId) {
+            if (this.selectedIdea?.id === this.ideaIdToDelete) {
               this.selectedIdea = null;
               this.isEditMode = false; // Exit edit mode if open
               console.log('Closed details panel for deleted idea');
             }
-
-            // No ideas left?
-            if (this.ideas.length === 0) {
-              console.log('All ideas deleted, showing empty state');
-            }
-            alert('Idea deleted successfully!');
+            
+            this.toastService.show('Idea deleted successfully!', 'success');
           } else {
-            alert(`Failed to delete idea: ${response.message}`);
+            this.toastService.show('Failed to delete idea: ${response.message}', 'error');
           }
+          this.cancelDeleteIdea();
         },
+
         error: (error) => {
-          console.error('Error deleting idea:', error);
-          alert('An error occurred while deleting the idea.');
+          this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
+          this.cancelDeleteIdea();
         }
       });
     }
-  }
+  
   deleteGroup() {
     this.groupsService.deleteGroup(this.groupId).subscribe({
       next: () => {

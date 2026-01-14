@@ -1,14 +1,14 @@
 .ideas-container {
   max-width: 1650px;
-  margin-left: 40px;
+  margin: 60px;
   padding: 10px;
   background: #ffffff;
-  min-height: 80vh;
+  height: 80vh;
   width: 100%;
   transition: all 0.35s ease;
   display: flex;              /* side-by-side layout */
   flex-direction: row;        /* horizontal split */
-  align-items: flex-start;
+  align-items: stretch;
   gap: 20px;               /* spacing between panels */
 }
 
@@ -48,7 +48,8 @@
   justify-content: center;
   z-index: 1000;
 }
-.member-leave-group {
+.member-leave-group,
+.delete-idea {
   margin: 30px;
 }
 
@@ -236,14 +237,18 @@
 }
 
 .form-control-description {
-  height: 150px;
   width: 100%;
   padding: 10px 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 15px;
   transition: border-color 0.2s;
-
+  box-sizing: border-box;    
+  min-height: 150px;      
+  max-height: 400px;
+  overflow-y: auto;         
+  max-width: 100%;           
+  resize: vertical;
 }
 
 .form-control:focus,
