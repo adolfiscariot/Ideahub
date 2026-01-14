@@ -9,7 +9,7 @@
         <div class="stats-summary" *ngIf="ideaStats">
             <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
                 variant="total"></app-stat-card>
-            <app-stat-card label="Open" [value]="ideaStats.open" icon="heroLockOpen" variant="open"></app-stat-card>
+            <app-stat-card label="Open" [value]="ideaStats.total - ideaStats.promoted" icon="heroLockOpen" variant="open"></app-stat-card>
             <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
                 variant="promoted"></app-stat-card>
             <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed"
