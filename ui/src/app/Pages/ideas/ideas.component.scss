@@ -950,6 +950,101 @@
   background: #fff2f0;
 }
 
+.idea-info-modal {
+  
+  color: #333;
+  line-height: 1.5;
+  margin: 30px;
+}
+
+.examples-happy-path,
+.examples-sad-path {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.idea-info-modal .intro-text {
+  margin-bottom: 24px;
+}
+
+.idea-info-modal h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  color: #1a1a1a;
+}
+
+.idea-example {
+  background: #f8f9fa;
+  border-left: 4px solid #4a90e2;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 0 4px 4px 0;
+  
+}
+
+.idea-example.avoid {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+
+.idea-example h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+}
+
+.idea-example p {
+  font-size: 14px;
+  margin: 0;
+  color: #666;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e9ecef;
+  margin: 24px 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+ 
+}
+
+.dont-show-again {
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.dont-show-again:hover {
+  color: #495057;
+}
+
+.primary-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #0056b3;
+}
+
 /* ============================
    RESPONSIVE FIXES
 ============================ */

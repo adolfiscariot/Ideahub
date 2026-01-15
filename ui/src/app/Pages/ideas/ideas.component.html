@@ -95,6 +95,12 @@
       >
         🚪 Leave Group
       </app-buttons>
+
+       <app-buttons
+        [buttonText]="'Idea info'"
+        [buttonStyleClass]="'btn-reject'"
+        (click)="displayIdeaInfo()">
+      </app-buttons>
     
         </div>
       </div>
@@ -579,6 +585,7 @@
         [buttonStyleClass]="'btn-reject'"
         (click)="confirmMemberLeave()">
       </app-buttons>
+      
 
     </div>
   </div>
@@ -640,4 +647,72 @@
       </li>
     </ul>
   </div>
+</app-modal>
+
+<!-- Idea Info modal -->
+<app-modal
+  [isOpen]="showIdeaInfoModal"
+  title="Welcome to Ideas"
+  size="md"
+  (closeModal)="closeIdeaInfo()">
+
+  <div modal-body>
+    <div class="idea-info-modal">
+      <p>Your space to share actionable improvements</p>
+      
+      <p class="intro-text">
+        This page is your space for <strong>practical, actionable ideas</strong> that can improve productivity, efficiency, or working conditions. Focus on realistic ideas that can be implemented in weeks or months.
+      </p>
+
+      <h3>Valid Ideas Look Like</h3>
+      
+    <div class="examples-happy-path">
+  <div class="idea-example">
+    <h4>Keyboard shortcuts for common actions</h4>
+    <p>Quickly trigger actions like search or save drafts to reduce repetitive work.</p>
+  </div>
+
+  <div class="idea-example">
+    <h4>Weekly team sync summary</h4>
+    <p>Automatically generate meeting notes and action items to keep everyone aligned.</p>
+  </div>
+</div>
+
+      <h3>Ideas to Avoid</h3>
+      
+       <div class="examples-sad-path">
+      <div class="idea-example avoid">
+        <h4>We should explore AI more</h4>
+        <p>Too broad — what specific problem would it solve?</p>
+      </div>
+      
+      <div class="idea-example avoid">
+        <h4>Change the company culture</h4>
+        <p>Out of scope — focus on specific, tangible changes</p>
+      </div>
+</div>
+
+<p class="tip-note">
+  Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficien?" If yes, it belongs here.
+</p>
+
+</div>
+      <div class="modal-footer">
+        
+        <app-buttons
+          [buttonText]="'Don’t show again'"
+          [buttonStyleClass]="'btn-reject'"
+          (click)="dontShowIdeaInfoAgain()">
+        </app-buttons>
+
+        <app-buttons
+  [buttonText]="'Got it, let’s go!'"
+  [buttonStyleClass]="'btn-promote'"
+  (click)="closeIdeaInfo()">
+</app-buttons>
+
+
+      </div>
+    </div>
+
 </app-modal>
