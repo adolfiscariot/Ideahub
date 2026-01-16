@@ -12,6 +12,13 @@
         </div>
         
         <div class="header-actions">
+          <app-buttons
+        [buttonText]="'ⓘ'"
+        [buttonStyleClass]="'btn-info-icon'"
+        title="Ideas Guideline"
+        (click)="displayIdeaInfo()">
+      </app-buttons>
+    
           <!-- Members Section -->
           <div class="members-section" (click)="openMembersModal()">
             <div class="members-icon">👥</div>
@@ -96,12 +103,7 @@
         🚪 Leave Group
       </app-buttons>
 
-       <app-buttons
-        [buttonText]="'Idea info'"
-        [buttonStyleClass]="'btn-reject'"
-        (click)="displayIdeaInfo()">
-      </app-buttons>
-    
+       
         </div>
       </div>
     </header>
@@ -693,7 +695,7 @@
 </div>
 
 <p class="tip-note">
-  Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficien?" If yes, it belongs here.
+  Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficient?" If yes, it belongs here.
 </p>
 
 </div>
