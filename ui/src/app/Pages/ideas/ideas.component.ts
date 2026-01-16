@@ -94,6 +94,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showDeleteIdeaModal= false;
   ideaIdToDelete: string | null = null;
 
+  showIdeaInfoModal = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -176,9 +178,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
         console.log('Using existing groupCreatorId:', this.groupCreatorId);
       }
       this.loadGroupMembers();
+      const hideInfo = localStorage.getItem('hideIdeaInfo') === 'true';
+      this.showIdeaInfoModal = !hideInfo;
       this.loadIdeas();
     });
-
   }
 
   ngOnDestroy(): void {
@@ -287,6 +290,20 @@ cancelDeleteIdea () {
 openDeleteIdeaModal (ideaId: string) {
   this.ideaIdToDelete = ideaId;
   this.showDeleteIdeaModal = true;
+}
+
+closeIdeaInfo () {
+  this.showIdeaInfoModal = false;
+}
+
+displayIdeaInfo () {
+  this.showIdeaInfoModal = true;
+}
+
+dontShowIdeaInfoAgain () {
+  localStorage.setItem('hideIdeaInfo', 'true');
+  console.log('hide idea information')
+  this.showIdeaInfoModal=false;
 }
 
   leaveGroup() {
