@@ -4,6 +4,7 @@ import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
 import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
+import { ViewIdeaModalComponent } from '../../Components/modals/view-idea-modal/view-idea-modal.component';
 import {
   MostVotedIdea,
   TopContributor,
@@ -35,7 +36,8 @@ import {
   imports: [
     CommonModule,
     StatCardComponent,
-    DashboardCardComponent
+    DashboardCardComponent,
+    ViewIdeaModalComponent
   ],
   viewProviders: [provideIcons({
     heroChartBar,
@@ -62,7 +64,20 @@ export class HomeComponent implements OnInit {
   groupEngagement: GroupEngagement[] = [];
   personalStats: PersonalStats | null = null;
 
+  selectedIdea: MostVotedIdea | null = null;
+  isModalOpen: boolean = false;
+
   constructor(private analyticsService: AnalyticsService) { }
+
+  openIdeaModal(idea: MostVotedIdea) {
+    this.selectedIdea = idea;
+    this.isModalOpen = true;
+  }
+
+  closeIdeaModal() {
+    this.isModalOpen = false;
+    this.selectedIdea = null;
+  }
 
   ngOnInit(): void {
     this.fetchAnalytics();

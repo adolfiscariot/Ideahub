@@ -1,111 +1,114 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Analytics Dashboard</h1>
+        <p>Insights into community engagement and top ideas.</p>
+    </header>
 
-    <div class="dashboard-container">
-        <header class="dashboard-header">
-            <h1>Analytics Dashboard</h1>
-            <p>Insights into community engagement and top ideas.</p>
-        </header>
-
-        <!-- Idea Statistics Summary -->
-        <div class="stats-summary" *ngIf="ideaStats">
-            <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
-                variant="total"></app-stat-card>
-            <app-stat-card label="Open" [value]="ideaStats.open" icon="heroLockOpen" variant="open"></app-stat-card>
-            <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
-                variant="promoted"></app-stat-card>
-            <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed"
-                variant="closed"></app-stat-card>
-        </div>
-
-        <div class="analytics-grid">
-            <!-- Most Voted Ideas -->
-            <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
-                <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
-                    <div *ngFor="let idea of mostVotedIdeas" class="list-item">
-                        <div class="item-main">
-                            <h3>{{idea.title}}</h3>
-                            <p>{{idea.description}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="author">by {{idea.author}}</span>
-                            <span class="badge vote-badge">{{idea.voteCount}} votes</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noVotes>
-                    <div class="empty-state">No votes recorded yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Top Contributors -->
-            <app-dashboard-card title="Top Contributors" variant="top-contributors" icon="heroTrophy">
-                <div *ngIf="topContributors.length > 0; else noContributors">
-                    <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
-                        <div class="rank">{{i + 1}}</div>
-                        <div class="item-main">
-                            <h3>{{user.displayName}}</h3>
-                            <p class="email">{{user.email}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noContributors>
-                    <div class="empty-state">No contributors yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Group Engagement -->
-            <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
-                <div *ngIf="groupEngagement.length > 0; else noGroups">
-                    <div *ngFor="let group of groupEngagement" class="list-item">
-                        <div class="item-main">
-                            <h3>{{group.name}}</h3>
-                        </div>
-                        <div class="item-meta">
-                            <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
-                            <span class="badge vote-badge">{{group.voteCount}} votes</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noGroups>
-                    <div class="empty-state">No active groups yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Promoted Ideas -->
-            <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
-                <div *ngIf="promotedIdeas.length > 0; else noPromoted">
-                    <div *ngFor="let idea of promotedIdeas" class="list-item">
-                        <div class="item-main">
-                            <h3>{{idea.title}}</h3>
-                            <p>{{idea.description}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="author">by {{idea.author}}</span>
-                            <span class="date">{{idea.promotedDate | date}}</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noPromoted>
-                    <div class="empty-state">No ideas promoted yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-        </div>
-
-        <!-- Personal Stats -->
-        <div class="personal-stats-section" *ngIf="personalStats">
-            <h2>Your Impact</h2>
-            <div class="personal-stats-grid">
-                <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated || 0" icon="heroLightBulb"
-                    variant="created"></app-stat-card>
-                <app-stat-card label="Votes Cast" [value]="personalStats.votesCast || 0" icon="heroHandThumbUp"
-                    variant="votes"></app-stat-card>
-                <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved || 0"
-                    icon="heroBriefcase" variant="projects"></app-stat-card>
-                <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated || 0" icon="heroUserGroup"
-                    variant="groups"></app-stat-card>
-            </div>
-        </div>
-
+    <!-- Idea Statistics Summary -->
+    <div class="stats-summary" *ngIf="ideaStats">
+        <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
+            variant="total"></app-stat-card>
+        <app-stat-card label="Open" [value]="ideaStats.open" icon="heroLockOpen" variant="open"></app-stat-card>
+        <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
+            variant="promoted"></app-stat-card>
+        <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed" variant="closed"></app-stat-card>
     </div>
+
+    <div class="analytics-grid">
+        <!-- Most Voted Ideas -->
+        <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
+            <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
+                <div *ngFor="let idea of mostVotedIdeas" class="list-item" (click)="openIdeaModal(idea)"
+                    style="cursor: pointer;">
+                    <div class="item-main">
+                        <h3>{{idea.title}}</h3>
+                        <p>{{idea.description}}</p>
+                    </div>
+                    <div class="item-meta">
+                        <span class="author">by {{idea.author}}</span>
+                        <span class="badge vote-badge">{{idea.voteCount}} votes</span>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noVotes>
+                <div class="empty-state">No votes recorded yet.</div>
+            </ng-template>
+        </app-dashboard-card>
+
+        <app-view-idea-modal [idea]="selectedIdea" [isVisible]="isModalOpen"
+            (close)="closeIdeaModal()"></app-view-idea-modal>
+
+        <!-- Top Contributors -->
+        <app-dashboard-card title="Top Contributors" variant="top-contributors" icon="heroTrophy">
+            <div *ngIf="topContributors.length > 0; else noContributors">
+                <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
+                    <div class="rank">{{i + 1}}</div>
+                    <div class="item-main">
+                        <h3>{{user.displayName}}</h3>
+                        <p class="email">{{user.email}}</p>
+                    </div>
+                    <div class="item-meta">
+                        <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noContributors>
+                <div class="empty-state">No contributors yet.</div>
+            </ng-template>
+        </app-dashboard-card>
+
+        <!-- Group Engagement -->
+        <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
+            <div *ngIf="groupEngagement.length > 0; else noGroups">
+                <div *ngFor="let group of groupEngagement" class="list-item">
+                    <div class="item-main">
+                        <h3>{{group.name}}</h3>
+                    </div>
+                    <div class="item-meta">
+                        <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
+                        <span class="badge vote-badge">{{group.voteCount}} votes</span>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noGroups>
+                <div class="empty-state">No active groups yet.</div>
+            </ng-template>
+        </app-dashboard-card>
+
+        <!-- Promoted Ideas -->
+        <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
+            <div *ngIf="promotedIdeas.length > 0; else noPromoted">
+                <div *ngFor="let idea of promotedIdeas" class="list-item">
+                    <div class="item-main">
+                        <h3>{{idea.title}}</h3>
+                        <p>{{idea.description}}</p>
+                    </div>
+                    <div class="item-meta">
+                        <span class="author">by {{idea.author}}</span>
+                        <span class="date">{{idea.promotedDate | date}}</span>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noPromoted>
+                <div class="empty-state">No ideas promoted yet.</div>
+            </ng-template>
+        </app-dashboard-card>
+    </div>
+
+    <!-- Personal Stats -->
+    <div class="personal-stats-section" *ngIf="personalStats">
+        <h2>Your Impact</h2>
+        <div class="personal-stats-grid">
+            <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated || 0" icon="heroLightBulb"
+                variant="created"></app-stat-card>
+            <app-stat-card label="Votes Cast" [value]="personalStats.votesCast || 0" icon="heroHandThumbUp"
+                variant="votes"></app-stat-card>
+            <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved || 0" icon="heroBriefcase"
+                variant="projects"></app-stat-card>
+            <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated || 0" icon="heroUserGroup"
+                variant="groups"></app-stat-card>
+        </div>
+    </div>
+
+</div>
+<app-view-idea-modal [idea]="selectedIdea" [isVisible]="isModalOpen" (close)="closeIdeaModal()"></app-view-idea-modal>

@@ -1,0 +1,34 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-content" (click)="onContentClick($event)">
+        <div class="modal-header">
+            <h2>Idea Details</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <div class="modal-body" *ngIf="idea">
+            <h1 class="idea-title">{{ idea.title }}</h1>
+
+            <div class="meta-tags">
+                <span class="tag author">
+                    <ng-icon name="heroUser" size="1rem"></ng-icon>
+                    {{ idea.author }}
+                </span>
+                <span class="tag group">
+                    <ng-icon name="heroUserGroup" size="1rem"></ng-icon>
+                    {{ idea.groupName }}
+                </span>
+                <span class="tag votes">
+                    <ng-icon name="heroHandThumbUp" size="1rem"></ng-icon>
+                    {{ idea.voteCount }} Votes
+                </span>
+            </div>
+
+            <div class="description-section">
+                <h3>Description</h3>
+                <p>{{ idea.description }}</p>
+            </div>
+        </div>
+    </div>
+</div>
