@@ -83,32 +83,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private setupCharCounters(): void {
 
-    this.createGroupForm.get('name')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        const result = updateCharCount(this.createGroupForm, 'name', 100);
-        this.nameCount = result.count;
-        this.nameLimitReached = result.limitReached;
-      });
-
-    this.createGroupForm.get('description')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        const result = updateCharCount(this.createGroupForm, 'description', 500);
-        this.descCount = result.count;
-        this.descLimitReached = result.limitReached;
-      });
-  }
-
-
-
-  autoGrow(event: any) {
-    const textarea = event.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-  }
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
