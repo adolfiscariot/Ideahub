@@ -64,12 +64,12 @@ export class HomeComponent implements OnInit {
   groupEngagement: GroupEngagement[] = [];
   personalStats: PersonalStats | null = null;
 
-  selectedIdea: MostVotedIdea | null = null;
+  selectedIdea: MostVotedIdea | PromotedIdea | null = null;
   isModalOpen: boolean = false;
 
   constructor(private analyticsService: AnalyticsService) { }
 
-  openIdeaModal(idea: MostVotedIdea) {
+  openIdeaModal(idea: MostVotedIdea | PromotedIdea) {
     this.selectedIdea = idea;
     this.isModalOpen = true;
   }

@@ -19,9 +19,18 @@
                     <ng-icon name="heroUserGroup" size="1rem"></ng-icon>
                     {{ idea.groupName }}
                 </span>
-                <span class="tag votes">
+
+                <!-- Show votes if available -->
+                <span class="tag votes" *ngIf="$any(idea).voteCount !== undefined">
                     <ng-icon name="heroHandThumbUp" size="1rem"></ng-icon>
-                    {{ idea.voteCount }} Votes
+                    {{ $any(idea).voteCount }} Votes
+                </span>
+
+                <!-- Show promoted date if available -->
+                <span class="tag promoted" *ngIf="$any(idea).promotedDate"
+                    style="background-color: #fdf4ff; color: #86198f;">
+                    <ng-icon name="heroStar" size="1rem"></ng-icon>
+                    Promoted: {{ $any(idea).promotedDate | date:'mediumDate' }}
                 </span>
             </div>
 
