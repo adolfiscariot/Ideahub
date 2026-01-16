@@ -1,26 +1,45 @@
 <div class="login-input">
   <form class="login-form" id="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit($event)">
     <div class="page-header">Log In</div>
-    <div class="form-section">
-      <input type="email" placeholder="Email" formControlName="email" />
-    </div>
-    @if (loginForm.get('email')?.touched) {
-    <div class="error-message">
-      @if (loginForm.get('email')?.errors?.['email']) {
-      <span>
-        Please enter a valid email address
-      </span>
-      }
-      @if (loginForm.get('email')?.errors?.['required']) {
-      <span>
-        Please enter your email address
-      </span>
-      }
-    </div>
-    }
 
+    <!-- Email Input -->
     <div class="form-section">
-      <input type="password" placeholder="Password" formControlName="password" />
+      <div class="input-wrapper">
+        <ng-icon name="heroEnvelope" class="input-icon"></ng-icon>
+        <input type="email" placeholder="Email" formControlName="email" />
+      </div>
+    </div>
+
+    <!-- Email Error Messages -->
+    <div class="error-container" [class.show]="submitted && loginForm.get('email')?.invalid">
+      <div class="error-message">
+        @if (loginForm.get('email')?.errors?.['email']) {
+        <span>Please enter a valid email address</span>
+        }
+        @if (loginForm.get('email')?.errors?.['required']) {
+        <span>Please enter your email address</span>
+        }
+      </div>
+    </div>
+
+    <!-- Password Input -->
+    <div class="form-section">
+      <div class="input-wrapper">
+        <ng-icon name="heroLockClosed" class="input-icon"></ng-icon>
+        <input [type]="showPassword ? 'text' : 'password'" placeholder="Password" formControlName="password" />
+        <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
+          <ng-icon [name]="showPassword ? 'heroEyeSlash' : 'heroEye'"></ng-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Password Error Messages -->
+    <div class="error-container" [class.show]="submitted && loginForm.get('password')?.invalid">
+      <div class="error-message">
+        @if (loginForm.get('password')?.errors?.['required']) {
+        <span>Please enter your password</span>
+        }
+      </div>
     </div>
 
     <div class="submit-button">

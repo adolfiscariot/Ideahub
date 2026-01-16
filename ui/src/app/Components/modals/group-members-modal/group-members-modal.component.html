@@ -43,6 +43,7 @@
         <div class="member-actions" *ngIf="isOwner && member.id !== data.group.createdByUserId">
           <button class="action-btn transfer-btn" (click)="transferOwnership(member)" title="Transfer Ownership">
             <ng-icon name="heroArrowsRightLeft" size="1.2rem"></ng-icon>
+            <span class="btn-text">Transfer</span>
           </button>
         </div>
       </div>

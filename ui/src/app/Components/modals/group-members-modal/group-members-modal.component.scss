@@ -138,8 +138,8 @@
 }
 
 .action-btn {
-  width: 36px;
   height: 36px;
+  padding: 0 0.75rem;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   background: white;
@@ -147,19 +147,29 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
   transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  .btn-text {
+    display: none;
+  }
 
   &:hover {
     background-color: #f3f4f6;
     color: #111827;
     border-color: #d1d5db;
+
+    .btn-text {
+      display: inline;
+    }
   }
 
   &.transfer-btn:hover {
-    background-color: #fff1f2;
-    color: #e11d48;
-    border-color: #fecdd3;
+    background-color: #f5f3ff;
+    color: #7c3aed;
+    border-color: #ddd6fe;
   }
 }
 

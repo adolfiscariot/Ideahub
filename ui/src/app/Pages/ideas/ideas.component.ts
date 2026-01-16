@@ -33,7 +33,8 @@ import {
   heroInformationCircle,
   heroBars3BottomLeft,
   heroClock,
-  heroFunnel
+  heroFunnel,
+  heroArrowUp
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -53,7 +54,8 @@ import {
     heroInformationCircle,
     heroBars3BottomLeft,
     heroClock,
-    heroFunnel
+    heroFunnel,
+    heroArrowUp
   })],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
@@ -99,6 +101,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   };
 
   sortMode: 'top' | 'newest' = 'top';
+  showScrollButton: boolean = false;
 
   showRequestsModal = false;
   pendingRequests: any[] = [];
@@ -503,7 +506,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
         group: {
           id: this.groupId,
           name: this.groupName,
-          memberCount: this.membersCount
+          memberCount: this.membersCount,
+          createdByUserId: this.groupCreatorId
         }
       },
       panelClass: 'custom-modal'
@@ -1328,5 +1332,20 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show('Failed to transfer ownership', 'error');
         }
       });
+  }
+
+  onScroll(event: any): void {
+    const threshold = 300;
+    this.showScrollButton = event.target.scrollTop > threshold;
+  }
+
+  scrollToTop(): void {
+    const panel = document.querySelector('.ideas-list-panel');
+    if (panel) {
+      panel.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   }
 }

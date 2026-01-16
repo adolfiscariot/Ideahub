@@ -1,0 +1,58 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Project Details</h2>
+            <button class="close-btn" (click)="onClose()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <h1 class="project-title">{{ project.title }}</h1>
+
+            <div class="meta-tags">
+                <span class="tag author">
+                    <ng-icon name="heroUser" size="1rem"></ng-icon>
+                    {{ project.overseenBy }}
+                </span>
+                <span class="tag group" *ngIf="project.groupName">
+                    <ng-icon name="heroUserGroup" size="1rem"></ng-icon>
+                    {{ project.groupName }}
+                </span>
+                <span class="tag idea" *ngIf="project.ideaTitle">
+                    <ng-icon name="heroLightBulb" size="1rem"></ng-icon>
+                    {{ project.ideaTitle }}
+                </span>
+                <span class="tag status" [ngClass]="getStatusClass(project.status)">
+                    <ng-icon name="heroRocketLaunch" size="1rem"></ng-icon>
+                    {{ getStatusLabel(project.status) }}
+                </span>
+            </div>
+
+            <div class="dates-row">
+                <div class="date-item">
+                    <ng-icon name="heroCalendar" size="1rem"></ng-icon>
+                    <span class="label">Created:</span>
+                    <span class="value">{{ project.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div class="date-item" *ngIf="project.endedAt">
+                    <ng-icon name="heroCalendar" size="1rem"></ng-icon>
+                    <span class="label">Ended:</span>
+                    <span class="value">{{ project.endedAt | date:'mediumDate' }}</span>
+                </div>
+            </div>
+
+            <div class="description-section">
+                <h3>Description</h3>
+                <p>{{ project.description || 'No description provided.' }}</p>
+            </div>
+        </div>
+
+        <div class="modal-footer" *ngIf="canEdit">
+            <button class="btn-edit" (click)="onEdit()">
+                <ng-icon name="heroPencilSquare" size="1.1rem"></ng-icon>
+                Edit Project
+            </button>
+        </div>
+    </div>
+</div>

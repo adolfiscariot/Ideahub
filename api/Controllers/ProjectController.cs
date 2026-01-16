@@ -268,105 +268,99 @@ public class ProjectController : ControllerBase
         }
     }
 
-    //Update a project
-    [HttpPut("{projectId}")]
-    public async Task<IActionResult> UpdateProject(int projectId, ProjectUpdateDto projectUpdateDto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProject(int id, ProjectUpdateDto projectUpdateDto)
     {
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        _logger.LogInformation("Update Project: Request for ID {id} by {userEmail}", id, userEmail);
+
         try
         {
-            //fetch user info
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
-                _logger.LogError("Update Project: User ID missing. Can't update project");
                 return Unauthorized(ApiResponse.Fail("User ID missing"));
             }
 
-            //fetch project
             var project = await _context.Projects
                 .Include(p => p.OverseenByUser)
-                .FirstOrDefaultAsync(p => p.Id == projectId);
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (project is null)
             {
-                _logger.LogError("Update Project: Project with Id {projectId} not found", projectId);
-                return NotFound(ApiResponse.Fail("Project not found"));
+                _logger.LogWarning("Update Project: Project with Id {id} not found", id);
+                return NotFound(ApiResponse.Fail($"Project with ID {id} not found"));
             }
 
-            //check if user created or is overseeing project
             if (project.CreatedByUserId != userId && project.OverseenByUserId != userId)
             {
-                _logger.LogError("Update Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
+                _logger.LogWarning("Update Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
                 return StatusCode(403, ApiResponse.Fail("User not authorized to update project"));
             }
 
-            //make changes to project
-            string newOverseerDisplayName =  null!;
-            if (projectUpdateDto.Title is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Title))
             {
                 project.Title = projectUpdateDto.Title;
             }
 
-            if (projectUpdateDto.Description is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Description))
             {
                 project.Description = projectUpdateDto.Description;
             }
 
-            if (projectUpdateDto.OverseenByUserEmail is not null)
+            string? newOverseerDisplayName = null;
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.OverseenByUserEmail))
             {
-                var newUser = await _userManager.FindByNameAsync(projectUpdateDto.OverseenByUserEmail);
+                var newUser = await _userManager.FindByEmailAsync(projectUpdateDto.OverseenByUserEmail);
                 if (newUser is null)
                 {
-                    _logger.LogError("Update Project: New user not found for user name {userName}. Can't update project", projectUpdateDto.OverseenByUserEmail);
-                    return NotFound(ApiResponse.Fail("User not found"));
+                    _logger.LogWarning("Update Project: User with email {email} not found", projectUpdateDto.OverseenByUserEmail);
+                    return NotFound(ApiResponse.Fail("Specified overseer user not found"));
                 }
-                var newUserId = newUser.Id;
-                project.OverseenByUserId = newUserId;
+                project.OverseenByUserId = newUser.Id;
                 newOverseerDisplayName = newUser.DisplayName;
             }
 
-            if (projectUpdateDto.Status is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Status))
             {
-                ProjectStatus newStatus;
-
-                if (Enum.TryParse(projectUpdateDto.Status, true, out newStatus))
+                if (Enum.TryParse<ProjectStatus>(projectUpdateDto.Status, true, out var newStatus))
                 {
                     project.Status = newStatus;
                 }
                 else
                 {
-                    _logger.LogWarning("Update Project: Unable to parse the updated status for project {projectTitle}", project.Title);
-                    return BadRequest(ApiResponse.Fail("Unable to parse updated status"));
+                    _logger.LogWarning("Update Project: Unable to parse status '{status}'", projectUpdateDto.Status);
+                    return BadRequest(ApiResponse.Fail("Invalid project status"));
                 }
-                }
+            }
 
-            if (projectUpdateDto.EndedAt is not null)
+            if (projectUpdateDto.EndedAt.HasValue)
             {
+                if (projectUpdateDto.EndedAt.Value < project.CreatedAt)
+                {
+                    return BadRequest(ApiResponse.Fail("End date cannot be before creation date"));
+                }
                 project.EndedAt = projectUpdateDto.EndedAt;
             }
 
-            //add updatedAt time
             project.UpdatedAt = DateTime.UtcNow;
-
-            //save changes
             await _context.SaveChangesAsync();
 
-            //update project details
             var projectUpdateData = new ProjectDetailsDto
             {
                 Title = project.Title,
                 Description = project.Description,
-                OverseenByUserName = newOverseerDisplayName ?? project.OverseenByUser.DisplayName,
+                OverseenByUserName = newOverseerDisplayName ?? project.OverseenByUser?.DisplayName ?? "Unknown",
                 Status = project.Status.ToString()
             };
 
-            _logger.LogInformation("Update Project: Updates made to Project {projectTitle} by User {userEmail}: {projectUpdateData}", project.Title, userEmail, projectUpdateData);
-            return Ok(ApiResponse.Ok("Project updated", projectUpdateData));
+            _logger.LogInformation("Update Project: Project {id} updated successfully", id);
+            return Ok(ApiResponse.Ok("Project updated successfully", projectUpdateData));
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Update Project: User {userEmail} failed to update project {projectId}", userEmail, projectId);
-            return StatusCode(500, ApiResponse.Fail("An internal server error occurred while updating project. Please try again"));
+            _logger.LogError(e, "Update Project: Error updating project {id}", id);
+            return StatusCode(500, ApiResponse.Fail("Failed to update project. Please try again later."));
         }
     }
 

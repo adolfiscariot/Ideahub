@@ -4,17 +4,22 @@ import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EditProjectModalComponent } from '../../Components/modals/edit-project-modal/edit-project-modal.component';
+import { ViewProjectModalComponent } from '../../Components/modals/view-project-modal/view-project-modal.component';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { Toast, ToastService } from '../../Services/toast.service';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPencilSquare, heroEye, heroUserGroup, heroLightBulb, heroRectangleStack } from '@ng-icons/heroicons/outline';
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatDialogModule],
+    imports: [CommonModule, FormsModule, MatDialogModule, NgIconComponent],
+    viewProviders: [provideIcons({ heroPencilSquare, heroEye, heroUserGroup, heroLightBulb, heroRectangleStack })],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
+
 export class ProjectsComponent implements OnInit {
     projects: Project[] = [];
     ProjectStatus = ProjectStatus;
@@ -26,7 +31,7 @@ export class ProjectsComponent implements OnInit {
 
     constructor(
         private toastService: ToastService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.currentUserId = this.authService.getUserId();
@@ -45,7 +50,6 @@ export class ProjectsComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Failed to load projects', err);
-                // Optionally show error toast
             }
         });
     }
@@ -65,6 +69,24 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
+    openViewModal(project: Project): void {
+        const dialogRef = this.dialog.open(ViewProjectModalComponent, {
+            width: '600px',
+            maxHeight: '90vh',
+            panelClass: 'custom-modal',
+            data: {
+                project,
+                canEdit: this.canEdit(project)
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result?.action === 'edit') {
+                this.openEditModal(result.project);
+            }
+        });
+    }
+
     openEditModal(project: Project): void {
         const dialogRef = this.dialog.open(EditProjectModalComponent, {
             width: '500px',
@@ -73,20 +95,17 @@ export class ProjectsComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
-                // Prepare update DTO
                 const updateDto = {
                     title: result.title,
                     description: result.description,
-                    // Convert numeric enum to string key for backend
                     status: ProjectStatus[result.status],
                     endedAt: result.endedAt ? new Date(result.endedAt).toISOString() : null
                 };
 
                 this.projectsService.updateProject(project.id, updateDto).subscribe({
-                    next: (updatedProject) => {
-                        console.log('Project updated successfully');
-                        this.toastService.show('Project updated successfuly', 'success');
-                        this.loadProjects(); // Reload to get fresh data
+                    next: () => {
+                        this.toastService.show('Project updated successfully', 'success');
+                        this.loadProjects();
                     },
                     error: (err) => {
                         console.error('Failed to update project', err);
@@ -97,4 +116,3 @@ export class ProjectsComponent implements OnInit {
         });
     }
 }
-

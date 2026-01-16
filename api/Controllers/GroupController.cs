@@ -577,6 +577,7 @@ public async Task<IActionResult> ViewAllGroupRequests()
 
         var membersList = users.Select(ug => new
         {
+            Id = ug.User?.Id,
             UserName = ug.User?.DisplayName,
             Email = ug.User?.Email,
         }).ToList();

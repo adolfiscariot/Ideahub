@@ -1,7 +1,7 @@
 <div class="ideas-container" [class.split-view]="selectedIdea">
 
   <!-- Left Panel: Ideas List -->
-  <div class="ideas-list-panel">
+  <div class="ideas-list-panel" (scroll)="onScroll($event)">
     <!-- Header with Members Section -->
     <header class="ideas-header">
       <div class="header-content">
@@ -183,7 +183,10 @@
     </div>
   </div>
 
-  <!-- Right Panel: Idea Details (Split View) -->
+  <!-- Overlay backdrop for Upwork-style panel -->
+  <div *ngIf="selectedIdea" class="panel-overlay" (click)="selectedIdea = null"></div>
+
+  <!-- Right Panel: Idea Details (Slide-in Panel) -->
   <div *ngIf="selectedIdea" class="idea-details-panel">
     <div class="details-panel-header">
       <h2 class="details-title">Idea Details</h2>

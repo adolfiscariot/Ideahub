@@ -2,29 +2,49 @@
   <form class="registration-form" [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)">
     <div class="page-header">Register</div>
 
+    <!-- Name Input -->
     <div class="form-section">
-      <label for="name-input">Name</label>
-      <input id="name-input" type="text" placeholder="" formControlName="displayName" />
+      <div class="input-wrapper">
+        <ng-icon name="heroUser" class="input-icon"></ng-icon>
+        <input id="name-input" type="text" placeholder="Name" formControlName="displayName" />
+      </div>
+    </div>
+    <div class="error-container" [class.show]="submitted && registrationForm.get('displayName')?.invalid">
+      <div class="error-message">
+        @if (registrationForm.get('displayName')?.errors?.['required']) {
+        <span>Please enter your name</span>
+        }
+      </div>
     </div>
 
+    <!-- Email Input -->
     <div class="form-section">
-      <label for="email-input">Email</label>
-      <input id="email-input" type="email" placeholder="" formControlName="email" />
+      <div class="input-wrapper">
+        <ng-icon name="heroEnvelope" class="input-icon"></ng-icon>
+        <input id="email-input" type="email" placeholder="Email" formControlName="email" />
+      </div>
+    </div>
+    <div class="error-container" [class.show]="submitted && registrationForm.get('email')?.invalid">
+      <div class="error-message">
+        @if (registrationForm.get('email')?.errors?.['email']) {
+        <span>Please enter a valid email address</span>
+        }
+        @if (registrationForm.get('email')?.errors?.['required']) {
+        <span>Please enter your email address</span>
+        }
+      </div>
     </div>
 
     <!-- Password -->
     <div class="form-section password-section">
       <div class="password-field-container">
-
         <div class="password-header">
-          <label for="password-input">Password</label>
-
+          <span class="field-label">Password</span>
           <div class="password-info-wrapper">
             <span class="password-info-icon" [class.met]="allPasswordMet" [class.not-met]="!allPasswordMet"
               (mouseenter)="infoHovered = true" (mouseleave)="infoHovered = false">
               ⓘ
             </span>
-
             <div *ngIf="infoHovered" class="password-popover right">
               <ul class="password-rules">
                 <li *ngFor="let rule of passwordChecks">
@@ -32,7 +52,6 @@
                   <span [class.met]="rule.met">{{ rule.text }}</span>
                 </li>
               </ul>
-
               <div class="strength-bars">
                 <span *ngFor="let i of [1,2,3,4]" [class.active]="passwordStrength >= i"></span>
               </div>
@@ -40,25 +59,51 @@
           </div>
         </div>
 
-        <div class="password-input-wrapper">
-          <input id="password-input" type="password" placeholder="" formControlName="password"
-            (input)="onPasswordInput()" />
-
-          <button type="button" class="show-password-btn" (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
-            <span class="material-icons">
-              {{ showPassword ? 'visibility_off' : 'visibility' }}
-            </span>
+        <div class="input-wrapper">
+          <ng-icon name="heroLockClosed" class="input-icon"></ng-icon>
+          <input id="password-input" [type]="showPassword ? 'text' : 'password'" placeholder="Password"
+            formControlName="password" (input)="onPasswordInput()" />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
+            <ng-icon [name]="showPassword ? 'heroEyeSlash' : 'heroEye'"></ng-icon>
           </button>
-
         </div>
       </div>
     </div>
-
-    <div class="form-section">
-      <label for="confirm-password-input">Confirm Password</label>
-      <input id="confirm-password-input" type="password" placeholder="" formControlName="confirmPassword" />
+    <div class="error-container" [class.show]="submitted && registrationForm.get('password')?.invalid">
+      <div class="error-message">
+        @if (registrationForm.get('password')?.errors?.['required']) {
+        <span>Please enter a password</span>
+        }
+        @if (registrationForm.get('password')?.errors?.['pattern'] ||
+        registrationForm.get('password')?.errors?.['minlength']) {
+        <span>Password does not meet requirements</span>
+        }
+      </div>
     </div>
+
+    <!-- Confirm Password -->
+    <div class="form-section">
+      <div class="input-wrapper">
+        <ng-icon name="heroLockClosed" class="input-icon"></ng-icon>
+        <input id="confirm-password-input" [type]="showConfirmPassword ? 'text' : 'password'"
+          placeholder="Confirm Password" formControlName="confirmPassword" />
+        <button type="button" class="password-toggle" (click)="toggleConfirmPasswordVisibility()" tabindex="-1">
+          <ng-icon [name]="showConfirmPassword ? 'heroEyeSlash' : 'heroEye'"></ng-icon>
+        </button>
+      </div>
+    </div>
+    <div class="error-container"
+      [class.show]="(registrationForm.get('confirmPassword')?.dirty && registrationForm.errors?.['passwordMismatch']) || (submitted && registrationForm.get('confirmPassword')?.invalid)">
+      <div class="error-message">
+        @if (submitted && registrationForm.get('confirmPassword')?.errors?.['required']) {
+        <span>Please confirm your password</span>
+        }
+        @if (registrationForm.get('confirmPassword')?.dirty && registrationForm.errors?.['passwordMismatch']) {
+        <span>Passwords do not match</span>
+        }
+      </div>
+    </div>
+
 
     <div class="submit-button">
       <app-buttons [buttonText]="'Register'" [buttonStyleClass]="'btn-registration'" [buttonType]="'submit'"

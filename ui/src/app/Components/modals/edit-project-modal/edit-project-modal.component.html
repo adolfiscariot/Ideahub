@@ -1,39 +1,60 @@
-<h2 mat-dialog-title>Edit Project</h2>
+<div class="modal-content-wrapper">
+    <!-- Header -->
+    <div class="modal-header">
+        <h2>Edit Project</h2>
+        <button class="close-btn" (click)="onCancel()">
+            <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+        </button>
+    </div>
 
-<mat-dialog-content>
-    <div class="form-container">
-        <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Title</mat-label>
-            <input matInput [(ngModel)]="editedProject.title" disabled>
-            <mat-hint>Project titles cannot be changed directly.</mat-hint>
-        </mat-form-field>
+    <!-- Body -->
+    <div class="modal-body">
+        <div class="form-container">
+            <div class="input-section">
+                <label>Title</label>
+                <div class="input-wrapper disabled">
+                    <input type="text" [(ngModel)]="editedProject.title" disabled />
+                </div>
+                <span class="hint-text">Project titles cannot be changed directly.</span>
+            </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput [(ngModel)]="editedProject.description" rows="4"></textarea>
-        </mat-form-field>
+            <div class="input-section">
+                <label>Description</label>
+                <div class="input-wrapper">
+                    <textarea [(ngModel)]="editedProject.description" rows="4"
+                        placeholder="Describe the project goals and scope..."></textarea>
+                </div>
+            </div>
 
-        <div class="row">
-            <mat-form-field appearance="outline" class="half-width">
-                <mat-label>Status</mat-label>
-                <mat-select [(ngModel)]="editedProject.status">
-                    <mat-option *ngFor="let status of statusOptions" [value]="status">
-                        {{ getStatusLabel(status) }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
+            <div class="row">
+                <div class="input-section half-width">
+                    <label>Status</label>
+                    <div class="input-wrapper">
+                        <select [(ngModel)]="editedProject.status">
+                            <option *ngFor="let status of statusOptions" [value]="status">
+                                {{ getStatusLabel(status) }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
 
-            <mat-form-field appearance="outline" class="half-width">
-                <mat-label>Ended At</mat-label>
-                <input matInput [matDatepicker]="picker" [(ngModel)]="editedProject.endedAt">
-                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-            </mat-form-field>
+                <div class="input-section half-width">
+                    <label>End Date</label>
+                    <div class="input-wrapper">
+                        <input type="date" [(ngModel)]="editedProject.endedAt" />
+                    </div>
+                    <span class="hint-text">Leave empty if project is ongoing</span>
+                </div>
+            </div>
         </div>
     </div>
-</mat-dialog-content>
 
-<mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onSave()">Save Changes</button>
-</mat-dialog-actions>
+    <!-- Footer -->
+    <div class="modal-footer">
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-secondary'" (click)="onCancel()">
+        </app-buttons>
+
+        <app-buttons [buttonText]="'Save Changes'" [buttonStyleClass]="'btn-primary'" (click)="onSave()">
+        </app-buttons>
+    </div>
+</div>

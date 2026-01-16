@@ -12,6 +12,8 @@ import { CommonModule } from '@angular/common';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { confirmPasswordValidator } from '../../Validators/password-match.validators';
 import { Router, RouterLink } from '@angular/router';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroUser, heroEnvelope, heroLockClosed, heroEye, heroEyeSlash } from '@ng-icons/heroicons/outline';
 
 const PASSWORD_REQUIREMENTS = [
   { text: 'At least 8 characters', test: (v: string) => v.length >= 8 },
@@ -24,7 +26,8 @@ const PASSWORD_REQUIREMENTS = [
 @Component({
   selector: 'app-registration-input',
   standalone: true,
-  imports: [ButtonsComponent, ReactiveFormsModule, RouterLink, CommonModule],
+  imports: [ButtonsComponent, ReactiveFormsModule, RouterLink, CommonModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroUser, heroEnvelope, heroLockClosed, heroEye, heroEyeSlash })],
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',
 })
@@ -34,15 +37,18 @@ export class RegistrationInputComponent implements OnInit {
   toastService = inject(ToastService);
 
   isLoading = false;
+  submitted = false;
 
   passwordFocused = false;
   passwordValue = '';
   infoHovered = false;
   showPassword = false;
+  showConfirmPassword = false;
   passwordChecks = PASSWORD_REQUIREMENTS.map(r => ({
     text: r.text,
     met: false,
   }));
+
 
   registrationForm = new FormGroup(
     {
@@ -90,18 +96,19 @@ export class RegistrationInputComponent implements OnInit {
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
-    const passwordInput = document.getElementById('password-input') as HTMLInputElement;
-    if (passwordInput) {
-      passwordInput.type = this.showPassword ? 'text' : 'password';
-    }
   }
 
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   get passwordStrength(): number {
     return this.passwordChecks.filter(r => r.met).length;
   }
 
   onSubmit(event: Event) {
+    this.submitted = true;
+
     if (this.registrationForm.valid) {
       this.isLoading = true;
       const registrationData: Registration =
@@ -113,6 +120,7 @@ export class RegistrationInputComponent implements OnInit {
           this.toastService.show('Registration was successful', 'success');
           this.router.navigate(['/login']);
           this.registrationForm.reset();
+          this.submitted = false;
         },
         error: (error) => {
           this.isLoading = false;
@@ -124,8 +132,7 @@ export class RegistrationInputComponent implements OnInit {
       });
     } else {
       event.preventDefault();
-      this.registrationForm.markAllAsTouched();
-      this.toastService.show('Please fill the form correctly', 'info');
+      // Inline errors will show via submitted flag
     }
   }
 }

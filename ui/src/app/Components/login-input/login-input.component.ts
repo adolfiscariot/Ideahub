@@ -13,10 +13,13 @@ import { ToastService } from '../../Services/toast.service';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
 import { NotificationsService } from '../../Services/notifications';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroEnvelope, heroLockClosed, heroEye, heroEyeSlash } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-login-input',
-  imports: [ButtonsComponent, RouterLink, ReactiveFormsModule],
+  imports: [ButtonsComponent, RouterLink, ReactiveFormsModule, NgIconComponent],
+  viewProviders: [provideIcons({ heroEnvelope, heroLockClosed, heroEye, heroEyeSlash })],
   templateUrl: './login-input.component.html',
   styleUrl: './login-input.component.scss',
 })
@@ -26,8 +29,15 @@ export class LoginInputComponent implements OnInit {
   notificationsService = inject(NotificationsService);
   router = inject(Router);
   isLoading = false;
+  showPassword = false;
+  submitted = false;
 
   ngOnInit(): void { this.notificationsService }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -41,6 +51,7 @@ export class LoginInputComponent implements OnInit {
   });
 
   onSubmit(event: Event) {
+    this.submitted = true;
     console.log(`${this.loginForm.value.email} is logging in...`);
 
     if (this.loginForm.valid) {
@@ -54,6 +65,7 @@ export class LoginInputComponent implements OnInit {
           this.router.navigate(['/home']);
           this.notificationsService.refreshPendingRequests();
           this.loginForm.reset();
+          this.submitted = false;
         },
         error: (error) => {
           this.isLoading = false;
@@ -62,7 +74,7 @@ export class LoginInputComponent implements OnInit {
       });
     } else {
       event.preventDefault();
-      this.toastService.show('Please input valid data in the login form', 'warning');
+      // Inline error messages will show via the submitted flag
     }
   }
 }

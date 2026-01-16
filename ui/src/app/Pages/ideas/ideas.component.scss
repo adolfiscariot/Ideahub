@@ -300,26 +300,69 @@
 
 
 /* ============================
-   RIGHT PANEL CONTAINER
+   RIGHT PANEL CONTAINER - Upwork Style Slide-in
 ============================ */
+
+/* Overlay backdrop when panel is open */
+.panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+  animation: fadeIn 0.25s ease-out;
+}
+
 .idea-details-panel {
-  position: relative;
-  flex: 0 0 50%;
-  /* fixed width window */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 55%;
+  max-width: 700px;
+  height: 100vh;
   background: #fff;
-  border-left: 2px solid #e0e0e0;
-  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
-  /* subtle shadow */
-  border-radius: 8px;
-  /* rounded edges */
-  padding: 24px;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  padding: 24px 32px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: all 0.3s ease;
   word-wrap: break-word;
+  animation: slideInRight 0.3s ease-out;
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100%;
+  }
 }
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 
 /* Header inside container */
 .details-panel-header {
@@ -369,6 +412,18 @@
   font-weight: 700;
   color: #333;
 }
+
+/* Idea title in details panel - show full text */
+.details-idea-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* Allow full title to display */
+}
+
 
 /* Section styling */
 .details-section {
@@ -665,129 +720,163 @@
 .ideas-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 16px;
   margin-bottom: 30px;
 }
 
 .idea-card {
   position: relative;
-  /* important for absolute badge positioning */
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.promoted-badge-top-right {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  align-items: center;
-  background-color: #ee82ee;
-  /* violet */
-  color: #fff;
-  font-weight: bold;
-  font-size: 12px;
-  padding: 3px 8px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  box-shadow: 0 0 6px rgba(238, 130, 238, 0.5);
-}
+  background: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-.idea-card:hover {
-  background: #fafafa;
-  border-color: #1a73e8;
+  &:hover {
+    border-color: #800080;
+    box-shadow: 0 4px 12px rgba(128, 0, 128, 0.08);
+    transform: translateY(-2px);
+  }
+
+  &.selected {
+    border-color: #800080;
+    background: #fdf2ff;
+    box-shadow: 0 0 0 1px #800080;
+  }
 }
 
 .idea-card-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.idea-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.idea-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.idea-description {
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  .read-more {
+    color: #800080;
+    font-weight: 500;
+    margin-left: 4px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.idea-footer-actions {
+  display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 4px;
 }
 
 .vote-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid #e0e0e0;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1px solid #e5e7eb;
   background: white;
-  color: #666;
-  font-size: 14px;
+  color: #4b5563;
+  font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 
-  &:hover:not(:disabled) {
-    border-color: #4CAF50;
-    background: #f8f8f8;
+  &:hover {
+    border-color: #800080;
+    color: #800080;
+    background: #fdf2ff;
   }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .vote-icon {
-    font-size: 16px;
-    transition: all 0.2s ease;
-  }
-
-  .vote-count {
-    font-weight: 600;
-    min-width: 0;
-
-    /* Hide when empty */
-    &:empty {
-      display: none;
-    }
+  &.voted {
+    background: #800080;
+    border-color: #800080;
+    color: white;
   }
 }
 
-/* Voted state */
-.vote-toggle-btn.voted {
-  background: #4CAF50;
-  border-color: #4CAF50;
-  color: white;
-
-  .vote-icon {
-    transform: translateY(-1px);
-  }
-
-  /* On hover, make it slightly darker green, NOT red */
-  &:hover:not(:disabled) {
-    background: #45a049;
-    /* Darker green */
-    border-color: #45a049;
-  }
-
-  /* Adjust padding when there's no vote count */
-  &:not(:has(.vote-count:not(:empty))) {
-    padding: 6px 12px;
-  }
-}
-
-/* For the details panel, make sure it has the same styles */
-.details-vote-btn {
-  @extend .vote-toggle-btn;
-  /* Inherit all base styles */
-
-  /* Additional styles specific to details panel */
-  padding: 8px 16px;
-  font-size: 15px;
-  display: flex;
-}
-
-.idea-title {
-  flex: 1;
-  /* take up middle space */
-  margin-left: 5px;
-  margin-top: 5px;
-  border-bottom: 1px solid #eee;
-  font-size: 20px;
+.promoted-badge-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3e8ff;
+  color: #800080;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #333;
+}
 
+/* Floating Scroll Top Button */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 40px;
+  left: 60px;
+  /* Aligned with margin */
+  z-index: 100;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  color: #800080;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  &:hover {
+    background: #800080;
+    color: white;
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(128, 0, 128, 0.2);
+  }
 }
 
 .idea-date {
