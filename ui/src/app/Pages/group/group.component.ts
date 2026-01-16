@@ -448,10 +448,16 @@ export class GroupsComponent implements OnInit, OnDestroy {
     const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
     const currentId = this.currentUserId.toString().trim().toLowerCase();
 
-    console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
+    // console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
 
     return groupCreatorId === currentId;
   }
 
-  // ===== FORM GETTER METHODS =====
+  canConfigureGroup(group: any): boolean {
+    return this.isGroupCreator(group);
+  }
+
+  hasPendingRequest(groupId: string): boolean {
+    return this.pendingRequests.get(groupId) || false;
+  }
 }
