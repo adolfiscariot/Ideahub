@@ -8,6 +8,165 @@
   color: rgb(95, 1, 95);
 }
 
+.password-section {
+  position: relative;
+}
+
+/* Password field container */
+.password-field-container {
+  width: 100%;
+}
+
+/* Header with label and info icon at top-right */
+.password-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.password-header label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Info icon wrapper for positioning */
+.password-info-wrapper {
+  position: relative;
+  display: inline-block;
+  color: blue;
+}
+
+.password-info-icon {
+  color: #666;
+  font-size: 14px;
+  cursor: help;
+  display: inline-block;
+  line-height: 1;
+}
+
+.password-info-icon.met {
+  color: #4CAF50;
+}
+
+.password-info-icon.not-met {
+  color: blue;
+}
+
+/* Password input */
+.password-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 70px;
+  box-sizing: border-box;
+}
+
+.show-password-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px;
+  margin: 0;
+}
+
+/* Password popover - positioned to the right of the icon */
+.password-popover {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 180px; /* Even smaller */
+  max-width: 200px;
+  z-index: 1000;
+  font-size: 11px; /* Smaller font */
+}
+
+.password-popover.right {
+  top: 0;
+  left: 100%;
+  margin-left: 8px;
+}
+
+.password-rules {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 6px 0;
+}
+
+.password-rules li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+
+.password-rules .icon {
+  font-size: 9px;
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.password-rules .met {
+  color: #4CAF50;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 2px;
+  height: 3px;
+  margin-top: 6px;
+}
+
+.strength-bars span {
+  flex: 1;
+  background: #e0e0e0;
+  border-radius: 1px;
+}
+
+.strength-bars span.active {
+  background: #4CAF50;
+}
+
+.form-section label,
+.password-header label {
+  
+  
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  width: auto;
+  text-align: left;
+  color: #333;
+}
+
+.show-password-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #000;
+}
+
+.show-password-btn .material-icons {
+  font-size: 20px;
+}
+
+
 .registration-form:not(.page-header) {
   background-color: plum;
   display: flex;
@@ -17,16 +176,17 @@
   padding: 50px 30px;
   padding-bottom: 20px;
   padding-top: 20px;
-  width: 300px;
+  width: 400px;
   border: 1px solid purple;
-  border-radius: 50px;
+  border-radius: 5px;
 }
 
 .form-section {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
-  margin-left: -10px;
+  margin-left: 0;
 
   input {
     margin-left: auto;

@@ -1,16 +1,16 @@
 <div class="sidebar-component">
-    <div class="sidebar-toggle-icon">
+    <!--  <div class="sidebar-toggle-icon">
         <button class="sidebar-toggle-icon" mat-icon-button (click)="toggleSidebar()">
             <mat-icon>menu</mat-icon>
         </button>
-    </div>
+    </div> -->
 
     <div class="sidebar-content" [ngClass]="{'closed' : !isSidebarExpanded}">
         <ul>
             <li>
                 <a routerLink="/home" routerLinkActive="active" aria-label="Navigate to Ideas page">
-                    <mat-icon>lightbulb</mat-icon>
-                    <span class="link-text">Ideas</span>
+                    <mat-icon>home</mat-icon>
+                    <span class="link-text">Home</span>
                 </a>
             </li>
             <li>

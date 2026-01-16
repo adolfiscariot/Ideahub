@@ -1,63 +1,108 @@
 <div class="registration">
-  <form class="registration-form" id="registration-form" [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)">
+  <form
+    class="registration-form"
+    [formGroup]="registrationForm"
+    (ngSubmit)="onSubmit($event)"
+  >
     <div class="page-header">Register</div>
-    <div class="form-section">
-      <input id="name-input" type="text" placeholder="Name" formControlName="displayName" />
-    </div>
-    @if (registrationForm.get('name')?.touched && registrationForm.get('name')?.errors?.['required']) {
-    <div class="error-message">
-      Please enter your name
-    </div>
-    }
 
     <div class="form-section">
-      <input id="email-input" type="email" placeholder="Email" formControlName="email" />
+      <label for="name-input">Name</label>
+      <input
+        id="name-input"
+        type="text"
+        placeholder=""
+        formControlName="displayName"
+      />
     </div>
-    @if (registrationForm.get('email')?.touched) {
-    <div class="error-message">
-      @if (registrationForm.get('email')?.errors?.['required']) {
-      <span>
-        Please enter your email</span>
-      }
-      @if (registrationForm.get('email')?.errors?.['email']) {
-      <span>
-        Please enter a valid email
-      </span>
-      }
-    </div>
-    }
 
     <div class="form-section">
-      <input id="password-input" type="password" placeholder="Password" formControlName="password" />
+      <label for="email-input">Email</label>
+      <input
+        id="email-input"
+        type="email"
+        placeholder=""
+        formControlName="email"
+      />
     </div>
 
-    @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.errors?.['required']) {
-    <div class="error-message">
-      Please enter your password
+    <!-- Password -->
+    <div class="form-section password-section">
+      <div class="password-field-container">
+
+        <div class="password-header">
+          <label for="password-input">Password</label>
+
+          <div class="password-info-wrapper">
+            <span
+              class="password-info-icon"
+              [class.met]="allPasswordMet"
+              [class.not-met]="!allPasswordMet"
+              (mouseenter)="infoHovered = true"
+              (mouseleave)="infoHovered = false"
+            >
+              ℹ️
+            </span>
+
+            <div *ngIf="infoHovered" class="password-popover right">
+              <ul class="password-rules">
+                <li *ngFor="let rule of passwordChecks">
+                  <span class="icon">{{ rule.met ? '✓' : '✗' }}</span>
+                  <span [class.met]="rule.met">{{ rule.text }}</span>
+                </li>
+              </ul>
+
+              <div class="strength-bars">
+                <span
+                  *ngFor="let i of [1,2,3,4]"
+                  [class.active]="passwordStrength >= i"
+                ></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="password-input-wrapper">
+          <input
+            id="password-input"
+            type="password"
+            placeholder=""
+            formControlName="password"
+            (input)="onPasswordInput()"
+          />
+
+          <button
+  type="button"
+  class="show-password-btn"
+  (click)="togglePasswordVisibility()"
+  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+>
+  <span class="material-icons">
+    {{ showPassword ? 'visibility_off' : 'visibility' }}
+  </span>
+</button>
+
+        </div>
+      </div>
     </div>
-    }
 
     <div class="form-section">
-      <input id="confirm-password-input" type="password" placeholder="Confirm password"
-        formControlName="confirmPassword" />
+      <label for="confirm-password-input">Confirm Password</label>
+      <input
+        id="confirm-password-input"
+        type="password"
+        placeholder=""
+        formControlName="confirmPassword"
+      />
     </div>
-    @if (
-    registrationForm.get('confirmPassword')?.invalid &&
-    registrationForm.get('confirmPassword')?.touched
-    ) {
-    <div class="error-message">
-      @if (registrationForm.get('confirmPassword')?.errors?.['required']) {
-      <span>Confirm Password field is required</span>
-      }
-      @if (registrationForm.get('confirmPassword')?.errors?.['passwordsDontMatch']) {
-      <span>Passwords don't match</span>
-      }
-    </div>
-    }
 
     <div class="submit-button">
-      <app-buttons [buttonText]="'Register'" [buttonStyleClass]="'btn-registration'" [buttonType]="'submit'"
-        [isLoading]="isLoading" />
+      <app-buttons
+        [buttonText]="'Register'"
+        [buttonStyleClass]="'btn-registration'"
+        [buttonType]="'submit'"
+        [isLoading]="isLoading"
+      />
       <p>Already have an account?</p>
       <a routerLink="/login"><u>Login here</u></a>
     </div>

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { BaseLayoutComponent } from "../../Components/base-layout/base-layout.component";
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
@@ -34,7 +33,6 @@ import {
   selector: 'app-home',
   standalone: true,
   imports: [
-    BaseLayoutComponent,
     CommonModule,
     StatCardComponent,
     DashboardCardComponent

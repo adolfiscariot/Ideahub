@@ -9,11 +9,12 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
-import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
+import { updateCharCount } from '../../Components/utils/char-count-util';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-groups',
@@ -24,10 +25,9 @@ import { NotificationsService } from '../../Services/notifications';
     CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
-    BaseLayoutComponent,
     ModalComponent,
     FormsModule,
-    GroupMembersModalComponent
+    //GroupMembersModalComponent
   ]
 })
 export class GroupsComponent implements OnInit {
@@ -88,36 +88,37 @@ export class GroupsComponent implements OnInit {
     this.currentUserId = this.authService.getCurrentUserId();
     console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
-    this.updateCharCounts(); 
+    this.createGroupForm = this.fb.group({
+      name:[''],
+      description: [''],
+      isPublic: [true]
+    });
+    this.setupCharCounters();
   }
 
-  updateCharCounts() {
-  const nameControl = this.createGroupForm.get('name');
-  const descControl = this.createGroupForm.get('description');
-
-  const nameValue = nameControl?.value || '';
-  const descValue = descControl?.value || '';
-
-  this.nameCount = nameValue.length;
-  this.descCount = descValue.length;
-
-  // NAME
-  if (this.nameCount > 100) {
-    this.nameLimitReached = true;
-    nameControl?.setValue(nameValue.substring(0, 100), { emitEvent: false });
-    this.nameCount = 100;
-  } else {
-    this.nameLimitReached = false;
+  ngOnDestroy (): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
+  private destroy$ = new Subject<void>();
 
-  // DESCRIPTION
-  if (this.descCount > 500) {
-    this.descLimitReached = true;
-    descControl?.setValue(descValue.substring(0, 500), { emitEvent: false });
-    this.descCount = 500;
-  } else {
-    this.descLimitReached = false;
-  }
+  private setupCharCounters(): void {
+
+  this.createGroupForm.get('name')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const result = updateCharCount(this.createGroupForm, 'name', 100);
+      this.nameCount = result.count;
+      this.nameLimitReached = result.limitReached;
+    });
+
+  this.createGroupForm.get('description')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      const result = updateCharCount(this.createGroupForm, 'description', 500);
+      this.descCount = result.count;
+      this.descLimitReached = result.limitReached;
+    });
 }
 
 

@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BaseLayoutComponent } from '../../Components/base-layout/base-layout.component';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -12,7 +11,7 @@ import { Toast, ToastService } from '../../Services/toast.service';
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, BaseLayoutComponent, FormsModule, MatDialogModule],
+    imports: [CommonModule, FormsModule, MatDialogModule],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })

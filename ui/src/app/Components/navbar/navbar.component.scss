@@ -45,6 +45,36 @@
   pointer-events: none;
 }
 
+
+.nav-items {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-left: 3rem;
+}
+
+.nav-items a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* space between icon and text */
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.nav-items a mat-icon {
+  font-size: 20px;
+}
+
+.nav-items a.active {
+  color: #ee82ee;
+  font-weight: 600;
+}
+
+.nav-items a:hover {
+  color: #9b59b6;
+}
+
 .navbar-left {
   display: flex;
   justify-content: center;
@@ -61,16 +91,6 @@
 .product-text {
   font-weight: bold;
   font-size: 1.2em;
-  cursor: pointer;
-}
-
-.nav-items {
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 0px;
-  margin-left: 20px;
   cursor: pointer;
 }
 

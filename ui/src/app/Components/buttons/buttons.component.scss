@@ -76,10 +76,6 @@
   font-weight: 400;
 }
 
-.btn-create-group {
-  background-color: yellow;
-  width: 100%;
-}
 
 /* Base vote button */
 .btn-vote {
@@ -160,7 +156,8 @@
 }
 
 .btn-promote,
-.btn-create-first-group
+.btn-create-first-group,
+.btn-create-group
 {
   background: #ffffff;
   color: purple;
@@ -252,6 +249,17 @@
   &:hover {
     background: rgba(128, 0, 128, 0.1);
   }
+}
+
+.btn-info-icon {
+  background: #ffffff;
+  color: green;
+  border: 1px solid green;
+  padding: 6px 10px;
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
 }
 
 .btn-view-voters {
