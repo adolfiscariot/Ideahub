@@ -1,0 +1,69 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-content" (click)="onContentClick($event)">
+
+        <!-- Header -->
+        <div class="modal-header">
+            <div class="header-icon">
+                <ng-icon name="heroSparkles" size="1.5rem"></ng-icon>
+            </div>
+            <h2>Welcome to Ideas</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+            <p class="main-desc">
+                Your space for <strong>practical, actionable improvements</strong> that enhance productivity,
+                efficiency, or working conditions.
+            </p>
+
+            <!-- Valid Ideas Section -->
+            <div class="section valid-ideas">
+                <h3><ng-icon name="heroCheckCircle" size="1.2rem" class="icon-valid"></ng-icon> What we're looking for
+                </h3>
+                <div class="cards-grid">
+                    <div class="info-card valid">
+                        <h4>Keyboard shortcuts</h4>
+                        <p>Quick triggers for common actions to reduce repetitive work.</p>
+                    </div>
+                    <div class="info-card valid">
+                        <h4>Team sync summary</h4>
+                        <p>Automated meeting notes to keep everyone aligned.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avoid Ideas Section -->
+            <div class="section avoid-ideas">
+                <h3><ng-icon name="heroExclamationCircle" size="1.2rem" class="icon-avoid"></ng-icon> What to avoid</h3>
+                <div class="cards-grid">
+                    <div class="info-card avoid">
+                        <h4>"Explore AI more"</h4>
+                        <p>Too broad. Focus on specific problems to solve.</p>
+                    </div>
+                    <div class="info-card avoid">
+                        <h4>"Change culture"</h4>
+                        <p>Out of scope. Focus on tangible process changes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <ng-icon name="heroLightBulb" size="1.2rem"></ng-icon>
+                <p><strong>Tip:</strong> Ask yourself, “Is this concrete? Can we build it in a few weeks?”</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <app-buttons [buttonText]="'Don’t show again'" [buttonStyleClass]="'btn-secondary btn-ghost'"
+                (click)="handleDontShowAgain()">
+            </app-buttons>
+
+            <app-buttons [buttonText]="'Got it, let’s go!'" [buttonStyleClass]="'btn-primary'" (click)="closeModal()">
+            </app-buttons>
+        </div>
+    </div>
+</div>

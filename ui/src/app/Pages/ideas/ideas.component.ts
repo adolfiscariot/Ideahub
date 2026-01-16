@@ -13,15 +13,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
-import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
+import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { IdeaInfoModalComponent } from '../../Components/modals/idea-info-modal/idea-info-modal.component';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, IdeaInfoModalComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -85,13 +86,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
   descLength = 0;
   isFormValid = false;
   shareTitleCount = 0;
-  shareDescCount =0;
+  shareDescCount = 0;
 
   shareIdeaForm!: FormGroup;
 
   private routeSub: Subscription = new Subscription();
 
-  showDeleteIdeaModal= false;
+  showDeleteIdeaModal = false;
   ideaIdToDelete: string | null = null;
 
   showIdeaInfoModal = false;
@@ -118,11 +119,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-    title: [''],
-    description: ['']
-  });
+      title: [''],
+      description: ['']
+    });
 
-  this.setupShareIdeaCharCounters();
+    this.setupShareIdeaCharCounters();
     // Check browser history state FIRST (in case of page refresh)
     console.log('Browser history state:', history.state);
 
@@ -188,23 +189,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.routeSub.unsubscribe();
   }
 
-  private destroy$ = new Subject<void>(); 
+  private destroy$ = new Subject<void>();
   private setupShareIdeaCharCounters(): void {
 
-  this.shareIdeaForm.get('title')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const res = updateCharCount(this.shareIdeaForm, 'title', 100);
-      this.shareTitleCount = res.count;
-    });
+    this.shareIdeaForm.get('title')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+        this.shareTitleCount = res.count;
+      });
 
-  this.shareIdeaForm.get('description')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
-      this.shareDescCount = res.count;
-    });
-}
+    this.shareIdeaForm.get('description')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+        this.shareDescCount = res.count;
+      });
+  }
 
   openEditModal(idea: any) {
     this.isEditMode = true;
@@ -253,19 +254,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
-updateShareIdeaCounts() {
-  this.shareTitleCount = this.modalEditData.title?.length || 0;
-  this.shareDescCount = this.modalEditData.description?.length || 0;
-}
+  updateShareIdeaCounts() {
+    this.shareTitleCount = this.modalEditData.title?.length || 0;
+    this.shareDescCount = this.modalEditData.description?.length || 0;
+  }
 
-autoGrow(event: any) {
-  const textarea = event.target;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-}
+  autoGrow(event: any) {
+    const textarea = event.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
 
   confirmLeaveGroup() {
-    if (this.isGroupCreator()){
+    if (this.isGroupCreator()) {
       this.showAdminLeaveModal = true;
     }
     else {
@@ -274,37 +275,37 @@ autoGrow(event: any) {
   }
 
   confirmMemberLeave() {
-  this.showMemberLeaveModal = false;
-  this.leaveGroup();
-}
+    this.showMemberLeaveModal = false;
+    this.leaveGroup();
+  }
 
-cancelMemberLeave() {
-  this.showMemberLeaveModal = false;
-}
+  cancelMemberLeave() {
+    this.showMemberLeaveModal = false;
+  }
 
-cancelDeleteIdea () {
-  this.ideaIdToDelete = null;
-  this.showDeleteIdeaModal = false;
-}
+  cancelDeleteIdea() {
+    this.ideaIdToDelete = null;
+    this.showDeleteIdeaModal = false;
+  }
 
-openDeleteIdeaModal (ideaId: string) {
-  this.ideaIdToDelete = ideaId;
-  this.showDeleteIdeaModal = true;
-}
+  openDeleteIdeaModal(ideaId: string) {
+    this.ideaIdToDelete = ideaId;
+    this.showDeleteIdeaModal = true;
+  }
 
-closeIdeaInfo () {
-  this.showIdeaInfoModal = false;
-}
+  closeIdeaInfo() {
+    this.showIdeaInfoModal = false;
+  }
 
-displayIdeaInfo () {
-  this.showIdeaInfoModal = true;
-}
+  displayIdeaInfo() {
+    this.showIdeaInfoModal = true;
+  }
 
-dontShowIdeaInfoAgain () {
-  localStorage.setItem('hideIdeaInfo', 'true');
-  console.log('hide idea information')
-  this.showIdeaInfoModal=false;
-}
+  dontShowIdeaInfoAgain() {
+    localStorage.setItem('hideIdeaInfo', 'true');
+    console.log('hide idea information')
+    this.showIdeaInfoModal = false;
+  }
 
   leaveGroup() {
     if (!this.groupId) return;
@@ -328,7 +329,7 @@ dontShowIdeaInfoAgain () {
       next: () => {
         console.log('Request accepted for user:', requestUserEmail);
         this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
-        
+
         if (this.pendingRequests.length === 0) {
           this.closeRequestsModal();
           this.toastService.show('Accepted User request', 'success');
@@ -688,30 +689,30 @@ dontShowIdeaInfoAgain () {
   }
 
   openShareModal(editMode = false, editData: any = null): void {
-  console.log('Opening share modal in edit mode:', editMode);
-  console.log('Edit data:', editData);
+    console.log('Opening share modal in edit mode:', editMode);
+    console.log('Edit data:', editData);
 
-  this.isEditMode = editMode;
+    this.isEditMode = editMode;
 
-  // Always reset modalEditData to a valid object
-  this.modalEditData = {
-    id: '',
-    title: '',
-    description: ''
-  };
-
-  // If in edit mode, populate with the idea data
-  if (editMode && editData) {
+    // Always reset modalEditData to a valid object
     this.modalEditData = {
-      id: editData.id || '',
-      title: editData.title || '',
-      description: editData.description || ''
+      id: '',
+      title: '',
+      description: ''
     };
-  }
 
-  this.showShareModal = true;
-  console.log('Modal edit data set to:', this.modalEditData);
-}
+    // If in edit mode, populate with the idea data
+    if (editMode && editData) {
+      this.modalEditData = {
+        id: editData.id || '',
+        title: editData.title || '',
+        description: editData.description || ''
+      };
+    }
+
+    this.showShareModal = true;
+    console.log('Modal edit data set to:', this.modalEditData);
+  }
   closeShareModal(): void {
     this.showShareModal = false;
     this.isEditMode = false;
@@ -860,67 +861,67 @@ dontShowIdeaInfoAgain () {
   }
 
   // Add property
-showVotersModalView = false; 
+  showVotersModalView = false;
 
-// Update onViewVoters method
-onViewVoters(idea: Idea, event?: Event): void {
-  if (event) event.stopPropagation();
+  // Update onViewVoters method
+  onViewVoters(idea: Idea, event?: Event): void {
+    if (event) event.stopPropagation();
 
-  this.isViewingVoters = true;
-  this.selectedIdeaForVoters = idea;
-  this.showVotersModalView = true;
+    this.isViewingVoters = true;
+    this.selectedIdeaForVoters = idea;
+    this.showVotersModalView = true;
 
-  this.ideasService.getVotesForIdea(idea.id).subscribe({
-    next: (response) => {
-      if (response.success && response.data) {
-        this.votersList = response.data;
-      } else {
-        this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
+    this.ideasService.getVotesForIdea(idea.id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.votersList = response.data;
+        } else {
+          this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
+          this.closeVotersModal();
+        }
+        this.isViewingVoters = false;
+      },
+      error: (error) => {
+        this.isViewingVoters = false;
+        console.error('Error fetching voters:', error);
+        this.toastService.show('Failed to load voters', 'error');
         this.closeVotersModal();
       }
-      this.isViewingVoters = false;
-    },
-    error: (error) => {
-      this.isViewingVoters = false;
-      console.error('Error fetching voters:', error);
-      this.toastService.show('Failed to load voters', 'error');
-      this.closeVotersModal();
-    }
-  });
-}
-// Close voters modal
-closeVotersModal(): void {
-  this.showVotersModalView = false;
-  this.selectedIdeaForVoters = null;
-  this.votersList = [];
-}
-
-// Helper method for voter initials
-getVoterInitials(name: string): string {
-  if (!name) return '?';
-  return name.split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-}
-
-// Format vote date
-formatVoteDate(date: any): string {
-  if (!date) return 'unknown date';
-  try {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
-  } catch {
-    return 'invalid date';
   }
-}
+  // Close voters modal
+  closeVotersModal(): void {
+    this.showVotersModalView = false;
+    this.selectedIdeaForVoters = null;
+    this.votersList = [];
+  }
+
+  // Helper method for voter initials
+  getVoterInitials(name: string): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+  // Format vote date
+  formatVoteDate(date: any): string {
+    if (!date) return 'unknown date';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'invalid date';
+    }
+  }
 
   /**
    * Check votes for all ideas in the list
@@ -1132,138 +1133,138 @@ formatVoteDate(date: any): string {
 
   //Promote Idea to project and create project
   onPromoteIdea(idea: Idea, event?: Event): void {
-  event?.stopPropagation();
-  
-  if (idea.isPromotedToProject) {
-    alert('Already promoted!');
-    return;
+    event?.stopPropagation();
+
+    if (idea.isPromotedToProject) {
+      alert('Already promoted!');
+      return;
+    }
+
+    this.currentIdeaToPromote = idea;
+    this.projectData = {
+      title: idea.title,
+      description: idea.description,
+      overseenByEmail: ''
+    };
+    this.showProjectModal = true;
   }
 
-  this.currentIdeaToPromote = idea;
-  this.projectData = {
-    title: idea.title,
-    description: idea.description,
-    overseenByEmail: ''
-  };
-  this.showProjectModal = true;
-}
+  createProjectFromIdea(): void {
+    if (!this.currentIdeaToPromote || !this.groupId) return;
+    if (!this.projectData.overseenByEmail) {
+      alert('Enter overseer email');
+      return;
+    }
 
-createProjectFromIdea(): void {
-  if (!this.currentIdeaToPromote || !this.groupId) return;
-  if (!this.projectData.overseenByEmail) {
-    alert('Enter overseer email');
-    return;
-  }
+    this.isPromoting = true;
+    const idea = this.currentIdeaToPromote;
 
-  this.isPromoting = true;
-  const idea = this.currentIdeaToPromote;
-
-  this.ideasService.promoteIdea({
-    ideaId: idea.id,
-    groupId: this.groupId
-  }).subscribe({
-    next: (promoteRes) => {
-      if (promoteRes.success) {
-        this.projectService.createProject(
-          this.groupId, 
-          idea.id, 
-          this.projectData
-        ).subscribe({
-          next: (projectRes) => this.handleSuccess(idea, projectRes),
-          error: (err) => this.handleProjectError(err)
-        });
-      } else {
+    this.ideasService.promoteIdea({
+      ideaId: idea.id,
+      groupId: this.groupId
+    }).subscribe({
+      next: (promoteRes) => {
+        if (promoteRes.success) {
+          this.projectService.createProject(
+            this.groupId,
+            idea.id,
+            this.projectData
+          ).subscribe({
+            next: (projectRes) => this.handleSuccess(idea, projectRes),
+            error: (err) => this.handleProjectError(err)
+          });
+        } else {
+          this.isPromoting = false;
+          alert('Promotion failed');
+        }
+      },
+      error: (err) => {
         this.isPromoting = false;
-        alert('Promotion failed');
+        alert('Error promoting');
       }
-    },
-    error: (err) => {
-      this.isPromoting = false;
-      alert('Error promoting');
-    }
-  });
-}
-
-private handleSuccess(idea: Idea, response: any): void {
-  this.isPromoting = false;
-  this.showProjectModal = false;
-
-  if (response.success) {
-    idea.isPromotedToProject = true;
-    idea.status = 'Promoted';
-    
-    if (this.selectedIdea?.id === idea.id) {
-      this.selectedIdea.isPromotedToProject = true;
-      this.selectedIdea.status = 'Promoted';
-    }
-    
-    this.ideas = [...this.ideas];
-    this.toastService.show('Project created', 'success');
-    
-    this.currentIdeaToPromote = null;
-    this.projectData = { title: '', description: '', overseenByEmail: '' };
-  } else {
-    alert('Project creation failed');
+    });
   }
-}
 
-private handleProjectError(error: any): void {
-  this.isPromoting = false;
-  
-  if (error.status === 404) {
-    alert(`User not found: ${this.projectData.overseenByEmail}`);
-  } else {
-    alert('Failed to create project');
-  }
-}
-
-closeProjectModal(): void {
-  if (!this.isPromoting) {
+  private handleSuccess(idea: Idea, response: any): void {
+    this.isPromoting = false;
     this.showProjectModal = false;
-    this.currentIdeaToPromote = null;
+
+    if (response.success) {
+      idea.isPromotedToProject = true;
+      idea.status = 'Promoted';
+
+      if (this.selectedIdea?.id === idea.id) {
+        this.selectedIdea.isPromotedToProject = true;
+        this.selectedIdea.status = 'Promoted';
+      }
+
+      this.ideas = [...this.ideas];
+      this.toastService.show('Project created', 'success');
+
+      this.currentIdeaToPromote = null;
+      this.projectData = { title: '', description: '', overseenByEmail: '' };
+    } else {
+      alert('Project creation failed');
+    }
   }
-}
+
+  private handleProjectError(error: any): void {
+    this.isPromoting = false;
+
+    if (error.status === 404) {
+      alert(`User not found: ${this.projectData.overseenByEmail}`);
+    } else {
+      alert('Failed to create project');
+    }
+  }
+
+  closeProjectModal(): void {
+    if (!this.isPromoting) {
+      this.showProjectModal = false;
+      this.currentIdeaToPromote = null;
+    }
+  }
 
 
   // DELETE IDEA METHOD
   onDeleteIdea() {
     if (!this.ideaIdToDelete) return;
 
-      this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
-        next: (response) => {
-          console.log('Delete response:', response);
+    this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
+      next: (response) => {
+        console.log('Delete response:', response);
 
-          if (response.success) {
-            console.log('Delete successful');
+        if (response.success) {
+          console.log('Delete successful');
 
-            // 1. Remove from local ideas array (immediate UI update)
-            const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
-            if (index !== -1) {
-              this.ideas.splice(index, 1);
-              this.ideas = [...this.ideas]; // Create new reference for change detection
-            }
-
-            // 2. If we're viewing this idea in details panel, close it
-            if (this.selectedIdea?.id === this.ideaIdToDelete) {
-              this.selectedIdea = null;
-              this.isEditMode = false; // Exit edit mode if open
-              console.log('Closed details panel for deleted idea');
-            }
-            
-            this.toastService.show('Idea deleted successfully!', 'success');
-          } else {
-            this.toastService.show('Failed to delete idea: ${response.message}', 'error');
+          // 1. Remove from local ideas array (immediate UI update)
+          const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
+          if (index !== -1) {
+            this.ideas.splice(index, 1);
+            this.ideas = [...this.ideas]; // Create new reference for change detection
           }
-          this.cancelDeleteIdea();
-        },
 
-        error: (error) => {
-          this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
-          this.cancelDeleteIdea();
+          // 2. If we're viewing this idea in details panel, close it
+          if (this.selectedIdea?.id === this.ideaIdToDelete) {
+            this.selectedIdea = null;
+            this.isEditMode = false; // Exit edit mode if open
+            console.log('Closed details panel for deleted idea');
+          }
+
+          this.toastService.show('Idea deleted successfully!', 'success');
+        } else {
+          this.toastService.show('Failed to delete idea: ${response.message}', 'error');
         }
-      });
-    }
-  
+        this.cancelDeleteIdea();
+      },
+
+      error: (error) => {
+        this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
+        this.cancelDeleteIdea();
+      }
+    });
+  }
+
   deleteGroup() {
     this.groupsService.deleteGroup(this.groupId).subscribe({
       next: () => {
@@ -1278,20 +1279,20 @@ closeProjectModal(): void {
     this.showAdminLeaveModal = false;
     this.showTransferOwnershipModal = true;
   }
-  transferOwnership(){
-    if(!this.newOwnerEmail){
+  transferOwnership() {
+    if (!this.newOwnerEmail) {
       alert('Please select a member');
       return;
     }
 
     this.groupsService.transferOwnership(this.groupId, this.newOwnerEmail)
       .subscribe({
-        next:()=>{
+        next: () => {
           this.showTransferOwnershipModal = false;
           this.router.navigate(['/groups']);
           this.toastService.show(`Transfer of ownership successfully transferred to ${this.newOwnerEmail}`, 'success')
         },
-        error:()=>{
+        error: () => {
           this.toastService.show('Failed to transfer ownership', 'error');
         }
       });

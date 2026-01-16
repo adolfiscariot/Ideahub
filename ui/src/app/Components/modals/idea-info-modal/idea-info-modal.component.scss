@@ -1,0 +1,238 @@
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    /* Higher than other modals if needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+
+    .modal-content {
+        background: white;
+        width: 90%;
+        max-width: 650px;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+
+    .header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #fdf4ff;
+        /* Light purplebg */
+        color: #d946ef;
+        /* Fuchsia/Purple text */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .close-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+    }
+}
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+
+    .main-desc {
+        font-size: 1.1rem;
+        color: #374151;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .section {
+        margin-bottom: 2rem;
+
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+
+            .icon-valid {
+                color: #10b981;
+            }
+
+            .icon-avoid {
+                color: #f59e0b;
+            }
+        }
+    }
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.info-card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    &.valid {
+        border-left: 4px solid #10b981;
+    }
+
+    &.avoid {
+        border-left: 4px solid #f59e0b;
+    }
+
+    h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+}
+
+.tip-box {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #1d4ed8;
+
+    ng-icon {
+        flex-shrink: 0;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    background: #f9fafb;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Custom button styles overrides if needed via ::ng-deep or better app-buttons classes */
+::ng-deep .btn-primary button {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.75rem 2rem !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.3) !important;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(124, 58, 237, 0.4) !important;
+    }
+}
+
+::ng-deep .btn-ghost button {
+    background: transparent !important;
+    color: #6b7280 !important;
+    border: none !important;
+    font-weight: 500 !important;
+
+    &:hover {
+        background: #f3f4f6 !important;
+        color: #111827 !important;
+    }
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
