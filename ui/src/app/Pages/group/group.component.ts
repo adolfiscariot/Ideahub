@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
@@ -10,11 +10,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { CreateGroupModalComponent } from '../../Components/modals/create-group-modal/create-group-modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
-import { updateCharCount } from '../../Components/utils/char-count-util';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-groups',
@@ -26,13 +26,10 @@ import { Subject, takeUntil } from 'rxjs';
     ReactiveFormsModule,
     ButtonsComponent,
     ModalComponent,
-    FormsModule,
-    //GroupMembersModalComponent
+    CreateGroupModalComponent
   ]
 })
-export class GroupsComponent implements OnInit {
-  // viewMode: 'list' | 'grid' = 'list';
-
+export class GroupsComponent implements OnInit, OnDestroy {
   // Group data
   groups: any[] = [];
 
@@ -42,7 +39,6 @@ export class GroupsComponent implements OnInit {
 
   // Form state
   showCreateModal = false;
-  createGroupForm: FormGroup;
   isSubmitting = false;
   isLoading: boolean = true;
   showDetailsModal = false;
@@ -54,10 +50,6 @@ export class GroupsComponent implements OnInit {
   isDeleting: boolean = false;
   confirmationInput: string = '';
   isDeletedDisabled: boolean = true;
-  nameCount = 0;
-  descCount = 0;
-  nameLimitReached = false;
-  descLimitReached = false;
   deleteConfirmControl: any;
 
   // Current user ID
@@ -65,6 +57,8 @@ export class GroupsComponent implements OnInit {
 
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private groupsService: GroupsService,
@@ -75,59 +69,46 @@ export class GroupsComponent implements OnInit {
     private notificationsService: NotificationsService,
     private fb: FormBuilder
   ) {
-    this.createGroupForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-      isPublic: [true, Validators.required]
-    });
     this.deleteConfirmControl = this.fb.control('');
   }
 
-  ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
+  ngOnInit(): void {
     // Get current user ID first
     this.currentUserId = this.authService.getCurrentUserId();
-    console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
-    this.createGroupForm = this.fb.group({
-      name:[''],
-      description: [''],
-      isPublic: [true]
-    });
-    this.setupCharCounters();
   }
 
-  ngOnDestroy (): void {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  private destroy$ = new Subject<void>();
 
   private setupCharCounters(): void {
 
-  this.createGroupForm.get('name')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const result = updateCharCount(this.createGroupForm, 'name', 100);
-      this.nameCount = result.count;
-      this.nameLimitReached = result.limitReached;
-    });
+    this.createGroupForm.get('name')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const result = updateCharCount(this.createGroupForm, 'name', 100);
+        this.nameCount = result.count;
+        this.nameLimitReached = result.limitReached;
+      });
 
-  this.createGroupForm.get('description')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const result = updateCharCount(this.createGroupForm, 'description', 500);
-      this.descCount = result.count;
-      this.descLimitReached = result.limitReached;
-    });
-}
+    this.createGroupForm.get('description')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const result = updateCharCount(this.createGroupForm, 'description', 500);
+        this.descCount = result.count;
+        this.descLimitReached = result.limitReached;
+      });
+  }
 
 
 
   autoGrow(event: any) {
-  const textarea = event.target;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-}
+    const textarea = event.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
@@ -169,9 +150,9 @@ export class GroupsComponent implements OnInit {
               },
               isPublic:
                 group.isPublic === true ||
-                group.isPublic === 'true' ||
-                group.IsPublic === true ||
-                group.IsPublic === 'true'
+                  group.isPublic === 'true' ||
+                  group.IsPublic === true ||
+                  group.IsPublic === 'true'
                   ? 'Public'
                   : 'Private',
             };
@@ -197,17 +178,17 @@ export class GroupsComponent implements OnInit {
 
   // ===== MODAL METHODS =====
 
- openDetailsModal(group: any): void {
-  this.selectedGroup = group;
-  this.showDetailsModal = true;
-}
+  openDetailsModal(group: any): void {
+    this.selectedGroup = group;
+    this.showDetailsModal = true;
+  }
 
-closeDetailsModal(): void {    
-  this.showDetailsModal = false;
-  this.selectedGroup = null;
-}
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedGroup = null;
+  }
 
-openMembersModal(group: any): void {
+  openMembersModal(group: any): void {
     this.dialog.open(GroupMembersModalComponent, {
       width: '600px',
       maxHeight: '90vh',
@@ -216,45 +197,44 @@ openMembersModal(group: any): void {
     });
   }
 
-closeMembersModal(): void {
-  this.showMembersModal = false;
-  this.selectedGroup = null;
-  this.groupMembers = [];
-}
+  closeMembersModal(): void {
+    this.showMembersModal = false;
+    this.selectedGroup = null;
+    this.groupMembers = [];
+  }
 
-openCreateModal(): void {
-  this.showCreateModal = true;
-}
+  openCreateModal(): void {
+    this.showCreateModal = true;
+  }
 
-closeCreateModal(): void {
-  this.showCreateModal = false;
-  this.createGroupForm.reset();
-}
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+  }
 
-openDeleteModal(group: any) {
-  this.selectedGroup = group;
-  this.showDeleteModal = true;
+  openDeleteModal(group: any) {
+    this.selectedGroup = group;
+    this.showDeleteModal = true;
 
-  this.deleteConfirmControl.setValue('');
-  this.deleteConfirmControl.setValidators([
-    Validators.required,
-    (control: AbstractControl) =>
-      control.value === group.name ? null : { mismatch: true }
-  ]);
-  this.deleteConfirmControl.updateValueAndValidity();
-}
-
+    this.deleteConfirmControl.setValue('');
+    this.deleteConfirmControl.setValidators([
+      Validators.required,
+      (control: AbstractControl) =>
+        control.value === group.name ? null : { mismatch: true }
+    ]);
+    this.deleteConfirmControl.updateValueAndValidity();
+  }
 
 
-closeDeleteModal(): void {
-  this.showDeleteModal = false;
-  this.selectedGroup = null;
-}
 
-onConfirmationInput(value: string): void {
-  this.confirmationInput = value;
-  this.isDeletedDisabled = value !== this.selectedGroup?.name;
-}
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.selectedGroup = null;
+  }
+
+  onConfirmationInput(value: string): void {
+    this.confirmationInput = value;
+    this.isDeletedDisabled = value !== this.selectedGroup?.name;
+  }
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
@@ -297,12 +277,12 @@ onConfirmationInput(value: string): void {
         const { isPublic } = response.data;
         if (isSuccess && isPublic === false) {
           this.toastService.show('Request sent! Waiting for admin approval.', 'success');
-          group.isMember=false;
+          group.isMember = false;
           this.loadGroups();
-        } 
-        else if (isSuccess && isPublic === true){
-          this.toastService.show('Joined successfully', 'success'); 
-          group.isMember=true;
+        }
+        else if (isSuccess && isPublic === true) {
+          this.toastService.show('Joined successfully', 'success');
+          group.isMember = true;
           this.onViewIdeas(groupId);
         }
         else {
@@ -326,31 +306,24 @@ onConfirmationInput(value: string): void {
 
   // ===== GROUP CREATION METHODS =====
 
- toggleCreateForm(): void {
-  if (this.showCreateModal) {
-    this.closeCreateModal();
-  } else {
-    this.openCreateModal();
-  }
-}
-
-  onCreateGroup(): void {
-    if (this.createGroupForm.invalid) {
-      this.createGroupForm.markAllAsTouched();
-      return;
+  toggleCreateForm(): void {
+    if (this.showCreateModal) {
+      this.closeCreateModal();
+    } else {
+      this.openCreateModal();
     }
+  }
 
+  onCreateGroup(groupData: any): void {
     this.isSubmitting = true;
-    const newGroup: AddGroup = this.createGroupForm.value;
 
-    this.groupsService.createGroup(newGroup).subscribe({
+    this.groupsService.createGroup(groupData).subscribe({
       next: (response: any) => {
         this.isSubmitting = false;
         const isSuccess = response.success || response.status;
         if (isSuccess) {
           this.toastService.show('Group created successfully!', 'success');
           this.loadGroups();
-          this.createGroupForm.reset();
           this.closeCreateModal();
         } else {
           if (response.message?.includes('authenticated') ||
@@ -378,34 +351,34 @@ onConfirmationInput(value: string): void {
   }
 
   loadGroupMembers(groupId: string): void {
-  this.isLoadingMembers = true;
-  this.groupMembers = [];
-  
-  this.groupsService.getGroupMembers(groupId).subscribe({
-    next: (response: any) => {
-      this.isLoadingMembers = false;
-      if (response.success && response.data) {
-        this.groupMembers = response.data.map((member: any) => ({
-          id: member.userId ?? member.id,
-          userId: member.userId || member.id,
-          name: member.name,
-          displayName: member.displayName || member.name,
-          userName: member.userName,
-          email: member.email,
-          createdByUserId: member.createdByUserId
-        }));
-      } else {
-        console.error('Failed to load group members:', response.message);
+    this.isLoadingMembers = true;
+    this.groupMembers = [];
+
+    this.groupsService.getGroupMembers(groupId).subscribe({
+      next: (response: any) => {
+        this.isLoadingMembers = false;
+        if (response.success && response.data) {
+          this.groupMembers = response.data.map((member: any) => ({
+            id: member.userId ?? member.id,
+            userId: member.userId || member.id,
+            name: member.name,
+            displayName: member.displayName || member.name,
+            userName: member.userName,
+            email: member.email,
+            createdByUserId: member.createdByUserId
+          }));
+        } else {
+          console.error('Failed to load group members:', response.message);
+          this.groupMembers = [];
+        }
+      },
+      error: (error: any) => {
+        this.isLoadingMembers = false;
+        console.error('Error loading group members:', error);
         this.groupMembers = [];
       }
-    },
-    error: (error: any) => {
-      this.isLoadingMembers = false;
-      console.error('Error loading group members:', error);
-      this.groupMembers = [];
-    }
-  });
-}
+    });
+  }
 
   onCancelCreate(): void {
     this.closeCreateModal();
@@ -436,7 +409,7 @@ onConfirmationInput(value: string): void {
           if (response.message?.includes('permission') ||
             response.message?.includes('admin') ||
             response.message?.includes('not allowed')) {
-            this.toastService.show('Only group admin can delete groups.', 'warning'); 
+            this.toastService.show('Only group admin can delete groups.', 'warning');
           }
         }
       },
@@ -483,13 +456,13 @@ onConfirmationInput(value: string): void {
   }
 
   getInitials(name: string): string {
-  if (!name) return '?';
-  return name.split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-}
+    if (!name) return '?';
+    return name.split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
 
   // ===== PERMISSION METHODS =====
 
@@ -505,28 +478,5 @@ onConfirmationInput(value: string): void {
     return groupCreatorId === currentId;
   }
 
-  canConfigureGroup(group: any): boolean {
-    return this.isGroupCreator(group);
-  }
-
-  // ===== PENDING REQUEST METHODS =====
-
-  hasPendingRequest(groupId: string): boolean {
-    return this.pendingRequests.get(groupId) || false;
-  }
-
-  // ===== FORM GETTER METHODS ===== // SHOULD BE REMOVED AND MOVED TO 
-
-  get name() {
-    return this.createGroupForm.get('name');
-  }
-
-  get description() {
-    return this.createGroupForm.get('description');
-  }
-
-  get privacy() {
-    return this.createGroupForm.get('isPublic');
-  }
+  // ===== FORM GETTER METHODS =====
 }
-  

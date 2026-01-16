@@ -1,0 +1,89 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-content" (click)="onContentClick($event)">
+        <div class="modal-header">
+            <h2>Create New Group</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form [formGroup]="createGroupForm" (ngSubmit)="onSubmit()">
+                <!-- Group Name -->
+                <div class="form-group">
+                    <label for="groupName">Group Name</label>
+                    <div class="input-wrapper">
+                        <ng-icon name="heroUserGroup" class="input-icon" size="1.2rem"></ng-icon>
+                        <input id="groupName" type="text" formControlName="name" placeholder="Enter group name"
+                            [class.error]="name?.invalid && name?.touched">
+                    </div>
+                    <div class="char-count" [class.limit-reached]="nameLimitReached">
+                        {{ nameCount }}/100
+                    </div>
+
+                    <div *ngIf="name?.invalid && name?.touched" class="error-message">
+                        <span *ngIf="name?.errors?.['required']">Group name is required</span>
+                        <span *ngIf="name?.errors?.['minlength']">Must be at least 3 characters</span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="groupDescription">Description</label>
+                    <textarea id="groupDescription" formControlName="description"
+                        placeholder="Describe what your group is about" rows="4"
+                        [class.error]="description?.invalid && description?.touched"></textarea>
+
+                    <div class="char-count" [class.limit-reached]="descLimitReached">
+                        {{ descCount }}/500
+                    </div>
+
+                    <div *ngIf="description?.invalid && description?.touched" class="error-message">
+                        <span *ngIf="description?.errors?.['required']">Description is required</span>
+                        <span *ngIf="description?.errors?.['minlength']">Must be at least 10 characters</span>
+                    </div>
+                </div>
+
+                <!-- Privacy Status -->
+                <div class="form-group">
+                    <label>Privacy Status</label>
+                    <div class="radio-group">
+                        <label class="radio-card" [class.selected]="privacy?.value === true">
+                            <input type="radio" formControlName="isPublic" [value]="true">
+                            <div class="radio-content">
+                                <ng-icon name="heroLockOpen" size="1.5rem" class="radio-icon"></ng-icon>
+                                <div class="text">
+                                    <span class="title">Public</span>
+                                    <span class="subtitle">Anyone can see and join this group</span>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="radio-card" [class.selected]="privacy?.value === false">
+                            <input type="radio" formControlName="isPublic" [value]="false">
+                            <div class="radio-content">
+                                <ng-icon name="heroLockClosed" size="1.5rem" class="radio-icon"></ng-icon>
+                                <div class="text">
+                                    <span class="title">Private</span>
+                                    <span class="subtitle">Only approved members can join</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-secondary'" (click)="closeModal()"
+                        [disabled]="isSubmitting">
+                    </app-buttons>
+
+                    <app-buttons [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
+                        [buttonStyleClass]="'btn-primary'" [buttonType]="'submit'"
+                        [disabled]="createGroupForm.invalid || isSubmitting">
+                    </app-buttons>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,199 +1,168 @@
+<div class="groups-container">
 
-  <div class="groups-container">
+  <!-- Header Section with Create Button -->
+  <header class="groups-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">{{ subtitle }}</p>
+      </div>
 
-    <!-- Header Section with Create Button -->
-    <header class="groups-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h1 class="page-title">{{ title }}</h1>
-          <p class="page-subtitle">{{ subtitle }}</p>
-        </div>
+      <app-buttons *ngIf="!showCreateModal && !isLoading && groups.length > 0" [buttonText]="'Create Group'"
+        [buttonStyleClass]="'btn-create-group'" [buttonType]="'button'" (click)="openCreateModal()">
+      </app-buttons>
+    </div>
+  </header>
 
-        <app-buttons
-          *ngIf="!showCreateModal && !isLoading && groups.length > 0"
-          [buttonText]="'Create Group'"
-          [buttonStyleClass]="'btn-create-group'"
-          [buttonType]="'button'"
-          (click)="openCreateModal()">
+  <hr class="divider">
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading groups...</p>
+  </div>
+
+  <!-- Groups List -->
+  <div *ngIf="!isLoading" class="groups-list">
+
+    <!-- No Groups State -->
+    <ng-container *ngIf="groups.length === 0; else gridView">
+      <div class="no-groups">
+        <div class="no-groups-icon">+</div>
+        <h3>No groups yet</h3>
+        <p>Be the first to create a group and start collaborating!</p>
+
+        <app-buttons [buttonText]="' + Create First Group'" [buttonStyleClass]="'btn-create-first-group'"
+          [buttonType]="'button'" (click)="openCreateModal()">
         </app-buttons>
       </div>
-    </header>
+    </ng-container>
 
-    <hr class="divider">
+    <!-- Grid View -->
+    <ng-template #gridView>
+      <div class="groups-grid">
+        <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading groups...</p>
-    </div>
-
-    <!-- Groups List -->
-    <div *ngIf="!isLoading" class="groups-list">
-
-      <!-- No Groups State -->
-      <ng-container *ngIf="groups.length === 0; else gridView">
-        <div class="no-groups">
-          <div class="no-groups-icon">+</div>
-          <h3>No groups yet</h3>
-          <p>Be the first to create a group and start collaborating!</p>
-
-          <app-buttons
-            [buttonText]="' + Create First Group'"
-            [buttonStyleClass]="'btn-create-first-group'"
-            [buttonType]="'button'"
-            (click)="openCreateModal()">
-          </app-buttons>
-        </div>
-      </ng-container>
-
-      <!-- Grid View -->
-      <ng-template #gridView>
-        <div class="groups-grid">
-          <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
-
-            <div class="group-top">
-              <!-- Group Header -->
-              <div class="group-header">
-                <div class="group-title-section">
-                  <h2 class="group-name">{{ group.name }}</h2>
-                </div>
-
-                <!-- Admin Badge -->
-                <div *ngIf="canConfigureGroup(group)" class="admin-info">
-                  <span class="admin-badge">admin</span>
-                </div>
+          <div class="group-top">
+            <!-- Group Header -->
+            <div class="group-header">
+              <div class="group-title-section">
+                <h2 class="group-name">{{ group.name }}</h2>
               </div>
 
-              <!-- Description -->
-              <p class="group-description">{{ group.description }}</p>
-            </div> 
-
-            <!-- Stats -->
-            <div class="group-stats">
-              <div class="stat">
-                <span class="stat-icon">👥</span>
-                <span class="stat-count">{{ group.memberCount || 0 }}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-icon">💡</span>
-                <span class="stat-count">{{ group.ideaCount || 0 }}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-icon">📅</span>
-                <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-icon">🔐</span>
-                <span class="stat-privacy">{{ group.isPublic }}</span>
+              <!-- Admin Badge -->
+              <div *ngIf="canConfigureGroup(group)" class="admin-info">
+                <span class="admin-badge">admin</span>
               </div>
             </div>
 
-            <hr class="group-divider">
+            <!-- Description -->
+            <p class="group-description">{{ group.description }}</p>
+          </div>
 
-            <!-- Bottom Section -->
-            <div class="group-bottom">
-              <!-- Member Buttons -->
-              <app-buttons
-                *ngIf="group.isMember"
-                [buttonText]="'💡 View Ideas'"
-                [buttonStyleClass]="'btn-view-ideas'"
-                [buttonType]="'button'"
-                (click)="onViewIdeas(group.id)">
+          <!-- Stats -->
+          <div class="group-stats">
+            <div class="stat">
+              <span class="stat-icon">👥</span>
+              <span class="stat-count">{{ group.memberCount || 0 }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">💡</span>
+              <span class="stat-count">{{ group.ideaCount || 0 }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">📅</span>
+              <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">🔐</span>
+              <span class="stat-privacy">{{ group.isPublic }}</span>
+            </div>
+          </div>
+
+          <hr class="group-divider">
+
+          <!-- Bottom Section -->
+          <div class="group-bottom">
+            <!-- Member Buttons -->
+            <app-buttons *ngIf="group.isMember" [buttonText]="'💡 View Ideas'" [buttonStyleClass]="'btn-view-ideas'"
+              [buttonType]="'button'" (click)="onViewIdeas(group.id)">
+            </app-buttons>
+
+            <!-- Pending Approval -->
+            <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
+              ⏳ Pending Approval
+            </div>
+
+            <!-- Join Button -->
+            <app-buttons *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+              [buttonText]="'Join Group'" [buttonStyleClass]="'btn-join-group'" [buttonType]="'button'"
+              (click)="onJoinGroup(group.id)">
+            </app-buttons>
+
+            <!-- Actions -->
+            <div class="group-actions">
+              <app-buttons [buttonText]="'📋 Details'" [buttonStyleClass]="'btn-group-details'" [buttonType]="'button'"
+                (click)="openDetailsModal(group)">
               </app-buttons>
 
-              <!-- Pending Approval -->
-              <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
-                ⏳ Pending Approval
-              </div>
-
-              <!-- Join Button -->
-              <app-buttons
-                *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
-                [buttonText]="'Join Group'"
-                [buttonStyleClass]="'btn-join-group'"
-                [buttonType]="'button'"
-                (click)="onJoinGroup(group.id)">
+              <app-buttons [buttonText]="'👥 Members'" [buttonStyleClass]="'btn-group-members'" [buttonType]="'button'"
+                (click)="openMembersModal(group)">
               </app-buttons>
 
-              <!-- Actions -->
-              <div class="group-actions">
-                <app-buttons
-                  [buttonText]="'📋 Details'"
-                  [buttonStyleClass]="'btn-group-details'"
-                  [buttonType]="'button'"
-                  (click)="openDetailsModal(group)">
-                </app-buttons>
-
-                <app-buttons
-                  [buttonText]="'👥 Members'"
-                  [buttonStyleClass]="'btn-group-members'"
-                  [buttonType]="'button'"
-                  (click)="openMembersModal(group)">
-                </app-buttons>
-
-                <app-buttons
-                  *ngIf="canConfigureGroup(group)"
-                  [buttonText]="'🗑️ Delete'"
-                  [buttonStyleClass]="'btn-reject'"
-                  [buttonType]="'button'"
-                  [title]="'Delete Group'"
-                  (click)="openDeleteModal(group)">
-                </app-buttons>
-              </div>
-            </div> 
+              <app-buttons *ngIf="canConfigureGroup(group)" [buttonText]="'🗑️ Delete'"
+                [buttonStyleClass]="'btn-reject'" [buttonType]="'button'" [title]="'Delete Group'"
+                (click)="openDeleteModal(group)">
+              </app-buttons>
+            </div>
           </div>
         </div>
-      </ng-template>
-    </div>
+      </div>
+    </ng-template>
   </div>
+</div>
 
 <!-- Group Details Modal -->
-<app-modal 
-  [isOpen]="showDetailsModal"
-  [title]="selectedGroup?.name + ' Details'"
-  size="md"
+<app-modal [isOpen]="showDetailsModal" [title]="selectedGroup?.name + ' Details'" size="md"
   (closeModal)="closeDetailsModal()">
-  
+
   <div modal-body *ngIf="selectedGroup">
     <div class="group-details-content">
       <div class="detail-row">
         <strong>Description:</strong>
         <p>{{ selectedGroup.description }}</p>
       </div>
-      
+
       <div class="detail-row">
         <strong>Created By</strong>
         <p>{{ selectedGroup.createdByUser?.displayName || 'Unknown' }}</p>
       </div>
-      
+
       <div class="detail-row">
         <strong>Created On</strong>
         <p>{{ formatDate(selectedGroup.createdAt) }}</p>
       </div>
-      
+
       <div class="detail-row">
         <strong>Privacy</strong>
         <p>{{ selectedGroup.isPublic }}</p>
       </div>
-      
+
       <div class="detail-row">
         <strong>Members</strong>
         <p>{{ formatMemberCount(selectedGroup.memberCount)}}</p>
       </div>
-      
+
       <div class="detail-row">
         <strong>Ideas</strong>
         <p>{{ selectedGroup.ideaCount || 0 }}</p>
       </div>
     </div>
   </div>
-  
+
   <div modal-footer>
     <div class="modal-actions">
-      <app-buttons
-        [buttonText]="'Close'"
-        [buttonStyleClass]="'btn-promote'"
-        [buttonType]="'button'"
+      <app-buttons [buttonText]="'Close'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
         (click)="closeDetailsModal()">
       </app-buttons>
     </div>
@@ -201,139 +170,42 @@
 </app-modal>
 
 <!-- Create Group Modal -->
-<app-modal 
-  [isOpen]="showCreateModal"
-  title="Create New Group"
-  size="md"
-  (closeModal)="closeCreateModal()">
-  
-  <div modal-body>
-    <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
-      <div class="form-group">
-        <label for="groupName">Group Name</label>
-
-        <input id="groupName" type="text" formControlName="name"
-          placeholder="Enter group name"
-          class="form-control"
-          [class.error]="name?.invalid && name?.touched">
-        <div class="char-count">
-          {{ nameCount }}/100
-        </div>
-               <div *ngIf="nameLimitReached" class="limit-message">
-  You have reached the maximum allowed characters.
-</div>
-
-        <div *ngIf="name?.invalid && name?.touched" class="error-message">
-          <div *ngIf="name?.errors?.['required']">Group name is required</div>
-          <div *ngIf="name?.errors?.['minlength']">Group name must be at least 3 characters</div>
-          <div *ngIf=" name?.errors?.['maxlength']">Group name cannot exceed 100 characters</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="groupDescription">Description</label>
-        <textarea id="groupDescription" formControlName="description"
-          placeholder="Describe what your group is about"
-          rows="3"
-          class="form-control auto-expand"
-          [class.error]="description?.invalid && description?.touched"></textarea>
-
-        <div class="char-count">
-          {{ descCount }}/500
-        </div>
-        <div *ngIf="descLimitReached" class="limit-message">
-  You have reached the maximum allowed characters.
-</div>
-
-        <div *ngIf="description?.invalid && description?.touched" class="error-message">
-          <div *ngIf="description?.errors?.['required']">Description is required</div>
-          <div *ngIf="description?.errors?.['minlength']">Description must be at least 10 characters</div>
-          <div *ngIf="description?.errors?.['maxlength']">Description cannot exceed 500 characters</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="groupPrivacy">Privacy Status</label>
-        <select id="groupPrivacy" formControlName="isPublic"
-          class="form-control"
-          [class.error]="privacy?.invalid && privacy?.touched">
-          <option [ngValue]="true">Public</option>
-          <option [ngValue]="false">Private</option>
-        </select>
-        <div *ngIf="privacy?.invalid && privacy?.touched" class="error-message">
-          Privacy status is required
-        </div>
-      </div>
-    </form>
-  </div>
-  
-  <div modal-footer>
-    <div class="modal-actions">
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
-        [buttonType]="'button'"
-        [disabled]="isSubmitting"
-        (click)="closeCreateModal()">
-      </app-buttons>
-
-      <app-buttons
-        [buttonText]="isSubmitting ? 'Creating...' : 'Create Group'"
-        [buttonStyleClass]="'btn-promote'"
-        [buttonType]="'submit'"
-        [disabled]="createGroupForm.invalid || isSubmitting"
-        (click)="onCreateGroup()">
-      </app-buttons>
-    </div>
-  </div>
-</app-modal>
+<app-create-group-modal [isVisible]="showCreateModal" [isSubmitting]="isSubmitting" (close)="closeCreateModal()"
+  (create)="onCreateGroup($event)">
+</app-create-group-modal>
 
 <!-- Delete Group Modal -->
-<app-modal 
-  [isOpen]="showDeleteModal"
-  title="Confirm Delete"
-  size="md"
-  (closeModal)="closeDeleteModal()">
-  
+<app-modal [isOpen]="showDeleteModal" title="Confirm Delete" size="md" (closeModal)="closeDeleteModal()">
+
   <div modal-body *ngIf="selectedGroup">
     <div class="delete-confirm-content">
       <p>Are you sure you want to delete the group <strong>"{{ selectedGroup.name }}"</strong>?</p>
-      <p class="warning-text">This action cannot be undone. All group data, ideas, and memberships will be permanently deleted.</p>
+      <p class="warning-text">This action cannot be undone. All group data, ideas, and memberships will be permanently
+        deleted.</p>
 
       <div class="type-confirm-section">
-         <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
-          <input
-            type="text"
-            [formControl]="deleteConfirmControl"
-            [placeholder]="'Enter group name here'"
-            [disabled]="isDeleting"
-            [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched"
-          />
+        <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
+        <input type="text" [formControl]="deleteConfirmControl" [placeholder]="'Enter group name here'"
+          [disabled]="isDeleting" [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched" />
 
-      <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched"
-          class="error-message">
-        Group name does not match.
-      </div>
+        <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched" class="error-message">
+          Group name does not match.
+        </div>
       </div>
     </div>
   </div>
-  
+
   <div modal-footer>
     <div class="modal-actions">
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
-        [buttonType]="'button'"
-        [disabled]="isDeleting"
-        (click)="closeDeleteModal()">
-        </app-buttons>
+      <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" [buttonType]="'button'"
+        [disabled]="isDeleting" (click)="closeDeleteModal()">
+      </app-buttons>
 
-      
-     <app-buttons
-      [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
-      [buttonStyleClass]="'btn-reject'"
-      [buttonType]="'button'"
-      [disabled]="deleteConfirmControl.invalid || isDeleting"
-      (click)="deleteGroup(selectedGroup.id)">
-    </app-buttons>
+
+      <app-buttons [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'" [buttonStyleClass]="'btn-reject'"
+        [buttonType]="'button'" [disabled]="deleteConfirmControl.invalid || isDeleting"
+        (click)="deleteGroup(selectedGroup.id)">
+      </app-buttons>
 
     </div>
   </div>
