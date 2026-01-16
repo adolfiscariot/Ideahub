@@ -9,8 +9,12 @@
   font-weight: bold;
   border-radius: 5px;
   border: 1px solid black;
-  height: 30px;
-  width: 100px;
+  height: auto;
+  width: auto;
+  min-width: 100px;
+  /* Optional: ensures buttons aren't too small */
+  padding: 8px 16px;
+  /* Add padding for breathing room */
   box-shadow: 1px 2px 2px;
   cursor: pointer;
 }
@@ -157,14 +161,15 @@
 
 .btn-promote,
 .btn-create-first-group,
-.btn-create-group
-{
+.btn-create-group {
   background: #ffffff;
   color: purple;
   border: 1px solid purple;
   padding: 6px 10px;
   border-radius: 6px;
   width: auto;
+  min-width: auto;
+  /* Allow flexible width */
   height: auto;
   box-shadow: none;
 
@@ -359,7 +364,7 @@
 }
 
 .btn-group-members {
-  
+
   color: #000;
   padding: 8px 12px;
   border-radius: 4px;
@@ -415,8 +420,77 @@
     opacity: 0;
     transform: scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+.btn-promote-sm {
+  background: #ffffff;
+  color: purple;
+  border: 1px solid purple;
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: auto;
+  min-width: auto;
+  height: auto;
+  box-shadow: none;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    background: rgba(128, 0, 128, 0.1);
+  }
+}
+
+/* New Standard Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.3);
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(124, 58, 237, 0.4);
+  }
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: none;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #111827;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #6b7280;
+  border: none;
+  box-shadow: none;
+  padding: 8px 16px;
+
+  &:hover {
+    background: #f9fafb;
+    color: #111827;
   }
 }
