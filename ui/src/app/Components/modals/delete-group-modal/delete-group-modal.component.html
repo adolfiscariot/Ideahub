@@ -1,0 +1,43 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-content" (click)="onContentClick($event)">
+
+        <!-- Header -->
+        <div class="modal-header">
+            <div class="header-icon-wrapper">
+                <ng-icon name="heroExclamationTriangle" size="1.5rem" class="warning-icon"></ng-icon>
+            </div>
+            <h2>Delete Group</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body" *ngIf="group">
+            <p class="confirm-text">
+                Are you sure you want to delete <strong>"{{ group.name }}"</strong>?
+            </p>
+            <p class="warning-text">
+                This action cannot be undone. All group data, ideas, and memberships will be permanently removed.
+            </p>
+
+            <div class="input-section">
+                <label>To confirm, type <strong>{{ group.name }}</strong> below:</label>
+                <input type="text" [formControl]="deleteConfirmControl" placeholder="Type group name to confirm"
+                    [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched && deleteConfirmControl.dirty" />
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-secondary'" [disabled]="isDeleting"
+                (click)="closeModal()">
+            </app-buttons>
+
+            <app-buttons [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'" [buttonStyleClass]="'btn-delete'"
+                [disabled]="!canDelete || isDeleting" (click)="onConfirm()">
+                <ng-icon name="heroTrash" size="1.2rem"></ng-icon> Delete Group
+            </app-buttons>
+        </div>
+    </div>
+</div>

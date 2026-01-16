@@ -140,38 +140,6 @@
 </app-create-group-modal>
 
 <!-- Delete Group Modal -->
-<app-modal [isOpen]="showDeleteModal" title="Confirm Delete" size="md" (closeModal)="closeDeleteModal()">
-
-  <div modal-body *ngIf="selectedGroup">
-    <div class="delete-confirm-content">
-      <p>Are you sure you want to delete the group <strong>"{{ selectedGroup.name }}"</strong>?</p>
-      <p class="warning-text">This action cannot be undone. All group data, ideas, and memberships will be permanently
-        deleted.</p>
-
-      <div class="type-confirm-section">
-        <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
-        <input type="text" [formControl]="deleteConfirmControl" [placeholder]="'Enter group name here'"
-          [disabled]="isDeleting" [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched" />
-
-        <div *ngIf="deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched" class="error-message">
-          Group name does not match.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div modal-footer>
-    <div class="modal-actions">
-      <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" [buttonType]="'button'"
-        [disabled]="isDeleting" (click)="closeDeleteModal()">
-      </app-buttons>
-
-
-      <app-buttons [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'" [buttonStyleClass]="'btn-reject'"
-        [buttonType]="'button'" [disabled]="deleteConfirmControl.invalid || isDeleting"
-        (click)="deleteGroup(selectedGroup.id)">
-      </app-buttons>
-
-    </div>
-  </div>
-</app-modal>
+<app-delete-group-modal [isVisible]="showDeleteModal" [group]="selectedGroup" [isDeleting]="isDeleting"
+  (close)="closeDeleteModal()" (confirm)="deleteGroup($event)">
+</app-delete-group-modal>

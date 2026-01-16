@@ -12,6 +12,7 @@ import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { CreateGroupModalComponent } from '../../Components/modals/create-group-modal/create-group-modal.component';
 import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
+import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
@@ -25,15 +26,7 @@ import { heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInforma
   templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    ButtonsComponent,
-    ModalComponent,
-    CreateGroupModalComponent,
-    GroupDetailsModalComponent,
-    NgIconComponent
-  ],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, CreateGroupModalComponent, NgIconComponent, GroupDetailsModalComponent, DeleteGroupModalComponent],
   viewProviders: [provideIcons({ heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInformationCircle, heroUsers, heroTrash })]
 })
 export class GroupsComponent implements OnInit, OnDestroy {
@@ -56,8 +49,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
   isLoadingMembers = false;
   isDeleting: boolean = false;
   confirmationInput: string = '';
-  isDeletedDisabled: boolean = true;
-  deleteConfirmControl: any;
+  // isDeletedDisabled is legacy now
   loadingGroupId: string | null = null;
 
   // Current user ID
@@ -77,7 +69,6 @@ export class GroupsComponent implements OnInit, OnDestroy {
     private notificationsService: NotificationsService,
     private fb: FormBuilder
   ) {
-    this.deleteConfirmControl = this.fb.control('');
   }
 
   ngOnInit(): void {
@@ -194,30 +185,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.showCreateModal = false;
   }
 
-  openDeleteModal(group: any) {
-    this.selectedGroup = group;
-    this.showDeleteModal = true;
-
-    this.deleteConfirmControl.setValue('');
-    this.deleteConfirmControl.setValidators([
-      Validators.required,
-      (control: AbstractControl) =>
-        control.value === group.name ? null : { mismatch: true }
-    ]);
-    this.deleteConfirmControl.updateValueAndValidity();
-  }
-
-
+  // Validator method removed as logic moved to modal component
 
   closeDeleteModal(): void {
     this.showDeleteModal = false;
     this.selectedGroup = null;
   }
 
-  onConfirmationInput(value: string): void {
-    this.confirmationInput = value;
-    this.isDeletedDisabled = value !== this.selectedGroup?.name;
-  }
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
@@ -377,32 +351,19 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
   // ===== GROUP DELETION METHODS =====
 
-  deleteGroup(groupId: string): void {
+  deleteGroup(groupId: string) {
+    if (!groupId) return;
+
     this.isDeleting = true;
-
     this.groupsService.deleteGroup(groupId).subscribe({
-      next: (response: any) => {
+      next: (response) => {
         this.isDeleting = false;
-
         if (response.success) {
-          this.toastService.show('Group deleted successfully!', 'success');
-          this.groups = this.groups.filter(group => group.id !== groupId);
-          this.notificationsService.refreshPendingRequests();
+          this.toastService.show('Group deleted successfully', 'success');
           this.closeDeleteModal();
-
-
-          if (this.groups.length === 0) {
-            this.title = 'No Groups';
-            this.subtitle = 'All groups have been deleted.';
-          }
+          this.loadGroups(); // Refresh list
         } else {
           this.toastService.show(response.message || 'Failed to delete group', 'error');
-
-          if (response.message?.includes('permission') ||
-            response.message?.includes('admin') ||
-            response.message?.includes('not allowed')) {
-            this.toastService.show('Only group admin can delete groups.', 'warning');
-          }
         }
       },
       error: (error: any) => {
