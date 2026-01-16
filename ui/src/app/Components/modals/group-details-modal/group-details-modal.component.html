@@ -1,0 +1,91 @@
+<div class="modal-backdrop" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-content" (click)="onContentClick($event)">
+        <!-- Header -->
+        <div class="modal-header">
+            <h2>Group Details</h2>
+            <button class="close-btn" (click)="closeModal()">
+                <ng-icon name="heroXMark" size="1.5rem"></ng-icon>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body" *ngIf="group">
+
+            <!-- Group Name & Badge -->
+            <div class="group-info-header">
+                <h3 class="group-name">{{ group.name }}</h3>
+                <span class="privacy-badge" [class.public]="group.isPublic === 'Public'"
+                    [class.private]="group.isPublic === 'Private'">
+                    <ng-icon [name]="group.isPublic === 'Public' ? 'heroUserGroup' : 'heroLockClosed'"
+                        size="0.9rem"></ng-icon>
+                    {{ group.isPublic }}
+                </span>
+            </div>
+
+            <!-- Description -->
+            <div class="section description-section">
+                <label>Description</label>
+                <p>
+                    {{ isExpanded ? group.description : (group.description | slice:0:150) }}
+                    <span *ngIf="!isExpanded && group.description?.length > 150">...</span>
+                </p>
+                <button *ngIf="group.description?.length > 150" class="read-more-btn" (click)="toggleDescription()">
+                    {{ isExpanded ? 'Read less' : 'Read more' }}
+                </button>
+            </div>
+
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <!-- Created By -->
+                <div class="info-item">
+                    <div class="icon-wrapper purple">
+                        <ng-icon name="heroUser" size="1.2rem"></ng-icon>
+                    </div>
+                    <div class="info-text">
+                        <label>Created By</label>
+                        <span>{{ group.createdByUser?.displayName || 'Unknown' }}</span>
+                    </div>
+                </div>
+
+                <!-- Created On -->
+                <div class="info-item">
+                    <div class="icon-wrapper blue">
+                        <ng-icon name="heroCalendar" size="1.2rem"></ng-icon>
+                    </div>
+                    <div class="info-text">
+                        <label>Created On</label>
+                        <span>{{ formatDate(group.createdAt) }}</span>
+                    </div>
+                </div>
+
+                <!-- Members -->
+                <div class="info-item">
+                    <div class="icon-wrapper green">
+                        <ng-icon name="heroUserGroup" size="1.2rem"></ng-icon>
+                    </div>
+                    <div class="info-text">
+                        <label>Members</label>
+                        <span>{{ formatMemberCount(group.memberCount) }}</span>
+                    </div>
+                </div>
+
+                <!-- Ideas -->
+                <div class="info-item">
+                    <div class="icon-wrapper orange">
+                        <ng-icon name="heroLightBulb" size="1.2rem"></ng-icon>
+                    </div>
+                    <div class="info-text">
+                        <label>Ideas</label>
+                        <span>{{ group.ideaCount || 0 }} ideas posted</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+            <app-buttons [buttonText]="'Close'" [buttonStyleClass]="'btn-close'" (click)="closeModal()">
+            </app-buttons>
+        </div>
+    </div>
+</div>

@@ -28,12 +28,14 @@
     <!-- No Groups State -->
     <ng-container *ngIf="groups.length === 0; else gridView">
       <div class="no-groups">
-        <div class="no-groups-icon">+</div>
+        <div class="no-groups-icon">
+          <ng-icon name="heroUserGroup" size="3rem" color="#9ca3af"></ng-icon>
+        </div>
         <h3>No groups yet</h3>
         <p>Be the first to create a group and start collaborating!</p>
 
-        <app-buttons [buttonText]="' + Create First Group'" [buttonStyleClass]="'btn-create-first-group'"
-          [buttonType]="'button'" (click)="openCreateModal()">
+        <app-buttons [buttonText]="'Create First Group'" [buttonStyleClass]="'btn-primary'" [buttonType]="'button'"
+          (click)="openCreateModal()">
         </app-buttons>
       </div>
     </ng-container>
@@ -43,78 +45,84 @@
       <div class="groups-grid">
         <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
 
-          <div class="group-top">
-            <!-- Group Header -->
-            <div class="group-header">
-              <div class="group-title-section">
-                <h2 class="group-name">{{ group.name }}</h2>
-              </div>
-
-              <!-- Admin Badge -->
-              <div *ngIf="canConfigureGroup(group)" class="admin-info">
-                <span class="admin-badge">admin</span>
+          <div class="group-content-wrapper">
+            <!-- Header: Title & Menu/Admin -->
+            <div class="card-header">
+              <div class="title-row">
+                <h2 class="group-name" [title]="group.name">{{ group.name }}</h2>
+                <div class="badges">
+                  <span *ngIf="canConfigureGroup(group)" class="badge admin-badge" title="You are the admin">
+                    Admin
+                  </span>
+                  <span class="badge privacy-badge" [class.public]="group.isPublic === 'Public'"
+                    [class.private]="group.isPublic === 'Private'">
+                    <ng-icon [name]="group.isPublic === 'Public' ? 'heroUserGroup' : 'heroLockClosed'"
+                      size="0.9rem"></ng-icon>
+                    {{ group.isPublic }}
+                  </span>
+                </div>
               </div>
             </div>
 
             <!-- Description -->
             <p class="group-description">{{ group.description }}</p>
-          </div>
 
-          <!-- Stats -->
-          <div class="group-stats">
-            <div class="stat">
-              <span class="stat-icon">👥</span>
-              <span class="stat-count">{{ group.memberCount || 0 }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">💡</span>
-              <span class="stat-count">{{ group.ideaCount || 0 }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">📅</span>
-              <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-icon">🔐</span>
-              <span class="stat-privacy">{{ group.isPublic }}</span>
+            <!-- Metadata Row -->
+            <div class="meta-row">
+              <div class="meta-item" title="Members">
+                <ng-icon name="heroUserGroup" size="1.1rem" class="meta-icon"></ng-icon>
+                <span>{{ group.memberCount || 0 }}</span>
+              </div>
+              <div class="meta-item" title="Ideas">
+                <ng-icon name="heroLightBulb" size="1.1rem" class="meta-icon"></ng-icon>
+                <span>{{ group.ideaCount || 0 }}</span>
+              </div>
+              <div class="meta-item date-item">
+                <ng-icon name="heroCalendar" size="1.1rem" class="meta-icon"></ng-icon>
+                <span>{{ formatDate(group.createdAt) }}</span>
+              </div>
             </div>
           </div>
 
-          <hr class="group-divider">
+          <!-- Divider -->
+          <div class="card-divider"></div>
 
-          <!-- Bottom Section -->
-          <div class="group-bottom">
-            <!-- Member Buttons -->
-            <app-buttons *ngIf="group.isMember" [buttonText]="'💡 View Ideas'" [buttonStyleClass]="'btn-view-ideas'"
-              [buttonType]="'button'" (click)="onViewIdeas(group.id)">
-            </app-buttons>
+          <!-- Footer Actions -->
+          <div class="card-footer">
 
-            <!-- Pending Approval -->
-            <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
-              ⏳ Pending Approval
-            </div>
-
-            <!-- Join Button -->
-            <app-buttons *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
-              [buttonText]="'Join Group'" [buttonStyleClass]="'btn-join-group'" [buttonType]="'button'"
-              (click)="onJoinGroup(group.id)">
-            </app-buttons>
-
-            <!-- Actions -->
-            <div class="group-actions">
-              <app-buttons [buttonText]="'📋 Details'" [buttonStyleClass]="'btn-group-details'" [buttonType]="'button'"
-                (click)="openDetailsModal(group)">
+            <!-- Primary Actions (Join/View) -->
+            <div class="primary-actions">
+              <!-- View Ideas Button (Secondary) -->
+              <app-buttons *ngIf="group.isMember" [buttonText]="'View Ideas'" [buttonStyleClass]="'btn-view-board'"
+                [isLoading]="loadingGroupId === group.id" [buttonType]="'button'" (click)="onViewIdeas(group.id)">
               </app-buttons>
 
-              <app-buttons [buttonText]="'👥 Members'" [buttonStyleClass]="'btn-group-members'" [buttonType]="'button'"
-                (click)="openMembersModal(group)">
-              </app-buttons>
+              <div *ngIf="!group.isMember && group.hasPendingRequest" class="pending-status">
+                <span class="status-dot"></span> Pending Approval
+              </div>
 
-              <app-buttons *ngIf="canConfigureGroup(group)" [buttonText]="'🗑️ Delete'"
-                [buttonStyleClass]="'btn-reject'" [buttonType]="'button'" [title]="'Delete Group'"
-                (click)="openDeleteModal(group)">
+              <app-buttons *ngIf="!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted"
+                [buttonText]="'Join Group'" [buttonStyleClass]="'btn-join'" [buttonType]="'button'"
+                (click)="onJoinGroup(group.id)">
               </app-buttons>
             </div>
+
+            <!-- Secondary Actions (Details/Settings) -->
+            <div class="secondary-actions">
+              <button class="icon-btn" (click)="openDetailsModal(group)" title="Details">
+                <ng-icon name="heroInformationCircle" size="1.3rem"></ng-icon>
+              </button>
+
+              <button class="icon-btn" (click)="openMembersModal(group)" title="Members">
+                <ng-icon name="heroUsers" size="1.3rem"></ng-icon>
+              </button>
+
+              <button *ngIf="canConfigureGroup(group)" class="icon-btn delete-btn" (click)="openDeleteModal(group)"
+                title="Delete Group">
+                <ng-icon name="heroTrash" size="1.3rem"></ng-icon>
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -123,51 +131,8 @@
 </div>
 
 <!-- Group Details Modal -->
-<app-modal [isOpen]="showDetailsModal" [title]="selectedGroup?.name + ' Details'" size="md"
-  (closeModal)="closeDetailsModal()">
-
-  <div modal-body *ngIf="selectedGroup">
-    <div class="group-details-content">
-      <div class="detail-row">
-        <strong>Description:</strong>
-        <p>{{ selectedGroup.description }}</p>
-      </div>
-
-      <div class="detail-row">
-        <strong>Created By</strong>
-        <p>{{ selectedGroup.createdByUser?.displayName || 'Unknown' }}</p>
-      </div>
-
-      <div class="detail-row">
-        <strong>Created On</strong>
-        <p>{{ formatDate(selectedGroup.createdAt) }}</p>
-      </div>
-
-      <div class="detail-row">
-        <strong>Privacy</strong>
-        <p>{{ selectedGroup.isPublic }}</p>
-      </div>
-
-      <div class="detail-row">
-        <strong>Members</strong>
-        <p>{{ formatMemberCount(selectedGroup.memberCount)}}</p>
-      </div>
-
-      <div class="detail-row">
-        <strong>Ideas</strong>
-        <p>{{ selectedGroup.ideaCount || 0 }}</p>
-      </div>
-    </div>
-  </div>
-
-  <div modal-footer>
-    <div class="modal-actions">
-      <app-buttons [buttonText]="'Close'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
-        (click)="closeDetailsModal()">
-      </app-buttons>
-    </div>
-  </div>
-</app-modal>
+<app-group-details-modal [isVisible]="showDetailsModal" [group]="selectedGroup" (close)="closeDetailsModal()">
+</app-group-details-modal>
 
 <!-- Create Group Modal -->
 <app-create-group-modal [isVisible]="showCreateModal" [isSubmitting]="isSubmitting" (close)="closeCreateModal()"

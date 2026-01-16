@@ -19,10 +19,42 @@ import { IdeaInfoModalComponent } from '../../Components/modals/idea-info-modal/
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import {
+  heroUsers,
+  heroEye,
+  heroPlus,
+  heroArrowRightOnRectangle,
+  heroHandThumbUp,
+  heroRocketLaunch,
+  heroPencilSquare,
+  heroTrash,
+  heroXMark,
+  heroInformationCircle,
+  heroBars3BottomLeft,
+  heroClock,
+  heroFunnel
+} from '@ng-icons/heroicons/outline';
+
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, IdeaInfoModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, IdeaInfoModalComponent, NgIconComponent],
+  viewProviders: [provideIcons({
+    heroUsers,
+    heroEye,
+    heroPlus,
+    heroArrowRightOnRectangle,
+    heroHandThumbUp,
+    heroRocketLaunch,
+    heroPencilSquare,
+    heroTrash,
+    heroXMark,
+    heroInformationCircle,
+    heroBars3BottomLeft,
+    heroClock,
+    heroFunnel
+  })],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })

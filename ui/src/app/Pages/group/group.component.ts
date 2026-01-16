@@ -11,10 +11,14 @@ import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { CreateGroupModalComponent } from '../../Components/modals/create-group-modal/create-group-modal.component';
+import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
 import { Subject } from 'rxjs';
+
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInformationCircle, heroUsers, heroTrash } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-groups',
@@ -26,8 +30,11 @@ import { Subject } from 'rxjs';
     ReactiveFormsModule,
     ButtonsComponent,
     ModalComponent,
-    CreateGroupModalComponent
-  ]
+    CreateGroupModalComponent,
+    GroupDetailsModalComponent,
+    NgIconComponent
+  ],
+  viewProviders: [provideIcons({ heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInformationCircle, heroUsers, heroTrash })]
 })
 export class GroupsComponent implements OnInit, OnDestroy {
   // Group data
@@ -51,6 +58,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
   confirmationInput: string = '';
   isDeletedDisabled: boolean = true;
   deleteConfirmControl: any;
+  loadingGroupId: string | null = null;
 
   // Current user ID
   currentUserId: string | null = null;
@@ -220,6 +228,8 @@ export class GroupsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadingGroupId = groupId;
+
     // Check if user is group creator
     const isGroupCreator = this.isGroupCreator(group);
 
@@ -230,6 +240,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
         groupName: group.name,
         groupCreatorId: group.createdByUserId
       }
+    }).then(() => {
+      // Navigation successful, the component will likely be destroyed or replaced, 
+      // but if it stays (e.g. outlet), we clear loading.
+      this.loadingGroupId = null;
+    }).catch((err) => {
+      console.error('Navigation error:', err);
+      this.loadingGroupId = null;
     });
   }
 
