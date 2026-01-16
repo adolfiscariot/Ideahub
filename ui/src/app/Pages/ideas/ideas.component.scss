@@ -455,54 +455,75 @@
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   flex-shrink: 0;
+
+  .btn-info-icon {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid #10b981;
+    /* Green border */
+    background: #fff;
+    color: #10b981;
+    /* Green icon */
+    transition: all 0.2s;
+
+    &:hover {
+      background: #ecfdf5;
+      /* Light green bg */
+      color: #059669;
+      /* Darker green icon */
+    }
+  }
 }
 
-/* Members Section */
-.members-section {
+/* Members Badge */
+.members-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 6px 12px;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  min-width: 140px;
-}
+  height: 40px;
+  /* Match standard button height */
+  box-sizing: border-box;
 
-.members-section:hover {
-  background: #f5f5f5;
-  border-color: #1a73e8;
-}
+  &:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+  }
 
-.members-icon {
-  font-size: 20px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f7ff;
-  border-radius: 50%;
-}
+  .members-icon-wrapper {
+    color: #555;
+    display: flex;
+    align-items: center;
+  }
 
-.members-info {
-  display: flex;
-  flex-direction: column;
-}
+  .members-text {
+    display: flex;
+    align-items: center;
+    /* keep on one line */
+    gap: 4px;
+    font-size: 14px;
+    color: #333;
 
-.members-count {
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
+    .count {
+      font-weight: 600;
+    }
 
-.members-label {
-  font-size: 12px;
-  color: #666;
+    .label {
+      color: #666;
+    }
+  }
 }
 
 .create-idea-btn {
@@ -621,12 +642,15 @@
 }
 
 .sort-option.active {
-  background: #f0f7ff;
-  color: #1a73e8;
+  background: #fbf0fb;
+  /* Light purple background */
+  color: #800080;
+  /* Purple text */
 }
 
 .sort-option:hover:not(.active) {
   background: #f5f5f5;
+  color: #333;
 }
 
 .sort-separator {

@@ -6,10 +6,9 @@ import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
-import { ModalComponent } from '../../Components/modal/modal.component';
 import { CreateGroupModalComponent } from '../../Components/modals/create-group-modal/create-group-modal.component';
 import { GroupDetailsModalComponent } from '../../Components/modals/group-details-modal/group-details-modal.component';
 import { DeleteGroupModalComponent } from '../../Components/modals/delete-group-modal/delete-group-modal.component';
@@ -26,7 +25,7 @@ import { heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInforma
   templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, CreateGroupModalComponent, NgIconComponent, GroupDetailsModalComponent, DeleteGroupModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, CreateGroupModalComponent, NgIconComponent, GroupDetailsModalComponent, DeleteGroupModalComponent],
   viewProviders: [provideIcons({ heroUserGroup, heroLightBulb, heroCalendar, heroLockClosed, heroInformationCircle, heroUsers, heroTrash })]
 })
 export class GroupsComponent implements OnInit, OnDestroy {
@@ -185,7 +184,10 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.showCreateModal = false;
   }
 
-  // Validator method removed as logic moved to modal component
+  openDeleteModal(group: any): void {
+    this.selectedGroup = group;
+    this.showDeleteModal = true;
+  }
 
   closeDeleteModal(): void {
     this.showDeleteModal = false;

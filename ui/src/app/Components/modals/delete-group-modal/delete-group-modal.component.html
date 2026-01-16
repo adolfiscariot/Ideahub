@@ -34,9 +34,9 @@
                 (click)="closeModal()">
             </app-buttons>
 
-            <app-buttons [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'" [buttonStyleClass]="'btn-delete'"
-                [disabled]="!canDelete || isDeleting" (click)="onConfirm()">
-                <ng-icon name="heroTrash" size="1.2rem"></ng-icon> Delete Group
+            <app-buttons [buttonStyleClass]="'btn-delete'" [disabled]="!canDelete || isDeleting" (click)="onConfirm()">
+                <ng-icon *ngIf="!isDeleting" name="heroTrash" size="1.2rem"></ng-icon>
+                {{ isDeleting ? 'Deleting...' : 'Delete Group' }}
             </app-buttons>
         </div>
     </div>

@@ -27,7 +27,7 @@ export class LoginInputComponent implements OnInit {
   router = inject(Router);
   isLoading = false;
 
-  ngOnInit(): void {this.notificationsService}
+  ngOnInit(): void { this.notificationsService }
 
   loginForm = new FormGroup({
     email: new FormControl('', {

@@ -47,9 +47,11 @@ label {
 .submit-button {
   width: 100%;
   text-align: center;
+
   & p {
     font-size: 14px;
   }
+
   & a {
     font-size: 14px;
   }
@@ -58,6 +60,7 @@ label {
 input:hover {
   outline: 1px solid purple;
 }
+
 input:focus {
   outline: 1px solid purple;
   border-bottom: 2px solid purple;

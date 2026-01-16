@@ -1,29 +1,15 @@
 <div class="registration">
-  <form
-    class="registration-form"
-    [formGroup]="registrationForm"
-    (ngSubmit)="onSubmit($event)"
-  >
+  <form class="registration-form" [formGroup]="registrationForm" (ngSubmit)="onSubmit($event)">
     <div class="page-header">Register</div>
 
     <div class="form-section">
       <label for="name-input">Name</label>
-      <input
-        id="name-input"
-        type="text"
-        placeholder=""
-        formControlName="displayName"
-      />
+      <input id="name-input" type="text" placeholder="" formControlName="displayName" />
     </div>
 
     <div class="form-section">
       <label for="email-input">Email</label>
-      <input
-        id="email-input"
-        type="email"
-        placeholder=""
-        formControlName="email"
-      />
+      <input id="email-input" type="email" placeholder="" formControlName="email" />
     </div>
 
     <!-- Password -->
@@ -34,13 +20,8 @@
           <label for="password-input">Password</label>
 
           <div class="password-info-wrapper">
-            <span
-              class="password-info-icon"
-              [class.met]="allPasswordMet"
-              [class.not-met]="!allPasswordMet"
-              (mouseenter)="infoHovered = true"
-              (mouseleave)="infoHovered = false"
-            >
+            <span class="password-info-icon" [class.met]="allPasswordMet" [class.not-met]="!allPasswordMet"
+              (mouseenter)="infoHovered = true" (mouseleave)="infoHovered = false">
               ⓘ
             </span>
 
@@ -53,34 +34,22 @@
               </ul>
 
               <div class="strength-bars">
-                <span
-                  *ngFor="let i of [1,2,3,4]"
-                  [class.active]="passwordStrength >= i"
-                ></span>
+                <span *ngFor="let i of [1,2,3,4]" [class.active]="passwordStrength >= i"></span>
               </div>
             </div>
           </div>
         </div>
 
         <div class="password-input-wrapper">
-          <input
-            id="password-input"
-            type="password"
-            placeholder=""
-            formControlName="password"
-            (input)="onPasswordInput()"
-          />
+          <input id="password-input" type="password" placeholder="" formControlName="password"
+            (input)="onPasswordInput()" />
 
-          <button
-  type="button"
-  class="show-password-btn"
-  (click)="togglePasswordVisibility()"
-  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
->
-  <span class="material-icons">
-    {{ showPassword ? 'visibility_off' : 'visibility' }}
-  </span>
-</button>
+          <button type="button" class="show-password-btn" (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+            <span class="material-icons">
+              {{ showPassword ? 'visibility_off' : 'visibility' }}
+            </span>
+          </button>
 
         </div>
       </div>
@@ -88,21 +57,12 @@
 
     <div class="form-section">
       <label for="confirm-password-input">Confirm Password</label>
-      <input
-        id="confirm-password-input"
-        type="password"
-        placeholder=""
-        formControlName="confirmPassword"
-      />
+      <input id="confirm-password-input" type="password" placeholder="" formControlName="confirmPassword" />
     </div>
 
     <div class="submit-button">
-      <app-buttons
-        [buttonText]="'Register'"
-        [buttonStyleClass]="'btn-registration'"
-        [buttonType]="'submit'"
-        [isLoading]="isLoading"
-      />
+      <app-buttons [buttonText]="'Register'" [buttonStyleClass]="'btn-registration'" [buttonType]="'submit'"
+        [isLoading]="isLoading" />
       <p>Already have an account?</p>
       <a routerLink="/login"><u>Login here</u></a>
     </div>
