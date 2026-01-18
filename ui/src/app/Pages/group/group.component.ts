@@ -211,6 +211,9 @@ onPageChange(event: any) {
             };
           });
 
+          this.groups.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
           this.dontShowPages = this.groups.length <= this.pageSize;
 
           console.log('Final groups state:');
@@ -402,8 +405,9 @@ onConfirmationInput(value: string): void {
         const isSuccess = response.success || response.status;
         if (isSuccess) {
           this.toastService.show('Group created successfully!', 'success');
-          this.updatePaginatedGroups();
-          this.loadGroups();
+          this.currentPage = 0;
+this.loadGroups();
+
           this.createGroupForm.reset();
           this.closeCreateModal();
         } else {
