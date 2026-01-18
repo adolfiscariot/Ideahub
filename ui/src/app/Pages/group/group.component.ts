@@ -74,6 +74,7 @@ export class GroupsComponent implements OnInit {
   pageSize = 8;
   currentPage = 0;
   paginateGroups: any[] = [];
+  dontShowPages = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -170,13 +171,8 @@ onPageChange(event: any) {
         this.isLoading = false;
 
         console.log('DEBUG - Full API response:', response);
-        
         if (response.success && response.data) {
           this.groups = response.data.map((group: any) => {
-            
-           
-          
-            
             console.log('Group:', {
               id: group.id,
               name: group.name,
@@ -215,12 +211,14 @@ onPageChange(event: any) {
             };
           });
 
+          this.dontShowPages = this.groups.length <= this.pageSize;
+
           console.log('Final groups state:');
           this.groups.forEach((group, i) => {
             console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
           });
 
-          this.currentPage = 0;
+          //this.currentPage = 0;
               this.updatePaginatedGroups();
 
 
@@ -404,6 +402,7 @@ onConfirmationInput(value: string): void {
         const isSuccess = response.success || response.status;
         if (isSuccess) {
           this.toastService.show('Group created successfully!', 'success');
+          this.updatePaginatedGroups();
           this.loadGroups();
           this.createGroupForm.reset();
           this.closeCreateModal();

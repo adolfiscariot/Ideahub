@@ -154,6 +154,7 @@
   </div>
 
     <mat-paginator
+            *ngIf="!dontShowPages"
             [length]="groups.length"
             [pageSize]="8"
             [pageSizeOptions]="[8]"
