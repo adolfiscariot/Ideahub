@@ -35,11 +35,12 @@
 .password-info-wrapper {
   position: relative;
   display: inline-block;
+  color: blue;
 }
 
 .password-info-icon {
   color: #666;
-  font-size: 16px;
+  font-size: 14px;
   cursor: help;
   display: inline-block;
   line-height: 1;
@@ -50,7 +51,7 @@
 }
 
 .password-info-icon.not-met {
-  color: #f44336;
+  color: blue;
 }
 
 /* Password input */
