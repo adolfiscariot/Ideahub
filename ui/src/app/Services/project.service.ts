@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse} from '../Interfaces/Projects/project-interface';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  private apiUrl = 'http://localhost:5065/api/project';
+  private apiUrl = `${environment.apiUrl}/group`;
 
   constructor(private http: HttpClient) { }
 
