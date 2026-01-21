@@ -11,5 +11,6 @@ public class IdeaDetailsDto
     public string Group { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public bool IsPromotedToProject { get; set; }
+    public List<string> Filter { get; set; }  = new List<string>();
 
 }
