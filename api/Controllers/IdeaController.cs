@@ -61,6 +61,7 @@ public class IdeaController : ControllerBase
             {
                 Title = ideaDto.Title,
                 Description = ideaDto.Description,
+                Filter = ideaDto.Filter,
                 UserId = userId,
                 GroupId = groupId
             };
@@ -119,7 +120,7 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
         }
 
         
