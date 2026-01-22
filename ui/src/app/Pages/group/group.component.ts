@@ -17,7 +17,6 @@ import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { NgModule } from '@angular/core';
-import { JoyrideService } from 'ngx-joyride';
 
 @Component({
   selector: 'app-groups',
@@ -32,7 +31,7 @@ import { JoyrideService } from 'ngx-joyride';
     MatPaginatorModule,
     FormsModule,
     //GroupMembersModalComponent
-  ]
+  ],
 })
 
 export class GroupsComponent implements OnInit {
@@ -87,7 +86,6 @@ export class GroupsComponent implements OnInit {
     private dialog: MatDialog,
     private router: Router,
     private notificationsService: NotificationsService,
-    private joyride: JoyrideService,
     private fb: FormBuilder
   ) {
     this.createGroupForm = this.fb.group({
