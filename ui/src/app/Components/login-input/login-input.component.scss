@@ -24,9 +24,8 @@
 
 .form-section {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   width: 100%;
-  margin-left: -10px;
 
   input {
     margin-left: auto;
@@ -41,7 +40,7 @@
 
 label {
   max-width: 200px;
-  text-align: right;
+  text-align: left;
 }
 
 .submit-button {
