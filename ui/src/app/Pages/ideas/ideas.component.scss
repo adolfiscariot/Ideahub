@@ -58,7 +58,7 @@
 .radio-option {
   display: flex;
   align-items: flex-start;
-  padding: 1rem;
+  padding: 0.3rem 0.5rem;
   background: white;
   border: 2px solid #e9ecef;
   border-radius: 6px;
@@ -68,7 +68,7 @@
 }
 
 .radio-option:hover {
-  border-color: #adb5bd;
+  border-color: #800080;
   background: #f8f9fa;
 }
 
@@ -76,8 +76,8 @@
   margin: 0.3rem 0.75rem 0 0;
   cursor: pointer;
   width: 18px;
-  height: 18px;
-  accent-color: #007bff;
+  height: 10px;
+  accent-color: #000000;
 }
 
 .radio-label {
@@ -102,7 +102,7 @@
 
 /* Selected state */
 .radio-option.selected {
-  border-color: #007bff;
+  border-color: #800080;
   background-color: #f0f7ff;
   box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25);
 }
