@@ -10,6 +10,13 @@
         </div>
 
         <app-buttons
+        [buttonText]="'ⓘ'"
+        [buttonStyleClass]="'btn-info-icon'"
+        title="Groups Guideline"
+        (click)="displayGroupInfo()">
+      </app-buttons>
+
+        <app-buttons
           *ngIf="!showCreateModal && !isLoading && groups.length > 0"
           [buttonText]="'Create Group'"
           [buttonStyleClass]="'btn-create-group'"
@@ -29,7 +36,7 @@
 
     <!-- Groups List -->
     <div *ngIf="!isLoading" class="groups-list">
-
+      
       <!-- No Groups State -->
       <ng-container *ngIf="groups.length === 0; else gridView">
         <div class="no-groups">
@@ -49,8 +56,7 @@
       <!-- Grid View -->
       <ng-template #gridView>
         <div class="groups-grid">
-          <div *ngFor="let group of groups; trackBy: trackById" class="group-card">
-
+          <div *ngFor="let group of paginateGroups; trackBy: trackById" class="group-card">
             <div class="group-top">
               <!-- Group Header -->
               <div class="group-header">
@@ -146,6 +152,14 @@
       </ng-template>
     </div>
   </div>
+
+    <mat-paginator
+            *ngIf="!dontShowPages"
+            [length]="groups.length"
+            [pageSize]="8"
+            [pageSizeOptions]="[8]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
 
 <!-- Group Details Modal -->
 <app-modal 
@@ -335,6 +349,119 @@
       (click)="deleteGroup(selectedGroup.id)">
     </app-buttons>
 
+    </div>
+  </div>
+</app-modal>
+
+<app-modal
+  [isOpen]="showGroupInfoModal"
+  title="Groups"
+  size="md"
+  (closeModal)="closeGroupInfo()">
+
+  <div modal-body>
+    <div class="group-info-modal">
+      <div class="section">
+        <div class="section">
+        <h3 class="section-title">
+          <span class="icon">💡</span>
+          Contributing Ideas
+        </h3>
+        <ul class="rule-list">
+
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>To contribute ideas you <strong>must be a member of a group</strong>. You can either join an existing group or create a group of your own that best fits the category your idea falls under.</span>
+            </div>
+          </li>
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>Once an idea is promoted, it <strong class="warning">cannot be deleted.</strong></span>
+            </div>
+          </li>
+        </ul>
+      </div>
+        <h3 class="section-title">
+          <span class="icon">👥</span>
+          Joining Groups
+        </h3>
+        <ul class="rule-list">
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <strong>Public Groups</strong>
+            </div>
+            <div class="rule-text">Click the join group button to Join instantly and you'll be redirected to the group's Ideas page automatically.</div>
+          </li>
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <strong>Private Groups</strong>
+            </div>
+            <div class="rule-text">Your request will be pending until an admin approves it.</div>
+          </li>
+        </ul>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section">
+        <h3 class="section-title">
+          <span class="icon">🚪</span>
+          Leaving Groups
+        </h3>
+        <ul class="rule-list">
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <strong>If You're an Admin</strong>
+            </div>
+            <div class="rule-text">You must transfer ownership to another member before you can leave.</div>
+          </li>
+        </ul>
+        <div class="note-box">
+          <div class="note-icon">📝</div>
+          <div class="note-content">
+            <strong>Note:</strong> Transferring ownership automatically removes you from the group. Ownership can be given to any current member of the group.
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section">
+        <h3 class="section-title">
+          <span class="icon">🔔</span>
+          Notifications
+        </h3>
+        <ul class="rule-list">
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>Admins receive alerts for pending join requests via the <strong>notification bell</strong> or the <strong>View Requests</strong> button on Ideas page.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div modal-footer>
+    <div class="modal-footer-content">
+      <app-buttons
+          [buttonText]="'Don’t show again'"
+          [buttonStyleClass]="'btn-reject'"
+          (click)="dontShowGroupInfoAgain()">
+        </app-buttons>
+
+        <app-buttons
+  [buttonText]="'Got it, let’s go!'"
+  [buttonStyleClass]="'btn-promote'"
+  (click)="closeGroupInfo()">
+</app-buttons>
+    
     </div>
   </div>
 </app-modal>

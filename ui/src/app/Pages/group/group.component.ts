@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
@@ -15,6 +15,8 @@ import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { NgModule } from '@angular/core';
 
 @Component({
   selector: 'app-groups',
@@ -26,10 +28,12 @@ import { Subject, takeUntil } from 'rxjs';
     ReactiveFormsModule,
     ButtonsComponent,
     ModalComponent,
+    MatPaginatorModule,
     FormsModule,
     //GroupMembersModalComponent
-  ]
+  ],
 })
+
 export class GroupsComponent implements OnInit {
   // viewMode: 'list' | 'grid' = 'list';
 
@@ -66,6 +70,15 @@ export class GroupsComponent implements OnInit {
   // Store pending requests for each group
   pendingRequests: Map<string, boolean> = new Map();
 
+  pageSize = 8;
+  currentPage = 0;
+  paginateGroups: any[] = [];
+  dontShowPages = false;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  showGroupInfoModal = false;
+
   constructor(
     private groupsService: GroupsService,
     private authService: AuthService,
@@ -83,6 +96,11 @@ export class GroupsComponent implements OnInit {
     this.deleteConfirmControl = this.fb.control('');
   }
 
+  @NgModule({
+    imports: [MatPaginatorModule]
+  })
+
+
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
     // Get current user ID first
     this.currentUserId = this.authService.getCurrentUserId();
@@ -93,6 +111,8 @@ export class GroupsComponent implements OnInit {
       description: [''],
       isPublic: [true]
     });
+    const hideInfo = localStorage.getItem('hideGroupInfo') === 'true';
+    this.showGroupInfoModal = !hideInfo;
     this.setupCharCounters();
   }
 
@@ -128,6 +148,18 @@ export class GroupsComponent implements OnInit {
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
 }
+
+updatePaginatedGroups() {
+  const startIndex = this.currentPage * this.pageSize;
+  const endIndex = startIndex + this.pageSize;
+  this.paginateGroups = this.groups.slice(startIndex, endIndex);
+}
+
+onPageChange(event: any) {
+  this.currentPage = event.pageIndex;
+  this.pageSize = event.pageSize;
+  this.updatePaginatedGroups();
+}
   // ===== GROUP LOADING METHODS =====
 
   loadGroups(): void {
@@ -137,7 +169,6 @@ export class GroupsComponent implements OnInit {
         this.isLoading = false;
 
         console.log('DEBUG - Full API response:', response);
-
         if (response.success && response.data) {
           this.groups = response.data.map((group: any) => {
             console.log('Group:', {
@@ -149,6 +180,7 @@ export class GroupsComponent implements OnInit {
               isCreator: group.createdByUserId === this.currentUserId,
               isPublic: group.isPublic
             });
+              
 
             return {
               ...group,
@@ -177,10 +209,19 @@ export class GroupsComponent implements OnInit {
             };
           });
 
+          this.groups.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          this.dontShowPages = this.groups.length <= this.pageSize;
+
           console.log('Final groups state:');
           this.groups.forEach((group, i) => {
             console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
           });
+
+          //this.currentPage = 0;
+              this.updatePaginatedGroups();
+
 
         } else {
           console.error('Failed to load groups:', response.message);
@@ -194,6 +235,19 @@ export class GroupsComponent implements OnInit {
       }
     });
   }
+  
+  closeGroupInfo() {
+    this.showGroupInfoModal = false;
+  }
+  displayGroupInfo() {
+    this.showGroupInfoModal = true;
+  }
+
+  dontShowGroupInfoAgain () {
+  localStorage.setItem('hideGroupInfo', 'true');
+  console.log('hide group information')
+  this.showGroupInfoModal=false;
+}
 
   // ===== MODAL METHODS =====
 
@@ -349,7 +403,9 @@ onConfirmationInput(value: string): void {
         const isSuccess = response.success || response.status;
         if (isSuccess) {
           this.toastService.show('Group created successfully!', 'success');
-          this.loadGroups();
+          this.currentPage = 0;
+this.loadGroups();
+
           this.createGroupForm.reset();
           this.closeCreateModal();
         } else {
