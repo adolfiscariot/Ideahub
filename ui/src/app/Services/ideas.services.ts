@@ -45,7 +45,8 @@ export class IdeasService {
     const params = new HttpParams().set('groupId', request.groupId);
     return this.http.post<any>(`${this.apiUrl}/create-idea`, {
       title: request.title,
-      description: request.description
+      description: request.description,
+      filter: request.filter
     }, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );

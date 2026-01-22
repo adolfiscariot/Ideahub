@@ -404,6 +404,72 @@
       </div>
     </div>
 
+    <!-- Add category field-->
+<div class="form-section categories-section">
+
+  <!-- TYPE -->
+  <div class="form-group">
+    <label class="category-label">Type</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="new">
+        New
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="current_process_improvement">
+        Current Process Improvement
+      </label>
+    </div>
+
+    <div *ngIf="shareIdeaForm.get('type')?.invalid && shareIdeaForm.get('type')?.touched" class="error-message">
+      Please select a type.
+    </div>
+  </div>
+
+  <!-- DOMAIN -->
+  <div class="form-group">
+    <label class="category-label">Domain</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="tech">
+        Tech
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="non_tech">
+        Non‑Tech
+      </label>
+    </div>
+
+    <div *ngIf="shareIdeaForm.get('domain')?.invalid && shareIdeaForm.get('domain')?.touched" class="error-message">
+      Please select a domain.
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="form-group">
+    <label class="category-label">Impact</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="financial">
+        Financial
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="productivity">
+        Productivity
+      </label>
+    </div>
+
+    <div *ngIf="shareIdeaForm.get('impact')?.invalid && shareIdeaForm.get('impact')?.touched" class="error-message">
+      Please select an impact.
+    </div>
+  </div>
+
+</div>
+
+    
   </form>
 
   </div>

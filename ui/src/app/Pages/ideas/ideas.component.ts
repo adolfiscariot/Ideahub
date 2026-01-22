@@ -121,7 +121,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.shareIdeaForm = this.fb.group({
     title: [''],
-    description: ['']
+    description: [''],
+    type: [''],
+    domain: [''],
+    impact: ['']
   });
 
   this.setupShareIdeaCharCounters();
@@ -569,6 +572,7 @@ dontShowIdeaInfoAgain () {
               id: idea.id?.toString() || '',
               title: idea.title || '',
               description: idea.description || '',
+              filter: idea.filter || '',
               UserId: idea.userId || idea.UserId || '',
               userId: idea.userId || idea.UserId || '',
               groupId: this.groupId,
@@ -744,32 +748,41 @@ dontShowIdeaInfoAgain () {
   }
 
 
-  onShareIdea(ideaData: { title: string, description: string }): void {
-    this.isSubmitting = true;
+onShareIdea(ideaData: { title: string; description: string }): void {
+  this.isSubmitting = true;
 
-    const request: CreateIdeaRequest = {
-      ...ideaData,
-      groupId: this.groupId
-    };
+  const filterArray = [
+    this.shareIdeaForm.get('type')?.value,
+    this.shareIdeaForm.get('domain')?.value,
+    this.shareIdeaForm.get('impact')?.value
+  ].filter(x => x);
 
-    this.ideasService.createIdea(request).subscribe({
-      next: (response) => {
-        this.isSubmitting = false;
-        if (response.success) {
-          this.closeShareModal();
-          this.loadIdeas(); // Refresh the list
-          this.toastService.show('Idea created successfully!', 'success');
-        } else {
-          this.toastService.show(`Failed to create idea: ${response.message}`, 'error');
-        }
-      },
-      error: (error) => {
-        this.isSubmitting = false;
-        console.error('Error creating idea:', error);
-        this.toastService.show('An error occurred while creating the idea.', 'error');
+  const request: CreateIdeaRequest = {
+    title: ideaData.title,
+    description: ideaData.description,
+    groupId: this.groupId,
+    filter: filterArray
+  };
+
+  this.ideasService.createIdea(request).subscribe({
+    next: (response) => {
+      this.isSubmitting = false;
+      if (response.success) {
+        this.closeShareModal();
+        this.loadIdeas(); // Refresh the list
+        this.toastService.show('Idea created successfully!', 'success');
+      } else {
+        this.toastService.show(`Failed to create idea: ${response.message}`, 'error');
       }
-    });
-  }
+    },
+    error: (error) => {
+      this.isSubmitting = false;
+      console.error('Error creating idea:', error);
+      this.toastService.show('An error occurred while creating the idea.', 'error');
+    }
+  });
+}
+
 
   openDescriptionModal(idea: any): void {
     alert(`Full Description:\n\n${idea.description}`);
