@@ -11,7 +11,7 @@
       <input
         id="name-input"
         type="text"
-        placeholder=""
+        placeholder="JohnDoe"
         formControlName="displayName"
       />
     </div>
@@ -21,7 +21,7 @@
       <input
         id="email-input"
         type="email"
-        placeholder=""
+        placeholder="you@example.com"
         formControlName="email"
       />
     </div>
@@ -62,11 +62,11 @@
           </div>
         </div>
 
-        <div class="password-input-wrapper">
+        <div class="form-section">
           <input
             id="password-input"
             type="password"
-            placeholder=""
+            placeholder=" *********"
             formControlName="password"
             (input)="onPasswordInput()"
           />
@@ -77,9 +77,7 @@
   (click)="togglePasswordVisibility()"
   [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
 >
-  <span class="material-icons">
-    {{ showPassword ? 'visibility_off' : 'visibility' }}
-  </span>
+  
 </button>
 
         </div>
@@ -91,7 +89,7 @@
       <input
         id="confirm-password-input"
         type="password"
-        placeholder=""
+        placeholder=" *********"
         formControlName="confirmPassword"
       />
     </div>
