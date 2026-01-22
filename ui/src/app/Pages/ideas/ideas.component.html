@@ -385,7 +385,7 @@
     </div>
 
     <div class="form-group">
-      <label>Description</label>
+      <label>Idea Description</label>
       <textarea
         class="form-control-description"
         formControlName="description"
@@ -407,8 +407,10 @@
     <!-- Add category field-->
 <div class="form-section categories-section">
 
+  
   <!-- TYPE -->
   <div class="form-group">
+    <label>Idea Category</label>
     <label class="category-label">Type</label>
     <div class="radio-group">
       <label class="radio-option">
@@ -420,10 +422,6 @@
         <input type="radio" formControlName="type" value="current_process_improvement">
         Current Process Improvement
       </label>
-    </div>
-
-    <div *ngIf="shareIdeaForm.get('type')?.invalid && shareIdeaForm.get('type')?.touched" class="error-message">
-      Please select a type.
     </div>
   </div>
 
@@ -441,10 +439,6 @@
         Non‑Tech
       </label>
     </div>
-
-    <div *ngIf="shareIdeaForm.get('domain')?.invalid && shareIdeaForm.get('domain')?.touched" class="error-message">
-      Please select a domain.
-    </div>
   </div>
 
   <!-- IMPACT -->
@@ -460,10 +454,6 @@
         <input type="radio" formControlName="impact" value="productivity">
         Productivity
       </label>
-    </div>
-
-    <div *ngIf="shareIdeaForm.get('impact')?.invalid && shareIdeaForm.get('impact')?.touched" class="error-message">
-      Please select an impact.
     </div>
   </div>
 

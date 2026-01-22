@@ -120,11 +120,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-    title: [''],
-    description: [''],
-    type: [''],
-    domain: [''],
-    impact: ['']
+    title: ['', Validators.required],
+    description: ['', Validators.required],
+    type: ['', Validators.required],
+    domain: ['', Validators.required],
+    impact: ['', Validators.required]
   });
 
   this.setupShareIdeaCharCounters();
@@ -749,6 +749,13 @@ dontShowIdeaInfoAgain () {
 
 
 onShareIdea(ideaData: { title: string; description: string }): void {
+  
+  if(this.shareIdeaForm.invalid) {
+    this.shareIdeaForm.markAllAsTouched();
+    this.toastService.show('Please fill in all required fields', 'error')
+    return;
+  }
+  
   this.isSubmitting = true;
 
   const filterArray = [
