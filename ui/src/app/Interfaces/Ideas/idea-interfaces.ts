@@ -2,6 +2,7 @@ export interface Idea {
   id: string;
   title: string;
   description: string;
+  filter: string[];
   isPromotedToProject: boolean;
   isDeleted: boolean;
   deletedAt?: Date;
@@ -26,6 +27,7 @@ export interface CreateIdeaRequest {
   title: string;
   description: string;
   groupId: string;
+  filter: string[];
 }
 
 export interface ApiResponse<T> {

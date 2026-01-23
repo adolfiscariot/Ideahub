@@ -385,7 +385,7 @@
     </div>
 
     <div class="form-group">
-      <label>Description</label>
+      <label>Idea Description</label>
       <textarea
         class="form-control-description"
         formControlName="description"
@@ -404,6 +404,67 @@
       </div>
     </div>
 
+    <!-- Add category field-->
+<div class="form-section categories-section">
+
+  
+  <!-- TYPE -->
+  <div class="form-group">
+    <label>Idea Category</label>
+    <label class="category-label">Type</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="new">
+        New
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="current_process_improvement">
+        Current Process Improvement
+      </label>
+    </div>
+  </div>
+
+  <!-- DOMAIN -->
+  <div class="form-group">
+    <label class="category-label">Domain</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="tech">
+        Tech
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="non_tech">
+        Non‑Tech
+      </label>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="form-group">
+    <label class="category-label">Impact</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="financial">
+        Financial
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="productivity">
+        Productivity
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="workplace-culture">
+        Workplace culture
+      </label> 
+    </div>
+  </div>
+
+</div>
+
+    
   </form>
 
   </div>

@@ -17,6 +17,10 @@ public class Idea
     [Column (TypeName = "text")]
     public string Description {get; set;} = string.Empty;
 
+    [Required]
+    [Column (TypeName = "jsonb")]
+    public List<string> Filter {get; set;} = new List<string>();
+
     public bool IsPromotedToProject { get; set; } = false;
 
     public bool IsDeleted {get; set;} = false;
