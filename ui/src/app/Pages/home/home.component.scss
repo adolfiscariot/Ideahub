@@ -16,6 +16,76 @@
     
 }
 
+.modal-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 16px 16px 16px;
+  border-top: 1px solid #e2e8f0;
+
+}
+
+:host ::ng-deep .modal-body {
+  padding: 20px;
+}
+
+.welcome-info-modal .section {
+  margin-bottom: 24px;
+}
+
+.welcome-info-modal .section:last-child {
+  margin-bottom: 0;
+}
+
+.welcome-info-modal .section-title {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+}
+
+.welcome-info-modal p {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.welcome-info-modal .rule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.welcome-info-modal .rule-item {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.5;
+  padding-left: 24px;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.welcome-info-modal .rule-item:last-child {
+  margin-bottom: 0;
+}
+
+.welcome-info-modal .rule-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #000;
+  font-size: 18px;
+}
+
+.welcome-info-modal .rule-header strong {
+  color: #2d3748;
+  font-weight: 600;
+}
 .dashboard-header {
     margin-bottom: 2rem;
 
