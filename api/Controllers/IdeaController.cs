@@ -61,6 +61,7 @@ public class IdeaController : ControllerBase
             {
                 Title = ideaDto.Title,
                 Description = ideaDto.Description,
+                Filter = ideaDto.Filter,
                 UserId = userId,
                 GroupId = groupId
             };

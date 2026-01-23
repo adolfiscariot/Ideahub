@@ -8,4 +8,5 @@ public class IdeaUpdateDto
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public List<string> Filter {get; set;} = new List<string>();
 }

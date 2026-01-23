@@ -4,6 +4,8 @@ import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
 import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
+import { ModalComponent } from '../../Components/modal/modal.component';
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import {
   MostVotedIdea,
   TopContributor,
@@ -35,7 +37,9 @@ import {
   imports: [
     CommonModule,
     StatCardComponent,
-    DashboardCardComponent
+    DashboardCardComponent,
+    ModalComponent,
+    ButtonsComponent
   ],
   viewProviders: [provideIcons({
     heroChartBar,
@@ -61,11 +65,27 @@ export class HomeComponent implements OnInit {
   ideaStats: IdeaStats | null = null;
   groupEngagement: GroupEngagement[] = [];
   personalStats: PersonalStats | null = null;
+  showWelcomeInfoModal = false;
+
 
   constructor(private analyticsService: AnalyticsService) { }
 
   ngOnInit(): void {
     this.fetchAnalytics();
+    const hasSeenWelcome = localStorage.getItem('seenWelcomeGuide');
+
+    if (!hasSeenWelcome) {
+      this.showWelcomeInfoModal = true;
+    }
+  }
+
+  closeWelcomeInfo() {
+    this.showWelcomeInfoModal = false;
+
+    localStorage.setItem('seenWelcomeGuide', 'true');
+  }
+  displayWelcomeInfo() {
+    this.showWelcomeInfoModal = true;
   }
 
   fetchAnalytics() {
