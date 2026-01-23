@@ -17,6 +17,7 @@ import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
+import { HostListener, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-ideas',
@@ -97,6 +98,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showIdeaInfoModal = false;
   //showCloseIdea=false;
   ideaIdToClose: string | null = null;
+
+  selectedType: string = '';
+  selectedDomain: string = '';
+  selectedImpact: string = '';
+
+  isDropdownOpen = false;
+  
+  selectedOptionLabel: string = 'All Categories';
 
   constructor(
     private route: ActivatedRoute,
@@ -210,6 +219,65 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.shareDescCount = res.count;
     });
 }
+
+toggleDropdown () {
+  this.isDropdownOpen = !this.isDropdownOpen;
+}
+
+selectCategory(filterType: 'type' | 'domain' | 'impact', value: string) {
+  if (filterType === 'type') this.selectedType = value;
+  if (filterType === 'domain') this.selectedDomain = value;
+  if (filterType === 'impact') this.selectedImpact = value;
+
+  this.filterByCategory({
+    type: this.selectedType,
+    domain: this.selectedDomain,
+    impact: this.selectedImpact
+  });
+}
+
+@ViewChild('dropdown', { static: true }) dropdown!: ElementRef;
+
+@HostListener('document:click', ['$event'])
+onDocumentClick(event: MouseEvent) {
+  if (!this.isDropdownOpen) return;
+
+  if (!this.dropdown.nativeElement.contains(event.target)) {
+    this.isDropdownOpen = false;
+  }
+}
+
+
+
+
+filterByCategory(filters: { type: string; domain: string; impact: string }) {
+  this.ideasService
+    .getIdeasByGroup(this.groupId, filters.type, filters.domain, filters.impact)
+    .subscribe({
+      next: (response) => {
+        this.ideas = response.data ?? [];
+      },
+      error: (err) => {
+        console.error('Error filtering ideas:', err);
+      }
+    });
+}
+
+
+clearAllCategories() {
+  this.selectedType = '';
+  this.selectedDomain = '';
+  this.selectedImpact = '';
+
+  this.selectedOptionLabel = 'All Categories';
+
+  this.filterByCategory({
+    type: '',
+    domain: '',
+    impact: ''
+  });
+}
+
 
   openEditModal(idea: any) {
     this.isEditMode = true;

@@ -22,8 +22,18 @@ export class IdeasService {
   }
 
   // GET all ideas for a group
-  getIdeasByGroup(groupId: string): Observable<ApiResponse<Idea[]>> {
-    const params = new HttpParams().set('groupId', groupId);
+  getIdeasByGroup(groupId: string, type?: string, domain?: string, impact?: string): Observable<ApiResponse<Idea[]>> {
+    let params = new HttpParams().set('groupId', groupId);
+
+    if (type) {
+      params = params.set('type', type);
+    }
+    if (domain) {
+      params = params.set('domain', domain);
+    }
+    if (impact) {
+      params = params.set('impact', impact);
+    }
     return this.http.get<any>(`${this.apiUrl}/view-ideas`, { params }).pipe(
       map(response => this.convertResponse<Idea[]>(response))
     );

@@ -82,7 +82,7 @@ public class IdeaController : ControllerBase
 
     //View all ideas
     [HttpGet("view-ideas")]
-    public async Task<IActionResult> ViewIdeas(int groupId)
+    public async Task<IActionResult> ViewIdeas(int groupId, string? type, string? domain, string? impact)
     {
         //Fetch user
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
@@ -109,8 +109,35 @@ public class IdeaController : ControllerBase
             return NotFound(ApiResponse.Fail("User not in group"));
         }
 
-        //Fetch ideas
-        var ideas = await _context.Ideas.Where(i => i.GroupId == groupId).ToListAsync();
+        //Fetch ideas and votes
+        var ideas = await _context.Ideas
+            .Where(i => i.GroupId == groupId)
+            .Include(i => i.Votes)
+            .ToListAsync();
+
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            ideas = ideas
+                .Where(i => i.Filter != null && i.Filter.Contains(type))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(domain))
+        {
+            ideas = ideas
+                .Where(i => i.Filter != null && i.Filter.Contains(domain))
+                .ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(impact))
+        {
+            ideas = ideas
+                .Where(i => i.Filter != null && i.Filter.Contains(impact))
+                .ToList();
+        }
+        else {
+            _logger.LogInformation("No ideas found for that category");
+        }
         if (ideas.Count == 0)
         {
             _logger.LogInformation("No ideas found in group: {groupName}", group.Name);
@@ -120,7 +147,7 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted, voteCount = idea.Votes.Count, userVoted = idea.Votes.Any(v => v.UserId == userId)});
         }
 
         
