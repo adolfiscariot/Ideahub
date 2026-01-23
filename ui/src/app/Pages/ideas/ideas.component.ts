@@ -95,6 +95,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   ideaIdToDelete: string | null = null;
 
   showIdeaInfoModal = false;
+  //showCloseIdea=false;
+  ideaIdToClose: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -118,8 +120,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-    title: [''],
-    description: ['']
+    title: ['', Validators.required],
+    description: ['', Validators.required],
+    type: ['', Validators.required],
+    domain: ['', Validators.required],
+    impact: ['', Validators.required]
   });
 
   this.setupShareIdeaCharCounters();
@@ -291,6 +296,30 @@ openDeleteIdeaModal (ideaId: string) {
   this.ideaIdToDelete = ideaId;
   this.showDeleteIdeaModal = true;
 }
+
+closeIdeabtn (ideaId: string) {
+  this.ideaIdToClose = ideaId;
+  this.onCloseIdea();
+}
+
+onCloseIdea() {
+    if (!this.ideaIdToClose) return;
+      this.ideasService.closeIdea(this.ideaIdToClose).subscribe({
+        next: (response) => {
+
+          if (response.success) {
+            
+            this.toastService.show('Idea closed successfully!', 'success');
+          } else {
+            this.toastService.show('Failed to close idea: ${response.message}', 'error');
+          }
+        },
+
+        error: (error) => {
+          this.toastService.show('Failed to close idea. Idea has already being closed', 'error');
+        }
+      });
+    }
 
 closeIdeaInfo () {
   this.showIdeaInfoModal = false;
@@ -543,6 +572,7 @@ dontShowIdeaInfoAgain () {
               id: idea.id?.toString() || '',
               title: idea.title || '',
               description: idea.description || '',
+              filter: idea.filter || '',
               UserId: idea.userId || idea.UserId || '',
               userId: idea.userId || idea.UserId || '',
               groupId: this.groupId,
@@ -718,32 +748,48 @@ dontShowIdeaInfoAgain () {
   }
 
 
-  onShareIdea(ideaData: { title: string, description: string }): void {
-    this.isSubmitting = true;
-
-    const request: CreateIdeaRequest = {
-      ...ideaData,
-      groupId: this.groupId
-    };
-
-    this.ideasService.createIdea(request).subscribe({
-      next: (response) => {
-        this.isSubmitting = false;
-        if (response.success) {
-          this.closeShareModal();
-          this.loadIdeas(); // Refresh the list
-          this.toastService.show('Idea created successfully!', 'success');
-        } else {
-          this.toastService.show(`Failed to create idea: ${response.message}`, 'error');
-        }
-      },
-      error: (error) => {
-        this.isSubmitting = false;
-        console.error('Error creating idea:', error);
-        this.toastService.show('An error occurred while creating the idea.', 'error');
-      }
-    });
+onShareIdea(ideaData: { title: string; description: string }): void {
+  
+  if(this.shareIdeaForm.invalid) {
+    this.shareIdeaForm.markAllAsTouched();
+    this.toastService.show('Please fill in all required fields', 'error')
+    return;
   }
+  
+  this.isSubmitting = true;
+
+  const filterArray = [
+    this.shareIdeaForm.get('type')?.value,
+    this.shareIdeaForm.get('domain')?.value,
+    this.shareIdeaForm.get('impact')?.value
+  ].filter(x => x);
+
+  const request: CreateIdeaRequest = {
+    title: ideaData.title,
+    description: ideaData.description,
+    groupId: this.groupId,
+    filter: filterArray
+  };
+
+  this.ideasService.createIdea(request).subscribe({
+    next: (response) => {
+      this.isSubmitting = false;
+      if (response.success) {
+        this.closeShareModal();
+        this.loadIdeas(); // Refresh the list
+        this.toastService.show('Idea created successfully!', 'success');
+      } else {
+        this.toastService.show(`Failed to create idea: ${response.message}`, 'error');
+      }
+    },
+    error: (error) => {
+      this.isSubmitting = false;
+      console.error('Error creating idea:', error);
+      this.toastService.show('An error occurred while creating the idea.', 'error');
+    }
+  });
+}
+
 
   openDescriptionModal(idea: any): void {
     alert(`Full Description:\n\n${idea.description}`);

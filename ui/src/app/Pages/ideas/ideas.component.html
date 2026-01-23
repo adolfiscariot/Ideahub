@@ -286,6 +286,17 @@
               >
                 👁️
               </app-buttons>
+
+              <!-- Vote button (Fixed - with 👍 and count) -->
+              <app-buttons
+                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
+                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
+                [disabled]="isVoting || isUnvoting"
+                title="Vote for this idea"
+              >
+                👍
+                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+              </app-buttons>
               
               <!-- Delete button for idea owner (Fixed - with ✕) -->
               <app-buttons
@@ -297,16 +308,15 @@
               >
                 ✕
               </app-buttons>
-              
-              <!-- Vote button (Fixed - with 👍 and count) -->
+
               <app-buttons
-                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
-                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                [disabled]="isVoting || isUnvoting"
-                title="Vote for this idea"
+                *ngIf="isGroupCreator()"
+                buttonStyleClass="btn-promote"
+                (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)"
+                [disabled]="false"
+                title="Close Idea"
               >
-                👍
-                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+                🛑 Close Idea
               </app-buttons>
             </div>
           </div> 
@@ -375,7 +385,7 @@
     </div>
 
     <div class="form-group">
-      <label>Description</label>
+      <label>Idea Description</label>
       <textarea
         class="form-control-description"
         formControlName="description"
@@ -394,6 +404,67 @@
       </div>
     </div>
 
+    <!-- Add category field-->
+<div class="form-section categories-section">
+
+  
+  <!-- TYPE -->
+  <div class="form-group">
+    <label>Idea Category</label>
+    <label class="category-label">Type</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="new">
+        New
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="type" value="current_process_improvement">
+        Current Process Improvement
+      </label>
+    </div>
+  </div>
+
+  <!-- DOMAIN -->
+  <div class="form-group">
+    <label class="category-label">Domain</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="tech">
+        Tech
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="domain" value="non_tech">
+        Non‑Tech
+      </label>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="form-group">
+    <label class="category-label">Impact</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="financial">
+        Financial
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="productivity">
+        Productivity
+      </label>
+
+      <label class="radio-option">
+        <input type="radio" formControlName="impact" value="workplace-culture">
+        Workplace culture
+      </label> 
+    </div>
+  </div>
+
+</div>
+
+    
   </form>
 
   </div>
@@ -415,7 +486,6 @@
               : onShareIdea(shareIdeaForm.value)
           ">
       </app-buttons>
-
     </div>
   </div>
 

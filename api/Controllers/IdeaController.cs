@@ -61,6 +61,7 @@ public class IdeaController : ControllerBase
             {
                 Title = ideaDto.Title,
                 Description = ideaDto.Description,
+                Filter = ideaDto.Filter,
                 UserId = userId,
                 GroupId = groupId
             };
@@ -119,7 +120,7 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted});
         }
 
         
@@ -281,11 +282,38 @@ public class IdeaController : ControllerBase
             return NotFound(ApiResponse.Fail("Idea not found"));
         }
         idea.IsPromotedToProject = true;
+        idea.Status = IdeaStatus.Closed;
 
         await _context.SaveChangesAsync();
         _logger.LogInformation("Idea {ideaId} promoted to project", ideaId);
         return Ok(ApiResponse.Ok("Idea promoted to project successfully"));
     }
+
+    [Authorize(Policy = "GroupAdminOnly")]
+    [HttpPatch("close-idea")]
+    public async Task<IActionResult> CloseIdea([FromQuery] int ideaId)
+    {
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogError("User not authenticated");
+                return Unauthorized(ApiResponse.Fail("User not authenticated"));
+            }
+        var idea = await _context.Ideas.FindAsync(ideaId);
+        if (idea == null)
+            return NotFound(ApiResponse.Fail("Idea not found"));
+
+        if (idea.Status == IdeaStatus.Closed)
+            return BadRequest(ApiResponse.Fail("Idea already closed"));
+
+        idea.Status = IdeaStatus.Closed;
+        await _context.SaveChangesAsync();
+
+        return Ok(ApiResponse.Ok("Idea closed successfully"));
+    }
+
 
     //Delete an idea
     [HttpDelete("{ideaId}")]

@@ -9,7 +9,7 @@
         <div class="stats-summary" *ngIf="ideaStats">
             <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
                 variant="total"></app-stat-card>
-            <app-stat-card label="Open" [value]="ideaStats.open" icon="heroLockOpen" variant="open"></app-stat-card>
+            <app-stat-card label="Open" [value]="ideaStats.total - ideaStats.promoted" icon="heroLockOpen" variant="open"></app-stat-card>
             <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
                 variant="promoted"></app-stat-card>
             <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed"
@@ -108,4 +108,76 @@
             </div>
         </div>
 
+     <app-modal
+  [isOpen]="showWelcomeInfoModal"
+  title="Welcome Guide"
+  size="md"
+  (closeModal)="closeWelcomeInfo()">
+
+  <div modal-body>
+    <div class="welcome-info-modal">
+      <div class="section">
+
+        <!-- Welcome -->
+        <h3 class="section-title">
+          <span class="icon">👋</span>
+          Welcome to IdeaHub
+        </h3>
+        <p>
+          IdeaHub is Adept Technologies’ internal platform for capturing, tracking, and turning employee ideas into real, executable initiatives.
+        </p>
+
+      </div>
+
+      <div class="section">
+
+        <!-- Getting Started -->
+        <h3 class="section-title">
+          <span class="icon">📊</span>
+          Getting Started
+        </h3>
+
+        <ul class="rule-list">
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>
+                The homepage gives you a quick snapshot of idea activity at Adept and your personal involvement.
+              </span>
+            </div>
+          </li>
+
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>
+                To participate, go to the <strong>Groups</strong> page and join an existing group or create a new one to contribute valuable ideas.
+              </span>
+            </div>
+          </li>
+
+          <li class="rule-item">
+            <div class="rule-header">
+              <span class="bullet"></span>
+              <span>
+                When an idea gains enough support and meets the required threshold, it is promoted into a project. At that point, an overseer is assigned to act as the project owner, and the idea moves from discussion into execution within the company.
+              </span>
+            </div>
+          </li>
+        </ul>
+
+      </div>
     </div>
+  </div>
+
+  <div modal-footer>
+    <div class="modal-footer-content">
+      <app-buttons
+        [buttonText]="'Got it, let’s go!'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="closeWelcomeInfo()">
+      </app-buttons>
+    </div>
+  </div>
+
+</app-modal>

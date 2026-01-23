@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using api.Models;
+using System.Text.Json;
 
 namespace api.Data;
 
@@ -109,6 +110,13 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.Property(i => i.DeletedAt)
                 .HasColumnName("DeletedAt");
 
+            i.Property(i => i.Filter)
+                .IsRequired()
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)!
+                );
             //Foreign Keys
             i.HasOne(i => i.User)
                 .WithMany(u => u.Ideas)

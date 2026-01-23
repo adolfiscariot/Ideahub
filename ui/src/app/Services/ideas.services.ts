@@ -46,7 +46,8 @@ export class IdeasService {
     const params = new HttpParams().set('groupId', request.groupId);
     return this.http.post<any>(`${this.apiUrl}/create-idea`, {
       title: request.title,
-      description: request.description
+      description: request.description,
+      filter: request.filter
     }, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
@@ -57,6 +58,16 @@ export class IdeasService {
     console.log('Updating idea:', ideaId, updateIdea);
     return this.http.put<any>(`${this.apiUrl}/${ideaId}`, updateIdea).pipe(
       map(response => this.convertResponse<Idea>(response))
+    );
+  }
+
+  // Close idea
+  closeIdea(ideaId: string): Observable<ApiResponse<any>> {
+    return this.http.patch<ApiResponse<any>>(
+      `${this.apiUrl}/close-idea?ideaId=${ideaId}`,
+      null
+    ).pipe(
+      map(res => this.convertResponse<any>(res))
     );
   }
 
