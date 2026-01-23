@@ -12,8 +12,8 @@ using api.Data;
 namespace Ideahub.Migrations
 {
     [DbContext(typeof(IdeahubDbContext))]
-    [Migration("20260121085017_AddFilterJsonb")]
-    partial class AddFilterJsonb
+    [Migration("20260123072938_InitialBaseline")]
+    partial class InitialBaseline
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
