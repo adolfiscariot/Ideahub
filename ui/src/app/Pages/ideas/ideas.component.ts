@@ -98,6 +98,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   //showCloseIdea=false;
   ideaIdToClose: string | null = null;
 
+  showClosedIdeas = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -307,6 +309,7 @@ onCloseIdea() {
           if (response.success) {
             
             this.toastService.show('Idea closed successfully!', 'success');
+            this.loadIdeas();
           } else {
             this.toastService.show('Failed to close idea: ${response.message}', 'error');
           }
@@ -586,16 +589,18 @@ dontShowIdeaInfoAgain () {
               groupName: idea.name || '',
               name: idea.name || ''
             };
-
             return mappedIdea;
+          })
+          .filter(idea => {
+            return this.showClosedIdeas
+            ? idea.status === 'Closed'
+            : idea.status !== 'Closed';
           });
-
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
             title: i.title,
             promoted: i.isPromotedToProject
           })));
-
           // Then fetch vote counts for all ideas
           if (this.ideas.length > 0) {
             await this.fetchAndUpdateVoteCounts();
@@ -1174,6 +1179,7 @@ formatVoteDate(date: any): string {
   this.showProjectModal = true;
 }
 
+
 createProjectFromIdea(): void {
   if (!this.currentIdeaToPromote || !this.groupId) return;
   if (!this.projectData.overseenByEmail) {
@@ -1224,6 +1230,7 @@ private handleSuccess(idea: Idea, response: any): void {
     }
     
     this.ideas = [...this.ideas];
+    this.loadIdeas();
     this.toastService.show('Project created', 'success');
     
     this.currentIdeaToPromote = null;
