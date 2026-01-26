@@ -370,6 +370,7 @@ openDeleteIdeaModal (ideaId: string) {
 closeIdeabtn (ideaId: string) {
   this.ideaIdToClose = ideaId;
   this.onCloseIdea();
+  this.selectedIdea = null;
 }
 
 onCloseIdea() {
@@ -1321,6 +1322,7 @@ private handleSuccess(idea: Idea, response: any): void {
     
     this.ideas = [...this.ideas];
     this.toastService.show('Project created', 'success');
+    this.selectedIdea = false;
     this.loadIdeas();
     
     this.currentIdeaToPromote = null;
