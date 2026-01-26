@@ -107,6 +107,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   
   selectedOptionLabel: string = 'All Categories';
 
+
+  isReadyForPromotion = true;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -1204,6 +1206,10 @@ formatVoteDate(date: any): string {
           // Count only active (non-deleted) votes
           const activeVotes = response.data.filter((vote: any) => !vote.isDeleted);
           idea.voteCount = activeVotes.length;
+
+          const totalGroupMembers = `${this.groupMembers.length}`;
+          const PROMOTION_THRESHOLD = Math.ceil(Number(totalGroupMembers)* 0.5);
+          idea.isReadyForPromotion = idea.voteCount >= PROMOTION_THRESHOLD;
 
           console.log(`Idea "${idea.title}": ${activeVotes.length} votes`);
 

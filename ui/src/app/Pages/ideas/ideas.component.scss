@@ -239,6 +239,18 @@
   font-size: 12px;
 }
 
+.promotion-badge-title {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background-color: #fff3c4;
+  color: #8a6d00;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+
 /* Fullscreen semi-transparent backdrop */
 .modal-backdrop {
   position: fixed;

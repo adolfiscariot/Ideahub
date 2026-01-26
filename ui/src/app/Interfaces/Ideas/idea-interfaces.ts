@@ -10,7 +10,8 @@ export interface Idea {
   updatedAt: Date;
   status: string;
   UserId: string;        
-  userId?: string;       
+  userId?: string; 
+  isReadyForPromotion?: boolean;      
   
   groupId: string;
   userName?: string;
