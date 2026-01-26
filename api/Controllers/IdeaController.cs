@@ -147,7 +147,7 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted, voteCount = idea.Votes.Count, userVoted = idea.Votes.Any(v => v.UserId == userId)});
+            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted, voteCount = idea.Votes.Count, userVoted = idea.Votes.Any(v => v.UserId == userId), Status = idea.Status.ToString()});
         }
 
         

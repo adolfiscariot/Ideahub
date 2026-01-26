@@ -107,6 +107,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   
   selectedOptionLabel: string = 'All Categories';
 
+  showClosedIdeas = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -378,6 +380,7 @@ onCloseIdea() {
           if (response.success) {
             
             this.toastService.show('Idea closed successfully!', 'success');
+            this.loadIdeas();
           } else {
             this.toastService.show('Failed to close idea: ${response.message}', 'error');
           }
@@ -660,6 +663,11 @@ dontShowIdeaInfoAgain () {
             };
 
             return mappedIdea;
+          })
+          .filter( idea => {
+            return this.showClosedIdeas 
+            ? idea.status === 'Closed'
+            : idea.status !== 'Closed';
           });
 
           console.log(`Mapped ${this.ideas.length} ideas`);
@@ -1313,6 +1321,7 @@ private handleSuccess(idea: Idea, response: any): void {
     
     this.ideas = [...this.ideas];
     this.toastService.show('Project created', 'success');
+    this.loadIdeas();
     
     this.currentIdeaToPromote = null;
     this.projectData = { title: '', description: '', overseenByEmail: '' };
