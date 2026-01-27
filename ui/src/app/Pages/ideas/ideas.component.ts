@@ -107,8 +107,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   
   selectedOptionLabel: string = 'All Categories';
 
-  showClosedIdeas = false;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -665,9 +663,7 @@ dontShowIdeaInfoAgain () {
 
             return mappedIdea;
           })
-          .filter( idea => {
-            return this.showClosedIdeas || idea.status !== 'Closed';
-          });
+          .filter( idea => return idea.status !== 'Closed');
 
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
