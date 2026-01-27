@@ -10,6 +10,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public IdeahubDbContext(DbContextOptions<IdeahubDbContext> options) : base(options){}
     public DbSet<Group> Groups {get; set;}
     public DbSet<Idea> Ideas {get; set;}
+    public DbSet<Comment> Comments {get; set;}
     public DbSet<Project> Projects {get; set;}
     public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
     public DbSet<Vote> Votes {get; set;}
@@ -137,12 +138,45 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithOne(v => v.Idea)
                 .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its votes go with it.
 
+            i.HasMany(i => i.Comments)
+                .WithOne(c => c.Idea)
+                .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its comments go with it
+
             //Index
             i.HasIndex(i => i.Title);
             i.HasIndex(i => i.Status);
             i.HasIndex(i => i.GroupId);
             i.HasIndex(i => i.UserId);
             i.HasIndex(i => i.IsDeleted);
+        });
+
+         // Comments Configuration
+         builder.Entity<Comment>(c =>
+        {
+            c.HasKey(c => c.Id);
+
+            //Properties
+            c.Property(c => c.Content)
+                .HasColumnType("text");
+
+            c.Property(c => c.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            //Foreign Keys
+            c.HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId);
+                
+            c.HasOne(c => c.Idea)
+                .WithMany(i => i.Comments)
+                .HasForeignKey(c => c.IdeaId);
+
+            //Index
+            c.HasIndex(c => c.Content);
+            c.HasIndex(c => c.UserId);
+            c.HasIndex(c => c.IdeaId);
         });
 
         //Project Configuration

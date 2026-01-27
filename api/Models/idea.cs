@@ -50,6 +50,7 @@ public class Idea
     public Group Group {get; set;} = null!;
     public ICollection<Project> Projects {get; set;} = new List<Project>();
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();
+    public ICollection<Comment> Comments {get; set;} = new List<Comment>();
 }
 
 public enum IdeaStatus 
