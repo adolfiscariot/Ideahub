@@ -666,9 +666,7 @@ dontShowIdeaInfoAgain () {
             return mappedIdea;
           })
           .filter( idea => {
-            return this.showClosedIdeas 
-            ? idea.status === 'Closed'
-            : idea.status !== 'Closed';
+            return this.showClosedIdeas || idea.status !== 'Closed';
           });
 
           console.log(`Mapped ${this.ideas.length} ideas`);
