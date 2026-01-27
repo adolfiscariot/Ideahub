@@ -108,7 +108,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   selectedOptionLabel: string = 'All Categories';
 
 
-  isReadyForPromotion = true;
+  isReadyForPromotion = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
