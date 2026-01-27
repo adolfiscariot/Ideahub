@@ -266,6 +266,7 @@
           <div class="idea-card-header">
             <div class="idea-header-top">
               <h3 class="idea-title">{{ idea.title }}</h3>
+              <span *ngIf="idea.isReadyForPromotion" class="promotion-badge-title"> ⭐ Ready for Promotion </span>
             </div>
             
             <div class="idea-card-meta">
