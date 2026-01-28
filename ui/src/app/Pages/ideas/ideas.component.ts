@@ -662,10 +662,9 @@ dontShowIdeaInfoAgain () {
               groupName: idea.name || '',
               name: idea.name || ''
             };
-
             return mappedIdea;
           })
-          .filter( idea => return idea.status !== 'Closed');
+          .filter( idea => idea.status !== 'Closed');
 
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
