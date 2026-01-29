@@ -756,7 +756,6 @@ dontShowIdeaInfoAgain () {
               groupName: idea.name || '',
               name: idea.name || ''
             };
-
             return mappedIdea;
           })
         );
