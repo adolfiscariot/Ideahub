@@ -4,7 +4,7 @@ import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } 
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
-import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest } from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest, viewComment, createComment} from '../../Interfaces/Ideas/idea-interfaces';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { VoteService } from '../../Services/vote.service';
@@ -18,6 +18,7 @@ import { ModalComponent } from '../../Components/modal/modal.component';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 import { HostListener, ViewChild, ElementRef } from '@angular/core';
+import { CommentsService } from '../../Services/comments.service';
 
 @Component({
   selector: 'app-ideas',
@@ -107,8 +108,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
   
   selectedOptionLabel: string = 'All Categories';
 
-
   isReadyForPromotion = false;
+
+  comments: viewComment[] = [];
+  newCommentContent: string = '';
+  isLoadingComments: boolean = false;
+
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -119,6 +125,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private dialog: MatDialog,
     private projectService: ProjectService,
+    private commentService: CommentsService,
     private fb: FormBuilder
   ) {
   }
@@ -249,7 +256,9 @@ onDocumentClick(event: MouseEvent) {
   }
 }
 
-
+private filterOutClosed(ideas: Idea[]): Idea[] {
+  return ideas.filter(idea => idea.status !== 'Closed');
+}
 
 
 filterByCategory(filters: { type: string; domain: string; impact: string }) {
@@ -257,7 +266,7 @@ filterByCategory(filters: { type: string; domain: string; impact: string }) {
     .getIdeasByGroup(this.groupId, filters.type, filters.domain, filters.impact)
     .subscribe({
       next: (response) => {
-        this.ideas = response.data ?? [];
+        this.ideas = this.filterOutClosed(response.data ?? []);
       },
       error: (err) => {
         console.error('Error filtering ideas:', err);
@@ -306,7 +315,91 @@ clearAllCategories() {
   selectIdea(idea: any): void {
     console.log('Selecting idea:', idea);
     this.selectedIdea = idea;
+    this.loadComments(idea.id);  
   }
+
+loadComments(ideaId: number) {
+  this.isLoadingComments = true;
+  this.commentService.getComments(ideaId).subscribe({
+    next: (res) => {
+      this.isLoadingComments = false;
+      if (res.success && res.data) {
+        this.comments = res.data.sort((a, b) =>
+  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+);
+
+       
+      } else {
+        this.comments = [];
+      }
+    },
+    error: (err) => {
+      console.error('Failed to load comments', err);
+      this.isLoadingComments = false;
+    }
+  });
+}
+
+  
+addComment() {
+  const content = this.newCommentContent?.trim();
+  if (!content) {
+    return this.toastService.show('To post a comment, you are required to provide one', 'info');
+  }
+
+  this.commentService.postComment(this.selectedIdea.id, { content }).subscribe({
+    next: (res) => {
+      if (res.message && res.data) {
+
+        // Insert new comment at the TOP
+        this.comments.unshift(res.data);
+
+        this.newCommentContent = '';
+        this.toastService.show('Comment posted', 'success');
+      } else {
+        this.toastService.show('Failed to post comment', 'error');
+      }
+    },
+    error: (err) => console.error('Error adding comment', err)
+  });
+}
+
+deleteComment(commentId: number) {
+  this.commentService.deleteComment(commentId).subscribe({
+    next: (res) => {
+      if (res.success) {
+        this.comments = this.comments.filter(c => c.id !== commentId);
+        this.toastService.show('Comment deleted', 'success');
+      } else {
+        this.toastService.show('Failed to delete comment', 'error');
+      }
+    },
+    error: (err) => console.error('Error deleting comment', err)
+  });
+}  
+
+formatRelativeTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+
+  const seconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+
+  // Under 1 minute
+  if (seconds < 60) return 'Just now';
+
+  // Under 1 hour
+  if (minutes < 60) return `${minutes} min ago`;
+
+  // Under 24 hours
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+
+  // 24+ hours → show date + time
+  return date.toLocaleString();
+}
+
 
   viewRequests(groupId: string) {
     console.log('Fetching pending requests for group:', groupId);
@@ -633,7 +726,8 @@ dontShowIdeaInfoAgain () {
         console.log('API Response:', response);
 
         if (response.success && response.data) {
-          this.ideas = response.data.map((idea: any) => {
+          this.ideas = this.filterOutClosed(
+          response.data.map((idea: any) => {
             console.log(`Mapping idea "${idea.title}":`, {
               id: idea.id,
               isPromotedToProject: idea.isPromotedToProject,
@@ -664,7 +758,7 @@ dontShowIdeaInfoAgain () {
             };
             return mappedIdea;
           })
-          .filter( idea => idea.status !== 'Closed');
+        );
 
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
