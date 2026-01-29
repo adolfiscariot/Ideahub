@@ -62,7 +62,17 @@ public class CommentController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("New comment created by {userEmail}", userEmail);
-            return Ok(ApiResponse.Ok($"New comment Created by {userEmail}"));
+
+             return Ok(ApiResponse.Ok(
+                $"New comment Created by {userEmail}",
+                new {
+                    id = comment.Id,
+                    content = comment.Content,
+                    createdAt = comment.CreatedAt,
+                    userId = comment.UserId,
+                    ideaId = comment.IdeaId
+                }
+            ));
         }
         catch (Exception e)
         {
