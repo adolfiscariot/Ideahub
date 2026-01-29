@@ -22,6 +22,7 @@ public class IdeahubUser : IdentityUser
     //Navigation Properties
     public ICollection<UserGroup> UserGroups {get; set;} = new List<UserGroup>();
     public ICollection<Idea> Ideas {get; set;} = new List<Idea>();
+    public ICollection<Comment> Comments {get; set;} = new List<Comment>();
     public ICollection<Project> ProjectsCreated {get; set;} = new List<Project>();
     public ICollection<Project> ProjectsOverseen {get; set;} = new List<Project>();
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();
