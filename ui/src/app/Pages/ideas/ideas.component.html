@@ -422,7 +422,51 @@
         <div class="details-section">
           <p class="details-idea-description">{{ selectedIdea.description }}</p>
         </div>
-        
+  
+        <div class="comments-section">
+          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+
+          <div class="new-comment">
+            <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
+            <app-buttons
+              [buttonText]="'Post Comment'"
+              [buttonStyleClass]="'btn-promote'"
+              [disabled]="!newCommentContent.trim()"
+              (click)="addComment()">
+            </app-buttons>
+          </div>
+
+          <div id="comments-list">
+            <div *ngFor="let comment of comments" class="comment" [class.own-comment]="comment.userId === currentUserId">
+
+              <div class="comment-header">
+                <span class="comment-author">
+                  {{ comment.userId === currentUserId ? 'You' : 'User' }}
+                </span>
+
+                <span class="comment-date">
+                  {{ formatRelativeTime(comment.createdAt) }}
+                </span>
+
+                <!-- Delete icon only on hover -->
+                <button class="delete-icon" (click)="deleteComment(comment.id)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14H6L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                    <path d="M9 6V4h6v2"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <p class="comment-text">{{ comment.content }}</p>
+
+            </div>
+          </div>
+        </div>
+
         <div class="details-section" *ngIf="selectedIdea.userName">
           <h4 class="details-section-title">Author</h4>
           <div class="author-info">
@@ -879,3 +923,4 @@
     </div>
 
 </app-modal>
+
