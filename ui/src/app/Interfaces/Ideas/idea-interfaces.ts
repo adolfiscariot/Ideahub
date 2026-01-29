@@ -77,3 +77,15 @@ export interface VoteResponse {
   userId?: string;
   createdAt?: Date;
 }
+
+export interface createComment {
+  content: string,
+}
+
+export interface viewComment {
+  id: number,
+  content: string,
+  createdAt: string,
+  userId?: string,
+  ideaId?: number
+}
