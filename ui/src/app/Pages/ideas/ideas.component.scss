@@ -239,6 +239,107 @@
   font-size: 12px;
 }
 
+.promotion-badge-title {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  background-color: #fff3c4;
+  color: #8a6d00;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+/* Container */
+.comments-section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.comments-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+/* New Comment Input */
+.new-comment textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: white;
+  resize: vertical;
+  max-height: 200px ;
+}
+
+.new-comment textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+.new-comment app-buttons {
+  margin-top: 8px;
+  display: inline-block;
+}
+
+/* Comment Card */
+.comment {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+/* Header */
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #374151;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-right: 540px;
+}
+
+/* Delete Icon (hover only) */
+.delete-icon {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  color: #ef4444;
+}
+
+.comment.own-comment:hover .delete-icon {
+  opacity: 1;
+}
+
+/* Comment Text */
+.comment-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+
 /* Fullscreen semi-transparent backdrop */
 .modal-backdrop {
   position: fixed;
@@ -674,6 +775,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 
 .sort-label {
@@ -717,6 +819,83 @@
   color: #ddd;
   font-size: 14px;
   margin: 0 2px;
+}
+/* Container */
+.filter-dropdown {
+  position: relative;
+  width: 200px;
+  color: purple;
+}
+
+/* Header */
+.dropdown-header {
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  height: 34px;
+  margin-left: 10px;
+}
+
+.dropdown-header:hover {
+  border-color: #b5b5b5;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.dropdown-arrow {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Dropdown Panel */
+.dropdown-content {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  animation: fadeIn 0.15s ease-out;
+}
+
+
+/* Section header */
+.section-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin: 12px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Filter option row */
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.filter-option input[type="radio"] {
+  accent-color: #ee82ee; 
+  cursor: pointer;
+}
+
+.filter-option label {
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
 }
 
 /* ============================

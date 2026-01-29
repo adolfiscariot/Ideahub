@@ -137,6 +137,91 @@
           </app-buttons>
         </div>
       </div>
+
+    <div class="filter-container" #dropdown>
+  <div class="filter-dropdown">
+    <div class="dropdown-header" (click)="toggleDropdown()">
+      <span>{{ selectedOptionLabel || 'All Categories' }}</span>
+      <span class="dropdown-arrow">▼</span>
+    </div>
+
+    <div class="dropdown-content" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+
+      <!-- All Categories -->
+     <div class="filter-option">
+        <input 
+          type="radio"
+          id="all_categories"
+          name="all"
+          [checked]="!selectedType && !selectedDomain && !selectedImpact"
+          (change)="clearAllCategories()">
+        <label for="all_categories">All Categories</label>
+      </div>
+
+
+      <!-- TYPE -->
+      <div class="filter-section">
+  <div class="section-header">TYPE</div>
+
+  <div class="filter-option">
+    <input type="radio" name="type" value="new"
+      [(ngModel)]="selectedType"
+      (change)="selectCategory('type', 'new')">
+    <label>New Ideas</label>
+  </div>
+
+  <div class="filter-option">
+    <input type="radio" name="type" value="current_process_improvement"
+      [(ngModel)]="selectedType"
+      (change)="selectCategory('type', 'current_process_improvement')">
+    <label>Process Improvement</label>
+  </div>
+</div>
+
+
+      <!-- DOMAIN -->
+      <div class="filter-section">
+        <div class="section-header">DOMAIN</div>
+        <div class="filter-option">
+          <input type="radio" id="tech" name="domain" value="tech"
+            [(ngModel)]="selectedDomain"
+            (change)="selectCategory('domain', 'tech')">
+          <label for="tech">Tech</label>
+        </div>
+        <div class="filter-option">
+          <input type="radio" id="non_tech" name="domain" value="non_tech"
+            [(ngModel)]="selectedDomain"
+            (change)="selectCategory('domain', 'non_tech')">
+          <label for="non_tech">Non-Tech</label>
+        </div>
+      </div>
+
+      <!-- IMPACT -->
+      <div class="filter-section">
+        <div class="section-header">IMPACT</div>
+        <div class="filter-option">
+          <input type="radio" id="culture" name="impact" value="workplace_culture"
+            [(ngModel)]="selectedImpact"
+            (change)="selectCategory('impact', 'workplace_culture')">
+          <label for="culture">Workplace Culture</label>
+        </div>
+        <div class="filter-option">
+          <input type="radio" id="financial" name="impact" value="financial"
+            [(ngModel)]="selectedImpact"
+            (change)="selectCategory('impact', 'financial')">
+          <label for="financial">Financial</label>
+        </div>
+        <div class="filter-option">
+          <input type="radio" id="productivity" name="impact" value="productivity"
+            [(ngModel)]="selectedImpact"
+            (change)="selectCategory('impact', 'productivity')">
+          <label for="productivity">Productivity</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
     </div>
 
     <!-- Loading State -->
@@ -145,8 +230,13 @@
       <p>Loading ideas...</p>
     </div>
     
+    <div *ngIf="ideas.length === 0 && (selectedType || selectedDomain || selectedImpact)">
+      <p class="empty-filter">🔍 No ideas match these filters</p>
+      <p class="empty-filter-sub">Try adjusting your filters.</p>
+    </div>
+
     <!-- No Ideas State -->
-    <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal" class="no-ideas">
+    <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact" class="no-ideas">
       <div class="no-ideas-content">
         <div class="no-ideas-icon">💡</div>
         <h3>No ideas yet</h3>
@@ -176,6 +266,7 @@
           <div class="idea-card-header">
             <div class="idea-header-top">
               <h3 class="idea-title">{{ idea.title }}</h3>
+              <span *ngIf="idea.isReadyForPromotion" class="promotion-badge-title"> ⭐ Ready for Promotion </span>
             </div>
             
             <div class="idea-card-meta">
@@ -331,7 +422,51 @@
         <div class="details-section">
           <p class="details-idea-description">{{ selectedIdea.description }}</p>
         </div>
-        
+  
+        <div class="comments-section">
+          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+
+          <div class="new-comment">
+            <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
+            <app-buttons
+              [buttonText]="'Post Comment'"
+              [buttonStyleClass]="'btn-promote'"
+              [disabled]="!newCommentContent.trim()"
+              (click)="addComment()">
+            </app-buttons>
+          </div>
+
+          <div id="comments-list">
+            <div *ngFor="let comment of comments" class="comment" [class.own-comment]="comment.userId === currentUserId">
+
+              <div class="comment-header">
+                <span class="comment-author">
+                  {{ comment.userId === currentUserId ? 'You' : 'User' }}
+                </span>
+
+                <span class="comment-date">
+                  {{ formatRelativeTime(comment.createdAt) }}
+                </span>
+
+                <!-- Delete icon only on hover -->
+                <button class="delete-icon" (click)="deleteComment(comment.id)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6l-1 14H6L5 6"></path>
+                    <path d="M10 11v6"></path>
+                    <path d="M14 11v6"></path>
+                    <path d="M9 6V4h6v2"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <p class="comment-text">{{ comment.content }}</p>
+
+            </div>
+          </div>
+        </div>
+
         <div class="details-section" *ngIf="selectedIdea.userName">
           <h4 class="details-section-title">Author</h4>
           <div class="author-info">
@@ -456,7 +591,7 @@
       </label>
 
       <label class="radio-option">
-        <input type="radio" formControlName="impact" value="workplace-culture">
+        <input type="radio" formControlName="impact" value="workplace_culture">
         Workplace culture
       </label> 
     </div>
@@ -788,3 +923,4 @@
     </div>
 
 </app-modal>
+

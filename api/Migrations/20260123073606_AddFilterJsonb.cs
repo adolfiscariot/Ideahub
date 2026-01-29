@@ -10,13 +10,19 @@ namespace Ideahub.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.AddColumn<string>(
+                name: "Filter",
+                table: "Ideas",
+                type: "jsonb",
+                nullable: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.DropColumn(
+                name: "Filter",
+                table: "Ideas");
         }
+
     }
 }

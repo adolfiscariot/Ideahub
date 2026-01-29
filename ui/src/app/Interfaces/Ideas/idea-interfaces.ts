@@ -10,7 +10,8 @@ export interface Idea {
   updatedAt: Date;
   status: string;
   UserId: string;        
-  userId?: string;       
+  userId?: string; 
+  isReadyForPromotion?: boolean;      
   
   groupId: string;
   userName?: string;
@@ -75,4 +76,16 @@ export interface VoteResponse {
   ideaId?: string;
   userId?: string;
   createdAt?: Date;
+}
+
+export interface createComment {
+  content: string,
+}
+
+export interface viewComment {
+  id: number,
+  content: string,
+  createdAt: string,
+  userId?: string,
+  ideaId?: number
 }
