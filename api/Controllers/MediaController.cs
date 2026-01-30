@@ -102,7 +102,7 @@ public class MediaController : ControllerBase
             if (media == null)
                 return NotFound(ApiResponse.Fail("Media not found"));
 
-            // Optional: allow only uploader or admin to delete
+            // allow only uploader to delete
             if (media.UserId != userId)
                 return Unauthorized(ApiResponse.Fail("Not authorized to delete this media"));
                 
