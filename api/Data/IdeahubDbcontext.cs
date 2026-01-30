@@ -11,6 +11,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Group> Groups {get; set;}
     public DbSet<Idea> Ideas {get; set;}
     public DbSet<Comment> Comments {get; set;}
+    public DbSet<Media> Media {get; set;}
     public DbSet<Project> Projects {get; set;}
     public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
     public DbSet<Vote> Votes {get; set;}
@@ -401,5 +402,54 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         {
             r.ToTable("Roles");
         });
+
+        // Media Configuration
+        builder.Entity<Media>(m =>
+        {
+            m.HasKey(m => m.Id);
+
+            m.Property(m => m.FilePath)
+                .HasMaxLength(512)
+                .IsRequired();
+
+            m.Property(m => m.MediaType)
+                .IsRequired()
+                .HasConversion<string>(); 
+
+            m.Property(m => m.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            // Foreign Keys
+            m.HasOne(m => m.Idea)
+                .WithMany(i => i.Media)
+                .HasForeignKey(m => m.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.HasOne(m => m.Project)
+                .WithMany(p => p.Media)
+                .HasForeignKey(m => m.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.Comment)
+                .WithMany(c => c.Media)
+                .HasForeignKey(m => m.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            m.HasIndex(m => m.IdeaId);
+            m.HasIndex(m => m.UserId);
+            m.HasIndex(m => m.ProjectId);
+            m.HasIndex(m => m.CommentId);
+            m.HasIndex(m => m.MediaType);
+
+        });
+
     }
 }
