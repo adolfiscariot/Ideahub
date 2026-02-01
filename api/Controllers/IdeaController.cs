@@ -71,7 +71,11 @@ public class IdeaController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("New idea created by {userEmail}", userEmail);
-            return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}"));
+            return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}",
+            new {
+                    id = idea.Id
+                } 
+            ));
         }
         catch (Exception e)
         {
