@@ -14,6 +14,7 @@ using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.FileProviders;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -161,6 +162,17 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 //3. Build the app
 var app = builder.Build();
+
+// Serve media files under /uploads
+var mediaPath = Path.Combine(builder.Environment.ContentRootPath, "Storage", "media");
+if (!Directory.Exists(mediaPath))
+    Directory.CreateDirectory(mediaPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(mediaPath),
+    RequestPath = "/uploads"
+});
 
 // APPLY EF MIGRATIONS HERE
 using var scope = app.Services.CreateScope();
