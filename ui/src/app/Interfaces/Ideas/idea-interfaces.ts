@@ -12,7 +12,8 @@ export interface Idea {
   UserId: string;        
   userId?: string; 
   isReadyForPromotion?: boolean;      
-  
+  mediaCount: number;
+
   groupId: string;
   userName?: string;
   voteCount?: number;
@@ -21,7 +22,7 @@ export interface Idea {
   userVoteId?: string;
   
   groupName?: string;
-  name?: string;    
+  name?: string; 
 } 
 
 export interface CreateIdeaRequest {
@@ -87,5 +88,7 @@ export interface viewComment {
   content: string,
   createdAt: string,
   userId?: string,
-  ideaId?: number
+  ideaId?: number,
+  mediaCount?: number,
+  mediaItems?: any[];
 }
