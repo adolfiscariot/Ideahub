@@ -1,5 +1,5 @@
 // src/environments/environment.prod.ts
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://<hosted_ip>'
+  apiBaseUrl: 'http://44.211.34.131:5065'
 };
