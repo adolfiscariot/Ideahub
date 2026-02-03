@@ -11,7 +11,7 @@
   box-sizing: border-box;
 }
 
-.stat-privacy{
+.stat-privacy {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
   padding: 6px;
@@ -215,7 +215,7 @@
 /* Groups Container */
 .groups-container {
   max-width: 100%;
-  padding: 50px;
+  padding: 4rem;
 }
 
 /* Header */
@@ -272,7 +272,7 @@
 :host ::ng-deep .mat-mdc-paginator-range-label {
   font-size: 13px;
   color: #4a5568;
-  
+
 }
 
 :host ::ng-deep .mat-mdc-icon-button {
@@ -320,21 +320,23 @@
 /* Grid container */
 [modal-body] .group-details-content {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns */
+  grid-template-columns: 1fr 1fr;
+  /* 2 columns */
   gap: 20px;
   padding: 10px 5px;
 }
 
 /* Make the first item (Description) span full width */
 [modal-body] .group-details-content .detail-row:first-child {
-  grid-column: 1 / -1; /* spans both columns */
+  grid-column: 1 / -1;
+  /* spans both columns */
   background: #fafafa;
 }
 
 /* Detail block styling */
 .detail-row {
- 
-  
+
+
   border-radius: 8px;
   padding: 14px 16px;
   display: flex;
@@ -386,7 +388,7 @@
   margin-top: 0.25rem;
 }
 
-.delete-confirm-content{
+.delete-confirm-content {
   margin: 50px;
 }
 
@@ -405,9 +407,12 @@
 }
 
 .auto-expand {
-  overflow-y: auto;       /* allow scrolling */
-  resize: none;           /* prevent manual drag */
-  max-height: 500px;      /* stop growing after this */
+  overflow-y: auto;
+  /* allow scrolling */
+  resize: none;
+  /* prevent manual drag */
+  max-height: 500px;
+  /* stop growing after this */
 }
 
 .create-group-header-btn:hover,
@@ -502,18 +507,19 @@
   border-radius: 8px;
   padding: 20px;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%; 
+  height: 100%;
 }
 
 .group-top {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* description can expand downward */
+  flex-grow: 1;
+  /* description can expand downward */
 }
 
 
@@ -530,7 +536,8 @@
 /* Description */
 .group-description {
   margin-top: 8px;
-  max-height: 80px;   /* prevents pushing stats down */
+  max-height: 80px;
+  /* prevents pushing stats down */
   overflow: hidden;
   line-height: 1.4;
   font-size: 14px;
@@ -538,7 +545,7 @@
 
 /* Bottom Section */
 .group-bottom {
-  margin-top: auto; 
+  margin-top: auto;
 }
 
 
@@ -550,8 +557,8 @@
 }
 
 .group-title-section {
-  flex: 1; 
-  min-width: 0; 
+  flex: 1;
+  min-width: 0;
 }
 
 .group-name {
@@ -560,11 +567,12 @@
   margin-bottom: -25px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* limit to 2 lines */
+  -webkit-line-clamp: 2;
+  /* limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word; 
+  word-break: break-word;
 }
 
 
@@ -578,6 +586,7 @@
   border-bottom: 1px solid #eee;
   align-items: center;
 }
+
 .stat {
   display: flex;
   align-items: center;

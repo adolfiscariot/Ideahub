@@ -1,15 +1,16 @@
 .ideas-container {
-  max-width: 1650px;
-  margin: 60px;
-  padding: 10px;
+  max-width: 100%;
+  padding: 4rem;
   background: #ffffff;
-  height: 80vh;
-  width: 100%;
+  height: 100vh;
   transition: all 0.35s ease;
-  display: flex;              /* side-by-side layout */
-  flex-direction: row;        /* horizontal split */
+  display: flex;
+  /* side-by-side layout */
+  flex-direction: row;
+  /* horizontal split */
   align-items: stretch;
-  gap: 20px;               /* spacing between panels */
+  gap: 20px;
+  /* spacing between panels */
 }
 
 /* Category Section Styling */
@@ -108,7 +109,7 @@
 }
 
 /* Focus state */
-.radio-option input[type="radio"]:focus + .radio-label {
+.radio-option input[type="radio"]:focus+.radio-label {
   outline: 2px solid #007bff;
   outline-offset: 2px;
 }
@@ -119,7 +120,7 @@
     flex-direction: row;
     flex-wrap: wrap;
   }
-  
+
   .radio-option {
     flex: 1;
     min-width: 0px;
@@ -130,13 +131,15 @@
    LEFT PANEL (Ideas List)
 ============================ */
 .ideas-list-panel {
-  flex: 1;                    /* take remaining space */
-  min-width: 0;               /* prevent overflow */
+  flex: 1;
+  /* take remaining space */
+  min-width: 0;
+  /* prevent overflow */
   border-right: 1px solid #e0e0e0;
   padding-right: 20px;
   word-wrap: break-word;
   overflow-y: auto;
-  
+
 }
 
 .share-idea-form {
@@ -162,6 +165,7 @@
   justify-content: center;
   z-index: 1000;
 }
+
 .member-leave-group,
 .delete-idea {
   margin: 30px;
@@ -182,9 +186,12 @@
 }
 
 .auto-expand {
-  overflow-y: auto;       /* allow scrolling */
-  resize: none;           /* prevent manual drag */
-  max-height: 500px;      /* stop growing after this */
+  overflow-y: auto;
+  /* allow scrolling */
+  resize: none;
+  /* prevent manual drag */
+  max-height: 500px;
+  /* stop growing after this */
 }
 
 /* Error Message */
@@ -276,12 +283,12 @@
   font-size: 14px;
   background: white;
   resize: vertical;
-  max-height: 200px ;
+  max-height: 200px;
 }
 
 .new-comment textarea:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
 .new-comment app-buttons {
@@ -352,8 +359,10 @@
   justify-content: center;
   align-items: center;
 
-  background: rgba(0, 0, 0, 0.6); /* 👈 THIS is the key */
-  backdrop-filter: blur(3px);     /* optional but nice */
+  background: rgba(0, 0, 0, 0.6);
+  /* 👈 THIS is the key */
+  backdrop-filter: blur(3px);
+  /* optional but nice */
   -webkit-backdrop-filter: blur(3px);
 
   z-index: 9999;
@@ -361,10 +370,12 @@
 
 /* Centered modal */
 .modal-content {
-  position: relative;            /* ensures it sits above backdrop */
+  position: relative;
+  /* ensures it sits above backdrop */
   z-index: 10000;
 
-  background: #ffffff;           /* solid background */
+  background: #ffffff;
+  /* solid background */
   color: #111;
 
   padding: 24px;
@@ -372,11 +383,11 @@
   min-width: 320px;
   max-width: 500px;
 
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   animation: fadeIn 0.25s ease-out;
 }
 
-.modal-actions{
+.modal-actions {
   display: flex;
   gap: 0.5em;
   justify-content: space-evenly;
@@ -458,11 +469,11 @@
   border: 1px solid #ccc;
   font-size: 15px;
   transition: border-color 0.2s;
-  box-sizing: border-box;    
-  min-height: 100px;      
+  box-sizing: border-box;
+  min-height: 100px;
   max-height: 190px;
-  overflow-y: auto;         
-  max-width: 100%;           
+  overflow-y: auto;
+  max-width: 100%;
   resize: vertical;
 }
 
@@ -474,8 +485,8 @@
 
 
 /* Request items styling */
-.request-list{
-  padding-left:0;
+.request-list {
+  padding-left: 0;
 }
 
 .request-item {
@@ -489,8 +500,15 @@
 
 /* Fade in animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
@@ -499,11 +517,14 @@
 ============================ */
 .idea-details-panel {
   position: relative;
-  flex: 0 0 50% ;              /* fixed width window */
+  flex: 0 0 50%;
+  /* fixed width window */
   background: #fff;
   border-left: 2px solid #e0e0e0;
-  box-shadow: -4px 0 12px rgba(0,0,0,0.08); /* subtle shadow */
-  border-radius: 8px;         /* rounded edges */
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+  /* subtle shadow */
+  border-radius: 8px;
+  /* rounded edges */
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -541,7 +562,8 @@
 .details-actions-right {
   display: flex;
   align-items: center;
-  gap: 10px; /* spacing between icons/buttons */
+  gap: 10px;
+  /* spacing between icons/buttons */
 }
 
 /* Row 2: only date, aligned left */
@@ -581,12 +603,14 @@
 
 /* Action buttons at bottom */
 .details-actions {
-  margin-top: auto;           /* push to bottom */
+  margin-top: auto;
+  /* push to bottom */
   padding-top: 20px;
   border-top: 1px solid #eee;
   display: flex;
   gap: 12px;
 }
+
 .details-action-btn {
   flex: 1;
   padding: 10px;
@@ -595,11 +619,13 @@
   cursor: pointer;
   transition: 0.2s;
 }
+
 .details-action-btn.delete {
   background: #fff2f0;
   color: #000000;
   border: 1px solid #ee82ee;
 }
+
 .details-action-btn.delete:hover {
   background: #800080;
   color: #fff;
@@ -708,38 +734,40 @@
   box-shadow: 0 4px 12px rgba(238, 130, 238, 0.3);
   position: relative;
   overflow: hidden;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(238, 130, 238, 0.4);
     background: linear-gradient(135deg, #f091f0, #8a008a);
   }
-  
+
   &:active {
     transform: translateY(0);
     box-shadow: 0 2px 8px rgba(238, 130, 238, 0.3);
   }
-  
+
   .create-icon {
     font-size: 1.5rem;
     font-weight: bold;
     transition: transform 0.3s ease;
   }
-  
+
   &:hover .create-icon {
     transform: rotate(90deg) scale(1.1);
   }
-  
+
   // Add a subtle pulse animation
   animation: pulse 2s infinite;
-  
+
   @keyframes pulse {
     0% {
       box-shadow: 0 4px 12px rgba(238, 130, 238, 0.3);
     }
+
     50% {
       box-shadow: 0 4px 20px rgba(238, 130, 238, 0.5);
     }
+
     100% {
       box-shadow: 0 4px 12px rgba(238, 130, 238, 0.3);
     }
@@ -820,6 +848,7 @@
   font-size: 14px;
   margin: 0 2px;
 }
+
 /* Container */
 .filter-dropdown {
   position: relative;
@@ -844,7 +873,7 @@
 
 .dropdown-header:hover {
   border-color: #b5b5b5;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .dropdown-arrow {
@@ -863,7 +892,7 @@
   border-radius: 8px;
   padding: 12px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   animation: fadeIn 0.15s ease-out;
 }
 
@@ -888,7 +917,7 @@
 }
 
 .filter-option input[type="radio"] {
-  accent-color: #ee82ee; 
+  accent-color: #ee82ee;
   cursor: pointer;
 }
 
@@ -909,7 +938,8 @@
 }
 
 .idea-card {
-  position: relative; /* important for absolute badge positioning */
+  position: relative;
+  /* important for absolute badge positioning */
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -921,7 +951,8 @@
   top: 10px;
   right: 10px;
   align-items: center;
-  background-color: #ee82ee; /* violet */
+  background-color: #ee82ee;
+  /* violet */
   color: #fff;
   font-weight: bold;
   font-size: 12px;
@@ -954,26 +985,26 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     border-color: #4CAF50;
     background: #f8f8f8;
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   .vote-icon {
     font-size: 16px;
     transition: all 0.2s ease;
   }
-  
+
   .vote-count {
     font-weight: 600;
     min-width: 0;
-    
+
     /* Hide when empty */
     &:empty {
       display: none;
@@ -986,17 +1017,18 @@
   background: #4CAF50;
   border-color: #4CAF50;
   color: white;
-  
+
   .vote-icon {
     transform: translateY(-1px);
   }
-  
+
   /* On hover, make it slightly darker green, NOT red */
   &:hover:not(:disabled) {
-    background: #45a049; /* Darker green */
+    background: #45a049;
+    /* Darker green */
     border-color: #45a049;
   }
-  
+
   /* Adjust padding when there's no vote count */
   &:not(:has(.vote-count:not(:empty))) {
     padding: 6px 12px;
@@ -1005,8 +1037,9 @@
 
 /* For the details panel, make sure it has the same styles */
 .details-vote-btn {
-  @extend .vote-toggle-btn; /* Inherit all base styles */
-  
+  @extend .vote-toggle-btn;
+  /* Inherit all base styles */
+
   /* Additional styles specific to details panel */
   padding: 8px 16px;
   font-size: 15px;
@@ -1014,7 +1047,8 @@
 }
 
 .idea-title {
-  flex: 1; /* take up middle space */
+  flex: 1;
+  /* take up middle space */
   margin-left: 5px;
   margin-top: 5px;
   border-bottom: 1px solid #eee;
@@ -1025,7 +1059,8 @@
 }
 
 .idea-date {
-  margin-left: auto; /* push to far right */
+  margin-left: auto;
+  /* push to far right */
   font-size: 0.9rem;
   color: #666;
 }
@@ -1244,7 +1279,7 @@
 }
 
 .idea-info-modal {
-  
+
   color: #333;
   line-height: 1.5;
   margin: 30px;
@@ -1273,7 +1308,7 @@
   padding: 12px 16px;
   margin-bottom: 12px;
   border-radius: 0 4px 4px 0;
-  
+
 }
 
 .idea-example.avoid {
@@ -1307,8 +1342,9 @@
   margin: 20px;
   padding-top: 16px;
   border-top: 1px solid #e9ecef;
- 
+
 }
+
 .tip-note {
   color: red;
 }
@@ -1348,22 +1384,22 @@
   .ideas-container {
     padding: 15px;
   }
-  
+
   .idea-sidebar {
     width: 100%;
     right: -100%;
   }
-  
+
   .header-content {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .members-section {
     min-width: 120px;
   }
@@ -1374,22 +1410,22 @@
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .idea-card-meta {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .idea-description {
     padding-left: 0;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .section-sort {
     width: 100%;
   }
