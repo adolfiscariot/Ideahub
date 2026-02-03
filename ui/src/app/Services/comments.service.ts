@@ -3,12 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
 import { viewComment, createComment } from '../Interfaces/Ideas/idea-interfaces';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommentsService {
-  private apiUrl = 'http://localhost:5065/api/comment';
+  private apiUrl = `${environment.apiUrl}/comment`;
 
   constructor(private http: HttpClient) { }
 
@@ -36,7 +37,7 @@ export class CommentsService {
     );
   }
 
-    // DELETE /api/comment/{commentId}
+  // DELETE /api/comment/{commentId}
   deleteComment(commentId: number): Observable<ApiResponse<any>> {
     return this.http.delete<any>(`${this.apiUrl}/${commentId}`).pipe(
       map(response => this.convertResponse<any>(response))
