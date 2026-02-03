@@ -1,10 +1,8 @@
 .ideas-container {
-  max-width: 1650px;
-  margin: 60px;
-  padding: 10px;
-  background: #ffffff;
-  height: 80vh;
-  width: 100%;
+  max-width: 100%;
+  padding: 4rem;
+  background: #ffffff; 
+  height: 100vh;
   transition: all 0.35s ease;
   display: flex;              /* side-by-side layout */
   flex-direction: row;        /* horizontal split */
@@ -132,7 +130,6 @@
 .ideas-list-panel {
   flex: 1;                    /* take remaining space */
   min-width: 0;               /* prevent overflow */
-  border-right: 1px solid #e0e0e0;
   padding-right: 20px;
   word-wrap: break-word;
   overflow-y: auto;
@@ -911,7 +908,7 @@
 .idea-card {
   position: relative; /* important for absolute badge positioning */
   padding: 5px;
-  border: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
 }
