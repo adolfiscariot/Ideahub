@@ -1,7 +1,15 @@
 .projects-page-container {
     max-width: 100%;
-    padding: 50px;
+    padding: 4rem;
 }
+
+/* Force vertical stacking ONLY inside the Projects table */
+:host ::ng-deep .media-vertical .media-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
 
 .page-header {
     display: flex;
@@ -24,15 +32,16 @@
 
 .projects-card {
     padding: 0;
-    /* Let table fill the card */
-    overflow: hidden;
-    /* For rounded corners */
+    overflow: hidden; /* keep rounded corners */
+    max-height: calc(100vh - 200px); /* adjust as needed */
 }
 
 .table-responsive {
-    overflow-x: auto;
-    width: 100%;
+    overflow-y: auto;   /* <-- vertical scroll */
+    overflow-x: auto;   /* keep horizontal scroll */
+    max-height: inherit;
 }
+
 
 .projects-table {
     width: 100%;

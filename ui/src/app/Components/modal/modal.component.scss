@@ -19,7 +19,16 @@
   width: 90%;
   max-height: 90vh;
   animation: slideIn 0.3s ease-out;
+
+  display: flex;
+  flex-direction: column;
 }
+
+.modal-body { 
+  padding: 20px; 
+  overflow-y: auto; 
+  flex: 1 1 auto; 
+  min-height: 0; }
 
 .modal-sm { max-width: 400px; }
 .modal-md { max-width: 700px; }

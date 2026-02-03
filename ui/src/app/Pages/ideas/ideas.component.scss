@@ -135,7 +135,6 @@
   /* take remaining space */
   min-width: 0;
   /* prevent overflow */
-  border-right: 1px solid #e0e0e0;
   padding-right: 20px;
   word-wrap: break-word;
   overflow-y: auto;
@@ -941,7 +940,7 @@
   position: relative;
   /* important for absolute badge positioning */
   padding: 5px;
-  border: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
 }
