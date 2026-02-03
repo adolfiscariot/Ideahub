@@ -116,7 +116,7 @@ public class CommentController : ControllerBase
         var commentDataToReturn = new List<object>();
         foreach (var comment in comments)
         {
-            commentDataToReturn.Add(new {comment.Id, comment.Content, comment.CreatedAt});
+            commentDataToReturn.Add(new {comment.Id, comment.Content, comment.CreatedAt, comment.UserId, comment.IdeaId});
         }
         return Ok(ApiResponse.Ok($"{comments.Count()} Comments found", commentDataToReturn));
 }
