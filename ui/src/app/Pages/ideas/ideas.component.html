@@ -422,24 +422,70 @@
         <div class="details-section">
           <p class="details-idea-description">{{ selectedIdea.description }}</p>
         </div>
-  
+        <!-- DISPLAY MEDIA FOR IDEAS -->
+        <div class="details-section" *ngIf="selectedIdea">
+          <app-media 
+            [ideaId]="selectedIdea.id"
+            [title]="'Supporting Media'">
+          </app-media>
+        </div>
+
         <div class="comments-section">
           <h4 class="comments-title">Comments ({{ comments.length }})</h4>
 
           <div class="new-comment">
             <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
-            <app-buttons
-              [buttonText]="'Post Comment'"
-              [buttonStyleClass]="'btn-promote'"
-              [disabled]="!newCommentContent.trim()"
-              (click)="addComment()">
-            </app-buttons>
+
+            <!-- MEDIA UPLOAD SECTION (COMMENTS) -->
+              <div class="media-upload-section" *ngIf="!isPostingComment">
+                <!-- Selected files preview -->
+                <div *ngIf="selectedCommentFiles.length > 0" class="selected-files">
+                  <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
+                    <span class="file-name">{{ file.name }}</span>
+                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                    <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
+                  </div>
+                </div>
+                
+                <div class="file-input-row">
+                  <input 
+                    type="file" 
+                    #commentFileInput
+                    multiple
+                    (change)="onCommentFileSelected($event)"
+                    [accept]="allowedFileTypes"
+                    style="display: none"
+                  >
+                  <app-buttons
+                    [buttonText]="'📎 Attach Media Files'"
+                    buttonStyleClass="btn-promote"
+                    (click)="commentFileInput.click()">
+                  </app-buttons>
+                  
+                  <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
+                    Optional - max 20MB per file
+                  </span>
+                </div>
+              </div>
+              
+              <div *ngIf="commentStatus" class="comment-status">
+                {{ commentStatus }}
+              </div>
+              
+              <app-buttons
+                [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+                [buttonStyleClass]="'btn-promote'"
+                [disabled]="!newCommentContent.trim() || isPostingComment"
+                (click)="addComment()">
+              </app-buttons>
+            </div>           
           </div>
 
           <div id="comments-list">
             <div *ngFor="let comment of comments" class="comment" [class.own-comment]="comment.userId === currentUserId">
 
               <div class="comment-header">
+                <div class="comment-meta">
                 <span class="comment-author">
                   {{ comment.userId === currentUserId ? 'You' : 'User' }}
                 </span>
@@ -447,10 +493,11 @@
                 <span class="comment-date">
                   {{ formatRelativeTime(comment.createdAt) }}
                 </span>
+                </div>
 
                 <!-- Delete icon only on hover -->
-                <button class="delete-icon" *ngIf="comment.userId === currentUserId" (click)="deleteComment(comment.id)">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                <app-buttons class="delete-icon" (click)="deleteComment(comment.id)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6l-1 14H6L5 6"></path>
@@ -458,11 +505,19 @@
                     <path d="M14 11v6"></path>
                     <path d="M9 6V4h6v2"></path>
                   </svg>
-                </button>
-              </div>
+                </app-buttons>
+  </div>
 
               <p class="comment-text">{{ comment.content }}</p>
 
+              <!-- DISPLAY MEDIA FOR COMMENTS -->
+              <div class="comment-media-section" *ngIf="comment.id">
+                <app-media 
+                  [commentId]="comment.id"
+                  [title]="''"
+                  [compactMode]="true">
+                </app-media>
+              </div>
             </div>
           </div>
         </div>
@@ -486,8 +541,6 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
 
 <!-- Share Idea Modal -->
 <app-modal
@@ -507,16 +560,16 @@
         class="form-control"
         formControlName="title"
         placeholder="Enter a descriptive title for your idea">
-      <div *ngIf="shareTitleCount >= 100" class="limit-message">
+      <div *ngIf="shareTitleCount >= 20" class="limit-message">
         You have reached the maximum allowed characters.
       </div>
 
       <div *ngIf="shareIdeaForm.get('title')?.invalid && shareIdeaForm.get('title')?.touched" class="error-message">
         <div *ngIf="shareIdeaForm.get('title')?.errors?.['required']">Title is required</div>
-        <div *ngIf="shareIdeaForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</div>
-        <div *ngIf="shareIdeaForm.get('title')?.errors?.['maxlength']">Title cannot exceed 100 characters</div>
+        <div *ngIf="shareIdeaForm.get('title')?.errors?.['minlength']">Title must be at least 10 characters</div>
+        <div *ngIf="shareIdeaForm.get('title')?.errors?.['maxlength']">Title cannot exceed 20 characters</div>
       </div>
-        <div class="char-count">{{ shareTitleCount }}/100</div>
+        <div class="char-count">{{ shareTitleCount }}/20</div>
     </div>
 
     <div class="form-group">
@@ -534,7 +587,7 @@
 
       <div *ngIf="shareIdeaForm.get('description')?.invalid && shareIdeaForm.get('description')?.touched" class="error-message">
         <div *ngIf="shareIdeaForm.get('description')?.errors?.['required']">Description is required</div>
-        <div *ngIf="shareIdeaForm.get('description')?.errors?.['minlength']">Description must be at least 10 characters</div>
+        <div *ngIf="shareIdeaForm.get('description')?.errors?.['minlength']">Description must be at least 20 characters</div>
         <div *ngIf="shareIdeaForm.get('description')?.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
       </div>
     </div>
@@ -599,7 +652,43 @@
 
 </div>
 
+   <!-- IDEA MEDIA UPLOAD -->
+  <div class="form-group">
+    <label>Attach Supporting Media (Optional)</label>
     
+    <!-- Selected files preview -->
+    <div *ngIf="selectedIdeaFiles.length > 0" class="selected-files">
+      <div *ngFor="let file of selectedIdeaFiles; let i = index" class="file-preview">
+        <span class="file-name">{{ file.name }}</span>
+        <span class="file-size">({{ formatFileSize(file.size) }})</span>
+        <button type="button" (click)="removeIdeaFile(i)" class="remove-file">×</button>
+      </div>
+    </div>
+
+    <div class="file-input-row">
+      <input 
+        type="file" 
+        #ideaFileInput
+        multiple
+        (change)="onIdeaFileSelected($event)"
+        [accept]="allowedFileTypes"
+        style="display: none"
+      >
+      <app-buttons 
+        [buttonText]="'📎 Attach Media Files'"
+        (click)="ideaFileInput.click()"
+        [buttonStyleClass]="'btn-promote'"
+      >
+      </app-buttons>
+      <span class="file-hint" *ngIf="selectedIdeaFiles.length === 0">
+        Max 20MB per file (images, videos, documents)
+      </span>
+    </div>
+
+    <div *ngIf="ideaUploadStatus" class="upload-status">
+      {{ ideaUploadStatus }}
+    </div>
+  </div> 
   </form>
 
   </div>

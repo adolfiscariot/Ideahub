@@ -19,11 +19,15 @@ import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 import { HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommentsService } from '../../Services/comments.service';
+import { MediaComponent } from '../media/media.component';
+import { MediaType, Media } from '../../Interfaces/Media/media-interface';
+import { MediaService } from '../../Services/media.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-ideas',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, FormsModule, ModalComponent, MediaComponent],
   templateUrl: './ideas.component.html',
   styleUrls: ['./ideas.component.scss']
 })
@@ -114,6 +118,16 @@ export class IdeasComponent implements OnInit, OnDestroy {
   newCommentContent: string = '';
   isLoadingComments: boolean = false;
 
+  selectedCommentFiles: File[] = [];
+  isPostingComment = false;
+  commentStatus = '';
+  allowedFileTypes = '.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.mov,.avi,.wmv,.pdf,.doc,.docx,.txt,.xls,.xlsx';
+
+  selectedIdeaFiles: File[] = [];
+  isUploadingIdeaMedia = false;
+  ideaUploadStatus = '';
+  //MediaType = MediaType;
+  //mediaList: Media[] = []; 
 
   constructor(
     private route: ActivatedRoute,
@@ -126,6 +140,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private projectService: ProjectService,
     private commentService: CommentsService,
+    private mediaService: MediaService,
     private fb: FormBuilder
   ) {
   }
@@ -328,7 +343,7 @@ loadComments(ideaId: number) {
   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 );
 
-       
+
       } else {
         this.comments = [];
       }
@@ -341,28 +356,71 @@ loadComments(ideaId: number) {
 }
 
   
-addComment() {
+async addComment(): Promise<void> {
   const content = this.newCommentContent?.trim();
   if (!content) {
     return this.toastService.show('To post a comment, you are required to provide one', 'info');
   }
 
-  this.commentService.postComment(this.selectedIdea.id, { content }).subscribe({
-    next: (res) => {
-      if (res.message && res.data) {
+  this.isPostingComment = true;
+  this.commentStatus = 'Posting comment...';
 
-        // Insert new comment at the TOP
-        this.comments.unshift(res.data);
-
-        this.newCommentContent = '';
-        this.toastService.show('Comment posted', 'success');
-      } else {
-        this.toastService.show('Failed to post comment', 'error');
-      }
-    },
-    error: (err) => console.error('Error adding comment', err)
-  });
+  try {
+    // Create the comment
+    const commentResponse = await firstValueFrom(
+      this.commentService.postComment(this.selectedIdea.id, { content })
+    );
+    
+    if (!commentResponse.success || !commentResponse.data?.id) {
+      throw new Error('Failed to create comment');
+    }
+    
+    const commentId = commentResponse.data.id;
+    
+    // If there are files, upload them
+    if (this.selectedCommentFiles.length > 0) {
+      this.commentStatus = `Attaching ${this.selectedCommentFiles.length} media file(s)...`;
+      
+      // Upload each file with the comment ID
+      const uploadPromises = this.selectedCommentFiles.map(file => 
+        firstValueFrom(
+          this.mediaService.uploadMedia(
+            file,
+            this.detectMediaType(file),
+            undefined, 
+            commentId, // pass the new comment ID
+            undefined 
+          )
+        )
+      );
+      
+      // Wait for all uploads
+      await Promise.all(uploadPromises);
+      
+      this.toastService.show(`Comment with ${this.selectedCommentFiles.length} media file(s) posted`, 'success');
+    } else {
+      this.toastService.show('Comment posted', 'success');
+    }
+    
+    //this.commentStatus = 'Comment posted successfully!';
+    this.newCommentContent = '';
+    this.selectedCommentFiles = [];
+    this.loadComments(this.selectedIdea.id);
+    
+    // Clear status after 2 second
+    setTimeout(() => {
+      this.commentStatus = '';
+    }, 2000);
+    
+  } catch (error: any) {
+    console.error('Error posting comment:', error);
+    this.commentStatus = error.message || 'Failed to post comment. Please try again.';
+    this.toastService.show(this.commentStatus, 'error');
+  } finally {
+    this.isPostingComment = false;
+  }
 }
+
 
 deleteComment(commentId: number) {
   this.commentService.deleteComment(commentId).subscribe({
@@ -396,11 +454,53 @@ formatRelativeTime(dateString: string): string {
   // Under 24 hours
   if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
 
-  // 24+ hours → show date + time
-  return date.toLocaleString();
+  // 24+ hours → show date
+  return date.toLocaleDateString();
 }
 
+  onCommentFileSelected(event: any): void {
+    const files: FileList = event.target.files;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Validate file size (20MB limit)
+      if (file.size > 20 * 1024 * 1024) {
+        this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
+        continue;
+      }
+      
+      this.selectedCommentFiles.push(file);
+    }
+    
+    // Reset file input
+    event.target.value = '';
+  }
 
+  removeCommentFile(index: number): void {
+    this.selectedCommentFiles.splice(index, 1);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  detectMediaType(file: File): MediaType {
+    const fileName = file.name.toLowerCase();
+    const extension = fileName.substring(fileName.lastIndexOf('.'));
+    
+    if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)) {
+      return MediaType.Image;
+    }
+    if (['.mp4', '.mov', '.avi', '.wmv'].includes(extension)) {
+      return MediaType.Video;
+    }
+    return MediaType.Document;
+  }
   viewRequests(groupId: string) {
     console.log('Fetching pending requests for group:', groupId);
     this.showRequestsModal = true;
@@ -754,11 +854,37 @@ dontShowIdeaInfoAgain () {
               userName: idea.userName || '',
               userVoteId: undefined, // Will be updated by fetchAndUpdateVoteCounts
               groupName: idea.name || '',
-              name: idea.name || ''
+              name: idea.name || '',
+              mediaCount: 0
             };
             return mappedIdea;
           })
         );
+        // After mapping ideas, fetch media counts for each
+        //console.log('Fetching media counts for ideas...');
+
+        // // Create an array of promises to fetch media counts
+        // const mediaCountPromises = this.ideas.map(async (idea) => {
+        //   try {
+        //     const mediaResponse = await firstValueFrom(
+        //       this.mediaService.viewMedia(Number(idea.id))
+        //     );
+            
+        //     if (mediaResponse.success && mediaResponse.data) {
+        //       idea.mediaCount = mediaResponse.data.length;
+        //       console.log(`Idea "${idea.title}": ${idea.mediaCount} media files`);
+        //     }
+        //   } catch (error) {
+        //     console.error(`Error fetching media for idea ${idea.id}:`, error);
+        //     idea.mediaCount = 0;
+        //   }
+          
+        //   return idea;
+        // });
+
+        // // Wait for all media counts to be fetched
+        // await Promise.all(mediaCountPromises);
+        // console.log('Media counts loaded for all ideas');
 
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
@@ -911,18 +1037,46 @@ dontShowIdeaInfoAgain () {
   closeShareModal(): void {
     this.showShareModal = false;
     this.isEditMode = false;
+    this.shareIdeaForm.reset();
+    this.selectedIdeaFiles = []; 
+    this.ideaUploadStatus = ''; 
   }
 
 
-onShareIdea(ideaData: { title: string; description: string }): void {
-  
-  if(this.shareIdeaForm.invalid) {
-    this.shareIdeaForm.markAllAsTouched();
-    this.toastService.show('Please fill in all required fields', 'error')
-    return;
+// Add these methods for idea file handling
+  onIdeaFileSelected(event: any): void {
+    const files: FileList = event.target.files;
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Validate file size (20MB limit)
+      if (file.size > 20 * 1024 * 1024) {
+        this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
+        continue;
+      }
+      
+      this.selectedIdeaFiles.push(file);
+    }
+    
+    // Reset file input
+    event.target.value = '';
   }
+
+  removeIdeaFile(index: number): void {
+    this.selectedIdeaFiles.splice(index, 1);
+  }
+
+// Update your existing onShareIdea() method to handle media
+  async onShareIdea(ideaData: { title: string; description: string }): Promise<void> {
+    if (this.shareIdeaForm.invalid) {
+      this.shareIdeaForm.markAllAsTouched();
+      this.toastService.show('Please fill in all required fields', 'error');
+      return;
+    }
   
   this.isSubmitting = true;
+  this.ideaUploadStatus = 'Creating idea...';
 
   const filterArray = [
     this.shareIdeaForm.get('type')?.value,
@@ -937,23 +1091,55 @@ onShareIdea(ideaData: { title: string; description: string }): void {
     filter: filterArray
   };
 
-  this.ideasService.createIdea(request).subscribe({
-    next: (response) => {
-      this.isSubmitting = false;
-      if (response.success) {
-        this.closeShareModal();
-        this.loadIdeas(); // Refresh the list
-        this.toastService.show('Idea created successfully!', 'success');
-      } else {
-        this.toastService.show(`Failed to create idea: ${response.message}`, 'error');
-      }
-    },
-    error: (error) => {
-      this.isSubmitting = false;
-      console.error('Error creating idea:', error);
-      this.toastService.show('An error occurred while creating the idea.', 'error');
+  try {
+    // Create idea
+    const ideaResponse = await firstValueFrom(
+      this.ideasService.createIdea(request)
+    );
+    
+    if (!ideaResponse.success || !ideaResponse.data?.id) {
+      throw new Error('Failed to create idea');
     }
-  });
+    
+    const ideaId = ideaResponse.data.id;
+    
+    // If there are files, upload them
+    if (this.selectedIdeaFiles.length > 0) {
+      this.ideaUploadStatus = `Attaching ${this.selectedIdeaFiles.length} media file(s)...`;
+      
+      // Upload each file with the idea ID
+      const uploadPromises = this.selectedIdeaFiles.map(file => 
+        firstValueFrom(
+          this.mediaService.uploadMedia(
+            file,
+            this.detectMediaType(file),
+            Number(ideaId), // the new idea ID
+            undefined, 
+            undefined  
+          )
+        )
+      );
+      
+      // Wait for all uploads
+      await Promise.all(uploadPromises);
+      
+      this.toastService.show(`Idea created with ${this.selectedIdeaFiles.length} media file(s)`, 'success');
+    } else {
+      this.toastService.show('Idea created successfully!', 'success');
+    }
+    
+    this.closeShareModal();
+    this.loadIdeas();
+    this.selectedIdeaFiles = [];
+    this.ideaUploadStatus = '';
+    
+  } catch (error: any) {
+    console.error('Error creating idea:', error);
+    this.ideaUploadStatus = 'Failed to create idea. Please try again.';
+    this.toastService.show(this.ideaUploadStatus, 'error');
+  } finally {
+    this.isSubmitting = false;
+  }
 }
 
 
