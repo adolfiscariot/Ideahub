@@ -51,6 +51,7 @@ public class Idea
     public ICollection<Project> Projects {get; set;} = new List<Project>();
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();
     public ICollection<Comment> Comments {get; set;} = new List<Comment>();
+    public ICollection<Media> Media { get; set; } = new List<Media>();
 }
 
 public enum IdeaStatus 

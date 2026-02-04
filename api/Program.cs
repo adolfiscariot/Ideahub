@@ -158,6 +158,15 @@ builder.Services.Configure<SendGridSettings>(
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+// MediaFile Service
+builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
+
+// convert enum to string
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 //3. Build the app
 var app = builder.Build();

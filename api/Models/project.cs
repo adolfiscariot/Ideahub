@@ -55,6 +55,8 @@ public class Project
     public Group Group {get; set;} = null!;
     public IdeahubUser CreatedByUser {get; set;} = null!;
     public IdeahubUser OverseenByUser {get; set;} = null!;
+    public ICollection<Media> Media { get; set; } = new List<Media>();
+
 }
 
 public enum ProjectStatus
