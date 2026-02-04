@@ -1,0 +1,69 @@
+<div class="media-section" [class.compact]="compactMode">
+  <div class="media-gallery">
+
+    <h4 *ngIf="!compactMode && title" class="media-title">
+      {{ title }} ({{ mediaList.length }})
+    </h4>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading">
+      Loading attachments…
+    </div>
+
+    <!-- Empty state
+    <div *ngIf="!isLoading && mediaList.length === 0" class="no-media">
+      No attachments
+    </div> -->
+
+    <!-- Attachments list -->
+    <div
+      class="media-grid"
+      *ngIf="!isLoading && mediaList.length > 0">
+
+      <div *ngFor="let media of mediaList" class="media-item">
+
+        <!-- IMAGE -->
+        <div
+          *ngIf="media.mediaType === MediaType.Image"
+          class="media-placeholder"
+          (click)="openMedia(media)">
+
+          <span class="media-icon">🖼️</span>
+          <span
+            class="media-label"
+            [title]="getDisplayName(media.filePath)">
+            {{ getDisplayName(media.filePath) }}
+          </span>
+        </div>
+
+        <!-- VIDEO -->
+        <div
+          *ngIf="media.mediaType === MediaType.Video"
+          class="video-placeholder"
+          (click)="openMedia(media)">
+
+          <span class="video-icon">▶️</span>
+         <span
+            class="media-label"
+            [title]="getDisplayName(media.filePath)">
+            {{ getDisplayName(media.filePath) }}
+         </span>
+        </div>
+
+        <!-- DOCUMENT -->
+        <div
+          *ngIf="media.mediaType === MediaType.Document"
+          class="document-placeholder"
+          (click)="openMedia(media)">
+
+          <span class="document-icon">📄</span>
+          <span
+            class="media-label"
+            [title]="getDisplayName(media.filePath)">
+            {{ getDisplayName(media.filePath) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

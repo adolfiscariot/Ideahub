@@ -1,0 +1,143 @@
+.media-gallery {
+  margin: 12px 0;
+}
+
+.media-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.media-item {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  background: transparent;
+  cursor: default;
+}
+
+.media-placeholder,
+.video-placeholder,
+.document-placeholder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 2px 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+
+  font-size: 13px;
+  line-height: 1.3;
+  color: #555;
+
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.media-icon,
+.video-icon,
+.document-icon {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+
+.media-label {
+  max-width: 180px;          
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.media-placeholder:hover,
+.video-placeholder:hover,
+.document-placeholder:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.media-divider {
+  display: none;
+}
+
+.media-thumbnail {
+  display: none;
+}
+
+.media-info {
+  display: none;
+}
+
+.no-media {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+  padding: 6px 0;
+}
+
+.loading {
+  font-size: 13px;
+  color: #666;
+  padding: 6px 0;
+}
+
+.media-section.compact .media-title {
+  display: none;
+}
+
+.media-section.compact {
+  margin-left: auto;
+}
+
+.comment-media-section .media-section.compact {
+  max-width: none;
+}
+
+.media-section.compact .media-gallery {
+  margin: 0;
+  padding: 0;
+}
+
+.media-section.compact .media-grid {
+  gap: 3px;
+}
+
+.media-section.compact
+.media-placeholder,
+.media-section.compact
+.video-placeholder,
+.media-section.compact
+.document-placeholder {
+  font-size: 12px;
+}
+
+.comment-media-section
+.media-placeholder,
+.comment-media-section
+.video-placeholder,
+.comment-media-section
+.document-placeholder {
+  display: inline-flex;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+}
+
+.comment-media-section
+.media-placeholder:hover,
+.comment-media-section
+.video-placeholder:hover,
+.comment-media-section
+.document-placeholder:hover {
+  color: #000;
+  text-decoration: underline;
+}
+

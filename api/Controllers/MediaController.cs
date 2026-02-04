@@ -46,7 +46,22 @@ public class MediaController : ControllerBase
             // if file is null but MediaType provided block 
             if (mediaDto.File == null || mediaDto.File.Length == 0)
             {
+                _logger.LogError("File is required when uploading media");
                 return BadRequest(ApiResponse.Fail("File is required when uploading media"));
+            }
+
+            // File size validation
+            const long maxFileSize = 20 * 1024 * 1024;
+            if (mediaDto.File.Length > maxFileSize)
+            {
+                _logger.LogError("File size exceeds 20MB limit");
+                return BadRequest(ApiResponse.Fail("File size exceeds 20MB limit"));
+            }
+
+            // File type validation
+            if (!IsValidFileType(mediaDto.File.FileName, mediaDto.MediaType))
+            {
+                return BadRequest(ApiResponse.Fail($"Invalid file type for {mediaDto.MediaType}"));
             }
 
             savedFilePath = await _mediaService.SaveFileAsync(mediaDto.File);
@@ -109,10 +124,11 @@ public class MediaController : ControllerBase
             if (media == null)
                 return NotFound(ApiResponse.Fail("Media not found"));
 
-            // allow only uploader to delete
+            // only uploader has permission to delete
             if (media.UserId != userId)
                 return Unauthorized(ApiResponse.Fail("Not authorized to delete this media"));
                 
+
             // Also delete the file from disk/cloud
             var fileDeleted = await _mediaService.DeleteFileAsync(media.FilePath);
             if (!fileDeleted)
@@ -120,13 +136,30 @@ public class MediaController : ControllerBase
 
             _context.Media.Remove(media);
             await _context.SaveChangesAsync();
-
+            
             return Ok(ApiResponse.Ok("Media deleted successfully"));
         }
         catch (Exception e)
         {
             _logger.LogError("Failed to delete media: {e}", e);
             return StatusCode(500, ApiResponse.Fail("Failed to delete media"));
+        }
+    }
+
+    private bool IsValidFileType(string fileName, MediaType mediaType)
+    {
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        switch (mediaType)
+        {
+            case MediaType.Image:
+                return new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" }.Contains(extension);
+            case MediaType.Video:
+                return new[] { ".mp4", ".mov", ".avi", ".wmv" }.Contains(extension);
+            case MediaType.Document:
+                return new[] { ".pdf", ".doc", ".docx", ".txt", ".xls", ".xlsx" }.Contains(extension);
+            default:
+                return false;
         }
     }
 }
