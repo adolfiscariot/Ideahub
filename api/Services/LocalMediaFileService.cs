@@ -18,13 +18,24 @@ namespace api.Services
                 Directory.CreateDirectory(_rootPath);
         }
 
+        private static string SanitizeSubFolder(string subFolder)
+        {
+            if (string.IsNullOrWhiteSpace(subFolder))
+                return string.Empty;
+
+            // Remove any path treversal attempts and invalid characters
+            var sanitized = Path.GetFileName(subFolder);
+            return string.IsNullOrWhiteSpace(sanitized) ? string.Empty : sanitized;
+        }
+
         public async Task<string> SaveFileAsync(IFormFile file, string subFolder = "")
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("File is empty.");
 
             // Optional subfolder (e.g., projectId or commentId)
-            string folderPath = string.IsNullOrWhiteSpace(subFolder) ? _rootPath : Path.Combine(_rootPath, subFolder);
+            var safeSubFolder = SanitizeSubFolder(subFolder);
+            string folderPath = string.IsNullOrWhiteSpace(safeSubFolder) ? _rootPath : Path.Combine(_rootPath, safeSubFolder);
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 

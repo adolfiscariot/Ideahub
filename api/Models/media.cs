@@ -9,7 +9,7 @@ public class Media
     public int Id { get; set; }
 
     [Required]
-    [MaxLength(1024)]
+    [MaxLength(512)]
     public string FilePath { get; set; } = string.Empty;
 
     [Required]

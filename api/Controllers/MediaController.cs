@@ -33,6 +33,7 @@ public class MediaController : ControllerBase
     [HttpPost("upload-media")]
     public async Task<IActionResult> UploadMedia([FromForm] MediaDto mediaDto, int? ideaId = null, int? commentId = null, int? projectId = null)
     {
+        string? savedFilePath = null;
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -48,9 +49,11 @@ public class MediaController : ControllerBase
                 return BadRequest(ApiResponse.Fail("File is required when uploading media"));
             }
 
+            savedFilePath = await _mediaService.SaveFileAsync(mediaDto.File);
+
             var media = new Media
             {
-                FilePath = await _mediaService.SaveFileAsync(mediaDto.File),// helper to save locally or cloud
+                FilePath = savedFilePath,
                 MediaType = mediaDto.MediaType,
                 UserId = userId,
                 IdeaId = ideaId,       
@@ -66,6 +69,10 @@ public class MediaController : ControllerBase
         }
         catch (Exception e)
         {
+            // Clean up orphan file if it was saved since we save file before updating db
+            if (!string.IsNullOrEmpty(savedFilePath))
+                await _mediaService.DeleteFileAsync(savedFilePath);
+
             _logger.LogError("Failed to upload media: {e}", e);
             return BadRequest(ApiResponse.Fail("Failed to upload media"));
         }
@@ -106,11 +113,13 @@ public class MediaController : ControllerBase
             if (media.UserId != userId)
                 return Unauthorized(ApiResponse.Fail("Not authorized to delete this media"));
                 
+            // Also delete the file from disk/cloud
+            var fileDeleted = await _mediaService.DeleteFileAsync(media.FilePath);
+            if (!fileDeleted)
+                _logger.LogWarning("Failed to delete file at {FilePath}", media.FilePath);
+
             _context.Media.Remove(media);
             await _context.SaveChangesAsync();
-
-            // Also delete the file from disk/cloud
-            await _mediaService.DeleteFileAsync(media.FilePath);
 
             return Ok(ApiResponse.Ok("Media deleted successfully"));
         }
