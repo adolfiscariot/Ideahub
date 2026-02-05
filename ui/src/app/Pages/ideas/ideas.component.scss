@@ -532,13 +532,30 @@
 
 /* Delete Icon (hover only) */
 .delete-icon {
-  background: none;
-  border: none;
+  background: none !important;
+  border: none !important;
   font-size: 16px;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s ease;
   color: #ef4444;
+  padding: 0 !important;
+  height: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+::ng-deep app-buttons.delete-icon {
+  display: flex;
+  button {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    width: auto !important;
+    color: red;
+  }
 }
 
 .comment.own-comment:hover .delete-icon {
