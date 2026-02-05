@@ -397,7 +397,7 @@
                 [disabled]="false"
                 title="Delete idea"
               >
-                ✕
+                🗑️
               </app-buttons>
 
               <app-buttons
@@ -447,37 +447,34 @@
                   </div>
                 </div>
                 
-                <div class="file-input-row">
-                  <input 
-                    type="file" 
-                    #commentFileInput
-                    multiple
-                    (change)="onCommentFileSelected($event)"
-                    [accept]="allowedFileTypes"
-                    style="display: none"
-                  >
-                  <app-buttons
-                    [buttonText]="'📎 Attach Media Files'"
-                    buttonStyleClass="btn-promote"
-                    (click)="commentFileInput.click()">
-                  </app-buttons>
-                  
-                  <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
-                    Optional - max 20MB per file
-                  </span>
-                </div>
-              </div>
+ 
+<div class="file-input-row upload-row">
+  <input 
+    type="file" 
+    #commentFileInput
+    multiple
+    (change)="onCommentFileSelected($event)"
+    [accept]="allowedFileTypes"
+    style="display: none"
+  >
+  <app-buttons
+    [buttonText]="'📎 Attach Media Files'"
+    buttonStyleClass="btn-promote attach-media-btn"
+    (click)="commentFileInput.click()">
+  </app-buttons>
+
+ <app-buttons
+  [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+  [buttonStyleClass]="'btn-accept'"
+  [disabled]="!newCommentContent.trim() || isPostingComment"
+  (click)="addComment()">
+</app-buttons> 
+</div>
               
               <div *ngIf="commentStatus" class="comment-status">
                 {{ commentStatus }}
               </div>
               
-              <app-buttons
-                [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
-                [buttonStyleClass]="'btn-promote'"
-                [disabled]="!newCommentContent.trim() || isPostingComment"
-                (click)="addComment()">
-              </app-buttons>
             </div>           
           </div>
 

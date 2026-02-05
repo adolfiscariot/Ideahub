@@ -256,6 +256,31 @@
   border: 1px solid #e5e7eb;
 }
 
+.upload-row {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  width: 100%;                      
+  max-width: 100%;                  
+  gap: 10px;                        
+}
+
+.post-comment-btn {
+  background-color: #28a745; /* nice green */
+  color: #ffffff;            /* white text */
+  border: 1px solid #28a745; /* optional: green border */
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.post-comment-btn:hover:not([disabled]) {
+  background-color: #218838; /* slightly darker green on hover */
+}
+
+
 .comments-title {
   font-size: 16px;
   font-weight: 600;
@@ -318,35 +343,34 @@
   color: #6b7280;
 }
 
-.media-upload-section, .form-group .file-input-row {
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  padding: 10px 12px;
-  background-color: #fafafa;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+// .media-upload-section, .form-group .file-input-row {
+//   border: 1px dashed #ccc;
+//   border-radius: 8px;
+//   padding: 10px 12px;
+//   background-color: #fafafa;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 8px;
+// }
 
-.media-upload-section:hover, 
-.form-group .file-input-row:hover {
-  border-color: #888;
-  background-color: #f0f0f0;
-}
+// .media-upload-section:hover, 
+// .form-group .file-input-row:hover {
+//   border-color: #888;
+//   background-color: #f0f0f0;
+// }
 
 .attach-media-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  font-size: 14px;
-  background: #ffffff;
+  background: #fff;
   color: purple;
-  cursor: pointer;
   border: 1px solid purple;
   border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
   transition: background-color 0.2s ease;
 }
+
 
 .attach-media-btn:hover {
   background: rgba(128, 0, 128, 0.1);
