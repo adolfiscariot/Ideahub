@@ -1571,7 +1571,16 @@ createProjectFromIdea(): void {
           idea.id, 
           this.projectData
         ).subscribe({
-          next: (projectRes) => this.handleSuccess(idea, projectRes),
+          next: (projectRes) => {
+            if (projectRes.success && projectRes.data?.projectId) {
+              const projectId = projectRes.data?.projectId;
+              this.handleSuccess(idea,projectId);
+            }
+            else {
+              this.handleProjectError('Failed to promote idea');
+            }
+          },
+            
           error: (err) => this.handleProjectError(err)
         });
       } else {
@@ -1585,6 +1594,7 @@ createProjectFromIdea(): void {
     }
   });
 }
+
 
 private handleSuccess(idea: Idea, response: any): void {
   this.isPromoting = false;
