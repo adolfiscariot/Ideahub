@@ -23,6 +23,7 @@ import { MediaComponent } from '../media/media.component';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
+import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles  } from '../../Components/utils/media.utils';
 
 @Component({
   selector: 'app-ideas',
@@ -1043,29 +1044,43 @@ dontShowIdeaInfoAgain () {
   }
 
 
-// Add these methods for idea file handling
-  onIdeaFileSelected(event: any): void {
-    const files: FileList = event.target.files;
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // Validate file size (20MB limit)
-      if (file.size > 20 * 1024 * 1024) {
-        this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
-        continue;
+    onFileSelected(
+      event: Event,
+      target: 'idea' | 'comment'
+    ): void {
+      const currentFiles =
+        target === 'idea'
+          ? this.selectedIdeaFiles
+          : this.selectedCommentFiles;
+
+      const result = processSelectedFiles(event, currentFiles);
+
+      if (target === 'idea') {
+        this.selectedIdeaFiles = result.files;
+      } else {
+        this.selectedCommentFiles = result.files;
       }
-      
-      this.selectedIdeaFiles.push(file);
-    }
-    
-    // Reset file input
-    event.target.value = '';
+
+      result.errors.forEach(msg =>
+        this.toastService.show(msg, 'warning')
+      );
   }
 
-  removeIdeaFile(index: number): void {
-    this.selectedIdeaFiles.splice(index, 1);
-  }
+        removeFile(index: number, target: 'idea' | 'comment'): void {
+          if (target === 'idea') {
+            this.selectedIdeaFiles = removeFileAtIndex(this.selectedIdeaFiles, index);
+          } else {
+            this.selectedCommentFiles = removeFileAtIndex(this.selectedCommentFiles, index);
+          }
+        }
+
+        formatIdeaCommentFileSize(bytes: number): string {
+            return formatFileSize(bytes);
+        }
+
+        detectFileMediaType(file: File): MediaType {
+            return detectMediaType(file);
+        }
 
 // Update your existing onShareIdea() method to handle media
   async onShareIdea(ideaData: { title: string; description: string }): Promise<void> {
