@@ -389,7 +389,7 @@
                 <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
               </app-buttons>
               
-              <!-- Delete button for idea owner (Fixed - with ✕) -->
+              <!-- Delete button for idea owner (Fixed - with trash icon) -->
               <app-buttons
                 *ngIf="isUserIdeaOwner(selectedIdea)"
                 buttonStyleClass="btn-delete"
@@ -397,7 +397,14 @@
                 [disabled]="false"
                 title="Delete idea"
               >
-                ✕
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6l-1 14H6L5 6"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                  <path d="M9 6V4h6v2"></path>
+                </svg>
               </app-buttons>
 
               <app-buttons
@@ -448,36 +455,40 @@
                 </div>
                 
                 <div class="file-input-row">
-                  <input 
-                    type="file" 
-                    #commentFileInput
-                    multiple
-                    (change)="onCommentFileSelected($event)"
-                    [accept]="allowedFileTypes"
-                    style="display: none"
-                  >
-                  <app-buttons
-                    [buttonText]="'📎 Attach Media Files'"
-                    buttonStyleClass="btn-promote"
-                    (click)="commentFileInput.click()">
-                  </app-buttons>
+                  <div class="file-input-left">
+                    <input 
+                      type="file" 
+                      #commentFileInput
+                      multiple
+                      (change)="onCommentFileSelected($event)"
+                      [accept]="allowedFileTypes"
+                      style="display: none"
+                    >
+                    <app-buttons
+                      [buttonText]="'📎 Attach Media Files'"
+                      buttonStyleClass="btn-promote"
+                      (click)="commentFileInput.click()">
+                    </app-buttons>
+                    
+                    <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
+                      Optional - max 20MB per file
+                    </span>
+                  </div>
                   
-                  <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
-                    Optional - max 20MB per file
-                  </span>
+                  <div class="post-comment-btn-wrapper">
+                    <app-buttons
+                      [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+                      [buttonStyleClass]="'btn-accept'"
+                      [disabled]="!newCommentContent.trim() || isPostingComment"
+                      (click)="addComment()">
+                    </app-buttons>
+                  </div>
                 </div>
               </div>
               
               <div *ngIf="commentStatus" class="comment-status">
                 {{ commentStatus }}
               </div>
-              
-              <app-buttons
-                [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
-                [buttonStyleClass]="'btn-promote'"
-                [disabled]="!newCommentContent.trim() || isPostingComment"
-                (click)="addComment()">
-              </app-buttons>
             </div>           
           </div>
 
@@ -655,8 +666,6 @@
 
    <!-- IDEA MEDIA UPLOAD -->
   <div class="form-group">
-    <label>Attach Supporting Media (Optional)</label>
-    
     <!-- Selected files preview -->
     <div *ngIf="selectedIdeaFiles.length > 0" class="selected-files">
       <div *ngFor="let file of selectedIdeaFiles; let i = index" class="file-preview">
@@ -667,6 +676,7 @@
     </div>
 
     <div class="file-input-row">
+      <label>Attach Supporting Media</label>
       <input 
         type="file" 
         #ideaFileInput
@@ -675,15 +685,21 @@
         [accept]="allowedFileTypes"
         style="display: none"
       >
-      <app-buttons 
-        [buttonText]="'📎 Attach Media Files'"
-        (click)="ideaFileInput.click()"
-        [buttonStyleClass]="'btn-promote'"
-      >
-      </app-buttons>
-      <span class="file-hint" *ngIf="selectedIdeaFiles.length === 0">
-        Max 20MB per file (images, videos, documents)
-      </span>
+      <div class="media-upload-left">
+        <app-buttons 
+          [buttonText]="'📎 Attach Media Files'"
+          (click)="ideaFileInput.click()"
+          [buttonStyleClass]="'btn-promote'"
+        >
+        </app-buttons>
+        <div class="media-file-info">
+          <span class="file-hint">Optional</span>
+          <span class="file-hint">•</span>
+          <span class="file-hint">Max 20MB</span>
+          <span class="file-hint">•</span>
+          <span class="file-hint">Images, Videos, Documents</span>
+        </div>
+      </div>
     </div>
 
     <div *ngIf="ideaUploadStatus" class="upload-status">
@@ -698,7 +714,7 @@
     <div class="footer-buttons">
       <app-buttons
         [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
+        [buttonStyleClass]="'btn-reject'"
         (click)="showShareModal = false">
       </app-buttons>
 

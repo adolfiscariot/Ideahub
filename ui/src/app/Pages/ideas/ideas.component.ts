@@ -1473,6 +1473,19 @@ formatVoteDate(date: any): string {
       title: this.selectedIdea.title,
       description: this.selectedIdea.description
     };
+    
+    // Patch form values with existing idea data
+    this.shareIdeaForm.patchValue({
+      title: this.selectedIdea.title,
+      description: this.selectedIdea.description,
+      type: this.selectedIdea.type || '',
+      domain: this.selectedIdea.domain || '',
+      impact: this.selectedIdea.impact || ''
+    });
+    
+    // Update character counts
+    this.shareTitleCount = this.selectedIdea.title?.length || 0;
+    this.shareDescCount = this.selectedIdea.description?.length || 0;
   }
 
   // Method to fetch and update vote counts for all ideas
