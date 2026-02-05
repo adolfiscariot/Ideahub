@@ -164,6 +164,40 @@
             <input [(ngModel)]="editForm.endedAt" type="date" />
             </div>
 
+        <!-- Project MEDIA UPLOAD -->
+        <div class="form-group">
+            <label>Attach Supporting media (Max 20MB per file)</label>
+            
+            <!-- Selected files preview -->
+            <div *ngIf="selectedProjectFiles.length > 0" class="selected-files">
+            <div *ngFor="let file of selectedProjectFiles; let i = index" class="file-preview">
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">({{ formatProjectFileSize(file.size) }})</span>
+                <button type="button" (click)="removeProjectFile(i)" class="remove-file">×</button>
+            </div>
+            </div>
+
+            <div class="file-input-row">
+            <input 
+                type="file" 
+                #projectFileInput
+                multiple
+                (change)="onProjectFileSelected($event)"
+                [accept]="allowedFileTypes"
+                style="display: none"
+            >
+            <app-buttons 
+                [buttonText]="'📎 Attach Media Files'"
+                (click)="projectFileInput.click()"
+                [buttonStyleClass]="'btn-promote'"
+            >
+            </app-buttons>
+            </div>
+
+            <div *ngIf="ideaUploadStatus" class="upload-status">
+            {{ ideaUploadStatus }}
+            </div>
+        </div> 
         </div>
 
         </div>

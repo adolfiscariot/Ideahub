@@ -10,6 +10,8 @@ import { Toast, ToastService } from '../../Services/toast.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
+import { MediaType } from '../../Interfaces/Media/media-interface';
+import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles  } from '../../Components/utils/media.utils';
 
 type EditProjectForm = {
   title: string;
@@ -38,6 +40,10 @@ export class ProjectsComponent implements OnInit {
     selectedProject: Project | null = null;
     isEditModalOpen = false;
     isViewModalOpen = false;
+    selectedProjectFiles: File[] = [];
+    allowedFileTypes = '.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.mov,.avi,.wmv,.pdf,.doc,.docx,.txt,.xls,.xlsx';
+    isUploadingIdeaMedia = false;
+    ideaUploadStatus = '';
     
     editForm: EditProjectForm = {
         title: '',
@@ -78,8 +84,8 @@ export class ProjectsComponent implements OnInit {
                 if (callback) callback();
             },
             error: (err) => {
-                console.error('Failed to load projects', err);
-                // Optionally show error toast
+                this.toastService.show('Failed to load project', 'error');
+                //console.error('Failed to load projects', err);
             }
         });
     }
@@ -159,6 +165,34 @@ export class ProjectsComponent implements OnInit {
             }
         }
 
+        onProjectFileSelected(event: Event): void {
+
+            const result = processSelectedFiles(
+                event,
+                this.selectedProjectFiles
+            );
+
+            this.selectedProjectFiles = result.files;
+
+            result.errors.forEach(msg =>
+                this.toastService.show(msg, 'warning')
+            );
+        }
+
+        removeProjectFile(index: number): void {
+            this.selectedProjectFiles = removeFileAtIndex(
+                this.selectedProjectFiles,
+                index
+            );
+        }
+
+        formatProjectFileSize(bytes: number): string {
+            return formatFileSize(bytes);
+        }
+
+        detectProjectMediaType(file: File): MediaType {
+            return detectMediaType(file);
+        }
 
 
     // openEditModal(project: Project): void {
