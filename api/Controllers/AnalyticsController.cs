@@ -126,7 +126,8 @@ public class AnalyticsController : ControllerBase
                     i.Description,
                     Author = i.User.DisplayName,
                     GroupName = i.Group.Name,
-                    PromotedDate = i.UpdatedAt
+                    PromotedDate = i.UpdatedAt,
+                    ProjectId = _context.Projects .Where(p => p.IdeaId == i.Id) .Select(p => p.Id) .FirstOrDefault()
                 })
                 .ToListAsync();
 

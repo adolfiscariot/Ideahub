@@ -312,16 +312,17 @@ public class ProjectController : ControllerBase
                 project.Description = projectUpdateDto.Description;
             }
 
-            if (projectUpdateDto.OverseenByUserEmail is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.OverseenByUserEmail))
             {
-                var newUser = await _userManager.FindByNameAsync(projectUpdateDto.OverseenByUserEmail);
+                var newUser = await _userManager.FindByEmailAsync(projectUpdateDto.OverseenByUserEmail);
+
                 if (newUser is null)
                 {
-                    _logger.LogError("Update Project: New user not found for user name {userName}. Can't update project", projectUpdateDto.OverseenByUserEmail);
+                    _logger.LogError("Update Project: User not found for email {email}", projectUpdateDto.OverseenByUserEmail);
                     return NotFound(ApiResponse.Fail("User not found"));
                 }
-                var newUserId = newUser.Id;
-                project.OverseenByUserId = newUserId;
+
+                project.OverseenByUserId = newUser.Id;
                 newOverseerDisplayName = newUser.DisplayName;
             }
 
