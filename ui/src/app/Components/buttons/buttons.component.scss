@@ -232,7 +232,9 @@
   box-shadow: none;
 
   &:hover {
-    background: #d93636;
+    background: red;
+    color: #000;
+    //border: 1px solid red;
   }
 }
 

@@ -363,7 +363,7 @@ async addComment(): Promise<void> {
   }
 
   this.isPostingComment = true;
-  this.commentStatus = 'Posting comment...';
+  //this.commentStatus = 'Posting comment...';
 
   try {
     // Create the comment
