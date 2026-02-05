@@ -80,6 +80,20 @@ public class ProjectController : ControllerBase
             await _context.Projects.AddAsync(newProject);
             await _context.SaveChangesAsync();
 
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var mediaItems = await _context.Media
+                .Where(m => m.IdeaId == ideaId)
+                .ToListAsync();
+
+            foreach (var media in mediaItems)
+            {
+                media.ProjectId = newProject.Id;
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
             _logger.LogInformation("Create Project: New Project {projectTitle} created", newProject.Title);
             return Ok(ApiResponse.Ok("New project created"));
         }
