@@ -697,7 +697,7 @@
     <div class="footer-buttons">
       <app-buttons
         [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
+        [buttonStyleClass]="'btn-reject'"
         (click)="showShareModal = false">
       </app-buttons>
 
@@ -993,7 +993,10 @@
 </p>
 
 </div>
-      <div class="modal-footer">
+</div>
+<hr divider>
+      <div modal-footer>
+         <div class="modal-footer-content">
         
         <app-buttons
           [buttonText]="'Don’t show again'"
@@ -1006,10 +1009,10 @@
   [buttonStyleClass]="'btn-promote'"
   (click)="closeIdeaInfo()">
 </app-buttons>
+</div>
 
 
       </div>
-    </div>
 
 </app-modal>
 
