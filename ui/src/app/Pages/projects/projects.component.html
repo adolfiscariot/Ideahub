@@ -22,7 +22,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let project of projects" (click)="canEdit(project) ? openEditModal(project) : null"
+                        <tr *ngFor="let project of projects" (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
                             [class.clickable-row]="canEdit(project)" [class.readonly-row]="!canEdit(project)">
                             <td class="cell-title">
                                 <div class="title-wrapper">
@@ -80,4 +80,109 @@
                 </table>
             </div>
         </div>
-    </div>
+
+        <app-modal
+        [isOpen]="isViewModalOpen"
+        title="Project Details"
+        (closeModal)="closeModals()"
+        size="md"
+        >
+        <div modal-body *ngIf="selectedProject as project">
+
+        <div class="description-row">
+            <span class="label">Description</span>
+            <p class="description-text">
+            {{ project.description }}
+            </p>
+        </div>
+
+        <div class="project-details-grid">
+
+            <div class="info-item">
+            <span class="label">Title</span>
+            <span class="value">{{ project.title }}</span>
+            </div>
+
+            <div class="info-item">
+            <span class="label">Status</span>
+            <span class="value">{{ getStatusLabel(project.status) }}</span>
+            </div>
+
+            <div class="info-item">
+            <span class="label">Ended At</span>
+            <span class="value">
+                <ng-container *ngIf="selectedProject?.endedAt; else dash">
+                {{ project.endedAt | date:'mediumDate' }}
+                </ng-container>
+                <ng-template #dash>-</ng-template>
+            </span>
+            </div>
+
+            <div class="info-item">
+            <span class="label">Overseen By</span>
+            <span class="value">{{ project.overseenBy }}</span>
+            </div>
+
+        </div>
+
+        </div>
+        </app-modal>
+
+        <app-modal
+            [isOpen]="isEditModalOpen"
+            title="Edit Project"
+            (closeModal)="closeModals()"
+            size="md"
+            >
+            <div modal-body class="edit-project-form">
+
+        <div class="form-group">
+            <label>Project Title</label>
+            <input [(ngModel)]="editForm.title" type="text" />
+        </div>
+
+        <div class="form-group">
+            <label>Project Description</label>
+            <textarea [(ngModel)]="editForm.description"></textarea>
+        </div>
+
+        <div class="edit-grid">
+
+            <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="editForm.status">
+                <option value="Planning">Planning</option>
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+                <option value="Shelved">Shelved</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            </div>
+
+            <div class="form-group">
+            <label>Ended At</label>
+            <input [(ngModel)]="editForm.endedAt" type="date" />
+            </div>
+
+        </div>
+
+        </div>
+
+        <div modal-footer class="edit-footer">
+        <app-buttons 
+                [buttonText]="'Cancel'"
+                [buttonStyleClass]="'btn-reject'"
+                [buttonType]="'button'"
+                (click)="closeModals()"
+                >
+            </app-buttons>
+            <app-buttons 
+                [buttonText]="'Save Changes'"
+                [buttonStyleClass]="'btn-promote'"
+                [buttonType]="'button'"
+                (click)="saveProject()"
+                >
+            </app-buttons>
+        </div>
+
+        </app-modal>
