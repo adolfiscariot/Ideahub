@@ -13,6 +13,7 @@ export interface Idea {
   userId?: string; 
   isReadyForPromotion?: boolean;      
   mediaCount: number;
+  projectId?: number;
 
   groupId: string;
   userName?: string;
