@@ -559,7 +559,8 @@
         type="text"
         class="form-control"
         formControlName="title"
-        placeholder="Enter a descriptive title for your idea">
+        placeholder="Enter a descriptive title for your idea"
+        maxlength="20">
       <div *ngIf="shareTitleCount >= 20" class="limit-message">
         You have reached the maximum allowed characters.
       </div>

@@ -153,7 +153,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-    title: ['', Validators.required],
+    title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(20)]],
     description: ['', Validators.required],
     type: ['', Validators.required],
     domain: ['', Validators.required],
@@ -232,7 +232,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   this.shareIdeaForm.get('title')?.valueChanges
     .pipe(takeUntil(this.destroy$))
     .subscribe(() => {
-      const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+      const res = updateCharCount(this.shareIdeaForm, 'title', 20);
       this.shareTitleCount = res.count;
     });
 
