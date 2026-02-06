@@ -140,7 +140,7 @@
 
         <!-- View Closed Ideas Button -->
       <app-buttons
-    [buttonText]="showClosedIdeas ? '👁️ Viewing Closed Ideas' : '📋 View Closed Ideas'"
+    [buttonText]="showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'"
     [buttonStyleClass]="
       (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
     "
@@ -469,7 +469,7 @@
       
       <!-- Add read-only message for closed ideas -->
       <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="read-only-message">
-        <p class="read-only-text">📌 This idea is closed and read-only</p>
+        <!--<p class="read-only-text">📌 This idea is closed and read-only</p> -->
       </div>
       
       <div class="details-section">
