@@ -138,6 +138,18 @@
         </div>
       </div>
 
+        <!-- View Closed Ideas Button -->
+      <app-buttons
+    [buttonText]="showClosedIdeas ? '👁️ Viewing Closed Ideas' : '📋 View Closed Ideas'"
+    [buttonStyleClass]="
+      (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
+    "
+    (click)="toggleViewClosedIdeas()"
+    [disabled]="false"
+    [title]="showClosedIdeas ? 'Click to view open ideas' : 'Click to view closed ideas'">
+  </app-buttons>
+
+
     <div class="filter-container" #dropdown>
   <div class="filter-dropdown">
     <div class="dropdown-header" (click)="toggleDropdown()">
@@ -235,8 +247,8 @@
       <p class="empty-filter-sub">Try adjusting your filters.</p>
     </div>
 
-    <!-- No Ideas State -->
-    <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact" class="no-ideas">
+    <!-- No Ideas State (open ideas) -->
+    <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact && !showClosedIdeas" class="no-ideas">
       <div class="no-ideas-content">
         <div class="no-ideas-icon">💡</div>
         <h3>No ideas yet</h3>
@@ -251,7 +263,24 @@
         </app-buttons>
 
           <!-- Leave Group -->
-    
+     
+      </div>
+    </div>
+
+    <!-- No Closed Ideas State -->
+    <div *ngIf="!isLoading && ideas.length === 0 && showClosedIdeas" class="no-closed-ideas">
+      <div class="no-closed-ideas-content">
+        <div class="no-closed-ideas-icon">📭</div>
+        <h3>No closed ideas</h3>
+        <p>There are no closed ideas in this group yet.</p>
+        <app-buttons
+          buttonStyleClass="btn-promote"
+          (click)="toggleViewClosedIdeas()"
+          [disabled]="false"
+          title="View open ideas"
+        >
+          ← Back to Open Ideas
+        </app-buttons>
       </div>
     </div>
 
@@ -262,10 +291,13 @@
         <div class="idea-card" 
              [class.selected]="selectedIdea?.id === idea.id"
              [class.promoted]="idea.isPromotedToProject"
+             [class.closed-idea]="idea.status === 'Closed'"
              (click)="selectIdea(idea)">
           <div class="idea-card-header">
             <div class="idea-header-top">
-              <h3 class="idea-title">{{ idea.title }}</h3>
+              <h3 class="idea-title">{{ idea.title }}
+                <span *ngIf="idea.status === 'Closed'" class="closed-badge-title">CLOSED</span>
+              </h3>
               <span *ngIf="idea.isReadyForPromotion" class="promotion-badge-title"> ⭐ Ready for Promotion </span>
             </div>
             
@@ -294,7 +326,7 @@
 
             <!-- Promote button -->
           <app-buttons
-    *ngIf="isGroupCreator() && !idea.isPromotedToProject"
+    *ngIf="isGroupCreator() && !idea.isPromotedToProject && idea.status !== 'Closed'"
     buttonStyleClass="btn-promote"
     (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
     [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id"
@@ -318,34 +350,43 @@
       </ng-container>
     </div>
   </div>
-
-  <!-- Right Panel: Idea Details (Split View) -->
-  <div *ngIf="selectedIdea" class="idea-details-panel">
-    <div class="details-panel-header">
-      <h2 class="details-title">Idea Details</h2>
-      <!-- Close Details Button (Fixed - with ×) -->
-      <app-buttons
-        buttonStyleClass="btn-close-details"
-        (click)="selectedIdea = null"
-        [disabled]="false"
-        title="Close details"
-      >
-        ×
-      </app-buttons>
+    
+    <!-- Right Panel: Idea Details (Split View) -->
+<div *ngIf="selectedIdea" class="idea-details-panel">
+  <div class="details-panel-header">
+    <h2 class="details-title">Idea Details</h2>
+    
+    <!-- Add "Read Only" badge for closed ideas -->
+    <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="read-only-badge">
+      <span class="read-only-text">Read Only</span>
     </div>
     
-    <div class="details-panel-content">
-      <!-- View Mode Only (No inline editing) -->
-      <div class="view-mode">
-        <div class="details-idea-header">
-          <!-- ROW 1 -->
-          <div class="details-row-1">
-            <h3 class="details-idea-title">{{ selectedIdea.title }}
-             
-            </h3>
+    <!-- Close Details Button -->
+    <app-buttons
+      buttonStyleClass="btn-close-details"
+      (click)="selectedIdea = null"
+      [disabled]="false"
+      title="Close details"
+    >
+      ×
+    </app-buttons>
+  </div>
+  
+  <div class="details-panel-content">
+    <!-- View Mode Only (No inline editing) -->
+    <div class="view-mode">
+      <div class="details-idea-header">
+        <!-- ROW 1 -->
+        <div class="details-row-1">
+          <h3 class="details-idea-title">{{ selectedIdea.title }}
+            <!-- Closed badge in details -->
+            <span *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="closed-badge-details">CLOSED</span>
+          </h3>
 
-            <div class="details-actions-right">
-              <!-- Edit button opens modal (Fixed - with ✎) -->
+          <div class="details-actions-right">
+            <!-- For closed ideas, hide action buttons -->
+            <ng-container *ngIf="!showClosedIdeas && selectedIdea.status !== 'Closed'">
+              <!-- Edit button opens modal -->
               <app-buttons
                 *ngIf="isUserIdeaOwner(selectedIdea)"
                 buttonStyleClass="btn-edit"
@@ -356,7 +397,7 @@
                 ✎
               </app-buttons>
               
-              <!-- Promote button for admins only (Fixed - with 🚀) -->
+              <!-- Promote button for admins only -->
               <app-buttons
                 *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
                 buttonStyleClass="btn-promote"
@@ -367,7 +408,7 @@
                 🚀
               </app-buttons>
               
-              <!-- View voters button for admins (Fixed - with 👁️) -->
+              <!-- View voters button for admins -->
               <app-buttons
                 *ngIf="isGroupCreator() && selectedIdea.voteCount > 0"
                 buttonStyleClass="btn-view-voters"
@@ -378,7 +419,7 @@
                 👁️
               </app-buttons>
 
-              <!-- Vote button (Fixed - with 👍 and count) -->
+              <!-- Vote button -->
               <app-buttons
                 [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
                 (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
@@ -389,7 +430,7 @@
                 <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
               </app-buttons>
               
-              <!-- Delete button for idea owner (Fixed - with ✕) -->
+              <!-- Delete button for idea owner -->
               <app-buttons
                 *ngIf="isUserIdeaOwner(selectedIdea)"
                 buttonStyleClass="btn-delete"
@@ -400,8 +441,9 @@
                 ✕
               </app-buttons>
 
+              <!-- Close Idea button for admins -->
               <app-buttons
-                *ngIf="isGroupCreator()"
+                *ngIf="isGroupCreator() && selectedIdea.status !== 'Closed'"
                 buttonStyleClass="btn-promote"
                 (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)"
                 [disabled]="false"
@@ -409,27 +451,41 @@
               >
                 🛑 Close Idea
               </app-buttons>
-            </div>
-          </div> 
-
-          <!-- ROW 2 -->
-          <div class="details-row-2">
-            <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
-             <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge-left">✔ Promoted</span>
+            </ng-container>
+            
+            <!-- Show vote count for closed ideas -->
+            <!-- <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="closed-vote-display">
+              <span class="closed-vote-count">{{ selectedIdea.voteCount || 0 }} votes</span>
+            </div> -->
           </div>
         </div>
-        
-        <div class="details-section">
-          <p class="details-idea-description">{{ selectedIdea.description }}</p>
-        </div>
-        <!-- DISPLAY MEDIA FOR IDEAS -->
-        <div class="details-section" *ngIf="selectedIdea">
-          <app-media 
-            [ideaId]="selectedIdea.id"
-            [title]="'Supporting Media'">
-          </app-media>
-        </div>
 
+        <!-- ROW 2 -->
+        <div class="details-row-2">
+          <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
+          <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge-left">✔ Promoted</span>
+        </div>
+      </div>
+      
+      <!-- Add read-only message for closed ideas -->
+      <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="read-only-message">
+        <p class="read-only-text">📌 This idea is closed and read-only</p>
+      </div>
+      
+      <div class="details-section">
+        <p class="details-idea-description">{{ selectedIdea.description }}</p>
+      </div>
+      
+      <!-- DISPLAY MEDIA FOR IDEAS -->
+      <div class="details-section" *ngIf="selectedIdea">
+        <app-media 
+          [ideaId]="selectedIdea.id"
+          [title]="'Supporting Media'">
+        </app-media>
+      </div>
+
+      <!-- Comments section - different for closed vs open ideas -->
+      <ng-container *ngIf="!showClosedIdeas && selectedIdea.status !== 'Closed'">
         <div class="comments-section">
           <h4 class="comments-title">Comments ({{ comments.length }})</h4>
 
@@ -437,48 +493,47 @@
             <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
 
             <!-- MEDIA UPLOAD SECTION (COMMENTS) -->
-              <div class="media-upload-section" *ngIf="!isPostingComment">
-                <!-- Selected files preview -->
-                <div *ngIf="selectedCommentFiles.length > 0" class="selected-files">
-                  <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
-                    <span class="file-name">{{ file.name }}</span>
-                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
-                    <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
-                  </div>
+            <div class="media-upload-section" *ngIf="!isPostingComment">
+              <!-- Selected files preview -->
+              <div *ngIf="selectedCommentFiles.length > 0" class="selected-files">
+                <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                  <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
                 </div>
+              </div>
+              
+              <div class="file-input-row">
+                <input 
+                  type="file" 
+                  #commentFileInput
+                  multiple
+                  (change)="onCommentFileSelected($event)"
+                  [accept]="allowedFileTypes"
+                  style="display: none"
+                >
+                <app-buttons
+                  [buttonText]="'📎 Attach Media Files'"
+                  buttonStyleClass="btn-promote"
+                  (click)="commentFileInput.click()">
+                </app-buttons>
                 
-                <div class="file-input-row">
-                  <input 
-                    type="file" 
-                    #commentFileInput
-                    multiple
-                    (change)="onCommentFileSelected($event)"
-                    [accept]="allowedFileTypes"
-                    style="display: none"
-                  >
-                  <app-buttons
-                    [buttonText]="'📎 Attach Media Files'"
-                    buttonStyleClass="btn-promote"
-                    (click)="commentFileInput.click()">
-                  </app-buttons>
-                  
-                  <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
-                    Optional - max 20MB per file
-                  </span>
-                </div>
+                <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
+                  Optional - max 20MB per file
+                </span>
               </div>
-              
-              <div *ngIf="commentStatus" class="comment-status">
-                {{ commentStatus }}
-              </div>
-              
-              <app-buttons
-                [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
-                [buttonStyleClass]="'btn-promote'"
-                [disabled]="!newCommentContent.trim() || isPostingComment"
-                (click)="addComment()">
-              </app-buttons>
-            </div>           
+            </div>
+            
+            <div *ngIf="commentStatus" class="comment-status">
+              {{ commentStatus }}
+            </div>
+            
+            <app-buttons
+              [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+              [buttonStyleClass]="'btn-promote'"
+              [disabled]="!newCommentContent.trim() || isPostingComment"
+              (click)="addComment()">
+            </app-buttons>
           </div>
 
           <div id="comments-list">
@@ -496,7 +551,7 @@
                 </div>
 
                 <!-- Delete icon only on hover -->
-                <app-buttons class="delete-icon" (click)="deleteComment(comment.id)">
+                <button type="button" *ngIf="comment.userId === currentUserId" class="delete-icon" (click)="deleteComment(comment.id)" title="Delete comment">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
@@ -505,7 +560,7 @@
                     <path d="M14 11v6"></path>
                     <path d="M9 6V4h6v2"></path>
                   </svg>
-                </app-buttons>
+                </button>
   </div>
 
               <p class="comment-text">{{ comment.content }}</p>
@@ -521,27 +576,64 @@
             </div>
           </div>
         </div>
+      </ng-container>
 
-        <div class="details-section" *ngIf="selectedIdea.userName">
-          <h4 class="details-section-title">Author</h4>
-          <div class="author-info">
-            <div class="author-avatar">{{ selectedIdea.userName?.charAt(0) || 'U' }}</div>
-            <div class="author-details">
-              <div class="author-name">{{ selectedIdea.userName || 'Unknown User' }}
-                <span *ngIf="isUserIdeaOwner(selectedIdea)" class="you-badge">(You)</span>
+      <!-- Read-only comments for closed ideas -->
+      <ng-container *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'">
+        <div class="comments-section-readonly">
+          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+          <p class="read-only-comment-note">Comments are disabled for closed ideas</p>
+          
+          <!-- Display existing comments in read-only mode -->
+          <div id="comments-list">
+            <div *ngFor="let comment of comments" class="comment" [class.own-comment]="comment.userId === currentUserId">
+              <div class="comment-header">
+                <div class="comment-meta">
+                  <span class="comment-author">
+                    {{ comment.userId === currentUserId ? 'You' : 'User' }}
+                  </span>
+                  <span class="comment-date">
+                    {{ formatRelativeTime(comment.createdAt) }}
+                  </span>
+                </div>
+                <!-- Hide delete button for closed ideas -->
               </div>
-              <div class="author-role">
-                <span *ngIf="isGroupCreator() && isUserIdeaOwner(selectedIdea)">Group Creator & Idea Owner</span>
-                <span *ngIf="isGroupCreator() && !isUserIdeaOwner(selectedIdea)">Group Creator</span>
-                <span *ngIf="!isGroupCreator() && isUserIdeaOwner(selectedIdea)">Idea Owner</span>
-                <span *ngIf="!isGroupCreator() && !isUserIdeaOwner(selectedIdea)">Member</span>
+              <p class="comment-text">{{ comment.content }}</p>
+              
+              <!-- DISPLAY MEDIA FOR COMMENTS (read-only) -->
+              <div class="comment-media-section" *ngIf="comment.id">
+                <app-media 
+                  [commentId]="comment.id"
+                  [title]="''"
+                  [compactMode]="true">
+                </app-media>
               </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Rest of your details section (Author info, etc.) stays the same -->
+      <div class="details-section" *ngIf="selectedIdea.userName">
+        <h4 class="details-section-title">Author</h4>
+        <div class="author-info">
+          <div class="author-avatar">{{ selectedIdea.userName?.charAt(0) || 'U' }}</div>
+          <div class="author-details">
+            <div class="author-name">{{ selectedIdea.userName || 'Unknown User' }}
+              <span *ngIf="isUserIdeaOwner(selectedIdea)" class="you-badge">(You)</span>
+            </div>
+            <div class="author-role">
+              <span *ngIf="isGroupCreator() && isUserIdeaOwner(selectedIdea)">Group Creator & Idea Owner</span>
+              <span *ngIf="isGroupCreator() && !isUserIdeaOwner(selectedIdea)">Group Creator</span>
+              <span *ngIf="!isGroupCreator() && isUserIdeaOwner(selectedIdea)">Idea Owner</span>
+              <span *ngIf="!isGroupCreator() && !isUserIdeaOwner(selectedIdea)">Member</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
+  </div>
+</div>
 <!-- Share Idea Modal -->
 <app-modal
   [isOpen]="showShareModal"
