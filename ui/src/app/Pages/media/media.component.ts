@@ -18,6 +18,7 @@ export class MediaComponent implements OnInit {
   @Input() projectId?: number;
   @Input() title: string = 'Media';
   @Input() compactMode: boolean = false;
+  @Input() media?: Media[];
 
   mediaList: Media[] = [];
   isLoading = false;
