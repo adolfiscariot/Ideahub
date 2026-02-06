@@ -30,7 +30,7 @@ export class MediaComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ideaId'] || changes['commentId']) {
+    if (changes['ideaId'] || changes['commentId'] || changes['projectId']) {
       this.loadMedia();
     }
   }
