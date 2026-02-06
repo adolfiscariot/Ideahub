@@ -80,8 +80,23 @@ public class ProjectController : ControllerBase
             await _context.Projects.AddAsync(newProject);
             await _context.SaveChangesAsync();
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
+            // check if a project already exists for this idea
+            var existingProject = await _context.Projects
+                .FirstOrDefaultAsync(p => p.IdeaId == ideaId);
+
+            if (existingProject != null)
+            {
+                newProject = existingProject;
+            }
+            else
+            {
+                await _context.Projects.AddAsync(newProject);
+                await _context.SaveChangesAsync();
+            }
+
+            // move the media
             var mediaItems = await _context.Media
                 .Where(m => m.IdeaId == ideaId)
                 .ToListAsync();
@@ -93,6 +108,7 @@ public class ProjectController : ControllerBase
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
 
             _logger.LogInformation("Create Project: New Project {projectTitle} created", newProject.Title);
             return Ok(ApiResponse.Ok("New project created"));
