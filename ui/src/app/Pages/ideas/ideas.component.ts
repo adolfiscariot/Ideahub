@@ -4,7 +4,7 @@ import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } 
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
-import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest, viewComment, createComment} from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest, viewComment, createComment } from '../../Interfaces/Ideas/idea-interfaces';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { VoteService } from '../../Services/vote.service';
@@ -13,7 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { ToastService } from '../../Services/toast.service';
 import { ProjectService } from '../../Services/project.service';
-import { CreateProjectRequest} from '../../Interfaces/Projects/project-interface';
+import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
@@ -23,6 +23,7 @@ import { MediaComponent } from '../media/media.component';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
+import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
 
 @Component({
   selector: 'app-ideas',
@@ -91,13 +92,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
   descLength = 0;
   isFormValid = false;
   shareTitleCount = 0;
-  shareDescCount =0;
+  shareDescCount = 0;
 
   shareIdeaForm!: FormGroup;
 
   private routeSub: Subscription = new Subscription();
 
-  showDeleteIdeaModal= false;
+  showDeleteIdeaModal = false;
   ideaIdToDelete: string | null = null;
 
   showIdeaInfoModal = false;
@@ -109,7 +110,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   selectedImpact: string = '';
 
   isDropdownOpen = false;
-  
+
   selectedOptionLabel: string = 'All Categories';
 
   isReadyForPromotion = false;
@@ -153,14 +154,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-    title: ['', Validators.required],
-    description: ['', Validators.required],
-    type: ['', Validators.required],
-    domain: ['', Validators.required],
-    impact: ['', Validators.required]
-  });
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      type: ['', Validators.required],
+      domain: ['', Validators.required],
+      impact: ['', Validators.required]
+    });
 
-  this.setupShareIdeaCharCounters();
+    this.setupShareIdeaCharCounters();
     // Check browser history state FIRST (in case of page refresh)
     console.log('Browser history state:', history.state);
 
@@ -226,83 +227,83 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.routeSub.unsubscribe();
   }
 
-  private destroy$ = new Subject<void>(); 
+  private destroy$ = new Subject<void>();
   private setupShareIdeaCharCounters(): void {
 
-  this.shareIdeaForm.get('title')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const res = updateCharCount(this.shareIdeaForm, 'title', 100);
-      this.shareTitleCount = res.count;
-    });
+    this.shareIdeaForm.get('title')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+        this.shareTitleCount = res.count;
+      });
 
-  this.shareIdeaForm.get('description')?.valueChanges
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
-      this.shareDescCount = res.count;
-    });
-}
-
-toggleDropdown () {
-  this.isDropdownOpen = !this.isDropdownOpen;
-}
-
-selectCategory(filterType: 'type' | 'domain' | 'impact', value: string) {
-  if (filterType === 'type') this.selectedType = value;
-  if (filterType === 'domain') this.selectedDomain = value;
-  if (filterType === 'impact') this.selectedImpact = value;
-
-  this.filterByCategory({
-    type: this.selectedType,
-    domain: this.selectedDomain,
-    impact: this.selectedImpact
-  });
-}
-
-@ViewChild('dropdown', { static: true }) dropdown!: ElementRef;
-
-@HostListener('document:click', ['$event'])
-onDocumentClick(event: MouseEvent) {
-  if (!this.isDropdownOpen) return;
-
-  if (!this.dropdown.nativeElement.contains(event.target)) {
-    this.isDropdownOpen = false;
+    this.shareIdeaForm.get('description')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+        this.shareDescCount = res.count;
+      });
   }
-}
 
-private filterOutClosed(ideas: Idea[]): Idea[] {
-  return ideas.filter(idea => idea.status !== 'Closed');
-}
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
 
+  selectCategory(filterType: 'type' | 'domain' | 'impact', value: string) {
+    if (filterType === 'type') this.selectedType = value;
+    if (filterType === 'domain') this.selectedDomain = value;
+    if (filterType === 'impact') this.selectedImpact = value;
 
-filterByCategory(filters: { type: string; domain: string; impact: string }) {
-  this.ideasService
-    .getIdeasByGroup(this.groupId, filters.type, filters.domain, filters.impact)
-    .subscribe({
-      next: (response) => {
-        this.ideas = this.filterOutClosed(response.data ?? []);
-      },
-      error: (err) => {
-        console.error('Error filtering ideas:', err);
-      }
+    this.filterByCategory({
+      type: this.selectedType,
+      domain: this.selectedDomain,
+      impact: this.selectedImpact
     });
-}
+  }
+
+  @ViewChild('dropdown', { static: true }) dropdown!: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.isDropdownOpen) return;
+
+    if (!this.dropdown.nativeElement.contains(event.target)) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  private filterOutClosed(ideas: Idea[]): Idea[] {
+    return ideas.filter(idea => idea.status !== 'Closed');
+  }
 
 
-clearAllCategories() {
-  this.selectedType = '';
-  this.selectedDomain = '';
-  this.selectedImpact = '';
+  filterByCategory(filters: { type: string; domain: string; impact: string }) {
+    this.ideasService
+      .getIdeasByGroup(this.groupId, filters.type, filters.domain, filters.impact)
+      .subscribe({
+        next: (response) => {
+          this.ideas = this.filterOutClosed(response.data ?? []);
+        },
+        error: (err) => {
+          console.error('Error filtering ideas:', err);
+        }
+      });
+  }
 
-  this.selectedOptionLabel = 'All Categories';
 
-  this.filterByCategory({
-    type: '',
-    domain: '',
-    impact: ''
-  });
-}
+  clearAllCategories() {
+    this.selectedType = '';
+    this.selectedDomain = '';
+    this.selectedImpact = '';
+
+    this.selectedOptionLabel = 'All Categories';
+
+    this.filterByCategory({
+      type: '',
+      domain: '',
+      impact: ''
+    });
+  }
 
 
   openEditModal(idea: any) {
@@ -330,149 +331,149 @@ clearAllCategories() {
   selectIdea(idea: any): void {
     console.log('Selecting idea:', idea);
     this.selectedIdea = idea;
-    this.loadComments(idea.id);  
+    this.loadComments(idea.id);
   }
 
-loadComments(ideaId: number) {
-  this.isLoadingComments = true;
-  this.commentService.getComments(ideaId).subscribe({
-    next: (res) => {
-      this.isLoadingComments = false;
-      if (res.success && res.data) {
-        this.comments = res.data.sort((a, b) =>
-  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-);
+  loadComments(ideaId: number) {
+    this.isLoadingComments = true;
+    this.commentService.getComments(ideaId).subscribe({
+      next: (res) => {
+        this.isLoadingComments = false;
+        if (res.success && res.data) {
+          this.comments = res.data.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
 
 
-      } else {
-        this.comments = [];
+        } else {
+          this.comments = [];
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load comments', err);
+        this.isLoadingComments = false;
       }
-    },
-    error: (err) => {
-      console.error('Failed to load comments', err);
-      this.isLoadingComments = false;
-    }
-  });
-}
-
-  
-async addComment(): Promise<void> {
-  const content = this.newCommentContent?.trim();
-  if (!content) {
-    return this.toastService.show('To post a comment, you are required to provide one', 'info');
+    });
   }
 
-  this.isPostingComment = true;
-  this.commentStatus = 'Posting comment...';
 
-  try {
-    // Create the comment
-    const commentResponse = await firstValueFrom(
-      this.commentService.postComment(this.selectedIdea.id, { content })
-    );
-    
-    if (!commentResponse.success || !commentResponse.data?.id) {
-      throw new Error('Failed to create comment');
+  async addComment(): Promise<void> {
+    const content = this.newCommentContent?.trim();
+    if (!content) {
+      return this.toastService.show('To post a comment, you are required to provide one', 'info');
     }
-    
-    const commentId = commentResponse.data.id;
-    
-    // If there are files, upload them
-    if (this.selectedCommentFiles.length > 0) {
-      this.commentStatus = `Attaching ${this.selectedCommentFiles.length} media file(s)...`;
-      
-      // Upload each file with the comment ID
-      const uploadPromises = this.selectedCommentFiles.map(file => 
-        firstValueFrom(
-          this.mediaService.uploadMedia(
-            file,
-            this.detectMediaType(file),
-            undefined, 
-            commentId, // pass the new comment ID
-            undefined 
-          )
-        )
+
+    this.isPostingComment = true;
+    this.commentStatus = 'Posting comment...';
+
+    try {
+      // Create the comment
+      const commentResponse = await firstValueFrom(
+        this.commentService.postComment(this.selectedIdea.id, { content })
       );
-      
-      // Wait for all uploads
-      await Promise.all(uploadPromises);
-      
-      this.toastService.show(`Comment with ${this.selectedCommentFiles.length} media file(s) posted`, 'success');
-    } else {
-      this.toastService.show('Comment posted', 'success');
-    }
-    
-    //this.commentStatus = 'Comment posted successfully!';
-    this.newCommentContent = '';
-    this.selectedCommentFiles = [];
-    this.loadComments(this.selectedIdea.id);
-    
-    // Clear status after 2 second
-    setTimeout(() => {
-      this.commentStatus = '';
-    }, 2000);
-    
-  } catch (error: any) {
-    console.error('Error posting comment:', error);
-    this.commentStatus = error.message || 'Failed to post comment. Please try again.';
-    this.toastService.show(this.commentStatus, 'error');
-  } finally {
-    this.isPostingComment = false;
-  }
-}
 
-
-deleteComment(commentId: number) {
-  this.commentService.deleteComment(commentId).subscribe({
-    next: (res) => {
-      if (res.success) {
-        this.comments = this.comments.filter(c => c.id !== commentId);
-        this.toastService.show('Comment deleted', 'success');
-      } else {
-        this.toastService.show('Failed to delete comment', 'error');
+      if (!commentResponse.success || !commentResponse.data?.id) {
+        throw new Error('Failed to create comment');
       }
-    },
-    error: (err) => console.error('Error deleting comment', err)
-  });
-}  
 
-formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+      const commentId = commentResponse.data.id;
 
-  const seconds = Math.floor(diffMs / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
+      // If there are files, upload them
+      if (this.selectedCommentFiles.length > 0) {
+        this.commentStatus = `Attaching ${this.selectedCommentFiles.length} media file(s)...`;
 
-  // Under 1 minute
-  if (seconds < 60) return 'Just now';
+        // Upload each file with the comment ID
+        const uploadPromises = this.selectedCommentFiles.map(file =>
+          firstValueFrom(
+            this.mediaService.uploadMedia(
+              file,
+              this.detectMediaType(file),
+              undefined,
+              commentId, // pass the new comment ID
+              undefined
+            )
+          )
+        );
 
-  // Under 1 hour
-  if (minutes < 60) return `${minutes} min ago`;
+        // Wait for all uploads
+        await Promise.all(uploadPromises);
 
-  // Under 24 hours
-  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        this.toastService.show(`Comment with ${this.selectedCommentFiles.length} media file(s) posted`, 'success');
+      } else {
+        this.toastService.show('Comment posted', 'success');
+      }
 
-  // 24+ hours → show date
-  return date.toLocaleDateString();
-}
+      //this.commentStatus = 'Comment posted successfully!';
+      this.newCommentContent = '';
+      this.selectedCommentFiles = [];
+      this.loadComments(this.selectedIdea.id);
+
+      // Clear status after 2 second
+      setTimeout(() => {
+        this.commentStatus = '';
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Error posting comment:', error);
+      this.commentStatus = error.message || 'Failed to post comment. Please try again.';
+      this.toastService.show(this.commentStatus, 'error');
+    } finally {
+      this.isPostingComment = false;
+    }
+  }
+
+
+  deleteComment(commentId: number) {
+    this.commentService.deleteComment(commentId).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.comments = this.comments.filter(c => c.id !== commentId);
+          this.toastService.show('Comment deleted', 'success');
+        } else {
+          this.toastService.show('Failed to delete comment', 'error');
+        }
+      },
+      error: (err) => console.error('Error deleting comment', err)
+    });
+  }
+
+  formatRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+
+    const seconds = Math.floor(diffMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    // Under 1 minute
+    if (seconds < 60) return 'Just now';
+
+    // Under 1 hour
+    if (minutes < 60) return `${minutes} min ago`;
+
+    // Under 24 hours
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+
+    // 24+ hours → show date
+    return date.toLocaleDateString();
+  }
 
   onCommentFileSelected(event: any): void {
     const files: FileList = event.target.files;
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
+
       // Validate file size (20MB limit)
       if (file.size > 20 * 1024 * 1024) {
         this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
         continue;
       }
-      
+
       this.selectedCommentFiles.push(file);
     }
-    
+
     // Reset file input
     event.target.value = '';
   }
@@ -492,7 +493,7 @@ formatRelativeTime(dateString: string): string {
   detectMediaType(file: File): MediaType {
     const fileName = file.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
-    
+
     if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)) {
       return MediaType.Image;
     }
@@ -521,19 +522,19 @@ formatRelativeTime(dateString: string): string {
     });
   }
 
-updateShareIdeaCounts() {
-  this.shareTitleCount = this.modalEditData.title?.length || 0;
-  this.shareDescCount = this.modalEditData.description?.length || 0;
-}
+  updateShareIdeaCounts() {
+    this.shareTitleCount = this.modalEditData.title?.length || 0;
+    this.shareDescCount = this.modalEditData.description?.length || 0;
+  }
 
-autoGrow(event: any) {
-  const textarea = event.target;
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
-}
+  autoGrow(event: any) {
+    const textarea = event.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
 
   confirmLeaveGroup() {
-    if (this.isGroupCreator()){
+    if (this.isGroupCreator()) {
       this.showAdminLeaveModal = true;
     }
     else {
@@ -542,63 +543,63 @@ autoGrow(event: any) {
   }
 
   confirmMemberLeave() {
-  this.showMemberLeaveModal = false;
-  this.leaveGroup();
-}
+    this.showMemberLeaveModal = false;
+    this.leaveGroup();
+  }
 
-cancelMemberLeave() {
-  this.showMemberLeaveModal = false;
-}
+  cancelMemberLeave() {
+    this.showMemberLeaveModal = false;
+  }
 
-cancelDeleteIdea () {
-  this.ideaIdToDelete = null;
-  this.showDeleteIdeaModal = false;
-}
+  cancelDeleteIdea() {
+    this.ideaIdToDelete = null;
+    this.showDeleteIdeaModal = false;
+  }
 
-openDeleteIdeaModal (ideaId: string) {
-  this.ideaIdToDelete = ideaId;
-  this.showDeleteIdeaModal = true;
-}
+  openDeleteIdeaModal(ideaId: string) {
+    this.ideaIdToDelete = ideaId;
+    this.showDeleteIdeaModal = true;
+  }
 
-closeIdeabtn (ideaId: string) {
-  this.ideaIdToClose = ideaId;
-  this.onCloseIdea();
-  this.selectedIdea = null;
-}
+  closeIdeabtn(ideaId: string) {
+    this.ideaIdToClose = ideaId;
+    this.onCloseIdea();
+    this.selectedIdea = null;
+  }
 
-onCloseIdea() {
+  onCloseIdea() {
     if (!this.ideaIdToClose) return;
-      this.ideasService.closeIdea(this.ideaIdToClose).subscribe({
-        next: (response) => {
+    this.ideasService.closeIdea(this.ideaIdToClose).subscribe({
+      next: (response) => {
 
-          if (response.success) {
-            
-            this.toastService.show('Idea closed successfully!', 'success');
-            this.loadIdeas();
-          } else {
-            this.toastService.show('Failed to close idea: ${response.message}', 'error');
-          }
-        },
+        if (response.success) {
 
-        error: (error) => {
-          this.toastService.show('Failed to close idea. Idea has already being closed', 'error');
+          this.toastService.show('Idea closed successfully!', 'success');
+          this.loadIdeas();
+        } else {
+          this.toastService.show('Failed to close idea: ${response.message}', 'error');
         }
-      });
-    }
+      },
 
-closeIdeaInfo () {
-  this.showIdeaInfoModal = false;
-}
+      error: (error) => {
+        this.toastService.show('Failed to close idea. Idea has already being closed', 'error');
+      }
+    });
+  }
 
-displayIdeaInfo () {
-  this.showIdeaInfoModal = true;
-}
+  closeIdeaInfo() {
+    this.showIdeaInfoModal = false;
+  }
 
-dontShowIdeaInfoAgain () {
-  localStorage.setItem('hideIdeaInfo', 'true');
-  console.log('hide idea information')
-  this.showIdeaInfoModal=false;
-}
+  displayIdeaInfo() {
+    this.showIdeaInfoModal = true;
+  }
+
+  dontShowIdeaInfoAgain() {
+    localStorage.setItem('hideIdeaInfo', 'true');
+    console.log('hide idea information')
+    this.showIdeaInfoModal = false;
+  }
 
   leaveGroup() {
     if (!this.groupId) return;
@@ -622,7 +623,7 @@ dontShowIdeaInfoAgain () {
       next: () => {
         console.log('Request accepted for user:', requestUserEmail);
         this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
-        
+
         if (this.pendingRequests.length === 0) {
           this.closeRequestsModal();
           this.toastService.show('Accepted User request', 'success');
@@ -827,64 +828,64 @@ dontShowIdeaInfoAgain () {
 
         if (response.success && response.data) {
           this.ideas = this.filterOutClosed(
-          response.data.map((idea: any) => {
-            console.log(`Mapping idea "${idea.title}":`, {
-              id: idea.id,
-              isPromotedToProject: idea.isPromotedToProject,
-              isDeleted: idea.isDeleted
-            });
+            response.data.map((idea: any) => {
+              console.log(`Mapping idea "${idea.title}":`, {
+                id: idea.id,
+                isPromotedToProject: idea.isPromotedToProject,
+                isDeleted: idea.isDeleted
+              });
 
-            const mappedIdea: Idea = {
-              id: idea.id?.toString() || '',
-              title: idea.title || '',
-              description: idea.description || '',
-              filter: idea.filter || '',
-              UserId: idea.userId || idea.UserId || '',
-              userId: idea.userId || idea.UserId || '',
-              groupId: this.groupId,
-              isPromotedToProject: idea.isPromotedToProject || false,
-              isDeleted: idea.isDeleted || false,
-              createdAt: new Date(idea.createdAt || new Date()),
-              updatedAt: new Date(idea.updatedAt || new Date()),
-              status: idea.status || 'Open',
-              deletedAt: idea.deletedAt ? new Date(idea.deletedAt) : undefined,
-              voteCount: 0, // Will be updated by fetchAndUpdateVoteCounts
-              commentCount: 0,
-              userVoted: false, // Will be updated by fetchAndUpdateVoteCounts
-              userName: idea.userName || '',
-              userVoteId: undefined, // Will be updated by fetchAndUpdateVoteCounts
-              groupName: idea.name || '',
-              name: idea.name || '',
-              mediaCount: 0
-            };
-            return mappedIdea;
-          })
-        );
-        // After mapping ideas, fetch media counts for each
-        //console.log('Fetching media counts for ideas...');
+              const mappedIdea: Idea = {
+                id: idea.id?.toString() || '',
+                title: idea.title || '',
+                description: idea.description || '',
+                filter: idea.filter || '',
+                UserId: idea.userId || idea.UserId || '',
+                userId: idea.userId || idea.UserId || '',
+                groupId: this.groupId,
+                isPromotedToProject: idea.isPromotedToProject || false,
+                isDeleted: idea.isDeleted || false,
+                createdAt: new Date(idea.createdAt || new Date()),
+                updatedAt: new Date(idea.updatedAt || new Date()),
+                status: idea.status || 'Open',
+                deletedAt: idea.deletedAt ? new Date(idea.deletedAt) : undefined,
+                voteCount: 0, // Will be updated by fetchAndUpdateVoteCounts
+                commentCount: 0,
+                userVoted: false, // Will be updated by fetchAndUpdateVoteCounts
+                userName: idea.userName || '',
+                userVoteId: undefined, // Will be updated by fetchAndUpdateVoteCounts
+                groupName: idea.name || '',
+                name: idea.name || '',
+                mediaCount: 0
+              };
+              return mappedIdea;
+            })
+          );
+          // After mapping ideas, fetch media counts for each
+          //console.log('Fetching media counts for ideas...');
 
-        // // Create an array of promises to fetch media counts
-        // const mediaCountPromises = this.ideas.map(async (idea) => {
-        //   try {
-        //     const mediaResponse = await firstValueFrom(
-        //       this.mediaService.viewMedia(Number(idea.id))
-        //     );
-            
-        //     if (mediaResponse.success && mediaResponse.data) {
-        //       idea.mediaCount = mediaResponse.data.length;
-        //       console.log(`Idea "${idea.title}": ${idea.mediaCount} media files`);
-        //     }
-        //   } catch (error) {
-        //     console.error(`Error fetching media for idea ${idea.id}:`, error);
-        //     idea.mediaCount = 0;
-        //   }
-          
-        //   return idea;
-        // });
+          // // Create an array of promises to fetch media counts
+          // const mediaCountPromises = this.ideas.map(async (idea) => {
+          //   try {
+          //     const mediaResponse = await firstValueFrom(
+          //       this.mediaService.viewMedia(Number(idea.id))
+          //     );
 
-        // // Wait for all media counts to be fetched
-        // await Promise.all(mediaCountPromises);
-        // console.log('Media counts loaded for all ideas');
+          //     if (mediaResponse.success && mediaResponse.data) {
+          //       idea.mediaCount = mediaResponse.data.length;
+          //       console.log(`Idea "${idea.title}": ${idea.mediaCount} media files`);
+          //     }
+          //   } catch (error) {
+          //     console.error(`Error fetching media for idea ${idea.id}:`, error);
+          //     idea.mediaCount = 0;
+          //   }
+
+          //   return idea;
+          // });
+
+          // // Wait for all media counts to be fetched
+          // await Promise.all(mediaCountPromises);
+          // console.log('Media counts loaded for all ideas');
 
           console.log(`Mapped ${this.ideas.length} ideas`);
           console.log('Promotion status:', this.ideas.map(i => ({
@@ -1010,137 +1011,151 @@ dontShowIdeaInfoAgain () {
   }
 
   openShareModal(editMode = false, editData: any = null): void {
-  console.log('Opening share modal in edit mode:', editMode);
-  console.log('Edit data:', editData);
+    console.log('Opening share modal in edit mode:', editMode);
+    console.log('Edit data:', editData);
 
-  this.isEditMode = editMode;
+    this.isEditMode = editMode;
 
-  // Always reset modalEditData to a valid object
-  this.modalEditData = {
-    id: '',
-    title: '',
-    description: ''
-  };
-
-  // If in edit mode, populate with the idea data
-  if (editMode && editData) {
+    // Always reset modalEditData to a valid object
     this.modalEditData = {
-      id: editData.id || '',
-      title: editData.title || '',
-      description: editData.description || ''
+      id: '',
+      title: '',
+      description: ''
     };
-  }
 
-  this.showShareModal = true;
-  console.log('Modal edit data set to:', this.modalEditData);
-}
+    // If in edit mode, populate with the idea data
+    if (editMode && editData) {
+      this.modalEditData = {
+        id: editData.id || '',
+        title: editData.title || '',
+        description: editData.description || ''
+      };
+    }
+
+    this.showShareModal = true;
+    console.log('Modal edit data set to:', this.modalEditData);
+  }
   closeShareModal(): void {
     this.showShareModal = false;
     this.isEditMode = false;
     this.shareIdeaForm.reset();
-    this.selectedIdeaFiles = []; 
-    this.ideaUploadStatus = ''; 
+    this.selectedIdeaFiles = [];
+    this.ideaUploadStatus = '';
   }
 
 
-// Add these methods for idea file handling
-  onIdeaFileSelected(event: any): void {
-    const files: FileList = event.target.files;
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // Validate file size (20MB limit)
-      if (file.size > 20 * 1024 * 1024) {
-        this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
-        continue;
-      }
-      
-      this.selectedIdeaFiles.push(file);
+  onFileSelected(
+    event: Event,
+    target: 'idea' | 'comment'
+  ): void {
+    const currentFiles =
+      target === 'idea'
+        ? this.selectedIdeaFiles
+        : this.selectedCommentFiles;
+
+    const result = processSelectedFiles(event, currentFiles);
+
+    if (target === 'idea') {
+      this.selectedIdeaFiles = result.files;
+    } else {
+      this.selectedCommentFiles = result.files;
     }
-    
-    // Reset file input
-    event.target.value = '';
+
+    result.errors.forEach(msg =>
+      this.toastService.show(msg, 'warning')
+    );
   }
 
-  removeIdeaFile(index: number): void {
-    this.selectedIdeaFiles.splice(index, 1);
+  removeFile(index: number, target: 'idea' | 'comment'): void {
+    if (target === 'idea') {
+      this.selectedIdeaFiles = removeFileAtIndex(this.selectedIdeaFiles, index);
+    } else {
+      this.selectedCommentFiles = removeFileAtIndex(this.selectedCommentFiles, index);
+    }
   }
 
-// Update your existing onShareIdea() method to handle media
+  formatIdeaCommentFileSize(bytes: number): string {
+    return formatFileSize(bytes);
+  }
+
+  detectFileMediaType(file: File): MediaType {
+    return detectMediaType(file);
+  }
+
+  // Update your existing onShareIdea() method to handle media
   async onShareIdea(ideaData: { title: string; description: string }): Promise<void> {
     if (this.shareIdeaForm.invalid) {
       this.shareIdeaForm.markAllAsTouched();
       this.toastService.show('Please fill in all required fields', 'error');
       return;
     }
-  
-  this.isSubmitting = true;
-  this.ideaUploadStatus = 'Creating idea...';
 
-  const filterArray = [
-    this.shareIdeaForm.get('type')?.value,
-    this.shareIdeaForm.get('domain')?.value,
-    this.shareIdeaForm.get('impact')?.value
-  ].filter(x => x);
+    this.isSubmitting = true;
+    this.ideaUploadStatus = 'Creating idea...';
 
-  const request: CreateIdeaRequest = {
-    title: ideaData.title,
-    description: ideaData.description,
-    groupId: this.groupId,
-    filter: filterArray
-  };
+    const filterArray = [
+      this.shareIdeaForm.get('type')?.value,
+      this.shareIdeaForm.get('domain')?.value,
+      this.shareIdeaForm.get('impact')?.value
+    ].filter(x => x);
 
-  try {
-    // Create idea
-    const ideaResponse = await firstValueFrom(
-      this.ideasService.createIdea(request)
-    );
-    
-    if (!ideaResponse.success || !ideaResponse.data?.id) {
-      throw new Error('Failed to create idea');
-    }
-    
-    const ideaId = ideaResponse.data.id;
-    
-    // If there are files, upload them
-    if (this.selectedIdeaFiles.length > 0) {
-      this.ideaUploadStatus = `Attaching ${this.selectedIdeaFiles.length} media file(s)...`;
-      
-      // Upload each file with the idea ID
-      const uploadPromises = this.selectedIdeaFiles.map(file => 
-        firstValueFrom(
-          this.mediaService.uploadMedia(
-            file,
-            this.detectMediaType(file),
-            Number(ideaId), // the new idea ID
-            undefined, 
-            undefined  
-          )
-        )
+    const request: CreateIdeaRequest = {
+      title: ideaData.title,
+      description: ideaData.description,
+      groupId: this.groupId,
+      filter: filterArray
+    };
+
+    try {
+      // Create idea
+      const ideaResponse = await firstValueFrom(
+        this.ideasService.createIdea(request)
       );
-      
-      // Wait for all uploads
-      await Promise.all(uploadPromises);
-      
-      this.toastService.show(`Idea created with ${this.selectedIdeaFiles.length} media file(s)`, 'success');
-    } else {
-      this.toastService.show('Idea created successfully!', 'success');
+
+      if (!ideaResponse.success || !ideaResponse.data?.id) {
+        throw new Error('Failed to create idea');
+      }
+
+      const ideaId = ideaResponse.data.id;
+
+      // If there are files, upload them
+      if (this.selectedIdeaFiles.length > 0) {
+        this.ideaUploadStatus = `Attaching ${this.selectedIdeaFiles.length} media file(s)...`;
+
+        // Upload each file with the idea ID
+        const uploadPromises = this.selectedIdeaFiles.map(file =>
+          firstValueFrom(
+            this.mediaService.uploadMedia(
+              file,
+              this.detectMediaType(file),
+              Number(ideaId), // the new idea ID
+              undefined,
+              undefined
+            )
+          )
+        );
+
+        // Wait for all uploads
+        await Promise.all(uploadPromises);
+
+        this.toastService.show(`Idea created with ${this.selectedIdeaFiles.length} media file(s)`, 'success');
+      } else {
+        this.toastService.show('Idea created successfully!', 'success');
+      }
+
+      this.closeShareModal();
+      this.loadIdeas();
+      this.selectedIdeaFiles = [];
+      this.ideaUploadStatus = '';
+
+    } catch (error: any) {
+      console.error('Error creating idea:', error);
+      this.ideaUploadStatus = 'Failed to create idea. Please try again.';
+      this.toastService.show(this.ideaUploadStatus, 'error');
+    } finally {
+      this.isSubmitting = false;
     }
-    
-    this.closeShareModal();
-    this.loadIdeas();
-    this.selectedIdeaFiles = [];
-    this.ideaUploadStatus = '';
-    
-  } catch (error: any) {
-    console.error('Error creating idea:', error);
-    this.ideaUploadStatus = 'Failed to create idea. Please try again.';
-    this.toastService.show(this.ideaUploadStatus, 'error');
-  } finally {
-    this.isSubmitting = false;
   }
-}
 
 
   openDescriptionModal(idea: any): void {
@@ -1258,67 +1273,67 @@ dontShowIdeaInfoAgain () {
   }
 
   // Add property
-showVotersModalView = false; 
+  showVotersModalView = false;
 
-// Update onViewVoters method
-onViewVoters(idea: Idea, event?: Event): void {
-  if (event) event.stopPropagation();
+  // Update onViewVoters method
+  onViewVoters(idea: Idea, event?: Event): void {
+    if (event) event.stopPropagation();
 
-  this.isViewingVoters = true;
-  this.selectedIdeaForVoters = idea;
-  this.showVotersModalView = true;
+    this.isViewingVoters = true;
+    this.selectedIdeaForVoters = idea;
+    this.showVotersModalView = true;
 
-  this.ideasService.getVotesForIdea(idea.id).subscribe({
-    next: (response) => {
-      if (response.success && response.data) {
-        this.votersList = response.data;
-      } else {
-        this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
+    this.ideasService.getVotesForIdea(idea.id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.votersList = response.data;
+        } else {
+          this.toastService.show(`Failed to get voters: ${response.message}`, 'error');
+          this.closeVotersModal();
+        }
+        this.isViewingVoters = false;
+      },
+      error: (error) => {
+        this.isViewingVoters = false;
+        console.error('Error fetching voters:', error);
+        this.toastService.show('Failed to load voters', 'error');
         this.closeVotersModal();
       }
-      this.isViewingVoters = false;
-    },
-    error: (error) => {
-      this.isViewingVoters = false;
-      console.error('Error fetching voters:', error);
-      this.toastService.show('Failed to load voters', 'error');
-      this.closeVotersModal();
-    }
-  });
-}
-// Close voters modal
-closeVotersModal(): void {
-  this.showVotersModalView = false;
-  this.selectedIdeaForVoters = null;
-  this.votersList = [];
-}
-
-// Helper method for voter initials
-getVoterInitials(name: string): string {
-  if (!name) return '?';
-  return name.split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-}
-
-// Format vote date
-formatVoteDate(date: any): string {
-  if (!date) return 'unknown date';
-  try {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
-  } catch {
-    return 'invalid date';
   }
-}
+  // Close voters modal
+  closeVotersModal(): void {
+    this.showVotersModalView = false;
+    this.selectedIdeaForVoters = null;
+    this.votersList = [];
+  }
+
+  // Helper method for voter initials
+  getVoterInitials(name: string): string {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
+
+  // Format vote date
+  formatVoteDate(date: any): string {
+    if (!date) return 'unknown date';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'invalid date';
+    }
+  }
 
   /**
    * Check votes for all ideas in the list
@@ -1490,7 +1505,7 @@ formatVoteDate(date: any): string {
           idea.voteCount = activeVotes.length;
 
           const totalGroupMembers = `${this.groupMembers.length}`;
-          const PROMOTION_THRESHOLD = Math.ceil(Number(totalGroupMembers)* 0.5);
+          const PROMOTION_THRESHOLD = Math.ceil(Number(totalGroupMembers) * 0.5);
           idea.isReadyForPromotion = idea.voteCount >= PROMOTION_THRESHOLD;
 
           console.log(`Idea "${idea.title}": ${activeVotes.length} votes`);
@@ -1534,141 +1549,151 @@ formatVoteDate(date: any): string {
 
   //Promote Idea to project and create project
   onPromoteIdea(idea: Idea, event?: Event): void {
-  event?.stopPropagation();
-  
-  if (idea.isPromotedToProject) {
-    alert('Already promoted!');
-    return;
+    event?.stopPropagation();
+
+    if (idea.isPromotedToProject) {
+      alert('Already promoted!');
+      return;
+    }
+
+    this.currentIdeaToPromote = idea;
+    this.projectData = {
+      title: idea.title,
+      description: idea.description,
+      overseenByEmail: ''
+    };
+    this.showProjectModal = true;
   }
 
-  this.currentIdeaToPromote = idea;
-  this.projectData = {
-    title: idea.title,
-    description: idea.description,
-    overseenByEmail: ''
-  };
-  this.showProjectModal = true;
-}
+  createProjectFromIdea(): void {
+    if (!this.currentIdeaToPromote || !this.groupId) return;
+    if (!this.projectData.overseenByEmail) {
+      alert('Enter overseer email');
+      return;
+    }
 
-createProjectFromIdea(): void {
-  if (!this.currentIdeaToPromote || !this.groupId) return;
-  if (!this.projectData.overseenByEmail) {
-    alert('Enter overseer email');
-    return;
-  }
+    this.isPromoting = true;
+    const idea = this.currentIdeaToPromote;
 
-  this.isPromoting = true;
-  const idea = this.currentIdeaToPromote;
+    this.ideasService.promoteIdea({
+      ideaId: idea.id,
+      groupId: this.groupId
+    }).subscribe({
+      next: (promoteRes) => {
+        if (promoteRes.success) {
+          this.projectService.createProject(
+            this.groupId,
+            idea.id,
+            this.projectData
+          ).subscribe({
+            next: (projectRes) => {
+              if (projectRes.success && projectRes.data?.projectId) {
+                const projectId = projectRes.data?.projectId;
+                this.handleSuccess(idea, projectRes);
+              }
+              else {
+                this.handleProjectError('Failed to promote idea');
+              }
+            },
 
-  this.ideasService.promoteIdea({
-    ideaId: idea.id,
-    groupId: this.groupId
-  }).subscribe({
-    next: (promoteRes) => {
-      if (promoteRes.success) {
-        this.projectService.createProject(
-          this.groupId, 
-          idea.id, 
-          this.projectData
-        ).subscribe({
-          next: (projectRes) => this.handleSuccess(idea, projectRes),
-          error: (err) => this.handleProjectError(err)
-        });
-      } else {
+            error: (err) => this.handleProjectError(err)
+          });
+        } else {
+          this.isPromoting = false;
+          alert('Promotion failed');
+        }
+      },
+      error: (err) => {
         this.isPromoting = false;
-        alert('Promotion failed');
+        alert('Error promoting');
       }
-    },
-    error: (err) => {
-      this.isPromoting = false;
-      alert('Error promoting');
-    }
-  });
-}
-
-private handleSuccess(idea: Idea, response: any): void {
-  this.isPromoting = false;
-  this.showProjectModal = false;
-
-  if (response.success) {
-    idea.isPromotedToProject = true;
-    idea.projectId = response.projectId;
-    idea.status = 'Promoted';
-    
-    if (this.selectedIdea?.id === idea.id) {
-      this.selectedIdea.isPromotedToProject = true;
-      this.selectedIdea.status = 'Promoted';
-    }
-    
-    this.ideas = [...this.ideas];
-    this.toastService.show('Project created', 'success');
-    this.selectedIdea = false;
-    this.loadIdeas();
-    
-    this.currentIdeaToPromote = null;
-    this.projectData = { title: '', description: '', overseenByEmail: '' };
-  } else {
-    alert('Project creation failed');
+    });
   }
-}
 
-private handleProjectError(error: any): void {
-  this.isPromoting = false;
-  
-  if (error.status === 404) {
-    alert(`User not found: ${this.projectData.overseenByEmail}`);
-  } else {
-    alert('Failed to create project');
-  }
-}
 
-closeProjectModal(): void {
-  if (!this.isPromoting) {
+  private handleSuccess(idea: Idea, response: any): void {
+    this.isPromoting = false;
     this.showProjectModal = false;
-    this.currentIdeaToPromote = null;
+
+    if (response.success) {
+      idea.isPromotedToProject = true;
+      idea.projectId = response.projectId;
+      idea.status = 'Promoted';
+
+      if (this.selectedIdea?.id === idea.id) {
+        this.selectedIdea.isPromotedToProject = true;
+        this.selectedIdea.status = 'Promoted';
+      }
+
+      this.ideas = [...this.ideas];
+      this.toastService.show('Project created', 'success');
+      this.selectedIdea = false;
+      this.loadIdeas();
+
+      this.currentIdeaToPromote = null;
+      this.projectData = { title: '', description: '', overseenByEmail: '' };
+    } else {
+      alert('Project creation failed');
+    }
   }
-}
+
+  private handleProjectError(error: any): void {
+    this.isPromoting = false;
+
+    if (error.status === 404) {
+      alert(`User not found: ${this.projectData.overseenByEmail}`);
+    } else {
+      alert('Failed to create project');
+    }
+  }
+
+  closeProjectModal(): void {
+    if (!this.isPromoting) {
+      this.showProjectModal = false;
+      this.currentIdeaToPromote = null;
+    }
+  }
 
 
   // DELETE IDEA METHOD
   onDeleteIdea() {
     if (!this.ideaIdToDelete) return;
 
-      this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
-        next: (response) => {
-          console.log('Delete response:', response);
+    this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
+      next: (response) => {
+        console.log('Delete response:', response);
 
-          if (response.success) {
-            console.log('Delete successful');
+        if (response.success) {
+          console.log('Delete successful');
 
-            // 1. Remove from local ideas array (immediate UI update)
-            const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
-            if (index !== -1) {
-              this.ideas.splice(index, 1);
-              this.ideas = [...this.ideas]; // Create new reference for change detection
-            }
-
-            // 2. If we're viewing this idea in details panel, close it
-            if (this.selectedIdea?.id === this.ideaIdToDelete) {
-              this.selectedIdea = null;
-              this.isEditMode = false; // Exit edit mode if open
-              console.log('Closed details panel for deleted idea');
-            }
-            
-            this.toastService.show('Idea deleted successfully!', 'success');
-          } else {
-            this.toastService.show('Failed to delete idea: ${response.message}', 'error');
+          // 1. Remove from local ideas array (immediate UI update)
+          const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
+          if (index !== -1) {
+            this.ideas.splice(index, 1);
+            this.ideas = [...this.ideas]; // Create new reference for change detection
           }
-          this.cancelDeleteIdea();
-        },
 
-        error: (error) => {
-          this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
-          this.cancelDeleteIdea();
+          // 2. If we're viewing this idea in details panel, close it
+          if (this.selectedIdea?.id === this.ideaIdToDelete) {
+            this.selectedIdea = null;
+            this.isEditMode = false; // Exit edit mode if open
+            console.log('Closed details panel for deleted idea');
+          }
+
+          this.toastService.show('Idea deleted successfully!', 'success');
+        } else {
+          this.toastService.show('Failed to delete idea: ${response.message}', 'error');
         }
-      });
-    }
-  
+        this.cancelDeleteIdea();
+      },
+
+      error: (error) => {
+        this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
+        this.cancelDeleteIdea();
+      }
+    });
+  }
+
   deleteGroup() {
     this.groupsService.deleteGroup(this.groupId).subscribe({
       next: () => {
@@ -1683,20 +1708,20 @@ closeProjectModal(): void {
     this.showAdminLeaveModal = false;
     this.showTransferOwnershipModal = true;
   }
-  transferOwnership(){
-    if(!this.newOwnerEmail){
+  transferOwnership() {
+    if (!this.newOwnerEmail) {
       alert('Please select a member');
       return;
     }
 
     this.groupsService.transferOwnership(this.groupId, this.newOwnerEmail)
       .subscribe({
-        next:()=>{
+        next: () => {
           this.showTransferOwnershipModal = false;
           this.router.navigate(['/groups']);
           this.toastService.show(`Transfer of ownership successfully transferred to ${this.newOwnerEmail}`, 'success')
         },
-        error:()=>{
+        error: () => {
           this.toastService.show('Failed to transfer ownership', 'error');
         }
       });

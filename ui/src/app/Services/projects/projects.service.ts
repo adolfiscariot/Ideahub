@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { Project } from '../../Interfaces/Projects/Project';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ProjectsService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:5065/api/Project';
+    private apiUrl = `${environment.apiBaseUrl}/api/Project`;
 
     constructor() { }
 
