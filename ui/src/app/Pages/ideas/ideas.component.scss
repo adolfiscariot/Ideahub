@@ -1932,7 +1932,8 @@
   border-bottom: 1px solid #ccc;
   border-radius: 8px;
   background: #fff;
-  animation: _ngcontent-ng-c2727844447_fadeInOpen 0.3s ease-out;
+  //animation: _ngcontent-ng-c2727844447_fadeInOpen 0.3s ease-out;
+  animation: fadeInClosed 0.3s ease-out;
 }
 
 /* Closed badge in title - HIDDEN in list panel */
