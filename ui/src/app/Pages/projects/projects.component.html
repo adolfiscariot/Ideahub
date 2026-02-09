@@ -18,6 +18,7 @@
                             <th class="col-status">Status</th>
                             <th class="col-date">Created At</th>
                             <th class="col-date">Ended At</th>
+                            <th class="col-media">Media</th>
                             <th class="col-actions">Actions</th>
                         </tr>
                     </thead>
@@ -58,6 +59,17 @@
                                 <span *ngIf="project.endedAt">{{ project.endedAt | date:'mediumDate' }}</span>
                                 <span *ngIf="!project.endedAt" class="text-muted">-</span>
                             </td>
+
+                            <td class="cell-media">
+                                <div class="media-vertical">
+                                    <app-media 
+                                    [media]="project.media"
+                                    [projectId]="project.id" 
+                                    [title]="'Project Media'" 
+                                    [compactMode]="true">
+                                    </app-media>
+                                </div>
+                            </td>
                             <td class="cell-actions">
                                 <button *ngIf="canEdit(project)" class="btn-icon" title="Edit Project"
                                     (click)="openEditModal(project); $event.stopPropagation()">
@@ -69,7 +81,7 @@
                             </td>
                         </tr>
                         <tr *ngIf="projects.length === 0" class="empty-state-row">
-                            <td colspan="7">
+                            <td colspan="8">
                                 <div class="empty-state">
                                     <i class="fas fa-project-diagram"></i>
                                     <p>No projects found yet.</p>

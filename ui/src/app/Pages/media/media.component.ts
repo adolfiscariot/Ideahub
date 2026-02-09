@@ -15,8 +15,10 @@ import { environment } from '../../../environments/environment';
 export class MediaComponent implements OnInit {
   @Input() ideaId?: number;
   @Input() commentId?: number;
+  @Input() projectId?: number;
   @Input() title: string = 'Media';
   @Input() compactMode: boolean = false;
+  @Input() media?: Media[];
 
   mediaList: Media[] = [];
   isLoading = false;
@@ -29,27 +31,28 @@ export class MediaComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ideaId'] || changes['commentId']) {
+    if (changes['ideaId'] || changes['commentId'] || changes['projectId']) {
       this.loadMedia();
     }
   }
 
   loadMedia(): void {
-    if (!this.ideaId && !this.commentId) return;
+  if (!this.ideaId && !this.commentId && !this.projectId) return;
 
-    this.isLoading = true;
-    this.mediaService.viewMedia(this.ideaId, this.commentId).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success && response.data) {
-          this.mediaList = response.data;
-        }
-      },
-      error: () => {
-        this.isLoading = false;
+  this.isLoading = true;
+
+  this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId).subscribe({
+    next: (response) => {
+      this.isLoading = false;
+      if (response.success && response.data) {
+        this.mediaList = response.data;
       }
-    });
-  }
+    },
+    error: () => {
+      this.isLoading = false;
+    }
+  });
+}
 
   getMediaUrl(filePath: string): string {
   // Remove 'media/' prefix 

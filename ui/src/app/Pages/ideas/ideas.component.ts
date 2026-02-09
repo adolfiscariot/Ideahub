@@ -1592,6 +1592,7 @@ private handleSuccess(idea: Idea, response: any): void {
 
   if (response.success) {
     idea.isPromotedToProject = true;
+    idea.projectId = response.projectId;
     idea.status = 'Promoted';
     
     if (this.selectedIdea?.id === idea.id) {

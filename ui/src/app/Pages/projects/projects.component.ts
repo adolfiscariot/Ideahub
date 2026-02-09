@@ -7,19 +7,26 @@ import { EditProjectModalComponent } from '../../Components/modals/edit-project-
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { Toast, ToastService } from '../../Services/toast.service';
+import { MediaService } from '../../Services/media.service';
+import { forkJoin } from 'rxjs';
+import { Media } from '../../Interfaces/Media/media-interface';
+import { MediaComponent } from '../media/media.component';
+
+type ProjectWithMedia = Project & { media?: Media[] };
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatDialogModule],
+    imports: [CommonModule, FormsModule, MatDialogModule, MediaComponent],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
 export class ProjectsComponent implements OnInit {
-    projects: Project[] = [];
+    projects: ProjectWithMedia[] = [];
     ProjectStatus = ProjectStatus;
 
     private projectsService = inject(ProjectsService);
+    private mediaService = inject(MediaService);
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     currentUserId: string = '';
@@ -39,16 +46,44 @@ export class ProjectsComponent implements OnInit {
     }
 
     loadProjects(): void {
-        this.projectsService.getMyProjects().subscribe({
-            next: (data) => {
-                this.projects = data;
-            },
-            error: (err) => {
-                console.error('Failed to load projects', err);
-                // Optionally show error toast
-            }
-        });
-    }
+    this.projectsService.getMyProjects().subscribe({
+        next: (projectsData) => {
+            this.projects = projectsData as ProjectWithMedia[];
+            const mediaRequests = this.projects.map(project =>
+                this.mediaService.viewMedia(undefined, undefined, Number(project.id))
+            );
+
+            forkJoin(mediaRequests).subscribe({
+                next: (mediaResults) => {
+                    this.projects.forEach((project, idx) => {
+                        project.media = mediaResults[idx].data || [];
+                    });
+                    //console.log('Projects with media:', this.projects);
+                },
+                error: (err) => {
+                    //console.error('Failed to fetch media for projects', err);
+                    this.toastService.show('Failed to fetch media for project', 'error');
+                }
+            });
+        },
+        error: (err) => {
+            //console.error('Failed to load projects', err);
+            this.toastService.show('Failed to load projects', 'error');
+        }
+    });
+}
+
+    // loadProjects(): void {
+    //     this.projectsService.getMyProjects().subscribe({
+    //         next: (data) => {
+    //             this.projects = data;
+    //         },
+    //         error: (err) => {
+    //             console.error('Failed to load projects', err);
+    //             // Optionally show error toast
+    //         }
+    //     });
+    // }
 
     getStatusLabel(status: ProjectStatus): string {
         return ProjectStatus[status];
