@@ -154,7 +154,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-      title: ['', Validators.required],
+      title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(20)]],
       description: ['', Validators.required],
       type: ['', Validators.required],
       domain: ['', Validators.required],
@@ -233,7 +233,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.shareIdeaForm.get('title')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'title', 100);
+        const res = updateCharCount(this.shareIdeaForm, 'title', 20);
         this.shareTitleCount = res.count;
       });
 
@@ -364,7 +364,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     }
 
     this.isPostingComment = true;
-    this.commentStatus = 'Posting comment...';
+    //this.commentStatus = 'Posting comment...';
 
     try {
       // Create the comment
@@ -1488,6 +1488,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
       title: this.selectedIdea.title,
       description: this.selectedIdea.description
     };
+
+    // Patch form values with existing idea data
+    this.shareIdeaForm.patchValue({
+      title: this.selectedIdea.title,
+      description: this.selectedIdea.description,
+      type: this.selectedIdea.type || '',
+      domain: this.selectedIdea.domain || '',
+      impact: this.selectedIdea.impact || ''
+    });
+
+    // Update character counts
+    this.shareTitleCount = this.selectedIdea.title?.length || 0;
+    this.shareDescCount = this.selectedIdea.description?.length || 0;
   }
 
   // Method to fetch and update vote counts for all ideas
