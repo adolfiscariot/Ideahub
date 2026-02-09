@@ -452,7 +452,7 @@
                     type="file" 
                     #commentFileInput
                     multiple
-                    (change)="onCommentFileSelected($event)"
+                    (change)="onFileSelected($event, 'comment')"
                     [accept]="allowedFileTypes"
                     style="display: none"
                   >
@@ -654,14 +654,14 @@
 
    <!-- IDEA MEDIA UPLOAD -->
   <div class="form-group">
-    <label>Attach Supporting Media (Optional)</label>
+    <label>Attach Supporting Media (Max 20MB per file i.e. images, videos, documents)</label>
     
     <!-- Selected files preview -->
     <div *ngIf="selectedIdeaFiles.length > 0" class="selected-files">
       <div *ngFor="let file of selectedIdeaFiles; let i = index" class="file-preview">
         <span class="file-name">{{ file.name }}</span>
-        <span class="file-size">({{ formatFileSize(file.size) }})</span>
-        <button type="button" (click)="removeIdeaFile(i)" class="remove-file">×</button>
+        <span class="file-size">({{ formatIdeaCommentFileSize(file.size) }})</span>
+        <button type="button" (click)="removeFile(i, 'idea')" class="remove-file">×</button>
       </div>
     </div>
 
@@ -670,7 +670,7 @@
         type="file" 
         #ideaFileInput
         multiple
-        (change)="onIdeaFileSelected($event)"
+        (change)="onFileSelected($event, 'idea')"
         [accept]="allowedFileTypes"
         style="display: none"
       >
@@ -680,9 +680,9 @@
         [buttonStyleClass]="'btn-promote'"
       >
       </app-buttons>
-      <span class="file-hint" *ngIf="selectedIdeaFiles.length === 0">
+      <!--<span class="file-hint" *ngIf="selectedIdeaFiles.length === 0">
         Max 20MB per file (images, videos, documents)
-      </span>
+      </span> -->
     </div>
 
     <div *ngIf="ideaUploadStatus" class="upload-status">

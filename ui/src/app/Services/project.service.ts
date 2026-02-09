@@ -21,13 +21,13 @@ export class ProjectService {
   }
 
   // CREATE: Create a new project from an idea
-  createProject(groupId: string, ideaId: string, request: CreateProjectRequest): Observable<ApiResponse<Project>> {
+  createProject(groupId: string, ideaId: string, request: CreateProjectRequest): Observable<ApiResponse<{ projectId: number }>> {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
     
-    return this.http.post<any>(`${this.apiUrl}/create-project`, request, { params }).pipe(
-      map(response => this.convertResponse<Project>(response))
+     return this.http.post<any>(`${this.apiUrl}/create-project`, request, { params }).pipe(
+      map(response => this.convertResponse<{ projectId: number }>(response))
     );
   }
 

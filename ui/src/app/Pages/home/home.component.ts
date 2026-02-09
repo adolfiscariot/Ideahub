@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { StatCardComponent } from '../../Components/stat-card/stat-card.component';
 import { DashboardCardComponent } from '../../Components/dashboard-card/dashboard-card.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { ProjectService } from '../../Services/project.service';
+import { Router } from '@angular/router';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import {
   MostVotedIdea,
@@ -67,8 +69,13 @@ export class HomeComponent implements OnInit {
   personalStats: PersonalStats | null = null;
   showWelcomeInfoModal = false;
 
+  isProjectModalOpen = false;
+  selectedProjectId: number | null = null;
+  selectedGroupId: string | null = null;
+  currentProject: any = null;
 
-  constructor(private analyticsService: AnalyticsService) { }
+
+  constructor(private analyticsService: AnalyticsService, private projectService: ProjectService, private router: Router) { }
 
   ngOnInit(): void {
     this.fetchAnalytics();
@@ -108,4 +115,13 @@ export class HomeComponent implements OnInit {
       error: (err) => console.error('Error fetching analytics', err)
     });
   }
+
+  onPromotedIdeaClick(idea: PromotedIdea) {
+    console.log("Clicked idea:", idea);
+  if (!idea.projectId) return;
+
+  this.router.navigate(['/projects'], {
+    queryParams: { openProject: idea.projectId }
+  });
+}
 }

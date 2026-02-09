@@ -20,6 +20,8 @@ export interface PromotedIdea {
     author: string;
     groupName: string;
     promotedDate: string;
+    projectId: number;
+    groupId: string;
 }
 
 export interface IdeaStats {
