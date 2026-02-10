@@ -1,6 +1,7 @@
 using api.Models;
 using System.Text;
 using api.Services;
+using api.Helpers;
 using api.Constants;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,8 @@ using System.Security.Cryptography;
 using api.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace api.Controllers;
-
-using ApiResponse = api.Helpers.ApiResponse;
-
 
 [ApiController]
 [Route("api/auth")]
@@ -35,7 +32,7 @@ public class AuthController : ControllerBase
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly SignInManager<IdeahubUser> _signInManager;
     private readonly ILogger<AuthController> _logger;
-    private readonly Microsoft.AspNetCore.Identity.UI.Services.IEmailSender _emailSender;
+    private readonly IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
@@ -47,7 +44,7 @@ public class AuthController : ControllerBase
         UserManager<IdeahubUser> userManager,
         SignInManager<IdeahubUser> signinManager,
         ILogger<AuthController> logger,
-        Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender,
+        IEmailSender emailSender,
         IConfiguration configuration,
         ITokenService tokenService,
         IdeahubDbContext context,
@@ -466,9 +463,11 @@ public class AuthController : ControllerBase
 
         if (resetRecord == null)
         {
+            _logger.LogError("Invalid or expired reset code");
             return BadRequest(new { message = "Invalid or expired reset code" });
         }
 
+        _logger.LogInformation("Reset code is valid");
         return Ok(new { message = "Reset code is valid" });
     }
 
