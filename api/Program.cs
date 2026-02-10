@@ -149,18 +149,32 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+builder.Services.AddHttpClient<ResendEmailSender>();
+
+builder.Services.AddScoped<
+    Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
+    ResendEmailSender
+>();
+
+builder.Services.Configure<ResendSettings>(
+    builder.Configuration.GetSection("ResendSettings")
+);
+
 //2.8 Email Sender
-builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
+// builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 //2.9 Link the SendGridSettings class to the "SendGrid" user secrets
-builder.Services.Configure<SendGridSettings>(
-    builder.Configuration.GetSection("SendGridSettings"));
+// builder.Services.Configure<SendGridSettings>(
+//     builder.Configuration.GetSection("SendGridSettings"));
 
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // MediaFile Service
 builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
+
+// Password Reset Service
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 // convert enum to string
 builder.Services.AddControllers()
