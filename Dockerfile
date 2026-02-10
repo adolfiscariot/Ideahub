@@ -8,6 +8,7 @@ RUN dotnet restore api
 
 # Copy source
 COPY api/ ./api/
+COPY .env .
 
 # Copy pre-built Angular files
 COPY ui/dist/ideahub/ ./api/wwwroot/
