@@ -1,6 +1,5 @@
 using api.Models;
 using System.Text;
-using api.Helpers;
 using api.Services;
 using api.Constants;
 using System.Security.Claims;
@@ -14,8 +13,11 @@ using System.Security.Cryptography;
 using api.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace api.Controllers;
+
+using ApiResponse = api.Helpers.ApiResponse;
 
 
 [ApiController]
@@ -33,10 +35,11 @@ public class AuthController : ControllerBase
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly SignInManager<IdeahubUser> _signInManager;
     private readonly ILogger<AuthController> _logger;
-    private readonly IEmailSender _emailSender;
+    private readonly Microsoft.AspNetCore.Identity.UI.Services.IEmailSender _emailSender;
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
+    private readonly IPasswordResetService _passwordResetService;
     //private readonly string homepageUrl = "http://localhost:4200";
 
     //constructor
@@ -44,10 +47,11 @@ public class AuthController : ControllerBase
         UserManager<IdeahubUser> userManager,
         SignInManager<IdeahubUser> signinManager,
         ILogger<AuthController> logger,
-        IEmailSender emailSender,
+        Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender,
         IConfiguration configuration,
         ITokenService tokenService,
-        IdeahubDbContext context
+        IdeahubDbContext context,
+        IPasswordResetService passwordResetService
         )
     {
         _userManager = userManager;
@@ -57,6 +61,7 @@ public class AuthController : ControllerBase
         _configuration = configuration;
         _tokenService = tokenService;
         _context = context;
+        _passwordResetService = passwordResetService;
     }
 
 
@@ -397,4 +402,105 @@ public class AuthController : ControllerBase
             return StatusCode(500, ApiResponse.Fail("Logout failed"));
         }
     }
+
+
+    // Request password reset
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return BadRequest(ApiResponse.Fail("Email is required"));
+
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+
+        // Always return generic response
+        if (user is null)
+        {
+            _logger.LogInformation("Forgot password requested for non-existent email: {Email}", dto.Email);
+            return Ok(ApiResponse.Ok("If an account exists with this email, you will receive a reset code"));
+        }
+
+        var (code, success) = await _passwordResetService.GeneratePasswordResetCodeAsync(user.Id);
+
+        if (!success)
+        {
+            _logger.LogError("Failed to generate password reset code for user: {UserId}", user.Id);
+            return Ok(ApiResponse.Ok("If an account exists with this email, you will receive a reset code"));
+        }
+
+        try
+        {
+            var subject = "Password Reset Code - Ideahub";
+            var message = $@"
+                <p>Hello {user.DisplayName},</p>
+                <p>Your password reset code is:</p>
+                <h2>{code}</h2>
+                <p>This code will expire in 10 minutes.</p>
+                <p>If you did not request this, ignore this email.</p>
+            ";
+
+            await _emailSender.SendEmailAsync(user.Email!, subject, message);
+            _logger.LogInformation("Password reset code sent to {Email}", user.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to send reset code email: {Error}", ex.Message);
+        }
+
+        return Ok(ApiResponse.Ok("If an account exists with this email, you will receive a reset code"));
+    }
+
+    [HttpPost("validate-reset-code")]
+    public async Task<IActionResult> ValidateResetCode(ValidateResetCodeDto dto)
+    {
+        var codeHash = Convert.ToBase64String(
+            SHA256.HashData(Encoding.UTF8.GetBytes(dto.Code))
+        );
+
+        var resetRecord = await _context.PasswordResets
+            .FirstOrDefaultAsync(pr =>
+                pr.Code == codeHash &&
+                !pr.Used &&
+                pr.ExpiresAt > DateTime.UtcNow
+            );
+
+        if (resetRecord == null)
+        {
+            return BadRequest(new { message = "Invalid or expired reset code" });
+        }
+
+        return Ok(new { message = "Reset code is valid" });
+    }
+
+    // Complete password reset
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ApiResponse.Fail("Invalid request"));
+
+        try
+        {
+            var (success, error) =
+                await _passwordResetService.ValidateCodeAndResetPasswordAsync(
+                    dto.Code,
+                    dto.NewPassword
+                );
+
+            if (!success)
+            {
+                _logger.LogWarning("Password reset failed: {Error}", error);
+                return BadRequest(ApiResponse.Fail(error));
+            }
+
+            _logger.LogInformation("Password reset successful");
+            return Ok(ApiResponse.Ok("Password reset successful. You can now log in."));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error resetting password: {Error}", ex.Message);
+            return StatusCode(500, ApiResponse.Fail("An error occurred"));
+        }
+    }
+
 }
