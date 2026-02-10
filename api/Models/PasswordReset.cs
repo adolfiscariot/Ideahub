@@ -12,9 +12,9 @@ public class PasswordReset
 	[Required]
 	public string UserId { get; set; } = string.Empty;
 
-	[Required]
-	[MaxLength(128)]
-	public string TokenHash { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(128)]
+    public string Code { get; set; } = string.Empty;
 
 	[Required]
 	public DateTime ExpiresAt { get; set; }

@@ -368,7 +368,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         {
             pr.HasKey(pr => pr.Id);
 
-            pr.Property(pr => pr.TokenHash)
+            pr.Property(pr => pr.Code)
                 .IsRequired()
                 .HasMaxLength(128);
 
@@ -394,7 +394,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             // pr.Property(pr => pr.RequestUserAgent)
             //     .HasMaxLength(512);
 
-            pr.HasIndex(pr => pr.TokenHash)
+            pr.HasIndex(pr => pr.Code)
                 .IsUnique();
 
             pr.HasIndex(pr => pr.UserId);
