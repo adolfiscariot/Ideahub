@@ -12,6 +12,7 @@ import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { firstValueFrom } from 'rxjs';
 
 type EditProjectForm = {
     title: string;
@@ -137,7 +138,7 @@ export class ProjectsComponent implements OnInit {
         this.editForm = {
             title: project.title,
             description: project.description,
-            status: project.status,
+            status: ProjectStatus[project.status],
             endedAt: project.endedAt ?? null
         };
         this.isEditModalOpen = true;
@@ -148,7 +149,7 @@ export class ProjectsComponent implements OnInit {
         this.isViewModalOpen = true;
     }
 
-    saveProject() {
+    async saveProject() {
         if (!this.selectedProject) return;
 
         const updateDto = {
@@ -156,23 +157,43 @@ export class ProjectsComponent implements OnInit {
             description: this.editForm.description,
             status: this.editForm.status,
             endedAt: this.editForm.endedAt
-                ? new Date(this.editForm.endedAt).toISOString()
-                : null
+            ? new Date(this.editForm.endedAt).toISOString()
+            : null
         };
 
-        this.projectsService.updateProject(this.selectedProject!.id, updateDto)
-            .subscribe({
-                next: () => {
-                    this.toastService.show('Project updated successfully', 'success');
-                    this.loadProjects();
-                    this.closeModals();
-                },
-                error: () => {
-                    this.toastService.show('Failed to update project', 'error');
-                }
-            });
-    }
+        try {
+            await firstValueFrom(
+            this.projectsService.updateProject(this.selectedProject.id, updateDto)
+            );
 
+            this.toastService.show('Project updated successfully', 'success');
+
+            if (this.selectedProjectFiles?.length > 0) {
+            const mediaUploadPromises = this.selectedProjectFiles.map(file =>
+                firstValueFrom(
+                this.mediaService.uploadMedia(
+                    file,
+                    detectMediaType(file),
+                    undefined,
+                    undefined,
+                    Number(this.selectedProject!.id)
+                )
+                )
+            );
+
+            await Promise.all(mediaUploadPromises);
+            this.toastService.show(`Attached ${this.selectedProjectFiles.length} media file(s)`, 'success');
+            }
+
+            this.loadProjects().subscribe();
+            this.closeModals();
+            this.selectedProjectFiles = [];
+
+        } catch (error: any) {
+            console.error('Error saving project:', error);
+            this.toastService.show('Failed to update project', 'error');
+        }
+    }
 
     closeModals() {
         this.isEditModalOpen = false;
