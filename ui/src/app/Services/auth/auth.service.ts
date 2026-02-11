@@ -5,6 +5,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { ForgotPassword } from '../../Interfaces/Auth/forgot-password-interface';
+import { ResetPassword } from '../../Interfaces/Auth/reset-password-interface';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment.prod';
 
@@ -265,5 +267,26 @@ export class AuthService {
   getEmail(): string {
     const user = this.getCurrentUser();
     return user?.email || '';
+  }
+
+  forgotPassword(payload: ForgotPassword): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.authUrl}/forgot-password`,
+      payload
+    );
+  }
+
+  validateResetCode(code: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.authUrl}/validate-reset-code`,
+      { code }
+    );
+  }
+
+  resetPassword(payload: ResetPassword): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.authUrl}/reset-password`,
+      payload
+    );
   }
 }

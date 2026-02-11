@@ -14,6 +14,7 @@ using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.FileProviders;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -157,9 +158,32 @@ builder.Services.Configure<SendGridSettings>(options =>
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+// MediaFile Service
+builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
+
+// Password Reset Service
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
+// convert enum to string
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 //3. Build the app
 var app = builder.Build();
+
+// Serve media files under /uploads
+var mediaPath = Path.Combine(builder.Environment.ContentRootPath, "Storage", "media");
+if (!Directory.Exists(mediaPath))
+    Directory.CreateDirectory(mediaPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(mediaPath),
+    RequestPath = "/uploads"
+});
 
 // APPLY EF MIGRATIONS HERE
 using var scope = app.Services.CreateScope();
@@ -231,4 +255,5 @@ app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();
+
 

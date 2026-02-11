@@ -1,6 +1,5 @@
-
 <div class="ideas-container" [class.split-view]="selectedIdea">
-  
+
   <!-- Left Panel: Ideas List -->
   <div class="ideas-list-panel">
     <!-- Header with Members Section -->
@@ -10,15 +9,12 @@
           <h1 class="page-title">{{ groupName || 'Loading group name...' }}</h1>
           <p class="page-subtitle">Explore and collaborate on ideas within the group</p>
         </div>
-        
+
         <div class="header-actions">
-          <app-buttons
-        [buttonText]="'ⓘ'"
-        [buttonStyleClass]="'btn-info-icon'"
-        title="Ideas Guideline"
-        (click)="displayIdeaInfo()">
-      </app-buttons>
-    
+          <app-buttons [buttonText]="'ⓘ'" [buttonStyleClass]="'btn-info-icon'" title="Ideas Guideline"
+            (click)="displayIdeaInfo()">
+          </app-buttons>
+
           <!-- Members Section -->
           <div class="members-section" (click)="openMembersModal()">
             <div class="members-icon">👥</div>
@@ -26,88 +22,60 @@
               <div class="members-count">{{ membersCount || 0 }} member (s)</div>
               <div class="members-label">Click to view</div>
             </div>
-          </div>  
+          </div>
 
           <!-- View Requests Button (only for group creator) -->
-<app-buttons
-  *ngIf="isGroupCreator()"
-  [buttonText]="'👁️ View Requests'"
-  buttonStyleClass="btn-view-requests"
-  (click)="viewRequests(groupId)"
-  [disabled]="false"
-  title="View pending join requests"
-> 
-</app-buttons>
-
-<!-- Requests Modal -->
-<div *ngIf="showRequestsModal" class="modal-backdrop" (click)="closeRequestsModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <h3>Pending Requests ({{ pendingRequests.length }})</h3>
-
-    <div *ngIf="loadingRequests">Loading...</div>
-    <div *ngIf="errorRequests">{{ errorRequests }}</div>
-
-    <div *ngIf="!loadingRequests && !errorRequests && pendingRequests.length === 0" 
-         class="no-requests-message">
-      <p>No pending requests</p>
-    </div>
-
-    <ul *ngIf="!loadingRequests && !errorRequests && pendingRequests.length > 0" 
-        class="request-list">
-      <li *ngFor="let req of pendingRequests" class="request-item">
-        <span><b>Email: </b> {{ req.email }}</span>
-        <app-buttons
-          [buttonText]="'Accept'"
-          [buttonStyleClass]="'btn-accept'"
-          [buttonType]="'button'"
-          (click)="acceptRequest(groupId, req.email)"
-          >
-        </app-buttons>
-        <app-buttons
-          [buttonText]="'Reject'"
-          [buttonStyleClass]="'btn-reject'"
-          [buttonType]="'button'"
-          (click)="rejectRequest(groupId, req.email)"
-          >
-        </app-buttons>
-      </li>
-    </ul>
-
-    <app-buttons
-      [buttonText]="'Close'"
-      [buttonStyleClass]="'btn-promote'"
-      [buttonType]="'button'"
-      (click)="closeRequestsModal()"
-      >
-    </app-buttons>
-  </div>
-</div>
-
-          <!-- Share Idea Button (Fixed - with + icon) -->
-          <app-buttons
-            *ngIf="!showShareModal"
-            buttonStyleClass="btn-share-idea"
-            (click)="openShareModal()"
-            [disabled]="false"
-            title="Share a new idea with the group"
-          >
-          ✚  Share Idea
+          <app-buttons *ngIf="isGroupCreator()" [buttonText]="'👁️ View Requests'" buttonStyleClass="btn-view-requests"
+            (click)="viewRequests(groupId)" [disabled]="false" title="View pending join requests">
           </app-buttons>
 
-        <app-buttons
-        buttonStyleClass="btn-leave-group"
-        (click)="confirmLeaveGroup()"
-        [disabled]="false"
-        title="Leave this group"
-      >
-        🚪 Leave Group
-      </app-buttons>
+          <!-- Requests Modal -->
+          <div *ngIf="showRequestsModal" class="modal-backdrop" (click)="closeRequestsModal()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+              <h3>Pending Requests ({{ pendingRequests.length }})</h3>
 
-       
+              <div *ngIf="loadingRequests">Loading...</div>
+              <div *ngIf="errorRequests">{{ errorRequests }}</div>
+
+              <div *ngIf="!loadingRequests && !errorRequests && pendingRequests.length === 0"
+                class="no-requests-message">
+                <p>No pending requests</p>
+              </div>
+
+              <ul *ngIf="!loadingRequests && !errorRequests && pendingRequests.length > 0" class="request-list">
+                <li *ngFor="let req of pendingRequests" class="request-item">
+                  <span><b>Email: </b> {{ req.email }}</span>
+                  <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
+                    (click)="acceptRequest(groupId, req.email)">
+                  </app-buttons>
+                  <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+                    (click)="rejectRequest(groupId, req.email)">
+                  </app-buttons>
+                </li>
+              </ul>
+
+              <app-buttons [buttonText]="'Close'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
+                (click)="closeRequestsModal()">
+              </app-buttons>
+            </div>
+          </div>
+
+          <!-- Share Idea Button (Fixed - with + icon) -->
+          <app-buttons *ngIf="!showShareModal" buttonStyleClass="btn-share-idea" (click)="openShareModal()"
+            [disabled]="false" title="Share a new idea with the group">
+            ✚ Share Idea
+          </app-buttons>
+
+          <app-buttons buttonStyleClass="btn-leave-group" (click)="confirmLeaveGroup()" [disabled]="false"
+            title="Leave this group">
+            🚪 Leave Group
+          </app-buttons>
+
+
         </div>
       </div>
     </header>
-    
+
     <!-- Section Header -->
     <div class="section-header">
       <h2 class="section-title">Ideas</h2>
@@ -115,112 +83,101 @@
         <span class="sort-label">Sort by:</span>
         <div class="sort-options">
           <!-- Sort Option: Top Voted (Fixed) -->
-          <app-buttons
-            [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
-            (click)="setSortMode('top')"
-            [disabled]="false"
-            title="Sort ideas by most votes"
-          >
+          <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
+            (click)="setSortMode('top')" [disabled]="false" title="Sort ideas by most votes">
             Top Voted
           </app-buttons>
 
           <div class="sort-separator">|</div>
 
           <!-- Sort Option: Newest (Fixed) -->
-          <app-buttons
-            [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
-            (click)="setSortMode('newest')"
-            [disabled]="false"
-            title="Sort ideas by newest first"
-          >
+          <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
+            (click)="setSortMode('newest')" [disabled]="false" title="Sort ideas by newest first">
             Newest
           </app-buttons>
         </div>
       </div>
 
-    <div class="filter-container" #dropdown>
-  <div class="filter-dropdown">
-    <div class="dropdown-header" (click)="toggleDropdown()">
-      <span>{{ selectedOptionLabel || 'All Categories' }}</span>
-      <span class="dropdown-arrow">▼</span>
-    </div>
+      <!-- View Closed Ideas Button -->
+      <app-buttons [buttonText]="showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'" [buttonStyleClass]="
+      (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
+    " (click)="toggleViewClosedIdeas()" [disabled]="false"
+        [title]="showClosedIdeas ? 'Click to view open ideas' : 'Click to view closed ideas'">
+      </app-buttons>
 
-    <div class="dropdown-content" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
 
-      <!-- All Categories -->
-     <div class="filter-option">
-        <input 
-          type="radio"
-          id="all_categories"
-          name="all"
-          [checked]="!selectedType && !selectedDomain && !selectedImpact"
-          (change)="clearAllCategories()">
-        <label for="all_categories">All Categories</label>
+      <div class="filter-container" #dropdown>
+        <div class="filter-dropdown">
+          <div class="dropdown-header" (click)="toggleDropdown()">
+            <span>{{ selectedOptionLabel || 'All Categories' }}</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+
+          <div class="dropdown-content" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+
+            <!-- All Categories -->
+            <div class="filter-option">
+              <input type="radio" id="all_categories" name="all"
+                [checked]="!selectedType && !selectedDomain && !selectedImpact" (change)="clearAllCategories()">
+              <label for="all_categories">All Categories</label>
+            </div>
+
+
+            <!-- TYPE -->
+            <div class="filter-section">
+              <div class="section-header">TYPE</div>
+
+              <div class="filter-option">
+                <input type="radio" name="type" value="new" [(ngModel)]="selectedType"
+                  (change)="selectCategory('type', 'new')">
+                <label>New Ideas</label>
+              </div>
+
+              <div class="filter-option">
+                <input type="radio" name="type" value="current_process_improvement" [(ngModel)]="selectedType"
+                  (change)="selectCategory('type', 'current_process_improvement')">
+                <label>Process Improvement</label>
+              </div>
+            </div>
+
+
+            <!-- DOMAIN -->
+            <div class="filter-section">
+              <div class="section-header">DOMAIN</div>
+              <div class="filter-option">
+                <input type="radio" id="tech" name="domain" value="tech" [(ngModel)]="selectedDomain"
+                  (change)="selectCategory('domain', 'tech')">
+                <label for="tech">Tech</label>
+              </div>
+              <div class="filter-option">
+                <input type="radio" id="non_tech" name="domain" value="non_tech" [(ngModel)]="selectedDomain"
+                  (change)="selectCategory('domain', 'non_tech')">
+                <label for="non_tech">Non-Tech</label>
+              </div>
+            </div>
+
+            <!-- IMPACT -->
+            <div class="filter-section">
+              <div class="section-header">IMPACT</div>
+              <div class="filter-option">
+                <input type="radio" id="culture" name="impact" value="workplace_culture" [(ngModel)]="selectedImpact"
+                  (change)="selectCategory('impact', 'workplace_culture')">
+                <label for="culture">Workplace Culture</label>
+              </div>
+              <div class="filter-option">
+                <input type="radio" id="financial" name="impact" value="financial" [(ngModel)]="selectedImpact"
+                  (change)="selectCategory('impact', 'financial')">
+                <label for="financial">Financial</label>
+              </div>
+              <div class="filter-option">
+                <input type="radio" id="productivity" name="impact" value="productivity" [(ngModel)]="selectedImpact"
+                  (change)="selectCategory('impact', 'productivity')">
+                <label for="productivity">Productivity</label>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-
-      <!-- TYPE -->
-      <div class="filter-section">
-  <div class="section-header">TYPE</div>
-
-  <div class="filter-option">
-    <input type="radio" name="type" value="new"
-      [(ngModel)]="selectedType"
-      (change)="selectCategory('type', 'new')">
-    <label>New Ideas</label>
-  </div>
-
-  <div class="filter-option">
-    <input type="radio" name="type" value="current_process_improvement"
-      [(ngModel)]="selectedType"
-      (change)="selectCategory('type', 'current_process_improvement')">
-    <label>Process Improvement</label>
-  </div>
-</div>
-
-
-      <!-- DOMAIN -->
-      <div class="filter-section">
-        <div class="section-header">DOMAIN</div>
-        <div class="filter-option">
-          <input type="radio" id="tech" name="domain" value="tech"
-            [(ngModel)]="selectedDomain"
-            (change)="selectCategory('domain', 'tech')">
-          <label for="tech">Tech</label>
-        </div>
-        <div class="filter-option">
-          <input type="radio" id="non_tech" name="domain" value="non_tech"
-            [(ngModel)]="selectedDomain"
-            (change)="selectCategory('domain', 'non_tech')">
-          <label for="non_tech">Non-Tech</label>
-        </div>
-      </div>
-
-      <!-- IMPACT -->
-      <div class="filter-section">
-        <div class="section-header">IMPACT</div>
-        <div class="filter-option">
-          <input type="radio" id="culture" name="impact" value="workplace_culture"
-            [(ngModel)]="selectedImpact"
-            (change)="selectCategory('impact', 'workplace_culture')">
-          <label for="culture">Workplace Culture</label>
-        </div>
-        <div class="filter-option">
-          <input type="radio" id="financial" name="impact" value="financial"
-            [(ngModel)]="selectedImpact"
-            (change)="selectCategory('impact', 'financial')">
-          <label for="financial">Financial</label>
-        </div>
-        <div class="filter-option">
-          <input type="radio" id="productivity" name="impact" value="productivity"
-            [(ngModel)]="selectedImpact"
-            (change)="selectCategory('impact', 'productivity')">
-          <label for="productivity">Productivity</label>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
     </div>
 
@@ -229,29 +186,40 @@
       <div class="spinner"></div>
       <p>Loading ideas...</p>
     </div>
-    
+
     <div *ngIf="ideas.length === 0 && (selectedType || selectedDomain || selectedImpact)">
       <p class="empty-filter">🔍 No ideas match these filters</p>
       <p class="empty-filter-sub">Try adjusting your filters.</p>
     </div>
 
-    <!-- No Ideas State -->
-    <div *ngIf="!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact" class="no-ideas">
+    <!-- No Ideas State (open ideas) -->
+    <div
+      *ngIf="!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact && !showClosedIdeas"
+      class="no-ideas">
       <div class="no-ideas-content">
         <div class="no-ideas-icon">💡</div>
         <h3>No ideas yet</h3>
         <p>Be the first to share an idea with the group!</p>
-        <app-buttons
-          buttonStyleClass="btn-share-idea"
-          (click)="openShareModal()"
-          [disabled]="false"
-          title="Share a new idea with the group"
-        >
+        <app-buttons buttonStyleClass="btn-share-idea" (click)="openShareModal()" [disabled]="false"
+          title="Share a new idea with the group">
           <span class="create-icon">+</span> Share Idea
         </app-buttons>
 
-          <!-- Leave Group -->
-    
+        <!-- Leave Group -->
+
+      </div>
+    </div>
+
+    <!-- No Closed Ideas State -->
+    <div *ngIf="!isLoading && ideas.length === 0 && showClosedIdeas" class="no-closed-ideas">
+      <div class="no-closed-ideas-content">
+        <div class="no-closed-ideas-icon">📭</div>
+        <h3>No closed ideas</h3>
+        <p>There are no closed ideas in this group yet.</p>
+        <app-buttons buttonStyleClass="btn-promote" (click)="toggleViewClosedIdeas()" [disabled]="false"
+          title="View open ideas">
+          ← Back to Open Ideas
+        </app-buttons>
       </div>
     </div>
 
@@ -259,18 +227,19 @@
     <div *ngIf="!isLoading && ideas.length > 0" class="ideas-list">
       <ng-container *ngFor="let idea of ideas; let last = last; trackBy: trackById">
         <!-- Idea Card -->
-        <div class="idea-card" 
-             [class.selected]="selectedIdea?.id === idea.id"
-             [class.promoted]="idea.isPromotedToProject"
-             (click)="selectIdea(idea)">
+        <div class="idea-card" [class.selected]="selectedIdea?.id === idea.id"
+          [class.promoted]="idea.isPromotedToProject" [class.closed-idea]="idea.status === 'Closed'"
+          (click)="selectIdea(idea)">
           <div class="idea-card-header">
             <div class="idea-header-top">
-              <h3 class="idea-title">{{ idea.title }}</h3>
+              <h3 class="idea-title">{{ idea.title }}
+                <span *ngIf="idea.status === 'Closed'" class="closed-badge-title">CLOSED</span>
+              </h3>
               <span *ngIf="idea.isReadyForPromotion" class="promotion-badge-title"> ⭐ Ready for Promotion </span>
             </div>
-            
+
             <div class="idea-card-meta">
-              
+
               <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
             </div>
           </div>
@@ -279,38 +248,31 @@
             <span *ngIf="idea.description.length > 150" class="read-more">Read more</span>
           </p>
 
- <!-- Idea Action Buttons-->
-<div class="idea-footer-actions">
-           <!-- Vote button -->
-  <app-buttons
-    [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
-    (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
-    [disabled]="isVoting || isUnvoting"
-    title="Vote for this idea"
-  >
-    👍
-    <span *ngIf="isGroupCreator()" class="vote-count">{{ idea.voteCount || 0 }}</span>
-  </app-buttons>
+          <!-- Idea Action Buttons-->
+          <div class="idea-footer-actions">
+            <!-- Vote button -->
+            <app-buttons [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
+              (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
+              [disabled]="isVoting || isUnvoting" title="Vote for this idea">
+              👍
+              <span *ngIf="isGroupCreator()" class="vote-count">{{ idea.voteCount || 0 }}</span>
+            </app-buttons>
 
             <!-- Promote button -->
-          <app-buttons
-    *ngIf="isGroupCreator() && !idea.isPromotedToProject"
-    buttonStyleClass="btn-promote"
-    (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
-    [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id"
-    title="Promote to Project"
-  >
-    Promote
-  </app-buttons>
+            <app-buttons *ngIf="isGroupCreator() && !idea.isPromotedToProject && idea.status !== 'Closed'"
+              buttonStyleClass="btn-promote" (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
+              [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id" title="Promote to Project">
+              Promote
+            </app-buttons>
 
-  <!-- Promoted badge -->
-  <span *ngIf="idea.isPromotedToProject" class="promoted-badge-footer">
-    ✔ Promoted
-  </span>
-</div>
+            <!-- Promoted badge -->
+            <span *ngIf="idea.isPromotedToProject" class="promoted-badge-footer">
+              ✔ Promoted
+            </span>
+          </div>
 
         </div>
-        
+
         <!-- Divider -->
         <div *ngIf="!last" class="card-divider">
           <div class="divider-line"></div>
@@ -323,17 +285,19 @@
   <div *ngIf="selectedIdea" class="idea-details-panel">
     <div class="details-panel-header">
       <h2 class="details-title">Idea Details</h2>
-      <!-- Close Details Button (Fixed - with ×) -->
-      <app-buttons
-        buttonStyleClass="btn-close-details"
-        (click)="selectedIdea = null"
-        [disabled]="false"
-        title="Close details"
-      >
+
+      <!-- Add "Read Only" badge for closed ideas -->
+      <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="read-only-badge">
+        <span class="read-only-text">Read Only</span>
+      </div>
+
+      <!-- Close Details Button -->
+      <app-buttons buttonStyleClass="btn-close-details" (click)="selectedIdea = null" [disabled]="false"
+        title="Close details">
         ×
       </app-buttons>
     </div>
-    
+
     <div class="details-panel-content">
       <!-- View Mode Only (No inline editing) -->
       <div class="view-mode">
@@ -341,132 +305,203 @@
           <!-- ROW 1 -->
           <div class="details-row-1">
             <h3 class="details-idea-title">{{ selectedIdea.title }}
-             
+              <!-- Closed badge in details -->
+              <span *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'"
+                class="closed-badge-details">CLOSED</span>
             </h3>
 
             <div class="details-actions-right">
-              <!-- Edit button opens modal (Fixed - with ✎) -->
-              <app-buttons
-                *ngIf="isUserIdeaOwner(selectedIdea)"
-                buttonStyleClass="btn-edit"
-                (click)="startEditing()"
-                [disabled]="false"
-                title="Edit idea"
-              >
-                ✎
-              </app-buttons>
-              
-              <!-- Promote button for admins only (Fixed - with 🚀) -->
-              <app-buttons
-                *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
-                buttonStyleClass="btn-promote"
-                (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event)"
-                [disabled]="isPromoting"
-                title="Promote to Project"
-              >
-                🚀
-              </app-buttons>
-              
-              <!-- View voters button for admins (Fixed - with 👁️) -->
-              <app-buttons
-                *ngIf="isGroupCreator() && selectedIdea.voteCount > 0"
-                buttonStyleClass="btn-view-voters"
-                (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)"
-                [disabled]="false"
-                title="View voters"
-              >
-                👁️
-              </app-buttons>
+              <!-- For closed ideas, hide action buttons -->
+              <ng-container *ngIf="!showClosedIdeas && selectedIdea.status !== 'Closed'">
+                <!-- Edit button opens modal -->
+                <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-edit" (click)="startEditing()"
+                  [disabled]="false" title="Edit idea">
+                  ✎
+                </app-buttons>
 
-              <!-- Vote button (Fixed - with 👍 and count) -->
-              <app-buttons
-                [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
-                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                [disabled]="isVoting || isUnvoting"
-                title="Vote for this idea"
-              >
-                👍
-                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
-              </app-buttons>
-              
-              <!-- Delete button for idea owner (Fixed - with ✕) -->
-              <app-buttons
-                *ngIf="isUserIdeaOwner(selectedIdea)"
-                buttonStyleClass="btn-delete"
-                (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id)"
-                [disabled]="false"
-                title="Delete idea"
-              >
-                ✕
-              </app-buttons>
+                <!-- Promote button for admins only -->
+                <app-buttons *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
+                  buttonStyleClass="btn-promote" (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event)"
+                  [disabled]="isPromoting" title="Promote to Project">
+                  🚀
+                </app-buttons>
 
-              <app-buttons
-                *ngIf="isGroupCreator()"
-                buttonStyleClass="btn-promote"
-                (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)"
-                [disabled]="false"
-                title="Close Idea"
-              >
-                🛑 Close Idea
-              </app-buttons>
+                <!-- View voters button for admins -->
+                <app-buttons *ngIf="isGroupCreator() && selectedIdea.voteCount > 0" buttonStyleClass="btn-view-voters"
+                  (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
+                  title="View voters">
+                  👁️
+                </app-buttons>
+
+                <!-- Vote button -->
+                <app-buttons [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
+                  (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
+                  [disabled]="isVoting || isUnvoting" title="Vote for this idea">
+                  👍
+                  <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+                </app-buttons>
+
+                <!-- Delete button for idea owner -->
+                <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-delete"
+                  (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id)" [disabled]="false"
+                  title="Delete idea">
+                  🗑️
+                </app-buttons>
+
+                <!-- Close Idea button for admins -->
+                <app-buttons *ngIf="isGroupCreator() && selectedIdea.status !== 'Closed'" buttonStyleClass="btn-promote"
+                  (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)" [disabled]="false"
+                  title="Close Idea">
+                  🛑 Close Idea
+                </app-buttons>
+              </ng-container>
+
+              <!-- Show vote count for closed ideas -->
+              <!-- <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="closed-vote-display">
+              <span class="closed-vote-count">{{ selectedIdea.voteCount || 0 }} votes</span>
+            </div> -->
             </div>
-          </div> 
+          </div>
 
           <!-- ROW 2 -->
           <div class="details-row-2">
             <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
-             <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge-left">✔ Promoted</span>
+            <span *ngIf="selectedIdea.isPromotedToProject" class="promoted-badge-left">✔ Promoted</span>
           </div>
         </div>
-        
+
+        <!-- Add read-only message for closed ideas -->
+        <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="read-only-message">
+          <!--<p class="read-only-text">📌 This idea is closed and read-only</p> -->
+        </div>
+
         <div class="details-section">
           <p class="details-idea-description">{{ selectedIdea.description }}</p>
         </div>
-  
-        <div class="comments-section">
-          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
 
-          <div class="new-comment">
-            <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
-            <app-buttons
-              [buttonText]="'Post Comment'"
-              [buttonStyleClass]="'btn-promote'"
-              [disabled]="!newCommentContent.trim()"
-              (click)="addComment()">
-            </app-buttons>
-          </div>
-
-          <div id="comments-list">
-            <div *ngFor="let comment of comments" class="comment" [class.own-comment]="comment.userId === currentUserId">
-
-              <div class="comment-header">
-                <span class="comment-author">
-                  {{ comment.userId === currentUserId ? 'You' : 'User' }}
-                </span>
-
-                <span class="comment-date">
-                  {{ formatRelativeTime(comment.createdAt) }}
-                </span>
-
-                <!-- Delete icon only on hover -->
-                <button class="delete-icon" *ngIf="comment.userId === currentUserId" (click)="deleteComment(comment.id)">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6l-1 14H6L5 6"></path>
-                    <path d="M10 11v6"></path>
-                    <path d="M14 11v6"></path>
-                    <path d="M9 6V4h6v2"></path>
-                  </svg>
-                </button>
-              </div>
-
-              <p class="comment-text">{{ comment.content }}</p>
-
-            </div>
-          </div>
+        <!-- DISPLAY MEDIA FOR IDEAS -->
+        <div class="details-section" *ngIf="selectedIdea">
+          <app-media [ideaId]="selectedIdea.id" [title]="'Supporting Media'">
+          </app-media>
         </div>
 
+        <!-- Comments section - different for closed vs open ideas -->
+        <ng-container *ngIf="!showClosedIdeas && selectedIdea.status !== 'Closed'">
+          <div class="comments-section">
+            <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+
+            <div class="new-comment">
+              <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
+
+              <!-- MEDIA UPLOAD SECTION (COMMENTS) -->
+              <div class="media-upload-section" *ngIf="!isPostingComment">
+                <!-- Selected files preview -->
+                <div *ngIf="selectedCommentFiles.length > 0" class="selected-files">
+                  <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
+                    <span class="file-name">{{ file.name }}</span>
+                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                    <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
+                  </div>
+                </div>
+
+                <div class="file-input-row">
+                  <input type="file" #commentFileInput multiple (change)="onCommentFileSelected($event)"
+                    [accept]="allowedFileTypes" style="display: none">
+                  <app-buttons [buttonText]="'📎 Attach Media Files'" buttonStyleClass="btn-promote"
+                    (click)="commentFileInput.click()">
+                  </app-buttons>
+
+                  <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
+                    Optional - max 20MB per file
+                  </span>
+                </div>
+              </div>
+
+              <div *ngIf="commentStatus" class="comment-status">
+                {{ commentStatus }}
+              </div>
+
+              <app-buttons [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+                [buttonStyleClass]="'btn-promote'" [disabled]="!newCommentContent.trim() || isPostingComment"
+                (click)="addComment()">
+              </app-buttons>
+            </div>
+
+            <div id="comments-list">
+              <div *ngFor="let comment of comments" class="comment"
+                [class.own-comment]="comment.userId === currentUserId">
+
+                <div class="comment-header">
+                  <div class="comment-meta">
+                    <span class="comment-author">
+                      {{ comment.userId === currentUserId ? 'You' : 'User' }}
+                    </span>
+
+                    <span class="comment-date">
+                      {{ formatRelativeTime(comment.createdAt) }}
+                    </span>
+                  </div>
+
+                  <!-- Delete icon only on hover -->
+                  <button type="button" *ngIf="comment.userId === currentUserId" class="delete-icon"
+                    (click)="deleteComment(comment.id)" title="Delete comment">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6l-1 14H6L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                      <path d="M9 6V4h6v2"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <p class="comment-text">{{ comment.content }}</p>
+
+                <!-- DISPLAY MEDIA FOR COMMENTS -->
+                <div class="comment-media-section" *ngIf="comment.id">
+                  <app-media [commentId]="comment.id" [title]="''" [compactMode]="true">
+                  </app-media>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Read-only comments for closed ideas -->
+        <ng-container *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'">
+          <div class="comments-section-readonly">
+            <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+            <p class="read-only-comment-note">Comments are disabled for closed ideas</p>
+
+            <!-- Display existing comments in read-only mode -->
+            <div id="comments-list">
+              <div *ngFor="let comment of comments" class="comment"
+                [class.own-comment]="comment.userId === currentUserId">
+                <div class="comment-header">
+                  <div class="comment-meta">
+                    <span class="comment-author">
+                      {{ comment.userId === currentUserId ? 'You' : 'User' }}
+                    </span>
+                    <span class="comment-date">
+                      {{ formatRelativeTime(comment.createdAt) }}
+                    </span>
+                  </div>
+                  <!-- Hide delete button for closed ideas -->
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+
+                <!-- DISPLAY MEDIA FOR COMMENTS (read-only) -->
+                <div class="comment-media-section" *ngIf="comment.id">
+                  <app-media [commentId]="comment.id" [title]="''" [compactMode]="true">
+                  </app-media>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Rest of your details section (Author info, etc.) stays the same -->
         <div class="details-section" *ngIf="selectedIdea.userName">
           <h4 class="details-section-title">Author</h4>
           <div class="author-info">
@@ -487,440 +522,395 @@
       </div>
     </div>
   </div>
-</div>
+  <!-- Share Idea Modal -->
+  <app-modal [isOpen]="showShareModal" [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'" [size]="'md'"
+    (closeModal)="closeShareModal()">
 
-<!-- Share Idea Modal -->
-<app-modal
-  [isOpen]="showShareModal"
-  [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'"
-  [size]="'md'"
-  (closeModal)="closeShareModal()">
+    <div modal-body>
 
-  <div modal-body>
-    
-  <form [formGroup]="shareIdeaForm" class="share-idea-form">
+      <form [formGroup]="shareIdeaForm" class="share-idea-form">
 
-    <div class="form-group">
-      <label>Idea Title</label>
-      <input
-        type="text"
-        class="form-control"
-        formControlName="title"
-        placeholder="Enter a descriptive title for your idea">
-      <div *ngIf="shareTitleCount >= 100" class="limit-message">
-        You have reached the maximum allowed characters.
-      </div>
+        <div class="form-group">
+          <label>Idea Title</label>
+          <input type="text" class="form-control" formControlName="title"
+            placeholder="Enter a descriptive title for your idea" maxlength="20">
+          <div *ngIf="shareTitleCount >= 20" class="limit-message">
+            You have reached the maximum allowed characters.
+          </div>
 
-      <div *ngIf="shareIdeaForm.get('title')?.invalid && shareIdeaForm.get('title')?.touched" class="error-message">
-        <div *ngIf="shareIdeaForm.get('title')?.errors?.['required']">Title is required</div>
-        <div *ngIf="shareIdeaForm.get('title')?.errors?.['minlength']">Title must be at least 3 characters</div>
-        <div *ngIf="shareIdeaForm.get('title')?.errors?.['maxlength']">Title cannot exceed 100 characters</div>
-      </div>
-        <div class="char-count">{{ shareTitleCount }}/100</div>
-    </div>
+          <div *ngIf="shareIdeaForm.get('title')?.invalid && shareIdeaForm.get('title')?.touched" class="error-message">
+            <div *ngIf="shareIdeaForm.get('title')?.errors?.['required']">Title is required</div>
+            <div *ngIf="shareIdeaForm.get('title')?.errors?.['minlength']">Title must be at least 10 characters</div>
+            <div *ngIf="shareIdeaForm.get('title')?.errors?.['maxlength']">Title cannot exceed 20 characters</div>
+          </div>
+          <div class="char-count">{{ shareTitleCount }}/20</div>
+        </div>
 
-    <div class="form-group">
-      <label>Idea Description</label>
-      <textarea
-        class="form-control-description"
-        formControlName="description"
-        rows="3"
-        placeholder="Describe your idea in detail...">
+        <div class="form-group">
+          <label>Idea Description</label>
+          <textarea class="form-control-description" formControlName="description" rows="3"
+            placeholder="Describe your idea in detail...">
       </textarea>
-      <div class="char-count">{{ shareDescCount }}/1000</div>
-       <div *ngIf="shareDescCount >= 1000" class="limit-message">
-        You have reached the maximum allowed characters.
-      </div>
+          <div class="char-count">{{ shareDescCount }}/1000</div>
+          <div *ngIf="shareDescCount >= 1000" class="limit-message">
+            You have reached the maximum allowed characters.
+          </div>
 
-      <div *ngIf="shareIdeaForm.get('description')?.invalid && shareIdeaForm.get('description')?.touched" class="error-message">
-        <div *ngIf="shareIdeaForm.get('description')?.errors?.['required']">Description is required</div>
-        <div *ngIf="shareIdeaForm.get('description')?.errors?.['minlength']">Description must be at least 10 characters</div>
-        <div *ngIf="shareIdeaForm.get('description')?.errors?.['maxlength']">Description cannot exceed 1000 characters</div>
-      </div>
+          <div *ngIf="shareIdeaForm.get('description')?.invalid && shareIdeaForm.get('description')?.touched"
+            class="error-message">
+            <div *ngIf="shareIdeaForm.get('description')?.errors?.['required']">Description is required</div>
+            <div *ngIf="shareIdeaForm.get('description')?.errors?.['minlength']">Description must be at least 20
+              characters</div>
+            <div *ngIf="shareIdeaForm.get('description')?.errors?.['maxlength']">Description cannot exceed 1000
+              characters</div>
+          </div>
+        </div>
+
+        <!-- Add category field-->
+        <div class="form-section categories-section">
+
+
+          <!-- TYPE -->
+          <div class="form-group">
+            <label>Idea Category</label>
+            <label class="category-label">Type</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" formControlName="type" value="new">
+                New
+              </label>
+
+              <label class="radio-option">
+                <input type="radio" formControlName="type" value="current_process_improvement">
+                Current Process Improvement
+              </label>
+            </div>
+          </div>
+
+          <!-- DOMAIN -->
+          <div class="form-group">
+            <label class="category-label">Domain</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" formControlName="domain" value="tech">
+                Tech
+              </label>
+
+              <label class="radio-option">
+                <input type="radio" formControlName="domain" value="non_tech">
+                Non‑Tech
+              </label>
+            </div>
+          </div>
+
+          <!-- IMPACT -->
+          <div class="form-group">
+            <label class="category-label">Impact</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" formControlName="impact" value="financial">
+                Financial
+              </label>
+
+              <label class="radio-option">
+                <input type="radio" formControlName="impact" value="productivity">
+                Productivity
+              </label>
+
+              <label class="radio-option">
+                <input type="radio" formControlName="impact" value="workplace_culture">
+                Workplace culture
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- IDEA MEDIA UPLOAD -->
+        <div class="form-group">
+          <!-- Selected files preview -->
+          <div *ngIf="selectedIdeaFiles.length > 0" class="selected-files">
+            <div *ngFor="let file of selectedIdeaFiles; let i = index" class="file-preview">
+              <span class="file-name">{{ file.name }}</span>
+              <span class="file-size">({{ formatIdeaCommentFileSize(file.size) }})</span>
+              <button type="button" (click)="removeFile(i, 'idea')" class="remove-file">×</button>
+            </div>
+          </div>
+
+          <div class="file-input-row">
+            <label>Attach Supporting Media</label>
+            <input type="file" #ideaFileInput multiple (change)="onFileSelected($event, 'idea')"
+              [accept]="allowedFileTypes" style="display: none">
+            <div class="media-upload-left">
+              <app-buttons [buttonText]="'📎 Attach Media Files'" (click)="ideaFileInput.click()"
+                [buttonStyleClass]="'btn-promote'">
+              </app-buttons>
+              <div class="media-file-info">
+                <span class="file-hint">Optional</span>
+                <span class="file-hint">•</span>
+                <span class="file-hint">Max 20MB</span>
+                <span class="file-hint">•</span>
+                <span class="file-hint">Images, Videos, Documents</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="ideaUploadStatus" class="upload-status">
+            {{ ideaUploadStatus }}
+          </div>
+        </div>
+      </form>
+
     </div>
 
-    <!-- Add category field-->
-<div class="form-section categories-section">
+    <div modal-footer>
+      <div class="footer-buttons">
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-reject'" (click)="showShareModal = false">
+        </app-buttons>
 
-  
-  <!-- TYPE -->
-  <div class="form-group">
-    <label>Idea Category</label>
-    <label class="category-label">Type</label>
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" formControlName="type" value="new">
-        New
-      </label>
-
-      <label class="radio-option">
-        <input type="radio" formControlName="type" value="current_process_improvement">
-        Current Process Improvement
-      </label>
-    </div>
-  </div>
-
-  <!-- DOMAIN -->
-  <div class="form-group">
-    <label class="category-label">Domain</label>
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" formControlName="domain" value="tech">
-        Tech
-      </label>
-
-      <label class="radio-option">
-        <input type="radio" formControlName="domain" value="non_tech">
-        Non‑Tech
-      </label>
-    </div>
-  </div>
-
-  <!-- IMPACT -->
-  <div class="form-group">
-    <label class="category-label">Impact</label>
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" formControlName="impact" value="financial">
-        Financial
-      </label>
-
-      <label class="radio-option">
-        <input type="radio" formControlName="impact" value="productivity">
-        Productivity
-      </label>
-
-      <label class="radio-option">
-        <input type="radio" formControlName="impact" value="workplace_culture">
-        Workplace culture
-      </label> 
-    </div>
-  </div>
-
-</div>
-
-    
-  </form>
-
-  </div>
-
-  <div modal-footer>
-    <div class="footer-buttons">
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
-        (click)="showShareModal = false">
-      </app-buttons>
-
-      <app-buttons
-          [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
-          [buttonStyleClass]="'btn-promote'"
+        <app-buttons [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'" [buttonStyleClass]="'btn-promote'"
           (click)="
             isEditMode
               ? onUpdateIdeaFromModal(shareIdeaForm.value)
               : onShareIdea(shareIdeaForm.value)
           ">
-      </app-buttons>
-    </div>
-  </div>
-
-</app-modal>
-
-<!-- Project Creation Modal -->
-<div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
-  <div class="project-modal-content" (click)="$event.stopPropagation()">
-    <div class="project-modal-header">
-      <h3>Create Project from Idea</h3>
-      <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
-    </div>
-    
-    <div class="project-modal-body">
-      <p class="project-modal-subtitle">
-        You're promoting "<strong>{{currentIdeaToPromote?.title}}</strong>" to a project.
-      </p>
-      
-      <div class="form-group">
-        <label>Project Title</label>
-        <input 
-          type="text" 
-          [(ngModel)]="projectData.title" 
-          class="form-control"
-          placeholder="Enter project title"
-          [disabled]="isPromoting">
+        </app-buttons>
       </div>
-      
-      <div class="form-group">
-        <label>Project Description</label>
-        <textarea 
-          [(ngModel)]="projectData.description" 
-          class="form-control"
-          rows="3"
-          placeholder="Enter project description"
-          [disabled]="isPromoting"></textarea>
+    </div>
+
+  </app-modal>
+
+  <!-- Project Creation Modal -->
+  <div *ngIf="showProjectModal" class="project-modal-overlay" (click)="closeProjectModal()">
+    <div class="project-modal-content" (click)="$event.stopPropagation()">
+      <div class="project-modal-header">
+        <h3>Create Project from Idea</h3>
+        <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
       </div>
-      
-      <div class="form-group">
-  <label>Project Overseer Email *</label>
-  <select 
-    [(ngModel)]="projectData.overseenByEmail"
-    class="form-control"
-    required
-    [disabled]="isPromoting || !groupMembers.length">
-    <option value="" disabled selected>Select project overseer</option>
-    <option *ngFor="let member of groupMembers" [value]="member.email">
-      {{member.userName || 'Unnamed User'}} - {{member.email}}
-    </option>
-  </select>
-</div>
-    </div>
-  <div modal-footer>
-  <div class="footer-buttons">
-    <app-buttons
-      [buttonText]="'Cancel'"
-      [buttonStyleClass]="'btn-modal-cancel'"
-      [disabled]="isPromoting"
-      (click)="closeProjectModal()">
-    </app-buttons>
 
-    <app-buttons
-      [buttonText]="isPromoting ? 'Creating Project...' : 'Create Project'"
-      [buttonStyleClass]="'btn-promote'"
-      [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
-      (click)="createProjectFromIdea()">
-    </app-buttons>
-  </div>
-</div>
+      <div class="project-modal-body">
+        <p class="project-modal-subtitle">
+          You're promoting "<strong>{{currentIdeaToPromote?.title}}</strong>" to a project.
+        </p>
 
-  </div>
-</div>
+        <div class="form-group">
+          <label>Project Title</label>
+          <input type="text" [(ngModel)]="projectData.title" class="form-control" placeholder="Enter project title"
+            [disabled]="isPromoting">
+        </div>
 
-<!-- Admin Leave Group Modal -->
-<div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">
-  <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="form-group">
+          <label>Project Description</label>
+          <textarea [(ngModel)]="projectData.description" class="form-control" rows="3"
+            placeholder="Enter project description" [disabled]="isPromoting"></textarea>
+        </div>
 
-    <h2>You are the group admin</h2>
-    <p>You must either delete the group or transfer ownership before leaving.</p>
-
-    <div class="modal-actions">
-      <app-buttons 
-        [buttonText]="'Delete Group'"
-        [buttonStyleClass]="'btn-reject'"
-        [buttonType]="'button'"
-        (click)="deleteGroup()"
-        >
-      </app-buttons>
-
-      <app-buttons 
-        [buttonText]="'Transfer Ownership'"
-        [buttonStyleClass]="'btn-promote'"
-        [buttonType]="'button'"
-        (click)="openTransferOwnershipModal()"
-        >
-      </app-buttons>
-
-      <app-buttons
-          [buttonText]="'Cancel'"
-          [buttonStyleClass]="'btn-promote'"
-          [buttonType]="'button'"
-          (click)="showAdminLeaveModal = false"
-          >
-      </app-buttons>
-    </div>
-  </div>
-</div>
-
-<!-- Transfer Ownership Modal -->
-<div *ngIf="showTransferOwnershipModal"
-     class="modal-backdrop"
-     (click)="showTransferOwnershipModal = false">
-
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Transfer Group Ownership</h2>
-    <p>Select a member to promote as the new admin.</p>
-
-    <select [(ngModel)]="newOwnerEmail" class="form-control">
-      <option value="" disabled selected>
-        Select new owner
-      </option>
-      <option *ngFor="let member of groupMembers"
-              [value]="member.email">
-        ({{ member.userName }}) ({{ member.email }})
-      </option>
-    </select>
-
-    <div class="modal-actions">
-      <app-buttons
-        [buttonText]="'Confirm Transfer'"
-        [buttonStyleClass]="'btn-promote'"
-        (click)="transferOwnership()">
-      </app-buttons>
-
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-secondary'"
-        (click)="showTransferOwnershipModal = false">
-      </app-buttons>
-    </div>
-  </div>
-</div>
-
-<!-- Member Leave Group Modal -->
-<app-modal
-  [isOpen]="showMemberLeaveModal"
-  title="Leave Group"
-  size="md"
-  (closeModal)="cancelMemberLeave()">
-
-  <div modal-body>
-    <div class="member-leave-group">
-    <p>Are you sure you want to leave this group?</p>
-    <p class="warning-text">You will lose access to all group content.</p>
-  </div>
-  </div>
-
-  <div modal-footer>
-    <div class="footer-buttons">
-
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
-        (click)="cancelMemberLeave()">
-      </app-buttons>
-
-      <app-buttons
-        [buttonText]="'Leave Group'"
-        [buttonStyleClass]="'btn-reject'"
-        (click)="confirmMemberLeave()">
-      </app-buttons>
-      
-
-    </div>
-  </div>
-</app-modal>
-
-<!-- Delete IDEA -->
-<app-modal
-  [isOpen]="showDeleteIdeaModal"
-  title="Delete Idea"
-  size="md"
-  (closeModal)="cancelDeleteIdea()">
-
-  <div modal-body>
-    <div class="delete-idea">
-    <p>Are you sure you want to delete this idea? </p>
-    <p class="warning-text">This action cannot be undone.</p>
-  </div>
-  </div>
-
-  <div modal-footer>
-    <div class="footer-buttons">
-
-      <app-buttons
-        [buttonText]="'Cancel'"
-        [buttonStyleClass]="'btn-modal-cancel'"
-        (click)="cancelDeleteIdea()">
-      </app-buttons>
-
-      <app-buttons
-        [buttonText]="'Delete Idea'"
-        [buttonStyleClass]="'btn-reject'"
-        (click)="onDeleteIdea()">
-      </app-buttons>
-
-    </div>
-  </div>
-</app-modal>
-
-<!-- View voters modal -->
-<app-modal
-  [isOpen]="showVotersModalView"
-  title="{{ selectedIdeaForVoters?.title || 'Voters' }}"
-  size="md"
-  (closeModal)="closeVotersModal()">
-
-  <div modal-body>
-    <div *ngIf="isViewingVoters">
-      <p>Loading voters...</p>
-    </div>
-
-    <div *ngIf="!isViewingVoters && votersList.length === 0">
-      <p>No votes yet for this idea.</p>
-    </div>
-
-    <ul *ngIf="votersList.length > 0">
-      <li *ngFor="let voter of votersList; let i = index">
-        {{ voter.userName }}
-        <br/>
-      </li>
-    </ul>
-  </div>
-</app-modal>
-
-<!-- Idea Info modal -->
-<app-modal
-  [isOpen]="showIdeaInfoModal"
-  title="Welcome to Ideas"
-  size="md"
-  (closeModal)="closeIdeaInfo()">
-
-  <div modal-body>
-    <div class="idea-info-modal">
-      <p>Your space to share actionable improvements</p>
-      
-      <p class="intro-text">
-        This page is your space for <strong>practical, actionable ideas</strong> that can improve productivity, efficiency, or working conditions. Focus on realistic ideas that can be implemented in weeks or months.
-      </p>
-
-      <h3>Valid Ideas Look Like</h3>
-      
-    <div class="examples-happy-path">
-  <div class="idea-example">
-    <h4>Automating Attendance Registration</h4>
-    <p>Use fingerprints to register attendance instead of manually writing it on Odoo.</p>
-  </div>
-
-  <div class="idea-example">
-    <h4>Knowledge Sharing Space</h4>
-    <p>A space e.g. excel sheet for people to post articles/posts/blogs they read that others might find interesting.</p>
-  </div>
-</div>
-
-      <h3>Ideas to Avoid</h3>
-      
-       <div class="examples-sad-path">
-      <div class="idea-example avoid">
-        <h4>We should explore AI more</h4>
-        <p>Too broad — what specific problem would it solve?</p>
+        <div class="form-group">
+          <label>Project Overseer Email *</label>
+          <select [(ngModel)]="projectData.overseenByEmail" class="form-control" required
+            [disabled]="isPromoting || !groupMembers.length">
+            <option value="" disabled selected>Select project overseer</option>
+            <option *ngFor="let member of groupMembers" [value]="member.email">
+              {{member.userName || 'Unnamed User'}} - {{member.email}}
+            </option>
+          </select>
+        </div>
       </div>
-      
-      <div class="idea-example avoid">
-        <h4>We should build an app to sell second hand cars</h4>
-        <p>Out of scope — focus on specific, tangible changes within the workplace</p>
+      <div modal-footer>
+        <div class="footer-buttons">
+          <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" [disabled]="isPromoting"
+            (click)="closeProjectModal()">
+          </app-buttons>
+
+          <app-buttons [buttonText]="isPromoting ? 'Creating Project...' : 'Create Project'"
+            [buttonStyleClass]="'btn-promote'"
+            [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
+            (click)="createProjectFromIdea()">
+          </app-buttons>
+        </div>
       </div>
-</div>
 
-<p class="tip-note">
-  Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficient?" If yes, it belongs here. If no, it has to go.
-</p>
+    </div>
+  </div>
 
-</div>
-      <div class="modal-footer">
-        
-        <app-buttons
-          [buttonText]="'Don’t show again'"
-          [buttonStyleClass]="'btn-reject'"
-          (click)="dontShowIdeaInfoAgain()">
+  <!-- Admin Leave Group Modal -->
+  <div *ngIf="showAdminLeaveModal" class="modal-backdrop" (click)="showAdminLeaveModal=false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+      <h2>You are the group admin</h2>
+      <p>You must either delete the group or transfer ownership before leaving.</p>
+
+      <div class="modal-actions">
+        <app-buttons [buttonText]="'Delete Group'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+          (click)="deleteGroup()">
         </app-buttons>
 
-        <app-buttons
-  [buttonText]="'Got it, let’s go!'"
-  [buttonStyleClass]="'btn-promote'"
-  (click)="closeIdeaInfo()">
-</app-buttons>
+        <app-buttons [buttonText]="'Transfer Ownership'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
+          (click)="openTransferOwnershipModal()">
+        </app-buttons>
+
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
+          (click)="showAdminLeaveModal = false">
+        </app-buttons>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Ownership Modal -->
+  <div *ngIf="showTransferOwnershipModal" class="modal-backdrop" (click)="showTransferOwnershipModal = false">
+
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Transfer Group Ownership</h2>
+      <p>Select a member to promote as the new admin.</p>
+
+      <select [(ngModel)]="newOwnerEmail" class="form-control">
+        <option value="" disabled selected>
+          Select new owner
+        </option>
+        <option *ngFor="let member of groupMembers" [value]="member.email">
+          ({{ member.userName }}) ({{ member.email }})
+        </option>
+      </select>
+
+      <div class="modal-actions">
+        <app-buttons [buttonText]="'Confirm Transfer'" [buttonStyleClass]="'btn-promote'" (click)="transferOwnership()">
+        </app-buttons>
+
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-secondary'"
+          (click)="showTransferOwnershipModal = false">
+        </app-buttons>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Leave Group Modal -->
+  <app-modal [isOpen]="showMemberLeaveModal" title="Leave Group" size="md" (closeModal)="cancelMemberLeave()">
+
+    <div modal-body>
+      <div class="member-leave-group">
+        <p>Are you sure you want to leave this group?</p>
+        <p class="warning-text">You will lose access to all group content.</p>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <div class="footer-buttons">
+
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" (click)="cancelMemberLeave()">
+        </app-buttons>
+
+        <app-buttons [buttonText]="'Leave Group'" [buttonStyleClass]="'btn-reject'" (click)="confirmMemberLeave()">
+        </app-buttons>
 
 
       </div>
     </div>
+  </app-modal>
 
-</app-modal>
+  <!-- Delete IDEA -->
+  <app-modal [isOpen]="showDeleteIdeaModal" title="Delete Idea" size="md" (closeModal)="cancelDeleteIdea()">
 
+    <div modal-body>
+      <div class="delete-idea">
+        <p>Are you sure you want to delete this idea? </p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <div class="footer-buttons">
+
+        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" (click)="cancelDeleteIdea()">
+        </app-buttons>
+
+        <app-buttons [buttonText]="'Delete Idea'" [buttonStyleClass]="'btn-reject'" (click)="onDeleteIdea()">
+        </app-buttons>
+
+      </div>
+    </div>
+  </app-modal>
+
+  <!-- View voters modal -->
+  <app-modal [isOpen]="showVotersModalView" title="{{ selectedIdeaForVoters?.title || 'Voters' }}" size="md"
+    (closeModal)="closeVotersModal()">
+
+    <div modal-body>
+      <div *ngIf="isViewingVoters">
+        <p>Loading voters...</p>
+      </div>
+
+      <div *ngIf="!isViewingVoters && votersList.length === 0">
+        <p>No votes yet for this idea.</p>
+      </div>
+
+      <ul *ngIf="votersList.length > 0">
+        <li *ngFor="let voter of votersList; let i = index">
+          {{ voter.userName }}
+          <br />
+        </li>
+      </ul>
+    </div>
+  </app-modal>
+
+  <!-- Idea Info modal -->
+  <app-modal [isOpen]="showIdeaInfoModal" title="Welcome to Ideas" size="md" (closeModal)="closeIdeaInfo()">
+
+    <div modal-body>
+      <div class="idea-info-modal">
+        <p>Your space to share actionable improvements</p>
+
+        <p class="intro-text">
+          This page is your space for <strong>practical, actionable ideas</strong> that can improve productivity,
+          efficiency, or working conditions. Focus on realistic ideas that can be implemented in weeks or months.
+        </p>
+
+        <h3>Valid Ideas Look Like</h3>
+
+        <div class="examples-happy-path">
+          <div class="idea-example">
+            <h4>Automating Attendance Registration</h4>
+            <p>Use fingerprints to register attendance instead of manually writing it on Odoo.</p>
+          </div>
+
+          <div class="idea-example">
+            <h4>Knowledge Sharing Space</h4>
+            <p>A space e.g. excel sheet for people to post articles/posts/blogs they read that others might find
+              interesting.</p>
+          </div>
+        </div>
+
+        <h3>Ideas to Avoid</h3>
+
+        <div class="examples-sad-path">
+          <div class="idea-example avoid">
+            <h4>We should explore AI more</h4>
+            <p>Too broad — what specific problem would it solve?</p>
+          </div>
+
+          <div class="idea-example avoid">
+            <h4>We should build an app to sell second hand cars</h4>
+            <p>Out of scope — focus on specific, tangible changes within the workplace</p>
+          </div>
+        </div>
+
+        <p class="tip-note">
+          Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficient?" If
+          yes, it belongs here. If no, it has to go.
+        </p>
+
+      </div>
+      <div modal-footer>
+        <div class="modal-footer-content">
+
+          <app-buttons [buttonText]="'Don’t show again'" [buttonStyleClass]="'btn-reject'"
+            (click)="dontShowIdeaInfoAgain()">
+          </app-buttons>
+
+          <app-buttons [buttonText]="'Got it, let’s go!'" [buttonStyleClass]="'btn-promote'" (click)="closeIdeaInfo()">
+          </app-buttons>
+
+        </div>
+      </div>
+    </div>
+
+  </app-modal>

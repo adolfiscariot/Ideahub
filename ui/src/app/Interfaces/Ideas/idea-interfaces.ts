@@ -9,20 +9,22 @@ export interface Idea {
   createdAt: Date;
   updatedAt: Date;
   status: string;
-  UserId: string;        
-  userId?: string; 
-  isReadyForPromotion?: boolean;      
-  
+  UserId: string;
+  userId?: string;
+  isReadyForPromotion?: boolean;
+  mediaCount: number;
+  projectId?: number;
+
   groupId: string;
   userName?: string;
   voteCount?: number;
   commentCount?: number;
   userVoted?: boolean;
   userVoteId?: string;
-  
+
   groupName?: string;
-  name?: string;    
-} 
+  name?: string;
+}
 
 export interface CreateIdeaRequest {
   title: string;
@@ -53,11 +55,11 @@ export interface SeeVotesRequest {
 export interface VoteDetails {
   userName: string;
   userEmail: string;
-  userId: string;           
-  ideaId: number;           
-  isDeleted: boolean;       
-  voteId: number;           
-  time: string;            
+  userId: string;
+  ideaId: number;
+  isDeleted: boolean;
+  voteId: number;
+  time: string;
 }
 
 export interface PromoteRequest {
@@ -72,7 +74,7 @@ export interface IdeaUpdate {
 }
 
 export interface VoteResponse {
-  id?: string;              
+  id?: string;
   ideaId?: string;
   userId?: string;
   createdAt?: Date;
@@ -87,5 +89,7 @@ export interface viewComment {
   content: string,
   createdAt: string,
   userId?: string,
-  ideaId?: number
+  ideaId?: number,
+  mediaCount?: number,
+  mediaItems?: any[];
 }

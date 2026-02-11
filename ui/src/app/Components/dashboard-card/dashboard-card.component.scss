@@ -44,6 +44,10 @@
         /* Changed to Greyish Blue as per Design System */
     }
 
+    &.promoted-ideas .card-content {
+        cursor: pointer;
+    }
+
     &.group-engagement .card-header {
         border-left: 4px solid #9b59b6;
     }

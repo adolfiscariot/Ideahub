@@ -11,11 +11,13 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Group> Groups {get; set;}
     public DbSet<Idea> Ideas {get; set;}
     public DbSet<Comment> Comments {get; set;}
+    public DbSet<Media> Media {get; set;}
     public DbSet<Project> Projects {get; set;}
     public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
     public DbSet<Vote> Votes {get; set;}
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
+    public DbSet<PasswordReset> PasswordResets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -361,6 +363,47 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsUnique();
         });
 
+        // PasswordReset configuration
+        builder.Entity<PasswordReset>(pr =>
+        {
+            pr.HasKey(pr => pr.Id);
+
+            pr.Property(pr => pr.Code)
+                .IsRequired()
+                .HasMaxLength(128);
+
+            pr.Property(pr => pr.ExpiresAt)
+                .IsRequired()
+                .HasColumnType("timestamp with time zone");
+
+            pr.Property(pr => pr.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            pr.Property(pr => pr.UsedAt)
+                .HasColumnType("timestamp with time zone");
+
+            pr.Property(pr => pr.Used)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // pr.Property(pr => pr.RequestIp)
+            //     .HasMaxLength(45);
+
+            // pr.Property(pr => pr.RequestUserAgent)
+            //     .HasMaxLength(512);
+
+            pr.HasIndex(pr => pr.Code)
+                .IsUnique();
+
+            pr.HasIndex(pr => pr.UserId);
+
+            pr.HasOne(pr => pr.User)
+                .WithMany(u => u.PasswordResets)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         builder.Entity<GroupMembershipRequest>(gmr =>
         {
             gmr.HasKey(gmr => gmr.Id);
@@ -401,5 +444,54 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         {
             r.ToTable("Roles");
         });
+
+        // Media Configuration
+        builder.Entity<Media>(m =>
+        {
+            m.HasKey(m => m.Id);
+
+            m.Property(m => m.FilePath)
+                .HasMaxLength(512)
+                .IsRequired();
+
+            m.Property(m => m.MediaType)
+                .IsRequired()
+                .HasConversion<string>(); 
+
+            m.Property(m => m.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            // Foreign Keys
+            m.HasOne(m => m.Idea)
+                .WithMany(i => i.Media)
+                .HasForeignKey(m => m.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.HasOne(m => m.Project)
+                .WithMany(p => p.Media)
+                .HasForeignKey(m => m.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.Comment)
+                .WithMany(c => c.Media)
+                .HasForeignKey(m => m.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            m.HasIndex(m => m.IdeaId);
+            m.HasIndex(m => m.UserId);
+            m.HasIndex(m => m.ProjectId);
+            m.HasIndex(m => m.CommentId);
+            m.HasIndex(m => m.MediaType);
+
+        });
+
     }
 }

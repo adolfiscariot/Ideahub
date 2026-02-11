@@ -222,9 +222,9 @@
 }
 
 .btn-delete {
-  background: #ff4d4d;
-  color: white;
-  border: none;
+  background: #fff;
+  color: red;
+  border: 1px solid purple;
   padding: 6px 10px;
   border-radius: 6px;
   width: auto;
@@ -232,7 +232,9 @@
   box-shadow: none;
 
   &:hover {
-    background: #d93636;
+    background: red;
+    color: #000;
+    //border: 1px solid red;
   }
 }
 

@@ -71,3 +71,21 @@ input:focus {
 a {
   color: black;
 }
+
+.forgot-password-link {
+  width: 100%;          
+  text-align: right;    
+  margin-top: -4px;
+  margin-bottom: 12px;
+
+  a {
+    color: #6a0dad;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}

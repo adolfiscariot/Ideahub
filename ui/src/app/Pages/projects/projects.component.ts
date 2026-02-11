@@ -7,30 +7,74 @@ import { EditProjectModalComponent } from '../../Components/modals/edit-project-
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { Toast, ToastService } from '../../Services/toast.service';
+import { ActivatedRoute } from '@angular/router';
+import { ModalComponent } from '../../Components/modal/modal.component';
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
+import { MediaType } from '../../Interfaces/Media/media-interface';
+import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+
+type EditProjectForm = {
+    title: string;
+    description: string;
+    status: ProjectStatus | string;
+    endedAt: string | null;
+};
+import { MediaService } from '../../Services/media.service';
+import { forkJoin, Observable, EMPTY, catchError, map, tap, switchMap } from 'rxjs';
+import { Media } from '../../Interfaces/Media/media-interface';
+import { MediaComponent } from '../media/media.component';
+
+type ProjectWithMedia = Project & { media?: Media[] };
 
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatDialogModule],
+    imports: [CommonModule, FormsModule, MatDialogModule, ModalComponent, ButtonsComponent, MediaComponent],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
 export class ProjectsComponent implements OnInit {
-    projects: Project[] = [];
+    projects: ProjectWithMedia[] = [];
     ProjectStatus = ProjectStatus;
 
+
     private projectsService = inject(ProjectsService);
+    private mediaService = inject(MediaService);
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
+    private route = inject(ActivatedRoute);
     currentUserId: string = '';
+    selectedProject: Project | null = null;
+    isEditModalOpen = false;
+    isViewModalOpen = false;
+    selectedProjectFiles: File[] = [];
+    allowedFileTypes = '.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.mov,.avi,.wmv,.pdf,.doc,.docx,.txt,.xls,.xlsx';
+    isUploadingIdeaMedia = false;
+    ideaUploadStatus = '';
+
+    editForm: EditProjectForm = {
+        title: '',
+        description: '',
+        status: '',
+        endedAt: null
+    };
+
 
     constructor(
         private toastService: ToastService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.currentUserId = this.authService.getUserId();
-        this.loadProjects();
+
+        this.route.queryParams.subscribe((params: any) => {
+            const projectId = params['openProject'];
+            this.loadProjects().subscribe(() => {
+                if (projectId) {
+                    this.openProjectFromQuery(projectId);
+                }
+            });
+        });
     }
 
     canEdit(project: Project): boolean {
@@ -38,17 +82,39 @@ export class ProjectsComponent implements OnInit {
         return this.currentUserId === project.overseenById;
     }
 
-    loadProjects(): void {
-        this.projectsService.getMyProjects().subscribe({
-            next: (data) => {
-                this.projects = data;
-            },
-            error: (err) => {
-                console.error('Failed to load projects', err);
-                // Optionally show error toast
-            }
-        });
+    loadProjects(): Observable<void> {
+        return this.projectsService.getMyProjects().pipe(
+            switchMap((projectsData) => {
+                this.projects = projectsData as ProjectWithMedia[];
+                const mediaRequests = this.projects.map(project =>
+                    this.mediaService.viewMedia(undefined, undefined, Number(project.id))
+                );
+                return forkJoin(mediaRequests);
+            }),
+            tap((mediaResults) => {
+                this.projects.forEach((project, idx) => {
+                    project.media = mediaResults[idx].data || [];
+                });
+            }),
+            map(() => void 0),  // Return void
+            catchError((err) => {
+                this.toastService.show('Failed to load projects', 'error');
+                return EMPTY;
+            })
+        );
     }
+
+    // loadProjects(): void {
+    //     this.projectsService.getMyProjects().subscribe({
+    //         next: (data) => {
+    //             this.projects = data;
+    //         },
+    //         error: (err) => {
+    //             console.error('Failed to load projects', err);
+    //             // Optionally show error toast
+    //         }
+    //     });
+    // }
 
     getStatusLabel(status: ProjectStatus): string {
         return ProjectStatus[status];
@@ -65,36 +131,129 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
-    openEditModal(project: Project): void {
-        const dialogRef = this.dialog.open(EditProjectModalComponent, {
-            width: '500px',
-            data: { project }
-        });
 
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) {
-                // Prepare update DTO
-                const updateDto = {
-                    title: result.title,
-                    description: result.description,
-                    // Convert numeric enum to string key for backend
-                    status: ProjectStatus[result.status],
-                    endedAt: result.endedAt ? new Date(result.endedAt).toISOString() : null
-                };
-
-                this.projectsService.updateProject(project.id, updateDto).subscribe({
-                    next: (updatedProject) => {
-                        console.log('Project updated successfully');
-                        this.toastService.show('Project updated successfuly', 'success');
-                        this.loadProjects(); // Reload to get fresh data
-                    },
-                    error: (err) => {
-                        console.error('Failed to update project', err);
-                        this.toastService.show('Failed to update project', 'error');
-                    }
-                });
-            }
-        });
+    openEditModal(project: Project) {
+        this.selectedProject = project;
+        this.editForm = {
+            title: project.title,
+            description: project.description,
+            status: project.status,
+            endedAt: project.endedAt ?? null
+        };
+        this.isEditModalOpen = true;
     }
+
+    openViewModal(project: Project) {
+        this.selectedProject = project;
+        this.isViewModalOpen = true;
+    }
+
+    saveProject() {
+        if (!this.selectedProject) return;
+
+        const updateDto = {
+            title: this.editForm.title,
+            description: this.editForm.description,
+            status: this.editForm.status,
+            endedAt: this.editForm.endedAt
+                ? new Date(this.editForm.endedAt).toISOString()
+                : null
+        };
+
+        this.projectsService.updateProject(this.selectedProject!.id, updateDto)
+            .subscribe({
+                next: () => {
+                    this.toastService.show('Project updated successfully', 'success');
+                    this.loadProjects();
+                    this.closeModals();
+                },
+                error: () => {
+                    this.toastService.show('Failed to update project', 'error');
+                }
+            });
+    }
+
+
+    closeModals() {
+        this.isEditModalOpen = false;
+        this.isViewModalOpen = false;
+        this.selectedProject = null;
+    }
+
+    openProjectFromQuery(projectId: string) {
+        const project = this.projects.find(p => p.id === Number(projectId));
+        if (!project) return;
+
+        this.selectedProject = project;
+
+        if (this.canEdit(project)) {
+            this.openEditModal(project);
+        } else {
+            this.openViewModal(project);
+        }
+    }
+
+    onProjectFileSelected(event: Event): void {
+
+        const result = processSelectedFiles(
+            event,
+            this.selectedProjectFiles
+        );
+
+        this.selectedProjectFiles = result.files;
+
+        result.errors.forEach(msg =>
+            this.toastService.show(msg, 'warning')
+        );
+    }
+
+    removeProjectFile(index: number): void {
+        this.selectedProjectFiles = removeFileAtIndex(
+            this.selectedProjectFiles,
+            index
+        );
+    }
+
+    formatProjectFileSize(bytes: number): string {
+        return formatFileSize(bytes);
+    }
+
+    detectProjectMediaType(file: File): MediaType {
+        return detectMediaType(file);
+    }
+
+
+    // openEditModal(project: Project): void {
+    //     const dialogRef = this.dialog.open(EditProjectModalComponent, {
+    //         width: '500px',
+    //         data: { project }
+    //     });
+
+    //     dialogRef.afterClosed().subscribe(result => {
+    //         if (result) {
+    //             // Prepare update DTO
+    //             const updateDto = {
+    //                 title: result.title,
+    //                 description: result.description,
+    //                 // Convert numeric enum to string key for backend
+    //                 status: ProjectStatus[result.status],
+    //                 endedAt: result.endedAt ? new Date(result.endedAt).toISOString() : null
+    //             };
+
+    //             this.projectsService.updateProject(project.id, updateDto).subscribe({
+    //                 next: (updatedProject) => {
+    //                     console.log('Project updated successfully');
+    //                     this.toastService.show('Project updated successfuly', 'success');
+    //                     this.loadProjects(); // Reload to get fresh data
+    //                 },
+    //                 error: (err) => {
+    //                     console.error('Failed to update project', err);
+    //                     this.toastService.show('Failed to update project', 'error');
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
 }
 

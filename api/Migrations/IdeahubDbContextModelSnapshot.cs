@@ -450,6 +450,97 @@ namespace Ideahub.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("api.Models.Media", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<int?>("IdeaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MediaType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("IdeaId");
+
+                    b.HasIndex("MediaType");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Media");
+                });
+
+            modelBuilder.Entity("api.Models.PasswordReset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Used")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResets");
+                });
+
             modelBuilder.Entity("api.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -734,6 +825,49 @@ namespace Ideahub.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("api.Models.Media", b =>
+                {
+                    b.HasOne("api.Models.Comment", "Comment")
+                        .WithMany("Media")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("api.Models.Idea", "Idea")
+                        .WithMany("Media")
+                        .HasForeignKey("IdeaId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("api.Models.Project", "Project")
+                        .WithMany("Media")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Idea");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("api.Models.PasswordReset", b =>
+                {
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany("PasswordResets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("api.Models.Project", b =>
                 {
                     b.HasOne("api.Models.IdeahubUser", "CreatedByUser")
@@ -816,6 +950,11 @@ namespace Ideahub.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("api.Models.Comment", b =>
+                {
+                    b.Navigation("Media");
+                });
+
             modelBuilder.Entity("api.Models.Group", b =>
                 {
                     b.Navigation("GroupMembershipRequests");
@@ -830,6 +969,8 @@ namespace Ideahub.Migrations
             modelBuilder.Entity("api.Models.Idea", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Media");
 
                     b.Navigation("Projects");
 
@@ -846,6 +987,8 @@ namespace Ideahub.Migrations
 
                     b.Navigation("Ideas");
 
+                    b.Navigation("PasswordResets");
+
                     b.Navigation("ProjectsCreated");
 
                     b.Navigation("ProjectsOverseen");
@@ -855,6 +998,11 @@ namespace Ideahub.Migrations
                     b.Navigation("UserGroups");
 
                     b.Navigation("Votes");
+                });
+
+            modelBuilder.Entity("api.Models.Project", b =>
+                {
+                    b.Navigation("Media");
                 });
 #pragma warning restore 612, 618
         }

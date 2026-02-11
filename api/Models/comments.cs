@@ -26,4 +26,6 @@ public class Comment
     // Navigation Properties
     public Idea Idea { get; set; } = null!;
     public IdeahubUser User { get; set; } = null!;
+    public ICollection<Media> Media { get; set; } = new List<Media>();
+
 }
