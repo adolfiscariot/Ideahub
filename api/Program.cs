@@ -162,6 +162,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 // MediaFile Service
 builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
 
+// Password Reset Service
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
 // convert enum to string
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -247,4 +250,5 @@ app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();
+
 

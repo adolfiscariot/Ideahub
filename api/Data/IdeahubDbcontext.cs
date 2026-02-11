@@ -17,6 +17,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Vote> Votes {get; set;}
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
+    public DbSet<PasswordReset> PasswordResets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -360,6 +361,47 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             //Index
             rti.HasIndex(rti => rti.Token)
                 .IsUnique();
+        });
+
+        // PasswordReset configuration
+        builder.Entity<PasswordReset>(pr =>
+        {
+            pr.HasKey(pr => pr.Id);
+
+            pr.Property(pr => pr.Code)
+                .IsRequired()
+                .HasMaxLength(128);
+
+            pr.Property(pr => pr.ExpiresAt)
+                .IsRequired()
+                .HasColumnType("timestamp with time zone");
+
+            pr.Property(pr => pr.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            pr.Property(pr => pr.UsedAt)
+                .HasColumnType("timestamp with time zone");
+
+            pr.Property(pr => pr.Used)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // pr.Property(pr => pr.RequestIp)
+            //     .HasMaxLength(45);
+
+            // pr.Property(pr => pr.RequestUserAgent)
+            //     .HasMaxLength(512);
+
+            pr.HasIndex(pr => pr.Code)
+                .IsUnique();
+
+            pr.HasIndex(pr => pr.UserId);
+
+            pr.HasOne(pr => pr.User)
+                .WithMany(u => u.PasswordResets)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<GroupMembershipRequest>(gmr =>
