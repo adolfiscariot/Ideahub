@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 })
 export class ProjectsService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiBaseUrl}/api/Project`;
+    private apiUrl = `${environment.apiUrl}/api/Project`;
 
     constructor() { }
 
