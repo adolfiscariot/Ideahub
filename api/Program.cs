@@ -149,7 +149,7 @@ builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 builder.Services.Configure<SendGridSettings>(options =>
 {
-    options.SenderEmail = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL") ?? "m10mathenge@gmail.com" ;
+    options.SenderEmail = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL") ?? "adept.ideahub@gmail.com" ;
     options.SenderName = Environment.GetEnvironmentVariable("SENDGRID_SENDER_NAME") ?? "Ideahub";
     options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY")!;
 
