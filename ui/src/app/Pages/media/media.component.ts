@@ -24,7 +24,7 @@ export class MediaComponent implements OnInit {
   isLoading = false;
   MediaType = MediaType;
 
-  constructor(private mediaService: MediaService) {}
+  constructor(private mediaService: MediaService) { }
 
   ngOnInit(): void {
     this.loadMedia();
@@ -37,28 +37,28 @@ export class MediaComponent implements OnInit {
   }
 
   loadMedia(): void {
-  if (!this.ideaId && !this.commentId && !this.projectId) return;
+    if (!this.ideaId && !this.commentId && !this.projectId) return;
 
-  this.isLoading = true;
+    this.isLoading = true;
 
-  this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId).subscribe({
-    next: (response) => {
-      this.isLoading = false;
-      if (response.success && response.data) {
-        this.mediaList = response.data;
+    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.success && response.data) {
+          this.mediaList = response.data;
+        }
+      },
+      error: () => {
+        this.isLoading = false;
       }
-    },
-    error: () => {
-      this.isLoading = false;
-    }
-  });
-}
+    });
+  }
 
   getMediaUrl(filePath: string): string {
-  // Remove 'media/' prefix 
-  const cleanFileName = filePath.replace(/^media\//, '');
-  return `${environment.apiBaseUrl}/uploads/${cleanFileName}`;
-}
+    // Remove 'media/' prefix 
+    const cleanFileName = filePath.replace(/^media\//, '');
+    return `${environment.apiUrl}/uploads/${cleanFileName}`;
+  }
 
   getFileExtension(filePath: string): string {
     return filePath.split('.').pop()?.toUpperCase() || 'FILE';
@@ -79,17 +79,17 @@ export class MediaComponent implements OnInit {
 
   // Open in a new tab
   openMedia(media: Media): void {
-  const url = this.getMediaUrl(media.filePath);
+    const url = this.getMediaUrl(media.filePath);
 
-  if (media.mediaType === MediaType.Document) {
-    // Force new tab
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.click();
-  } else {
-    window.open(url, '_blank');
+    if (media.mediaType === MediaType.Document) {
+      // Force new tab
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.click();
+    } else {
+      window.open(url, '_blank');
+    }
   }
-}
 }
