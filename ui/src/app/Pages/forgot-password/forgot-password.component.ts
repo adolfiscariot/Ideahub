@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../Services/auth/auth.service';
+import { PasswordRequirementsComponent } from '../../Components/password-requirements/password-requirements.component';
+import { passwordMatchValidator } from '../../Components/utils/password-match.util';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PasswordRequirementsComponent],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss']
 })
@@ -18,6 +20,7 @@ export class ForgotPasswordComponent implements OnInit {
   step: 'email' | 'code' | 'reset' | 'done' = 'email';
   resetCode = '';
   infoHovered = false;
+  password = '';
 
   passwordChecks = [
     
@@ -52,12 +55,21 @@ passwordStrength = 0;
   buildResetForm() {
     this.form = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required]
-    });
+      confirmPassword: ['', Validators.required] 
+    },
+  { validators: passwordMatchValidator}
+    );
   }
-
+  
+  clearMessages() {
+    this.error = '';
+    this.message = '';
+  }
   
   submit() {
+
+  this.clearMessages();
+
     if (this.step === 'email') {
       this.sendEmail();
     } else if (this.step === 'code') {
@@ -80,7 +92,7 @@ passwordStrength = 0;
         }, 5000);
       },
       error: (err) => {
-        this.error = err.message || 'Request failed';
+        this.error = this.handleBackendError(err);
       }
     });
   }
@@ -94,9 +106,10 @@ passwordStrength = 0;
         this.resetCode = code;
         this.step = 'reset';
         this.buildResetForm();  
+        this.clearMessages();
       },
-      error: () => {
-        this.error = 'Invalid or expired code';
+      error: (err) => {
+        this.error = this.handleBackendError(err);
       }
     });
   }
@@ -114,22 +127,48 @@ passwordStrength = 0;
         this.message = 'Password reset successful. You can now log in.';
       },
       error: (err) => {
-        this.error = err.message || 'Reset failed';
+        this.error = this.handleBackendError(err);
       }
     });
   }
 
-  onPasswordInput() {
-  const pw = this.form.get('newPassword')?.value || '';
+  private handleBackendError(err: any) {
+  const backend = err.error;
 
-  this.passwordChecks[0].met = pw.length >= 8;
-  this.passwordChecks[1].met = /[a-z]/.test(pw);
-  this.passwordChecks[2].met = /[A-Z]/.test(pw);
-  this.passwordChecks[3].met = /[0-9]/.test(pw);
-  this.passwordChecks[4].met = /[^A-Za-z0-9]/.test(pw);
+  // 1. ModelState errors (ASP.NET Core)
+  if (backend?.errors) {
+    const firstKey = Object.keys(backend.errors)[0];
+    const errorValue = backend.errors[firstKey];
+    return Array.isArray(errorValue) ? errorValue[0] : errorValue;
 
-  // Strength = number of rules met
-  this.passwordStrength = this.passwordChecks.filter(r => r.met).length;
+  }
+
+  // 2. Backend provided a message
+  if (backend?.message) {
+    return backend.message;
+  }
+
+  // 3. Angular HttpClient generic error
+  if (err.status === 0) {
+    return 'Unable to reach the server. Please try again.';
+  }
+
+  // 4. Fallback
+  return 'Something went wrong. Please try again.';
 }
+
+
+//   onPasswordInput() {
+//   const pw = this.form.get('newPassword')?.value || '';
+
+//   this.passwordChecks[0].met = pw.length >= 8;
+//   this.passwordChecks[1].met = /[a-z]/.test(pw);
+//   this.passwordChecks[2].met = /[A-Z]/.test(pw);
+//   this.passwordChecks[3].met = /[0-9]/.test(pw);
+//   this.passwordChecks[4].met = /[^A-Za-z0-9]/.test(pw);
+
+//   // Strength = number of rules met
+//   this.passwordStrength = this.passwordChecks.filter(r => r.met).length;
+// }
 
 }
