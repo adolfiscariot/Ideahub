@@ -22,18 +22,6 @@ export class ForgotPasswordComponent implements OnInit {
   infoHovered = false;
   password = '';
 
-  passwordChecks = [
-    
-    { text: 'At least 8 characters', met: false },
-    { text: 'Contains a lowercase letter', met: false },
-    { text: 'Contains an uppercase letter', met: false },
-    { text: 'Contains a number', met: false },
-    { text: 'Contains a special character', met: false }
-  ];
-
-passwordStrength = 0;
-
-
   constructor(private fb: FormBuilder, private auth: AuthService) {}
 
   ngOnInit(): void {
@@ -135,7 +123,7 @@ passwordStrength = 0;
   private handleBackendError(err: any) {
   const backend = err.error;
 
-  // 1. ModelState errors (ASP.NET Core)
+  // ModelState errors (ASP.NET Core)
   if (backend?.errors) {
     const firstKey = Object.keys(backend.errors)[0];
     const errorValue = backend.errors[firstKey];
@@ -143,32 +131,18 @@ passwordStrength = 0;
 
   }
 
-  // 2. Backend provided a message
-  if (backend?.message) {
-    return backend.message;
-  }
+  // // 2Backend provided a message
+  // if (backend?.message) {
+  //   return backend.message;
+  // }
 
-  // 3. Angular HttpClient generic error
+  // Angular HttpClient generic error
   if (err.status === 0) {
     return 'Unable to reach the server. Please try again.';
   }
 
-  // 4. Fallback
+  // Fallback
   return 'Something went wrong. Please try again.';
 }
-
-
-//   onPasswordInput() {
-//   const pw = this.form.get('newPassword')?.value || '';
-
-//   this.passwordChecks[0].met = pw.length >= 8;
-//   this.passwordChecks[1].met = /[a-z]/.test(pw);
-//   this.passwordChecks[2].met = /[A-Z]/.test(pw);
-//   this.passwordChecks[3].met = /[0-9]/.test(pw);
-//   this.passwordChecks[4].met = /[^A-Za-z0-9]/.test(pw);
-
-//   // Strength = number of rules met
-//   this.passwordStrength = this.passwordChecks.filter(r => r.met).length;
-// }
 
 }
