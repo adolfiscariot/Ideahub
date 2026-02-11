@@ -149,17 +149,6 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-// builder.Services.AddHttpClient<ResendEmailSender>();
-
-// builder.Services.AddScoped<
-//     Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
-//     ResendEmailSender
-// >();
-
-// builder.Services.Configure<ResendSettings>(
-//     builder.Configuration.GetSection("ResendSettings")
-// );
-
 //2.8 Email Sender
 builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
@@ -261,4 +250,5 @@ app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();
+
 
