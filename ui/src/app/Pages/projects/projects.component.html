@@ -8,7 +8,7 @@
         </header>
 
         <div class="card projects-card">
-            <div class="table-responsive">
+            <div class="table-responsive" [class.reloading]="isReloading">
                 <table class="projects-table">
                     <thead>
                         <tr>
@@ -23,7 +23,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let project of projects" (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
+                        <tr *ngFor="let project of projects; trackBy: trackByProjectId" (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
                             [class.clickable-row]="canEdit(project)" [class.readonly-row]="!canEdit(project)">
                             <td class="cell-title">
                                 <div class="title-wrapper">

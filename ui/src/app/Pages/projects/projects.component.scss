@@ -380,3 +380,10 @@ textarea {
     }
 }
 
+.table-responsive {
+  transition: opacity 180ms ease;
+}
+
+.table-responsive.reloading {
+  opacity: 0.6;
+}

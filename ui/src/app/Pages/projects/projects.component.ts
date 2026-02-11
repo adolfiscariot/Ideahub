@@ -60,6 +60,7 @@ export class ProjectsComponent implements OnInit {
         endedAt: null
     };
 
+    isReloading = false;
 
     constructor(
         private toastService: ToastService
@@ -132,6 +133,9 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
+    trackByProjectId(index: number, project: ProjectWithMedia): number {
+        return project.id;
+    }
 
     openEditModal(project: Project) {
         this.selectedProject = project;
@@ -185,7 +189,17 @@ export class ProjectsComponent implements OnInit {
             this.toastService.show(`Attached ${this.selectedProjectFiles.length} media file(s)`, 'success');
             }
 
-            this.loadProjects().subscribe();
+            this.isReloading = true;
+
+            this.loadProjects().subscribe({
+                next: () => {
+                    this.isReloading = false;
+                },
+                error: () => {
+                    this.isReloading = false;
+                }
+            });
+
             this.closeModals();
             this.selectedProjectFiles = [];
 
