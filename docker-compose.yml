@@ -24,8 +24,6 @@ services:
       context: ./
       dockerfile: Dockerfile
     container_name: ideahub-backend
-    envfile: 
-      .env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
