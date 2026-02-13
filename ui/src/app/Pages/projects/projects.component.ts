@@ -186,7 +186,7 @@ export class ProjectsComponent implements OnInit {
             await Promise.all(mediaUploadPromises);
             this.toastService.show('Project updated with media successfully', 'success');
             } else {
-            this.toastService.show('Project updated without media successfully', 'info');
+            this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
             } 
 
             this.isReloading = true;
