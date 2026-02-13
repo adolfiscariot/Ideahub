@@ -169,9 +169,7 @@ export class ProjectsComponent implements OnInit {
             await firstValueFrom(
             this.projectsService.updateProject(this.selectedProject.id, updateDto)
             );
-
-            this.toastService.show('Project updated successfully', 'success');
-
+          
             if (this.selectedProjectFiles?.length > 0) {
             const mediaUploadPromises = this.selectedProjectFiles.map(file =>
                 firstValueFrom(
@@ -186,8 +184,10 @@ export class ProjectsComponent implements OnInit {
             );
 
             await Promise.all(mediaUploadPromises);
-            this.toastService.show(`Attached ${this.selectedProjectFiles.length} media file(s)`, 'success');
-            }
+            this.toastService.show('Project updated with media successfully', 'success');
+            } else {
+            this.toastService.show('Project updated without media successfully', 'info');
+            } 
 
             this.isReloading = true;
 
@@ -205,7 +205,7 @@ export class ProjectsComponent implements OnInit {
 
         } catch (error: any) {
             console.error('Error saving project:', error);
-            this.toastService.show('Failed to update project', 'error');
+            this.toastService.show('Failed to save project', 'error');
         }
     }
 
