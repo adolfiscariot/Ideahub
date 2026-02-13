@@ -12,6 +12,7 @@ import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { firstValueFrom } from 'rxjs';
 
 type EditProjectForm = {
     title: string;
@@ -59,6 +60,7 @@ export class ProjectsComponent implements OnInit {
         endedAt: null
     };
 
+    isReloading = false;
 
     constructor(
         private toastService: ToastService
@@ -131,13 +133,16 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
+    trackByProjectId(index: number, project: ProjectWithMedia): number {
+        return project.id;
+    }
 
     openEditModal(project: Project) {
         this.selectedProject = project;
         this.editForm = {
             title: project.title,
             description: project.description,
-            status: project.status,
+            status: ProjectStatus[project.status],
             endedAt: project.endedAt ?? null
         };
         this.isEditModalOpen = true;
@@ -148,7 +153,7 @@ export class ProjectsComponent implements OnInit {
         this.isViewModalOpen = true;
     }
 
-    saveProject() {
+    async saveProject() {
         if (!this.selectedProject) return;
 
         const updateDto = {
@@ -156,23 +161,53 @@ export class ProjectsComponent implements OnInit {
             description: this.editForm.description,
             status: this.editForm.status,
             endedAt: this.editForm.endedAt
-                ? new Date(this.editForm.endedAt).toISOString()
-                : null
+            ? new Date(this.editForm.endedAt).toISOString()
+            : null
         };
 
-        this.projectsService.updateProject(this.selectedProject!.id, updateDto)
-            .subscribe({
+        try {
+            await firstValueFrom(
+            this.projectsService.updateProject(this.selectedProject.id, updateDto)
+            );
+          
+            if (this.selectedProjectFiles?.length > 0) {
+            const mediaUploadPromises = this.selectedProjectFiles.map(file =>
+                firstValueFrom(
+                this.mediaService.uploadMedia(
+                    file,
+                    detectMediaType(file),
+                    undefined,
+                    undefined,
+                    Number(this.selectedProject!.id)
+                )
+                )
+            );
+
+            await Promise.all(mediaUploadPromises);
+            this.toastService.show('Project updated with media successfully', 'success');
+            } else {
+            this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
+            } 
+
+            this.isReloading = true;
+
+            this.loadProjects().subscribe({
                 next: () => {
-                    this.toastService.show('Project updated successfully', 'success');
-                    this.loadProjects();
-                    this.closeModals();
+                    this.isReloading = false;
                 },
                 error: () => {
-                    this.toastService.show('Failed to update project', 'error');
+                    this.isReloading = false;
                 }
             });
-    }
 
+            this.closeModals();
+            this.selectedProjectFiles = [];
+
+        } catch (error: any) {
+            console.error('Error saving project:', error);
+            this.toastService.show('Failed to save project', 'error');
+        }
+    }
 
     closeModals() {
         this.isEditModalOpen = false;
