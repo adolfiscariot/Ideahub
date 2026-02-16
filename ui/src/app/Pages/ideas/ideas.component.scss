@@ -315,7 +315,36 @@
   padding: 0;
 }
 
-// File input row for comments - side by side layout
+.comment-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.attach-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  /* Ensure it stays right even if left side is missing */
+}
+
+.selected-files-preview {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .media-upload-section .file-input-row {
   display: flex;
   align-items: center;
