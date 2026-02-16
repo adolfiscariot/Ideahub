@@ -2,8 +2,15 @@
   background: white;
   border-radius: 12px;
   padding: 0;
+  /* Responsive Modal Width */
   min-width: 500px;
   max-width: 600px;
+
+  @media (max-width: 600px) {
+    min-width: 90vw;
+    width: 90vw;
+  }
+
   max-height: 90vh;
   overflow: hidden;
 }
