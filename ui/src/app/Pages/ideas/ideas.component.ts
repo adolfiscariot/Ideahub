@@ -131,6 +131,25 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showClosedIdeas: boolean = false;
   closedIdeas: Idea[] = [];
 
+  showMobileMenu: boolean = false;
+  showIdeaActionsMenu: boolean = false;
+
+  toggleMobileMenu() {
+    this.showMobileMenu = !this.showMobileMenu;
+  }
+
+  closeMobileMenu() {
+    this.showMobileMenu = false;
+  }
+
+  toggleIdeaActionsMenu() {
+    this.showIdeaActionsMenu = !this.showIdeaActionsMenu;
+  }
+
+  closeIdeaActionsMenu() {
+    this.showIdeaActionsMenu = false;
+  }
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,

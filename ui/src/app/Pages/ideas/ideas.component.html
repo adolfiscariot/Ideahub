@@ -11,23 +11,46 @@
         </div>
 
         <div class="header-actions">
-          <app-buttons [buttonText]="'ⓘ'" [buttonStyleClass]="'btn-info-icon'" title="Ideas Guideline"
-            (click)="displayIdeaInfo()">
+          <!-- Primary Action: Share Idea (Mobile Only) -->
+          <app-buttons *ngIf="!showShareModal" buttonStyleClass="btn-share-idea mobile-only-share"
+            (click)="openShareModal()" [disabled]="false" title="Share a new idea with the group">
+            ✚ Share Idea
           </app-buttons>
+          <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+            <span class="dots-icon">⋮</span>
+          </button>
+          <!-- Secondary Actions (Desktop: Row, Mobile: Dropdown) -->
+          <div class="secondary-actions" [class.show-mobile]="showMobileMenu">
 
-          <!-- Members Section -->
-          <div class="members-section" (click)="openMembersModal()">
-            <div class="members-icon">👥</div>
-            <div class="members-info">
-              <div class="members-count">{{ membersCount || 0 }} member (s)</div>
-              <div class="members-label">Click to view</div>
+            <app-buttons [buttonText]="'ⓘ'" [buttonStyleClass]="'btn-info-icon'" title="Ideas Guideline"
+              (click)="displayIdeaInfo(); closeMobileMenu()">
+            </app-buttons>
+
+            <!-- Members Section -->
+            <div class="members-section" (click)="openMembersModal(); closeMobileMenu()">
+              <div class="members-icon">👥</div>
+              <div class="members-info">
+                <div class="members-count">{{ membersCount || 0 }} member (s)</div>
+                <div class="members-label">Click to view</div>
+              </div>
             </div>
-          </div>
+            <!-- View Requests Button (only for group creator) -->
+            <app-buttons *ngIf="isGroupCreator()" [buttonText]="'👁️ View Requests'"
+              buttonStyleClass="btn-view-requests" (click)="viewRequests(groupId); closeMobileMenu()" [disabled]="false"
+              title="View pending join requests">
+            </app-buttons>
+            <!-- Share Idea (Desktop Only) -->
+            <app-buttons *ngIf="!showShareModal" buttonStyleClass="btn-share-idea desktop-only-share"
+              (click)="openShareModal()" [disabled]="false" title="Share a new idea with the group">
+              ✚ Share Idea
+            </app-buttons>
 
-          <!-- View Requests Button (only for group creator) -->
-          <app-buttons *ngIf="isGroupCreator()" [buttonText]="'👁️ View Requests'" buttonStyleClass="btn-view-requests"
-            (click)="viewRequests(groupId)" [disabled]="false" title="View pending join requests">
-          </app-buttons>
+            <app-buttons buttonStyleClass="btn-leave-group" (click)="confirmLeaveGroup(); closeMobileMenu()"
+              [disabled]="false" title="Leave this group">
+              🚪 Leave Group
+            </app-buttons>
+
+          </div>
 
           <!-- Requests Modal -->
           <div *ngIf="showRequestsModal" class="modal-backdrop" (click)="closeRequestsModal()">
@@ -60,18 +83,6 @@
             </div>
           </div>
 
-          <!-- Share Idea Button (Fixed - with + icon) -->
-          <app-buttons *ngIf="!showShareModal" buttonStyleClass="btn-share-idea" (click)="openShareModal()"
-            [disabled]="false" title="Share a new idea with the group">
-            ✚ Share Idea
-          </app-buttons>
-
-          <app-buttons buttonStyleClass="btn-leave-group" (click)="confirmLeaveGroup()" [disabled]="false"
-            title="Leave this group">
-            🚪 Leave Group
-          </app-buttons>
-
-
         </div>
       </div>
     </header>
@@ -79,100 +90,103 @@
     <!-- Section Header -->
     <div class="section-header">
       <h2 class="section-title">Ideas</h2>
-      <div class="section-sort">
-        <span class="sort-label">Sort by:</span>
-        <div class="sort-options">
-          <!-- Sort Option: Top Voted (Fixed) -->
-          <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
-            (click)="setSortMode('top')" [disabled]="false" title="Sort ideas by most votes">
-            Top Voted
-          </app-buttons>
+      <div class="filters-row">
+        <div class="section-sort">
+          <span class="sort-label">Sort by:</span>
+          <div class="sort-options">
+            <!-- Sort Option: Top Voted (Fixed) -->
+            <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
+              (click)="setSortMode('top')" [disabled]="false" title="Sort ideas by most votes">
+              Top Voted
+            </app-buttons>
 
-          <div class="sort-separator">|</div>
+            <div class="sort-separator">|</div>
 
-          <!-- Sort Option: Newest (Fixed) -->
-          <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
-            (click)="setSortMode('newest')" [disabled]="false" title="Sort ideas by newest first">
-            Newest
-          </app-buttons>
-        </div>
-      </div>
-
-      <!-- View Closed Ideas Button -->
-      <app-buttons [buttonText]="showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'" [buttonStyleClass]="
-      (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
-    " (click)="toggleViewClosedIdeas()" [disabled]="false"
-        [title]="showClosedIdeas ? 'Click to view open ideas' : 'Click to view closed ideas'">
-      </app-buttons>
-
-
-      <div class="filter-container" #dropdown>
-        <div class="filter-dropdown">
-          <div class="dropdown-header" (click)="toggleDropdown()">
-            <span>{{ selectedOptionLabel || 'All Categories' }}</span>
-            <span class="dropdown-arrow">▼</span>
+            <!-- Sort Option: Newest (Fixed) -->
+            <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
+              (click)="setSortMode('newest')" [disabled]="false" title="Sort ideas by newest first">
+              Newest
+            </app-buttons>
           </div>
+        </div>
 
-          <div class="dropdown-content" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+        <!-- View Closed Ideas Button -->
+        <app-buttons [buttonText]="showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'"
+          [buttonStyleClass]="
+        (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
+      " (click)="toggleViewClosedIdeas()" [disabled]="false"
+          [title]="showClosedIdeas ? 'Click to view open ideas' : 'Click to view closed ideas'">
+        </app-buttons>
 
-            <!-- All Categories -->
-            <div class="filter-option">
-              <input type="radio" id="all_categories" name="all"
-                [checked]="!selectedType && !selectedDomain && !selectedImpact" (change)="clearAllCategories()">
-              <label for="all_categories">All Categories</label>
+
+        <div class="filter-container" #dropdown>
+          <div class="filter-dropdown">
+            <div class="dropdown-header" (click)="toggleDropdown()">
+              <span>{{ selectedOptionLabel || 'All Categories' }}</span>
+              <span class="dropdown-arrow">▼</span>
             </div>
 
+            <div class="dropdown-content" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
 
-            <!-- TYPE -->
-            <div class="filter-section">
-              <div class="section-header">TYPE</div>
-
+              <!-- All Categories -->
               <div class="filter-option">
-                <input type="radio" name="type" value="new" [(ngModel)]="selectedType"
-                  (change)="selectCategory('type', 'new')">
-                <label>New Ideas</label>
+                <input type="radio" id="all_categories" name="all"
+                  [checked]="!selectedType && !selectedDomain && !selectedImpact" (change)="clearAllCategories()">
+                <label for="all_categories">All Categories</label>
               </div>
 
-              <div class="filter-option">
-                <input type="radio" name="type" value="current_process_improvement" [(ngModel)]="selectedType"
-                  (change)="selectCategory('type', 'current_process_improvement')">
-                <label>Process Improvement</label>
+
+              <!-- TYPE -->
+              <div class="filter-section">
+                <div class="section-header">TYPE</div>
+
+                <div class="filter-option">
+                  <input type="radio" name="type" value="new" [(ngModel)]="selectedType"
+                    (change)="selectCategory('type', 'new')">
+                  <label>New Ideas</label>
+                </div>
+
+                <div class="filter-option">
+                  <input type="radio" name="type" value="current_process_improvement" [(ngModel)]="selectedType"
+                    (change)="selectCategory('type', 'current_process_improvement')">
+                  <label>Process Improvement</label>
+                </div>
               </div>
-            </div>
 
 
-            <!-- DOMAIN -->
-            <div class="filter-section">
-              <div class="section-header">DOMAIN</div>
-              <div class="filter-option">
-                <input type="radio" id="tech" name="domain" value="tech" [(ngModel)]="selectedDomain"
-                  (change)="selectCategory('domain', 'tech')">
-                <label for="tech">Tech</label>
+              <!-- DOMAIN -->
+              <div class="filter-section">
+                <div class="section-header">DOMAIN</div>
+                <div class="filter-option">
+                  <input type="radio" id="tech" name="domain" value="tech" [(ngModel)]="selectedDomain"
+                    (change)="selectCategory('domain', 'tech')">
+                  <label for="tech">Tech</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" id="non_tech" name="domain" value="non_tech" [(ngModel)]="selectedDomain"
+                    (change)="selectCategory('domain', 'non_tech')">
+                  <label for="non_tech">Non-Tech</label>
+                </div>
               </div>
-              <div class="filter-option">
-                <input type="radio" id="non_tech" name="domain" value="non_tech" [(ngModel)]="selectedDomain"
-                  (change)="selectCategory('domain', 'non_tech')">
-                <label for="non_tech">Non-Tech</label>
-              </div>
-            </div>
 
-            <!-- IMPACT -->
-            <div class="filter-section">
-              <div class="section-header">IMPACT</div>
-              <div class="filter-option">
-                <input type="radio" id="culture" name="impact" value="workplace_culture" [(ngModel)]="selectedImpact"
-                  (change)="selectCategory('impact', 'workplace_culture')">
-                <label for="culture">Workplace Culture</label>
-              </div>
-              <div class="filter-option">
-                <input type="radio" id="financial" name="impact" value="financial" [(ngModel)]="selectedImpact"
-                  (change)="selectCategory('impact', 'financial')">
-                <label for="financial">Financial</label>
-              </div>
-              <div class="filter-option">
-                <input type="radio" id="productivity" name="impact" value="productivity" [(ngModel)]="selectedImpact"
-                  (change)="selectCategory('impact', 'productivity')">
-                <label for="productivity">Productivity</label>
+              <!-- IMPACT -->
+              <div class="filter-section">
+                <div class="section-header">IMPACT</div>
+                <div class="filter-option">
+                  <input type="radio" id="culture" name="impact" value="workplace_culture" [(ngModel)]="selectedImpact"
+                    (change)="selectCategory('impact', 'workplace_culture')">
+                  <label for="culture">Workplace Culture</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" id="financial" name="impact" value="financial" [(ngModel)]="selectedImpact"
+                    (change)="selectCategory('impact', 'financial')">
+                  <label for="financial">Financial</label>
+                </div>
+                <div class="filter-option">
+                  <input type="radio" id="productivity" name="impact" value="productivity" [(ngModel)]="selectedImpact"
+                    (change)="selectCategory('impact', 'productivity')">
+                  <label for="productivity">Productivity</label>
+                </div>
               </div>
             </div>
           </div>
@@ -311,49 +325,57 @@
             </h3>
 
             <div class="details-actions-right">
+              <app-buttons [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
+                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
+                [disabled]="isVoting || isUnvoting" title="Vote for this idea">
+                👍
+                <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+              </app-buttons>
+
               <!-- For closed ideas, hide action buttons -->
               <ng-container *ngIf="!showClosedIdeas && selectedIdea.status !== 'Closed'">
-                <!-- Edit button opens modal -->
-                <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-edit" (click)="startEditing()"
-                  [disabled]="false" title="Edit idea">
-                  ✎
-                </app-buttons>
+                <!-- Mobile Actions Menu Button -->
+                <button class="idea-menu-btn" (click)="toggleIdeaActionsMenu()" title="More options">
+                  ⋮
+                </button>
+                <!-- Actions Container (Desktop: Row, Mobile: Dropdown) -->
+                <div class="idea-actions-container" [class.show-mobile-menu]="showIdeaActionsMenu">
+                  <!-- Edit button opens modal -->
+                  <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-edit"
+                    (click)="startEditing(); closeIdeaActionsMenu()" [disabled]="false" title="Edit idea">
+                    ✎ Edit
+                  </app-buttons>
 
-                <!-- Promote button for admins only -->
-                <app-buttons *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
-                  buttonStyleClass="btn-promote" (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event)"
-                  [disabled]="isPromoting" title="Promote to Project">
-                  🚀
-                </app-buttons>
+                  <!-- Promote button for admins -->
+                  <app-buttons *ngIf="isGroupCreator() && !selectedIdea.isPromotedToProject"
+                    buttonStyleClass="btn-promote"
+                    (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event); closeIdeaActionsMenu()"
+                    [disabled]="isPromoting" title="Promote to Project">
+                    🚀 Promote
+                  </app-buttons>
 
-                <!-- View voters button for admins -->
-                <app-buttons *ngIf="isGroupCreator() && selectedIdea.voteCount > 0" buttonStyleClass="btn-view-voters"
-                  (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
-                  title="View voters">
-                  👁️
-                </app-buttons>
+                  <!-- View voters button for admins -->
+                  <app-buttons *ngIf="isGroupCreator() && selectedIdea.voteCount > 0" buttonStyleClass="btn-view-voters"
+                    (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event); closeIdeaActionsMenu()"
+                    [disabled]="false" title="View voters">
+                    👁️ Voters
+                  </app-buttons>
 
-                <!-- Vote button -->
-                <app-buttons [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
-                  (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                  [disabled]="isVoting || isUnvoting" title="Vote for this idea">
-                  👍
-                  <span *ngIf="isGroupCreator()" class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
-                </app-buttons>
+                  <!-- Delete button for idea owner -->
+                  <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-delete"
+                    (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id); closeIdeaActionsMenu()"
+                    [disabled]="false" title="Delete idea">
+                    🗑️ Delete
+                  </app-buttons>
 
-                <!-- Delete button for idea owner -->
-                <app-buttons *ngIf="isUserIdeaOwner(selectedIdea)" buttonStyleClass="btn-delete"
-                  (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id)" [disabled]="false"
-                  title="Delete idea">
-                  🗑️
-                </app-buttons>
-
-                <!-- Close Idea button for admins -->
-                <app-buttons *ngIf="isGroupCreator() && selectedIdea.status !== 'Closed'" buttonStyleClass="btn-promote"
-                  (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id)" [disabled]="false"
-                  title="Close Idea">
-                  🛑 Close Idea
-                </app-buttons>
+                  <!-- Close Idea button for admins -->
+                  <app-buttons *ngIf="isGroupCreator() && selectedIdea.status !== 'Closed'"
+                    buttonStyleClass="btn-promote"
+                    (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id); closeIdeaActionsMenu()"
+                    [disabled]="false" title="Close Idea">
+                    🛑 Close Idea
+                  </app-buttons>
+                </div>
               </ng-container>
 
               <!-- Show vote count for closed ideas -->
