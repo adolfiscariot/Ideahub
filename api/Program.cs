@@ -165,6 +165,10 @@ builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
 // Password Reset Service
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
+// Notification Service
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 // convert enum to string
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -247,6 +251,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.MapHub<Ideahub.Hubs.NotificationHub>("/hubs/notifications");
 
 //5. Run the App
 app.Run();
