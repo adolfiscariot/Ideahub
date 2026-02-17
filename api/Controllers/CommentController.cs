@@ -2,6 +2,7 @@ using System.Security.Claims;
 using api.Data;
 using api.Helpers;
 using api.Models;
+using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,14 @@ public class CommentController : ControllerBase
     private readonly IdeahubDbContext _context;
     private readonly ILogger<ProjectController> _logger;
     private readonly UserManager<IdeahubUser> _userManager;
+    private readonly INotificationService _notificationService;
 
-    public CommentController(IdeahubDbContext context, ILogger<ProjectController> logger, UserManager<IdeahubUser> userManager)
+    public CommentController(IdeahubDbContext context, ILogger<ProjectController> logger, UserManager<IdeahubUser> userManager, INotificationService notificationService)
     {
         _context = context;
         _logger = logger;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     [HttpPost("create-comment")]
@@ -62,6 +65,12 @@ public class CommentController : ControllerBase
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("New comment created by {userEmail}", userEmail);
+
+            // Send notification to the idea owner
+            if (idea.UserId != userId)
+            {
+                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}");
+            }
 
              return Ok(ApiResponse.Ok(
                 $"New comment Created by {userEmail}",
