@@ -250,8 +250,8 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
 app.MapHub<Ideahub.Hubs.NotificationHub>("/hubs/notifications");
+app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();
