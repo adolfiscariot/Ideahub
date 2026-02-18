@@ -393,18 +393,18 @@
             <div class="new-comment">
               <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
 
-              <!-- MEDIA UPLOAD SECTION (COMMENTS) -->
-              <div class="media-upload-section" *ngIf="!isPostingComment">
-                <!-- Selected files preview -->
-                <div *ngIf="selectedCommentFiles.length > 0" class="selected-files">
-                  <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
-                    <span class="file-name">{{ file.name }}</span>
-                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
-                    <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
-                  </div>
+              <!-- Selected files preview -->
+              <div *ngIf="selectedCommentFiles.length > 0" class="selected-files-preview">
+                <div *ngFor="let file of selectedCommentFiles; let i = index" class="file-preview">
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                  <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
                 </div>
+              </div>
 
-                <div class="file-input-row">
+              <div class="comment-action-bar">
+
+                <div class="attach-section" *ngIf="!isPostingComment">
                   <input type="file" #commentFileInput multiple (change)="onCommentFileSelected($event)"
                     [accept]="allowedFileTypes" style="display: none">
                   <app-buttons [buttonText]="'📎 Attach Media Files'" buttonStyleClass="btn-promote"
@@ -412,19 +412,23 @@
                   </app-buttons>
 
                   <span class="file-hint" *ngIf="selectedCommentFiles.length === 0">
-                    Optional - max 20MB per file
+                    Optional
                   </span>
+                  <span class="file-hint">•</span>
+                  <span class="file-hint">Max 20MB</span>
+                </div>
+
+                <div class="post-section">
+                  <div *ngIf="commentStatus" class="comment-status">
+                    {{ commentStatus }}
+                  </div>
+
+                  <app-buttons [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
+                    [buttonStyleClass]="'btn-accept'" [disabled]="!newCommentContent.trim() || isPostingComment"
+                    (click)="addComment()">
+                  </app-buttons>
                 </div>
               </div>
-
-              <div *ngIf="commentStatus" class="comment-status">
-                {{ commentStatus }}
-              </div>
-
-              <app-buttons [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
-                [buttonStyleClass]="'btn-promote'" [disabled]="!newCommentContent.trim() || isPostingComment"
-                (click)="addComment()">
-              </app-buttons>
             </div>
 
             <div id="comments-list">
