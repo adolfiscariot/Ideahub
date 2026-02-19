@@ -4,6 +4,6 @@ namespace api.Services
 {
     public interface INotificationService
     {
-        Task SendNotificationAsync(string userId, string message);
+        Task SendNotificationAsync(string userId, string message, int commentId);
     }
 }
