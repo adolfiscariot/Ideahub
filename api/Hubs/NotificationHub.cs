@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 
-namespace Ideahub.Hubs
+namespace api.Hubs
 {
     public class NotificationHub : Hub
     {

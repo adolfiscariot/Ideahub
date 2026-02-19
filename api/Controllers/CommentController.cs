@@ -69,7 +69,7 @@ public class CommentController : ControllerBase
             // Send notification to the idea owner
             if (idea.UserId != userId)
             {
-                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}");
+                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}", comment.Id);
             }
 
              return Ok(ApiResponse.Ok(
