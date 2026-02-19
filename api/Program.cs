@@ -88,13 +88,29 @@ builder.Services.AddAuthentication(options =>
             RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         };
         options.Events = new JwtBearerEvents
+{
+    OnMessageReceived = context =>
+    {
+
+        var path = context.HttpContext.Request.Path;
+        if (path.StartsWithSegments("/hubs/notifications"))
         {
-            OnAuthenticationFailed = ctx =>
+            var accessToken = context.Request.Query["access_token"];
+            if (!string.IsNullOrEmpty(accessToken))
             {
-                Console.WriteLine($"Auth failed: {ctx.Exception}");
-                return Task.CompletedTask;
+                context.Token = accessToken;
             }
-        };
+        }
+
+        return Task.CompletedTask;
+    },
+    OnAuthenticationFailed = ctx =>
+    {
+        Console.WriteLine($"Auth failed: {ctx.Exception}");
+        return Task.CompletedTask;
+    }
+};
+
     });
 
 //2.5 Authorization Service
@@ -113,23 +129,29 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>();
+
 //2.6 CORS Service
-//builder.Services.AddCors(options =>
-//{
-    //options.AddPolicy(AllowedOrigins, policy =>
-        //policy.WithOrigins("http://localhost:4200")
-              //.AllowAnyHeader()
-              //.AllowAnyMethod()
-    //);
-//});
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowedOrigins", policy =>
-        policy.AllowAnyOrigin()
+    options.AddPolicy(AllowedOrigins, policy =>
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
+              .AllowCredentials()
     );
 });
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowedOrigins", policy =>
+//         policy.AllowAnyOrigin()
+//               .AllowAnyHeader()
+//               .AllowAnyMethod()
+//     );
+// });
 
 
 //2.7 Customizing ModelState Validation
@@ -250,7 +272,7 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<Ideahub.Hubs.NotificationHub>("/hubs/notifications");
+app.MapHub<api.Hubs.NotificationHub>("/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
 //5. Run the App
