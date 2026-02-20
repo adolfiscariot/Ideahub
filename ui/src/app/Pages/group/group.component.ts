@@ -104,7 +104,6 @@ export class GroupsComponent implements OnInit {
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
     // Get current user ID first
     this.currentUserId = this.authService.getCurrentUserId();
-    console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
     this.createGroupForm = this.fb.group({
       name:[''],
@@ -168,19 +167,8 @@ onPageChange(event: any) {
       next: (response: any) => {
         this.isLoading = false;
 
-        console.log('DEBUG - Full API response:', response);
         if (response.success && response.data) {
           this.groups = response.data.map((group: any) => {
-            console.log('Group:', {
-              id: group.id,
-              name: group.name,
-              isMember: group.isMember,
-              hasPendingRequest: group.hasPendingRequest,
-              createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId,
-              isPublic: group.isPublic
-            });
-              
 
             return {
               ...group,
@@ -214,11 +202,6 @@ onPageChange(event: any) {
           );
           this.dontShowPages = this.groups.length <= this.pageSize;
 
-          console.log('Final groups state:');
-          this.groups.forEach((group, i) => {
-            console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
-          });
-
           //this.currentPage = 0;
               this.updatePaginatedGroups();
 
@@ -245,7 +228,6 @@ onPageChange(event: any) {
 
   dontShowGroupInfoAgain () {
   localStorage.setItem('hideGroupInfo', 'true');
-  console.log('hide group information')
   this.showGroupInfoModal=false;
 }
 
@@ -555,8 +537,6 @@ this.loadGroups();
     // Normalize both IDs (trim and lowercase)
     const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
     const currentId = this.currentUserId.toString().trim().toLowerCase();
-
-    console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
 
     return groupCreatorId === currentId;
   }

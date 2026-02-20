@@ -24,8 +24,8 @@ export class NavbarComponent {
 
   onLogout() {
     this.authService.logout().subscribe({
-      next: (response) => console.log(`Logout successful. ${response.message}`),
-      error: (error) => console.error(`Logout failed: ${error.message}`)
+      // next: (response) => console.log(`Logout successful. ${response.message}`),
+      // error: (error) => console.error(`Logout failed: ${error.message}`)
     });
   }
 }

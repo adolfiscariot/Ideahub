@@ -204,7 +204,6 @@ export class ProjectsComponent implements OnInit {
             this.selectedProjectFiles = [];
 
         } catch (error: any) {
-            console.error('Error saving project:', error);
             this.toastService.show('Failed to save project', 'error');
         }
     }

@@ -41,7 +41,6 @@ export class LoginInputComponent implements OnInit {
   });
 
   onSubmit(event: Event) {
-    console.log(`${this.loginForm.value.email} is logging in...`);
 
     if (this.loginForm.valid) {
       this.isLoading = true;
