@@ -49,7 +49,8 @@ public class NotificationController : ControllerBase
                     n.Comment.CreatedAt,
                     commenterName = n.Comment.User.DisplayName,
                     ideaTitle = n.Comment.Idea != null ? n.Comment.Idea.Title : null,
-                    ideaId = n.Comment.IdeaId
+                    ideaId = n.Comment.IdeaId,
+                    groupId = n.Comment.Idea.GroupId
                 }
             })
             .ToListAsync();
