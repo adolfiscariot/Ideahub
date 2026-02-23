@@ -104,7 +104,6 @@ export class GroupsComponent implements OnInit {
   ngOnInit(): void {  // ====== DOES NOT GET THE USERID========
     // Get current user ID first
     this.currentUserId = this.authService.getCurrentUserId();
-    console.log('Current User ID on init:', this.currentUserId);
     this.loadGroups();
     this.createGroupForm = this.fb.group({
       name: [''],
@@ -168,19 +167,8 @@ export class GroupsComponent implements OnInit {
       next: (response: any) => {
         this.isLoading = false;
 
-        console.log('DEBUG - Full API response:', response);
         if (response.success && response.data) {
           this.groups = response.data.map((group: any) => {
-            console.log('Group:', {
-              id: group.id,
-              name: group.name,
-              isMember: group.isMember,
-              hasPendingRequest: group.hasPendingRequest,
-              createdByUserId: group.createdByUserId,
-              isCreator: group.createdByUserId === this.currentUserId,
-              isPublic: group.isPublic
-            });
-
 
             return {
               ...group,
@@ -214,23 +202,16 @@ export class GroupsComponent implements OnInit {
           );
           this.dontShowPages = this.groups.length <= this.pageSize;
 
-          console.log('Final groups state:');
-          this.groups.forEach((group, i) => {
-            console.log(`${i + 1}. ${group.name}: creator=${group.createdByUserId}, currentUser=${this.currentUserId}, isCreator=${this.isGroupCreator(group)}`);
-          });
-
           //this.currentPage = 0;
           this.updatePaginatedGroups();
 
 
         } else {
-          console.error('Failed to load groups:', response.message);
           this.groups = [];
         }
       },
       error: (error: any) => {
         this.isLoading = false;
-        console.error('Error loading groups:', error);
         this.groups = [];
       }
     });
@@ -245,7 +226,6 @@ export class GroupsComponent implements OnInit {
 
   dontShowGroupInfoAgain() {
     localStorage.setItem('hideGroupInfo', 'true');
-    console.log('hide group information')
     this.showGroupInfoModal = false;
   }
 
@@ -372,7 +352,6 @@ export class GroupsComponent implements OnInit {
         }
       },
       error: (error: any) => {
-        console.error('Error joining group:', error);
         this.toastService.show('Failed to send join request. Please try again.', 'error');
       }
     });
@@ -420,7 +399,6 @@ export class GroupsComponent implements OnInit {
       },
       error: (error: any) => {
         this.isSubmitting = false;
-        console.error('Error creating group:', error);
 
         if (error.status === 401) {
           this.toastService.show('Please login to create a group.', 'warning');
@@ -451,13 +429,11 @@ export class GroupsComponent implements OnInit {
             createdByUserId: member.createdByUserId
           }));
         } else {
-          console.error('Failed to load group members:', response.message);
           this.groupMembers = [];
         }
       },
       error: (error: any) => {
         this.isLoadingMembers = false;
-        console.error('Error loading group members:', error);
         this.groupMembers = [];
       }
     });
@@ -498,7 +474,6 @@ export class GroupsComponent implements OnInit {
       },
       error: (error: any) => {
         this.isDeleting = false;
-        console.error('Error deleting group:', error);
 
         if (error.status === 401) {
           this.toastService.show('Please login to delete groups.', 'warning');
@@ -555,8 +530,6 @@ export class GroupsComponent implements OnInit {
     // Normalize both IDs (trim and lowercase)
     const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
     const currentId = this.currentUserId.toString().trim().toLowerCase();
-
-    console.log(`Comparing IDs: "${groupCreatorId}" === "${currentId}" = ${groupCreatorId === currentId}`);
 
     return groupCreatorId === currentId;
   }

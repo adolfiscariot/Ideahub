@@ -28,14 +28,13 @@ export class AuthService {
   }
 
   register(registrationData: Registration): Observable<any> {
-    console.log('Registration taking place...');
 
     return this.http.post(`${this.authUrl}/register`, registrationData).pipe(
       tap((response) => {
-        console.log(
-          `${registrationData.email} has registered successfully: `,
-          response
-        );
+        // console.log(
+        //   `${registrationData.email} has registered successfully: `,
+        //   response
+        // );
       }),
       catchError((e) => {
         const errorMessage = e.error?.message || e.message || 'Registration failed';
@@ -70,11 +69,9 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    console.log("User logging out...");
 
     // 1. Check if token is invalid/expired before sending request
     if (!this.isTokenValid()) {
-      console.log("Token expired or invalid, performing local logout only.");
       this.logoutLocal();
       return of(true); // Return instant success
     }
@@ -82,10 +79,8 @@ export class AuthService {
     // 2. Attempt server-side logout
     return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
       tap(() => {
-        console.log("Server logout successful");
       }),
       catchError((error: HttpErrorResponse) => {
-        console.error("Server logout failed, forcing local logout", error);
         return throwError(() => error);
       }),
       // 3. Always clean up locally, regardless of server response
@@ -127,13 +122,9 @@ export class AuthService {
           localStorage.setItem('refreshToken', newRefreshToken);
           // Backend might not return expiry in refresh, calculate or assume valid
           this._isLoggedIn.next(true);
-          console.log("Token refreshed successfully");
-        } else {
-          console.warn("Refresh succeeded but tokens were missing in response", response);
-        }
+        } else {}
       }),
       catchError((error) => {
-        console.error("Token refresh failed", error);
         this.logoutLocal();
         return throwError(() => error);
       })

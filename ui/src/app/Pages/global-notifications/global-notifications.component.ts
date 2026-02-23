@@ -86,7 +86,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.loadingRequests = false;
       },
       error: (err) => {
-        console.error('Error fetching requests:', err);
         this.errorRequests = 'Failed to load requests';
         this.loadingRequests = false;
       }
@@ -105,7 +104,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.notificationsService.decrement(1);
       },
       error: (err) => {
-        console.error('Error accepting request:', err);
         this.toastService.show('Failed to accept request', 'error');
       }
     });
@@ -119,7 +117,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.notificationsService.decrement(1);
       },
       error: (err) => {
-        console.error('Error rejecting request:', err);
         this.toastService.show('Failed to reject request', 'error');
       }
     });
@@ -141,7 +138,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error('Error accepting request:', err);
           failed = true;
           this.toastService.show('Some requests failed to accept', 'error');
         }
@@ -164,7 +160,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error('Error rejecting request:', err);
           failed = true;
           this.toastService.show('Some requests failed to reject', 'error');
         }

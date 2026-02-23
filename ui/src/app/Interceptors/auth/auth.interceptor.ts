@@ -4,7 +4,6 @@ import { inject } from '@angular/core';
 import { AuthService } from '../../Services/auth/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
-  console.log("Interceptor working");
   const accessToken = localStorage.getItem('accessToken');
   const authService = inject(AuthService);
 
@@ -42,9 +41,6 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           return throwError(() => error);
         }
 
-        // For other requests, attempt to Refresh Token
-        console.warn("Unauthorized request - attempting token refresh");
-
         return authService.refreshToken().pipe(
           switchMap(() => {
             // Refresh successful, retry original request with new token
@@ -56,14 +52,12 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           }),
           catchError((refreshError) => {
             // Refresh failed, logout
-            console.error("Token refresh failed in interceptor", refreshError);
             authService.logoutLocal();
             return throwError(() => refreshError);
           })
         );
       }
 
-      console.error(`Request to ${newRequest.urlWithParams} failed`, error);
       return throwError(() => error);
     })
   );

@@ -65,7 +65,6 @@ export class IdeasService {
 
   // PUT update idea
   updateIdea(ideaId: string, updateIdea: IdeaUpdate): Observable<ApiResponse<Idea>> {
-    console.log('Updating idea:', ideaId, updateIdea);
     return this.http.put<any>(`${this.apiUrl}/${ideaId}`, updateIdea).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
