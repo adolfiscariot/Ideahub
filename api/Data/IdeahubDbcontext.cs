@@ -18,6 +18,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
     public DbSet<PasswordReset> PasswordResets { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -402,6 +403,34 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             pr.HasOne(pr => pr.User)
                 .WithMany(u => u.PasswordResets)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Notification>(n =>
+        {
+            n.HasKey(n => n.Id); 
+
+            n.Property(n => n.IsRead)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            n.Property(n => n.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
+                .ValueGeneratedOnAdd(); 
+
+            n.HasOne(n => n.User) 
+                .WithMany(u => u.Notifications) 
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            n.HasOne(n => n.Comment)
+                .WithMany()
+                .HasForeignKey(n => n.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            n.HasIndex(n => n.RecipientId);
+            n.HasIndex(n => n.CommentId);
+
         });
 
         builder.Entity<GroupMembershipRequest>(gmr =>
