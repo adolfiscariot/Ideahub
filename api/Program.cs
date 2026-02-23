@@ -132,7 +132,8 @@ builder.Services.AddAuthorization(options =>
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>();
+    .Get<string[]>()
+    ?? throw new Exception("AllowedOrigins required but not found in appsettings.json");
 
 //2.6 CORS Service
 builder.Services.AddCors(options =>
