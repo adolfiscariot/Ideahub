@@ -62,7 +62,6 @@ export class GroupMembersModalComponent implements OnInit {
       },
       error: (error: any) => {
         this.isLoading = false;
-        console.error('Error loading members:', error);
         this.toastService.show('Failed to load group members.', 'error');
       }
     });
@@ -81,7 +80,6 @@ export class GroupMembersModalComponent implements OnInit {
       },
       error: (error: any) => {
         this.joining = false;
-        console.error('Error joining group:', error);
         this.toastService.show('Failed to join group.', 'error');
       }
     });
@@ -108,7 +106,6 @@ export class GroupMembersModalComponent implements OnInit {
         }
       },
       error: (error: any) => {
-        console.error('Error transferring ownership:', error);
         this.toastService.show('Failed to transfer ownership.', 'error');
       }
     });
