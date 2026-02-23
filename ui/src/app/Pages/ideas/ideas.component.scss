@@ -662,7 +662,7 @@
   /* optional but nice */
   -webkit-backdrop-filter: blur(3px);
 
-  z-index: 9999;
+  z-index: 10000;
 }
 
 /* Centered modal */
@@ -689,7 +689,7 @@
 
 .modal-content {
   position: relative;
-  z-index: 10000;
+  z-index: 10001;
   background: #ffffff;
   color: #111;
   padding: 24px;
@@ -722,7 +722,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  align-items: center;
+  z-index: 10002;
   padding: 20px;
 }
 
@@ -2287,7 +2288,7 @@
   .btn-view-closed {
     margin-left: 0;
     flex: 1;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .read-only-badge {
@@ -2416,9 +2417,340 @@
    TRANSITIONS
    ============================================ */
 
-.btn-view-closed,
-.idea-card.closed-idea,
-.closed-badge-title,
-.closed-vote-count {
-  transition: all 0.2s ease;
+/* Close Button Style (Mobile/Desktop) */
+.close-details-btn {
+  background: transparent;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  color: #333;
+  cursor: pointer;
+  padding: 10px 20px;
+  display: block;
+  z-index: 9999;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+
+::ng-deep .mobile-only-share {
+  display: none !important;
+}
+
+::ng-deep .desktop-only-share {
+  display: flex !important;
+}
+
+@media (max-width: 768px) {
+
+  ::ng-deep .mobile-only-share {
+    display: block !important;
+    margin-right: -10px;
+  }
+
+  ::ng-deep .desktop-only-share {
+    display: none !important;
+  }
+
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+  }
+
+  ::ng-deep app-modal .modal-overlay,
+  ::ng-deep app-modal .modal-backdrop {
+    z-index: 10002 !important;
+  }
+
+  ::ng-deep app-modal .modal-container,
+  ::ng-deep app-modal .modal-content {
+    z-index: 10003 !important;
+  }
+
+  .filters-row>* {
+    flex-grow: 1;
+    margin: 0;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    height: auto;
+  }
+
+  .ideas-container {
+    flex-direction: column;
+    padding: 1rem;
+    height: 100vh;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .ideas-list-panel {
+    display: block;
+    width: 100%;
+    padding-right: 0;
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 80px;
+  }
+
+  .idea-details-panel {
+    display: none;
+    width: 100%;
+    border-left: none;
+    padding-left: 0;
+    margin-top: 0;
+    border-top: 1px solid #eee;
+    padding-top: 0;
+    height: 100%;
+    overflow-y: auto;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+    padding: 0;
+  }
+
+  .details-panel-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0;
+  }
+
+  .details-panel-content {
+    padding: 20px;
+  }
+
+  .details-title,
+  .details-idea-title {
+    text-align: left;
+  }
+
+  /* Fix for Idea Title Alignment on Mobile */
+  .idea-card-header,
+  .idea-header-top,
+  .idea-card .idea-title,
+  .idea-title {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  /* Fix for View Closed Ideas Button Alignment in Filters Row */
+  .filters-row ::ng-deep app-buttons {
+    /* Revert to auto width so they wrap nicely */
+    width: auto;
+    flex: 1 0 auto;
+  }
+
+  .filters-row ::ng-deep app-buttons .btn-view-closed,
+  .filters-row ::ng-deep app-buttons button {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-left: 10px !important;
+    width: auto !important;
+  }
+
+  .idea-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .idea-actions-container {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    width: 180px;
+    margin-top: 5px;
+  }
+
+  .idea-actions-container.show-mobile-menu {
+    display: flex;
+  }
+
+  .idea-actions-container ::ng-deep app-buttons button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 8px 12px !important;
+  }
+
+  .details-actions-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-sort {
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    position: relative;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+
+  .media-upload-section .file-input-row,
+  .share-idea-form .file-input-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .media-upload-left {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .comment-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .post-section {
+    justify-content: flex-end;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+    padding: 15px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .secondary-actions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+    width: 200px;
+    margin-top: 5px;
+  }
+
+  .secondary-actions.show-mobile {
+    display: flex;
+  }
+
+  .secondary-actions ::ng-deep app-buttons button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .members-section {
+    width: 100%;
+  }
+
+  .btn-share-idea {
+    white-space: nowrap;
+  }
+
+  .ideas-container.split-view {
+    .ideas-list-panel {
+      display: none;
+    }
+
+    .idea-details-panel {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-text {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+
+  .mobile-menu-btn,
+  .idea-menu-btn {
+    display: none;
+  }
+
+  .secondary-actions,
+  .idea-actions-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    position: static;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    width: auto;
+    background: transparent;
+  }
+
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
 }
