@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { EditProjectModalComponent } from '../../Components/modals/edit-project-modal/edit-project-modal.component';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
-import { Toast, ToastService } from '../../Services/toast.service';
+import { ToastService } from '../../Services/toast.service';
 import { ActivatedRoute } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
@@ -62,9 +61,7 @@ export class ProjectsComponent implements OnInit {
 
     isReloading = false;
 
-    constructor(
-        private toastService: ToastService
-    ) { }
+    private toastService = inject(ToastService);
 
     ngOnInit(): void {
         this.currentUserId = this.authService.getUserId();
@@ -161,33 +158,33 @@ export class ProjectsComponent implements OnInit {
             description: this.editForm.description,
             status: this.editForm.status,
             endedAt: this.editForm.endedAt
-            ? new Date(this.editForm.endedAt).toISOString()
-            : null
+                ? new Date(this.editForm.endedAt).toISOString()
+                : null
         };
 
         try {
             await firstValueFrom(
-            this.projectsService.updateProject(this.selectedProject.id, updateDto)
-            );
-          
-            if (this.selectedProjectFiles?.length > 0) {
-            const mediaUploadPromises = this.selectedProjectFiles.map(file =>
-                firstValueFrom(
-                this.mediaService.uploadMedia(
-                    file,
-                    detectMediaType(file),
-                    undefined,
-                    undefined,
-                    Number(this.selectedProject!.id)
-                )
-                )
+                this.projectsService.updateProject(this.selectedProject.id, updateDto)
             );
 
-            await Promise.all(mediaUploadPromises);
-            this.toastService.show('Project updated with media successfully', 'success');
+            if (this.selectedProjectFiles?.length > 0) {
+                const mediaUploadPromises = this.selectedProjectFiles.map(file =>
+                    firstValueFrom(
+                        this.mediaService.uploadMedia(
+                            file,
+                            detectMediaType(file),
+                            undefined,
+                            undefined,
+                            Number(this.selectedProject!.id)
+                        )
+                    )
+                );
+
+                await Promise.all(mediaUploadPromises);
+                this.toastService.show('Project updated with media successfully', 'success');
             } else {
-            this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
-            } 
+                this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
+            }
 
             this.isReloading = true;
 

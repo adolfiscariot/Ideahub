@@ -446,6 +446,7 @@
 }
 
 // Override app-buttons styling for post comment
+/* stylelint-disable selector-pseudo-element-no-unknown */
 ::ng-deep app-buttons.btn-post-comment {
   display: flex !important;
 
@@ -472,6 +473,8 @@
     cursor: not-allowed !important;
   }
 }
+
+/* stylelint-enable selector-pseudo-element-no-unknown */
 
 /* Comment Card */
 .comment {
@@ -618,6 +621,7 @@
   box-shadow: none !important;
 }
 
+/* stylelint-disable selector-pseudo-element-no-unknown */
 ::ng-deep app-buttons.delete-icon {
   display: flex;
 
@@ -631,6 +635,8 @@
     color: red;
   }
 }
+
+/* stylelint-enable selector-pseudo-element-no-unknown */
 
 .comment.own-comment:hover .delete-icon {
   opacity: 1;
@@ -2433,6 +2439,7 @@
   top: 15px;
 }
 
+/* stylelint-disable selector-pseudo-element-no-unknown */
 ::ng-deep .mobile-only-share {
   display: none !important;
 }
@@ -2441,8 +2448,11 @@
   display: flex !important;
 }
 
+/* stylelint-enable selector-pseudo-element-no-unknown */
+
 @media (max-width: 768px) {
 
+  /* stylelint-disable selector-pseudo-element-no-unknown */
   ::ng-deep .mobile-only-share {
     display: block !important;
     margin-right: -10px;
@@ -2469,6 +2479,8 @@
   ::ng-deep app-modal .modal-content {
     z-index: 10003 !important;
   }
+
+  /* stylelint-enable selector-pseudo-element-no-unknown */
 
   .filters-row>* {
     flex-grow: 1;
@@ -2504,10 +2516,8 @@
     display: none;
     width: 100%;
     border-left: none;
-    padding-left: 0;
     margin-top: 0;
     border-top: 1px solid #eee;
-    padding-top: 0;
     height: 100%;
     overflow-y: auto;
     background: white;
@@ -2552,6 +2562,7 @@
   }
 
   /* Fix for View Closed Ideas Button Alignment in Filters Row */
+  /* stylelint-disable selector-pseudo-element-no-unknown */
   .filters-row ::ng-deep app-buttons {
     /* Revert to auto width so they wrap nicely */
     width: auto;
@@ -2565,6 +2576,8 @@
     padding-left: 10px !important;
     width: auto !important;
   }
+
+  /* stylelint-enable selector-pseudo-element-no-unknown */
 
   .idea-menu-btn {
     display: flex;
@@ -2601,12 +2614,15 @@
     display: flex;
   }
 
+  /* stylelint-disable selector-pseudo-element-no-unknown */
   .idea-actions-container ::ng-deep app-buttons button {
     width: 100%;
     justify-content: flex-start;
     text-align: left;
     padding: 8px 12px !important;
   }
+
+  /* stylelint-enable selector-pseudo-element-no-unknown */
 
   .details-actions-right {
     position: relative;
@@ -2691,11 +2707,14 @@
     display: flex;
   }
 
+  /* stylelint-disable selector-pseudo-element-no-unknown */
   .secondary-actions ::ng-deep app-buttons button {
     width: 100%;
     justify-content: flex-start;
     text-align: left;
   }
+
+  /* stylelint-enable selector-pseudo-element-no-unknown */
 
   .members-section {
     width: 100%;

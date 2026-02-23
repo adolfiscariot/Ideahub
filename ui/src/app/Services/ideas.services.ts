@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, tap, throwError } from 'rxjs';
-import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest  } from '../Interfaces/Ideas/idea-interfaces';
+import { Observable, map } from 'rxjs';
+import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest } from '../Interfaces/Ideas/idea-interfaces';
 import { VoteService } from './vote.service';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IdeasService {
   private apiUrl = 'http://localhost:5065/api/idea';
-
-  constructor(private http: HttpClient, private voteService: VoteService) { }
+  private http = inject(HttpClient);
+  private voteService = inject(VoteService);
 
   // Helper method to convert backend response
   private convertResponse<T>(response: any): ApiResponse<T> {
@@ -44,7 +45,7 @@ export class IdeasService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
-    
+
     return this.http.get<any>(`${this.apiUrl}/open-idea`, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
@@ -92,7 +93,7 @@ export class IdeasService {
     const params = new HttpParams()
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
-    
+
     return this.http.post<any>(`${this.apiUrl}/promote-idea`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );

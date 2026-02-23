@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
 import { CommonModule } from '@angular/common';
 
@@ -15,27 +15,27 @@ export class NotificationsComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
-  constructor(private groupsService: GroupsService) {}
+  private groupsService = inject(GroupsService);
 
   ngOnInit(): void {
     //this.loadRequests();
   }
 
   loadRequests(groupId: string): void {
-  this.loading = true;
-  this.errorMessage = '';
+    this.loading = true;
+    this.errorMessage = '';
 
-  this.groupsService.viewRequests(groupId).subscribe({
-    next: (response) => {
-      this.requests = response.data || [];
-      this.loading = false;
-    },
-    error: () => {
-      this.errorMessage = "Could not load requests";
-      this.loading = false;
-    }
-  });
-}
+    this.groupsService.viewRequests(groupId).subscribe({
+      next: (response) => {
+        this.requests = response.data || [];
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = "Could not load requests";
+        this.loading = false;
+      }
+    });
+  }
 
 
   acceptRequest(groupId: string, userId: string): void {

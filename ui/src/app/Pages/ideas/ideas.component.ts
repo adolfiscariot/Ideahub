@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
-import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest, viewComment, createComment } from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, CreateIdeaRequest, IdeaUpdate, viewComment } from '../../Interfaces/Ideas/idea-interfaces';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { VoteService } from '../../Services/vote.service';
@@ -20,7 +20,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommentsService } from '../../Services/comments.service';
 import { MediaComponent } from '../media/media.component';
-import { MediaType, Media } from '../../Interfaces/Media/media-interface';
+import { MediaType } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
@@ -33,38 +33,38 @@ import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFile
   styleUrls: ['./ideas.component.scss']
 })
 export class IdeasComponent implements OnInit, OnDestroy {
-  groupId: string = '';
-  groupName: string = '';
+  groupId = '';
+  groupName = '';
   ideas: Idea[] = [];
-  isLoading: boolean = false;
-  isSubmitting: boolean = false;
-  showShareModal: boolean = false;
-  currentUserId: string = '';
+  isLoading = false;
+  isSubmitting = false;
+  showShareModal = false;
+  currentUserId = '';
 
   selectedIdea: any = null;
-  membersCount: string = '0';
+  membersCount = '0';
 
-  isVoting: boolean = false;
-  isUnvoting: boolean = false;
-  isViewingVoters: boolean = false;
+  isVoting = false;
+  isUnvoting = false;
+  isViewingVoters = false;
   selectedIdeaForVoters: Idea | null = null;
   votersList: any[] = [];
 
-  groupCreatorId: string = '';
+  groupCreatorId = '';
 
   //showMembersModal = false;
-  showAdminLeaveModal: boolean = false;
-  showTransferOwnershipModal: boolean = false;
+  showAdminLeaveModal = false;
+  showTransferOwnershipModal = false;
 
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
-  groupCreatorIdFromState: string = ''; // set from route state
+  groupCreatorIdFromState = ''; // set from route state
 
-  isPromoting: boolean = false;
+  isPromoting = false;
   currentlyPromotingIdeaId: string | null = null;
 
   groupMembers: any[] = [];
 
-  isEditMode: boolean = false;
+  isEditMode = false;
 
   modalEditData: any = {
     id: '',
@@ -105,19 +105,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
   //showCloseIdea=false;
   ideaIdToClose: string | null = null;
 
-  selectedType: string = '';
-  selectedDomain: string = '';
-  selectedImpact: string = '';
+  selectedType = '';
+  selectedDomain = '';
+  selectedImpact = '';
 
   isDropdownOpen = false;
 
-  selectedOptionLabel: string = 'All Categories';
+  selectedOptionLabel = 'All Categories';
 
   isReadyForPromotion = false;
 
   comments: viewComment[] = [];
-  newCommentContent: string = '';
-  isLoadingComments: boolean = false;
+  newCommentContent = '';
+  isLoadingComments = false;
 
   selectedCommentFiles: File[] = [];
   isPostingComment = false;
@@ -150,21 +150,18 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.showIdeaActionsMenu = false;
   }
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private ideasService: IdeasService,
-    private groupsService: GroupsService,
-    private authService: AuthService,
-    private voteService: VoteService,
-    private toastService: ToastService,
-    private dialog: MatDialog,
-    private projectService: ProjectService,
-    private commentService: CommentsService,
-    private mediaService: MediaService,
-    private fb: FormBuilder
-  ) {
-  }
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private ideasService = inject(IdeasService);
+  private groupsService = inject(GroupsService);
+  private authService = inject(AuthService);
+  private voteService = inject(VoteService);
+  private toastService = inject(ToastService);
+  private dialog = inject(MatDialog);
+  private projectService = inject(ProjectService);
+  private commentService = inject(CommentsService);
+  private mediaService = inject(MediaService);
+  private fb = inject(FormBuilder);
 
   ngOnInit(): void {
     // console.log('=== INITIALIZING IDEAS COMPONENT ===');

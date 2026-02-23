@@ -1,6 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ButtonsComponent } from '../../Components/buttons/buttons.component';
-import { AuthService } from '../../Services/auth/auth.service';
+import { Component } from '@angular/core';
 import { RegistrationInputComponent } from '../../Components/registration-input/registration-input.component';
 
 @Component({
@@ -10,4 +8,4 @@ import { RegistrationInputComponent } from '../../Components/registration-input/
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent {}
+export class RegisterComponent { }
