@@ -1,4 +1,4 @@
- <div class="navbar">
+<div class="navbar">
   <div class="navbar-left">
 
     <!--If logged out this text should lead to the landing page otherwise
@@ -36,8 +36,7 @@
           <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
         </button>
 
-        <span *ngIf="(notificationsService.pendingRequests$ | async) as count" class="notif-badge"
-          [innerText]="count > 9 ? '9+' : count">
+        <span *ngIf="(totalBadge$ | async) as count" class="notif-badge" [innerText]="count > 9 ? '9+' : count">
         </span>
       </div>
     </a>
