@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
-import { viewComment, createComment } from '../Interfaces/Ideas/idea-interfaces';
+import { viewComment } from '../Interfaces/Ideas/idea-interfaces';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommentsService {
   private apiUrl = 'http://localhost:5065/api/comment';
-
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: any): ApiResponse<T> {
@@ -23,7 +23,7 @@ export class CommentsService {
 
   // GET /api/comment/view-comments?ideaID
   getComments(ideaId: number): Observable<ApiResponse<viewComment[]>> {
-    const params = new HttpParams().set('IdeaId', ideaId);
+    //const params = new HttpParams().set('IdeaId', ideaId);
     return this.http.get<any>(`${this.apiUrl}/view-comments?ideaId=${ideaId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );
@@ -36,7 +36,7 @@ export class CommentsService {
     );
   }
 
-    // DELETE /api/comment/{commentId}
+  // DELETE /api/comment/{commentId}
   deleteComment(commentId: number): Observable<ApiResponse<any>> {
     return this.http.delete<any>(`${this.apiUrl}/${commentId}`).pipe(
       map(response => this.convertResponse<any>(response))

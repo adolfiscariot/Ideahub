@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
@@ -9,7 +9,9 @@ import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 export class AnalyticsService {
     private baseUrl = 'http://localhost:5065/api/analytics';
 
-    constructor(private http: HttpClient) { }
+    private http = inject(HttpClient);
+
+    constructor() { }
 
     getMostVotedIdeas(): Observable<ApiResponse> {
         return this.http.get<ApiResponse>(`${this.baseUrl}/most-voted`);

@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Ideas/idea-interfaces';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectsService {
   private apiUrl = 'http://localhost:5065/api/project';
-
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response
   private convertResponse<T>(response: any): ApiResponse<T> {
@@ -26,7 +26,7 @@ export class ProjectsService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
-    
+
     return this.http.post<any>(`${this.apiUrl}/create-project`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );

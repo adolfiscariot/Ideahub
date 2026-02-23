@@ -12,8 +12,6 @@ export class ProjectsService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/api/Project`;
 
-    constructor() { }
-
     getMyProjects(): Observable<Project[]> {
         return this.http.get<ApiResponse>(`${this.apiUrl}/all`).pipe(
             map(response => {

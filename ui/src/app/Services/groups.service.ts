@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GroupsService {
   private apiUrl = 'http://localhost:5065/api/group';
-
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: any): ApiResponse<T> {

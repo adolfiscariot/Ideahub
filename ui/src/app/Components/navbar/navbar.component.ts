@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [ButtonsComponent, RouterModule, AsyncPipe, CommonModule, NgIconsModule,  MatButtonModule, MatIconModule],
+  imports: [ButtonsComponent, RouterModule, AsyncPipe, CommonModule, NgIconsModule, MatButtonModule, MatIconModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
@@ -27,5 +27,15 @@ export class NavbarComponent {
       next: (response) => console.log(`Logout successful. ${response.message}`),
       error: (error) => console.error(`Logout failed: ${error.message}`)
     });
+  }
+
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
   }
 }
