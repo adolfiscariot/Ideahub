@@ -14,6 +14,10 @@ export class SignalrService {
     constructor(private notificationService: NotificationService) { }
 
     public startConnection = () => {
+        if (this.hubConnection) {
+            this.hubConnection.stop();
+            this.hubConnection = undefined;
+        }
         this.hubConnection = new signalR.HubConnectionBuilder()
             .withUrl(environment.apiUrl + '/hubs/notifications', {
                 accessTokenFactory: () => localStorage.getItem('accessToken') || '',

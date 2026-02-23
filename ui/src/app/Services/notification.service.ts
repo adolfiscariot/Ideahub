@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 
@@ -27,17 +27,26 @@ export class NotificationService {
     private _unreadCount = new BehaviorSubject<number>(0);
     unreadCount$ = this._unreadCount.asObservable();
 
-    constructor(private http: HttpClient) { }
+    private _fetchTrigger = new Subject<void>();
+
+    private http = inject(HttpClient);
+    constructor() {
+        this._fetchTrigger.pipe(
+            switchMap(() =>
+                this.http.get<ApiResponse<{ count: number }>>(`${this.baseUrl}/unread-count`)
+            )
+        ).subscribe({
+            next: (res) => this._unreadCount.next(res.data?.count ?? 0),
+            error: () => this._unreadCount.next(0)
+        });
+    }
 
     getNotifications(): Observable<ApiResponse<CommentNotification[]>> {
         return this.http.get<ApiResponse<CommentNotification[]>>(`${this.baseUrl}/my-notifications`);
     }
 
     fetchUnreadCount(): void {
-        this.http.get<ApiResponse<{ count: number }>>(`${this.baseUrl}/unread-count`).subscribe({
-            next: (res) => this._unreadCount.next(res.data?.count ?? 0),
-            error: () => this._unreadCount.next(0)
-        });
+        this._fetchTrigger.next();
     }
 
     markAsRead(id: number): Observable<any> {
