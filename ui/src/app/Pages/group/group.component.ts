@@ -207,13 +207,11 @@ onPageChange(event: any) {
 
 
         } else {
-          console.error('Failed to load groups:', response.message);
           this.groups = [];
         }
       },
       error: (error: any) => {
         this.isLoading = false;
-        console.error('Error loading groups:', error);
         this.groups = [];
       }
     });
@@ -354,7 +352,6 @@ onConfirmationInput(value: string): void {
         }
       },
       error: (error: any) => {
-        console.error('Error joining group:', error);
         this.toastService.show('Failed to send join request. Please try again.', 'error');
       }
     });
@@ -402,7 +399,6 @@ this.loadGroups();
       },
       error: (error: any) => {
         this.isSubmitting = false;
-        console.error('Error creating group:', error);
 
         if (error.status === 401) {
           this.toastService.show('Please login to create a group.', 'warning');
@@ -433,13 +429,11 @@ this.loadGroups();
           createdByUserId: member.createdByUserId
         }));
       } else {
-        console.error('Failed to load group members:', response.message);
         this.groupMembers = [];
       }
     },
     error: (error: any) => {
       this.isLoadingMembers = false;
-      console.error('Error loading group members:', error);
       this.groupMembers = [];
     }
   });
@@ -480,7 +474,6 @@ this.loadGroups();
       },
       error: (error: any) => {
         this.isDeleting = false;
-        console.error('Error deleting group:', error);
 
         if (error.status === 401) {
           this.toastService.show('Please login to delete groups.', 'warning');
