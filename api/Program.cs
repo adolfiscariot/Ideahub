@@ -2,7 +2,7 @@ using api.Data;
 using api.Models;
 using api.Helpers;
 using api.Constants;
-using api.Controllers;
+using api.Services;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -201,8 +200,8 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
-// Scoring Controllers
-builder.Services.AddScoped<ScoringController>();
+// Scoring Services
+builder.Services.AddScoped<IScoringService, ScoringService>();
 
 // LLM Scoring Service
 builder.Services.AddScoped<ILlmService, MockLlmService>();

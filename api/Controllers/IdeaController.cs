@@ -82,8 +82,8 @@ public class IdeaController : ControllerBase
             _logger.LogInformation("AI Scoring beginning...");
             try
             {
-                var scoringController = HttpContext.RequestServices.GetRequiredService<ScoringController>();
-                await scoringController.EvaluateIdea(idea.Id);
+                var scoringService = HttpContext.RequestServices.GetRequiredService<IScoringService>();
+                await scoringService.EvaluateAndStageIdeaAsync(idea);
                 _logger.LogInformation("AI Evaluation Successful!");
             }
             catch (Exception ex)

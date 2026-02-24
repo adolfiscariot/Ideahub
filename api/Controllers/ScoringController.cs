@@ -17,13 +17,13 @@ namespace api.Controllers;
 public class ScoringController : ControllerBase
 {
     private readonly IdeahubDbContext _context;
-    private readonly ILlmService _llmService;
+    private readonly IScoringService _scoringService;
     private readonly ILogger<ScoringController> _logger;
 
-    public ScoringController(IdeahubDbContext context, ILlmService llmService, ILogger<ScoringController> logger)
+    public ScoringController(IdeahubDbContext context, IScoringService scoringService, ILogger<ScoringController> logger)
     {
         _context = context;
-        _llmService = llmService;
+        _scoringService = scoringService;
         _logger = logger;
     }
 
@@ -44,34 +44,11 @@ public class ScoringController : ControllerBase
         if (idea.CurrentStage != ScoringStage.Evaluation)
             return BadRequest(ApiResponse.Fail($"Cannot evaluate idea in stage: {idea.CurrentStage}"));
 
-        // LLM Scoring
+        // Use Scoring Service
         try
         {
-            var (score, reasoning) = await _llmService.EvaluateIdeaAsync(
-                idea.Title, 
-                idea.StrategicAlignment, 
-                idea.ProblemStatement, 
-                idea.ProposedSolution, 
-                idea.UseCase, 
-                idea.InnovationCategory
-            );
+            var (score, reasoning) = await _scoringService.EvaluateAndStageIdeaAsync(idea);
 
-            idea.Score = score;
-            idea.AiReasoning = reasoning;
-
-            // Move to Phase 2 if score >= 70
-            if (score >= 70)
-            {
-                idea.CurrentStage = ScoringStage.BusinessCase;
-            }
-            else
-            {
-                idea.CurrentStage = ScoringStage.Rejected;
-            }
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Phase 1 scoring complete");
             return Ok(ApiResponse.Ok("Phase 1: AI Evaluation completed.", new { 
                 Score = score, 
                 Reasoning = reasoning,
