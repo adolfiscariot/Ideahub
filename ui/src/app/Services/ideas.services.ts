@@ -54,10 +54,17 @@ export class IdeasService {
   // POST create new idea
   createIdea(request: CreateIdeaRequest): Observable<ApiResponse<Idea>> {
     const params = new HttpParams().set('groupId', request.groupId);
+
     return this.http.post<any>(`${this.apiUrl}/create-idea`, {
-      title: request.title,
-      description: request.description,
-      filter: request.filter
+      Title: request.Title,
+      ProblemStatement: request.ProblemStatement,
+      ProposedSolution: request.ProposedSolution,
+      StrategicAlignment: request.StrategicAlignment,
+      UseCase: request.UseCase,
+      InnovationCategory: request.InnovationCategory,
+      SubCategory: request.SubCategory,
+      TechnologyInvolved: request.TechnologyInvolved,
+      Notes: request.Notes
     }, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );

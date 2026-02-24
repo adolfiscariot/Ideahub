@@ -1,8 +1,17 @@
 export interface Idea {
   id: string;
-  title: string;
-  description: string;
-  filter: string[];
+  Title: string;
+  ProblemStatement: string;
+  ProposedSolution: string;
+  StrategicAlignment?: string;
+  UseCase?: string;
+  InnovationCategory: string;
+  SubCategory?: string;
+  TechnologyInvolved?: string;
+  Notes?: string;
+
+  score?: number;
+  //filter: string[];
   isPromotedToProject: boolean;
   isDeleted: boolean;
   deletedAt?: Date;
@@ -27,10 +36,16 @@ export interface Idea {
 }
 
 export interface CreateIdeaRequest {
-  title: string;
-  description: string;
+  Title: string;
+  ProblemStatement: string;
+  ProposedSolution: string;
+  StrategicAlignment?: string;
+  UseCase?: string;
+  InnovationCategory: string;
+  SubCategory?: string;
+  TechnologyInvolved?: string;
+  Notes?: string;
   groupId: string;
-  filter: string[];
 }
 
 export interface ApiResponse<T> {
@@ -68,9 +83,10 @@ export interface PromoteRequest {
 }
 
 export interface IdeaUpdate {
-  title?: string;
-  description?: string;
-  status?: string;
+  Title?: string;
+  ProposedSolution?: string;
+  ProblemStatement: string;
+  Status?: string;
 }
 
 export interface VoteResponse {

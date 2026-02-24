@@ -2,6 +2,7 @@ using api.Data;
 using api.Models;
 using api.Helpers;
 using api.Constants;
+using api.Controllers;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
