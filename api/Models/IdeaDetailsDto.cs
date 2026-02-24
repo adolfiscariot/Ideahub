@@ -15,6 +15,7 @@ public class IdeaDetailsDto
     public string? TechnologyInvolved { get; set; }
     public string? Notes { get; set; }
     public int Score { get; set; }
+    public string? AiReasoning { get; set; }
     public string Author { get; set; } = string.Empty;
     public string Group { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;

@@ -141,7 +141,17 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.Property(i => i.Status)
                 .IsRequired()
                 .HasMaxLength(24)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasDefaultValue(IdeaStatus.Open);
+
+            i.Property(i => i.CurrentStage)
+                .IsRequired()
+                .HasMaxLength(24)
+                .HasConversion<string>()
+                .HasDefaultValue(ScoringStage.Evaluation);
+
+            i.Property(i => i.AiReasoning)
+                .HasColumnType("text");
 
             i.HasQueryFilter(i => !i.IsDeleted);
 

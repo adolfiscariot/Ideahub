@@ -62,6 +62,12 @@ public class Idea
     
     [Required]
     public IdeaStatus Status {get; set;} = IdeaStatus.Open;
+
+    [Required]
+    public ScoringStage CurrentStage { get; set; } = ScoringStage.Evaluation;
+
+    [Column(TypeName = "text")]
+    public string? AiReasoning { get; set; }
     
     [Required]
     [ForeignKey ("User")]
@@ -80,6 +86,15 @@ public class Idea
     public ICollection<Media> Media { get; set; } = new List<Media>();
     public BusinessCase? BusinessCase { get; set; }
     public ScoringDimensions? ScoringDimensions { get; set; }
+}
+
+public enum ScoringStage
+{
+    Evaluation = 0,       // Phase 1 (Automated)
+    BusinessCase = 1,     // Phase 2 (Manual)
+    ScoringDimensions = 2, // Phase 3 (Manual)
+    Completed = 3,
+    Rejected = 4
 }
 
 public enum IdeaStatus 

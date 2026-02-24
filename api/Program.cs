@@ -200,6 +200,9 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
+// LLM Scoring Service
+builder.Services.AddScoped<ILlmService, MockLlmService>();
+
 // convert enum to string
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
