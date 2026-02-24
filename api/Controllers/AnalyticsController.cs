@@ -46,8 +46,8 @@ public class AnalyticsController : ControllerBase
                 .Select(i => new
                 {
                     i.Id,
-                    i.StrategicAlignment,
                     i.ProblemStatement,
+                    i.ProposedSolution,
                     Author = i.User.DisplayName,
                     GroupName = i.Group.Name,
                     VoteCount = i.Votes.Count(v => !v.IsDeleted)
@@ -114,8 +114,8 @@ public class AnalyticsController : ControllerBase
                 .Select(i => new
                 {
                     i.Id,
-                    i.StrategicAlignment,
                     i.ProblemStatement,
+                    i.ProposedSolution,
                     Author = i.User.DisplayName,
                     GroupName = i.Group.Name,
                     PromotedDate = i.UpdatedAt,

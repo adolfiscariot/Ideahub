@@ -48,7 +48,7 @@ public class NotificationController : ControllerBase
                     n.Comment.Content,
                     n.Comment.CreatedAt,
                     commenterName = n.Comment.User.DisplayName,
-                    ideaTitle = n.Comment.Idea != null ? n.Comment.Idea.Title : null,
+                    ideaProblemStatement = n.Comment.Idea != null ? n.Comment.Idea.ProblemStatement : null,
                     ideaId = n.Comment.IdeaId
                 }
             })
