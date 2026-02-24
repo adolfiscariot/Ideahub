@@ -3,7 +3,7 @@
     class="registration-form"
     [formGroup]="registrationForm"
     (ngSubmit)="onSubmit($event)"
-  >
+    >
     <div class="page-header">Register</div>
 
     <div class="form-section">
@@ -13,96 +13,100 @@
         type="text"
         placeholder="John Doe"
         formControlName="displayName"
-      />
-    </div>
+        />
+      </div>
 
-    <div class="form-section">
-      <label for="email-input">Email</label>
-      <input
-        id="email-input"
-        type="email"
-        placeholder="you@example.com"
-        formControlName="email"
-      />
-    </div>
+      <div class="form-section">
+        <label for="email-input">Email</label>
+        <input
+          id="email-input"
+          type="email"
+          placeholder="you@example.com"
+          formControlName="email"
+          />
+        </div>
 
-    <!-- Password -->
-    <div class="form-section password-section">
-      <div class="password-field-container">
+        <!-- Password -->
+        <div class="form-section password-section">
+          <div class="password-field-container">
 
-        <div class="password-header">
-          <label for="password-input">Password</label>
+            <div class="password-header">
+              <label for="password-input">Password</label>
 
-          <div class="password-info-wrapper">
-            <span
-              class="password-info-icon"
-              [class.met]="allPasswordMet"
-              [class.not-met]="!allPasswordMet"
-              (mouseenter)="infoHovered = true"
-              (mouseleave)="infoHovered = false"
-            >
-              ℹ️
-            </span>
-
-            <div *ngIf="infoHovered" class="password-popover right">
-              <ul class="password-rules">
-                <li *ngFor="let rule of passwordChecks">
-                  <span class="icon">{{ rule.met ? '✓' : '✗' }}</span>
-                  <span [class.met]="rule.met">{{ rule.text }}</span>
-                </li>
-              </ul>
-
-              <div class="strength-bars">
+              <div class="password-info-wrapper">
                 <span
-                  *ngFor="let i of [1,2,3,4]"
-                  [class.active]="passwordStrength >= i"
-                ></span>
+                  class="password-info-icon"
+                  [class.met]="allPasswordMet"
+                  [class.not-met]="!allPasswordMet"
+                  (mouseenter)="infoHovered = true"
+                  (mouseleave)="infoHovered = false"
+                  >
+                  ℹ️
+                </span>
+
+                @if (infoHovered) {
+                  <div class="password-popover right">
+                    <ul class="password-rules">
+                      @for (rule of passwordChecks; track rule) {
+                        <li>
+                          <span class="icon">{{ rule.met ? '✓' : '✗' }}</span>
+                          <span [class.met]="rule.met">{{ rule.text }}</span>
+                        </li>
+                      }
+                    </ul>
+                    <div class="strength-bars">
+                      @for (i of [1,2,3,4]; track i) {
+                        <span
+                          [class.active]="passwordStrength >= i"
+                        ></span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="form-section">
+              <input
+                id="password-input"
+                type="password"
+                placeholder=" *********"
+                formControlName="password"
+                (input)="onPasswordInput()"
+                />
+
+                <button
+                  type="button"
+                  class="show-password-btn"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  >
+
+                </button>
+
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="form-section">
-          <input
-            id="password-input"
-            type="password"
-            placeholder=" *********"
-            formControlName="password"
-            (input)="onPasswordInput()"
-          />
+          <div class="form-section">
+            <label for="confirm-password-input">Confirm Password</label>
+            <input
+              id="confirm-password-input"
+              type="password"
+              placeholder=" *********"
+              formControlName="confirmPassword"
+              />
+            </div>
 
-          <button
-  type="button"
-  class="show-password-btn"
-  (click)="togglePasswordVisibility()"
-  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
->
-  
-</button>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <label for="confirm-password-input">Confirm Password</label>
-      <input
-        id="confirm-password-input"
-        type="password"
-        placeholder=" *********"
-        formControlName="confirmPassword"
-      />
-    </div>
-
-    <div class="submit-button">
-      <app-buttons
-        [buttonText]="'Register'"
-        [buttonStyleClass]="'btn-registration'"
-        [buttonType]="'submit'"
-        [isLoading]="isLoading"
-      />
-      <p>Already have an account?</p>
-      <a routerLink="/login"><u>Login here</u></a>
-    </div>
-  </form>
-</div>
+            <div class="submit-button">
+              <app-buttons
+                [buttonText]="'Register'"
+                [buttonStyleClass]="'btn-registration'"
+                [buttonType]="'submit'"
+                [isLoading]="isLoading"
+                />
+                <p>Already have an account?</p>
+                <a routerLink="/login"><u>Login here</u></a>
+              </div>
+            </form>
+          </div>

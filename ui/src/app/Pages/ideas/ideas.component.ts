@@ -128,11 +128,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isUploadingIdeaMedia = false;
   ideaUploadStatus = '';
 
-  showClosedIdeas: boolean = false;
+  showClosedIdeas = false;
   closedIdeas: Idea[] = [];
 
-  showMobileMenu: boolean = false;
-  showIdeaActionsMenu: boolean = false;
+  showMobileMenu = false;
+  showIdeaActionsMenu = false;
+  highlightedCommentId: number | null = null;
 
   toggleMobileMenu() {
     this.showMobileMenu = !this.showMobileMenu;
@@ -237,6 +238,37 @@ export class IdeasComponent implements OnInit, OnDestroy {
       const hideInfo = localStorage.getItem('hideIdeaInfo') === 'true';
       this.showIdeaInfoModal = !hideInfo;
       this.loadIdeas();
+
+      // Check for query parameters to highlight a specific comment
+      this.route.queryParams.subscribe(queryParams => {
+        const ideaId = queryParams['ideaId'];
+        const commentId = queryParams['commentId'];
+
+        if (ideaId && commentId) {
+          this.highlightedCommentId = +commentId;
+          // Defer selection until ideas are loaded if they haven't been already
+          const checkAndSelect = () => {
+            const idea = this.ideas.find(i => i.id === ideaId.toString());
+            if (idea) {
+              this.selectIdea(idea);
+              // After picking the idea, we need to wait for comments to load and render
+              setTimeout(() => {
+                const element = document.getElementById(`comment-${commentId}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // Clear highlight after 3 seconds
+                setTimeout(() => {
+                  this.highlightedCommentId = null;
+                }, 3000);
+              }, 1000); // Give some time for comments API and rendering
+            } else if (this.isLoading) {
+              setTimeout(checkAndSelect, 100);
+            }
+          };
+          checkAndSelect();
+        }
+      });
     });
   }
 
@@ -1083,7 +1115,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           // Then fetch vote counts for all filtered ideas
           if (this.ideas.length > 0) {
             await this.fetchAndUpdateVoteCounts();
-          } else {}
+          } else { }
 
           // Sort based on current mode
           if (this.showClosedIdeas) {

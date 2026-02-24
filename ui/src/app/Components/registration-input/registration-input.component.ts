@@ -8,7 +8,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { confirmPasswordValidator } from '../../Validators/password-match.validators';
 import { Router, RouterLink } from '@angular/router';
@@ -24,7 +24,7 @@ const PASSWORD_REQUIREMENTS = [
 @Component({
   selector: 'app-registration-input',
   standalone: true,
-  imports: [ButtonsComponent, ReactiveFormsModule, RouterLink, CommonModule],
+  imports: [ButtonsComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',
 })

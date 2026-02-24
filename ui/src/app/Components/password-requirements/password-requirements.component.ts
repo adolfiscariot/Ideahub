@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 const PASSWORD_REQUIREMENTS = [
   { text: 'At least 8 characters', test: (v: string) => v.length >= 8 },
@@ -12,7 +12,7 @@ const PASSWORD_REQUIREMENTS = [
 @Component({
   selector: 'app-password-requirements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './password-requirements.component.html',
   styleUrls: ['./password-requirements.component.scss']
 })

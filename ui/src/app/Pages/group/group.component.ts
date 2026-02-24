@@ -5,7 +5,7 @@ import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from "../../Components/buttons/buttons.component";
@@ -24,14 +24,12 @@ import { NgModule, OnDestroy } from '@angular/core';
   styleUrls: ['./group.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ButtonsComponent,
     ModalComponent,
     MatPaginatorModule,
-    FormsModule,
-    //GroupMembersModalComponent
-  ],
+    FormsModule
+],
 })
 
 export class GroupsComponent implements OnInit, OnDestroy {

@@ -1,18 +1,19 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
 import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces';
-import { CommonModule } from '@angular/common';
+
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { NotificationsService } from '../../Services/notifications';
 import { NotificationService, CommentNotification } from '../../Services/notification.service';
 import { SignalrService } from '../../Services/signalr.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-global-notifications',
   standalone: true,
-  imports: [CommonModule, ButtonsComponent],
+  imports: [ButtonsComponent],
   templateUrl: './global-notifications.component.html',
   styleUrls: ['./global-notifications.component.scss'],
 })
@@ -43,7 +44,8 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private notificationsService: NotificationsService,
     private notificationService: NotificationService,
-    private signalRService: SignalrService
+    private signalRService: SignalrService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -229,5 +231,20 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
 
   get unreadCount(): number {
     return this.commentNotifications.filter(n => !n.isRead).length;
+  }
+
+  onNotificationClick(notification: CommentNotification): void {
+    // Mark as read if unread
+    if (!notification.isRead) {
+      this.markAsRead(notification);
+    }
+
+    // Navigate to the idea page with query params for highlighting
+    this.router.navigate([`/groups/${notification.comment.groupId}/ideas`], {
+      queryParams: {
+        ideaId: notification.comment.ideaId,
+        commentId: notification.comment.id
+      }
+    });
   }
 }

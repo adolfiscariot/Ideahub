@@ -2773,3 +2773,28 @@
     gap: 15px;
   }
 }
+
+// comments fade highlight
+.comment.highlighted {
+  animation: highlight-fade 3s ease-out forwards;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: rgba(128, 0, 128, 0.2);
+    box-shadow: 0 0 15px rgba(128, 0, 128, 0.15);
+    border-color: #800080;
+  }
+
+  70% {
+    background-color: rgba(128, 0, 128, 0.1);
+    box-shadow: 0 0 10px rgba(128, 0, 128, 0.05);
+  }
+
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

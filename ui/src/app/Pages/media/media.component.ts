@@ -1,14 +1,14 @@
 import { Component, Input, OnInit, SimpleChanges, OnChanges } from '@angular/core';
 import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-media',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './media.component.html',
   styleUrls: ['./media.component.scss']
 })

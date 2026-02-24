@@ -1,11 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss']
 })
