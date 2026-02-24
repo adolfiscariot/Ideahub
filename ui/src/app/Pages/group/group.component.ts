@@ -16,7 +16,7 @@ import { NotificationsService } from '../../Services/notifications';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { NgModule } from '@angular/core';
+import { NgModule, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-groups',
@@ -34,7 +34,7 @@ import { NgModule } from '@angular/core';
   ],
 })
 
-export class GroupsComponent implements OnInit {
+export class GroupsComponent implements OnInit, OnDestroy {
   // viewMode: 'list' | 'grid' = 'list';
 
   // Group data
@@ -48,16 +48,16 @@ export class GroupsComponent implements OnInit {
   showCreateModal = false;
   createGroupForm: FormGroup;
   isSubmitting = false;
-  isLoading: boolean = true;
+  isLoading = true;
   showDetailsModal = false;
   showMembersModal = false;
   showDeleteModal = false;
   selectedGroup: any = null;
   groupMembers: any[] = [];
   isLoadingMembers = false;
-  isDeleting: boolean = false;
-  confirmationInput: string = '';
-  isDeletedDisabled: boolean = true;
+  isDeleting = false;
+  confirmationInput = '';
+  isDeletedDisabled = true;
   nameCount = 0;
   descCount = 0;
   nameLimitReached = false;
@@ -68,7 +68,7 @@ export class GroupsComponent implements OnInit {
   currentUserId: string | null = null;
 
   // Store pending requests for each group
-  pendingRequests: Map<string, boolean> = new Map();
+  pendingRequests = new Map<string, boolean>();
 
   pageSize = 8;
   currentPage = 0;

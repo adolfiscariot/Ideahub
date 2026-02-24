@@ -16,10 +16,10 @@ import { AuthService } from '../../../Services/auth/auth.service';
 })
 export class GroupMembersModalComponent implements OnInit {
   members: any[] = [];
-  isLoading: boolean = true;
-  joining: boolean = false;
-  isOwner: boolean = false;
-  currentUserEmail: string = '';
+  isLoading = true;
+  joining = false;
+  isOwner = false;
+  currentUserEmail = '';
 
   constructor(
     public dialogRef: MatDialogRef<GroupMembersModalComponent>,

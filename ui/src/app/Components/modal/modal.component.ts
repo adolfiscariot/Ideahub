@@ -10,7 +10,7 @@ import { Component, Input, Output, EventEmitter, HostListener } from '@angular/c
 })
 export class ModalComponent {
   @Input() isOpen = false;
-  @Input() title: string = '';
+  @Input() title = '';
   @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
   @Input() showCloseButton = true;
   @Input() showFooter = true;

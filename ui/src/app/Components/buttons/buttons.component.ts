@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -10,13 +10,13 @@ import { RouterModule } from '@angular/router';
   styleUrl: './buttons.component.scss',
 })
 export class ButtonsComponent {
-  @Input() buttonText: string = '';
-  @Input() buttonStyleClass: string = '';
-  @Input() buttonLink: string = '';
+  @Input() buttonText = '';
+  @Input() buttonStyleClass = '';
+  @Input() buttonLink = '';
   @Input() buttonType: 'submit' | 'button' | 'reset' = 'button';
 
   // Ideas
-  @Input() disabled: boolean = false;
-  @Input() title: string = '';
-  @Input() isLoading: boolean = false;
+  @Input() disabled = false;
+  @Input() title = '';
+  @Input() isLoading = false;
 }

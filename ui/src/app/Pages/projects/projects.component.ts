@@ -13,12 +13,12 @@ import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
 import { firstValueFrom } from 'rxjs';
 
-type EditProjectForm = {
+interface EditProjectForm {
     title: string;
     description: string;
     status: ProjectStatus | string;
     endedAt: string | null;
-};
+}
 import { MediaService } from '../../Services/media.service';
 import { forkJoin, Observable, EMPTY, catchError, map, tap, switchMap } from 'rxjs';
 import { Media } from '../../Interfaces/Media/media-interface';
@@ -43,7 +43,7 @@ export class ProjectsComponent implements OnInit {
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
-    currentUserId: string = '';
+    currentUserId = '';
     selectedProject: Project | null = null;
     isEditModalOpen = false;
     isViewModalOpen = false;
