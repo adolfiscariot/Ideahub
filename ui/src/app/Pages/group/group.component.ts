@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
@@ -33,6 +33,14 @@ import { NgModule, OnDestroy } from '@angular/core';
 })
 
 export class GroupsComponent implements OnInit, OnDestroy {
+  private groupsService = inject(GroupsService);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private dialog = inject(MatDialog);
+  private router = inject(Router);
+  private notificationsService = inject(NotificationsService);
+  private fb = inject(FormBuilder);
+
   // viewMode: 'list' | 'grid' = 'list';
 
   // Group data
@@ -77,15 +85,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   showGroupInfoModal = false;
 
-  constructor(
-    private groupsService: GroupsService,
-    private authService: AuthService,
-    private toastService: ToastService,
-    private dialog: MatDialog,
-    private router: Router,
-    private notificationsService: NotificationsService,
-    private fb: FormBuilder
-  ) {
+  constructor() {
     this.createGroupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],

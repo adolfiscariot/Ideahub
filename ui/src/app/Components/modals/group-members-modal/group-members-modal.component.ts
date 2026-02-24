@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,19 +15,19 @@ import { AuthService } from '../../../Services/auth/auth.service';
   styleUrls: ['./group-members-modal.component.scss']
 })
 export class GroupMembersModalComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<GroupMembersModalComponent>>(MatDialogRef);
+  data = inject<{
+    group: any;
+}>(MAT_DIALOG_DATA);
+  private groupsService = inject(GroupsService);
+  private toastService = inject(ToastService);
+  private authService = inject(AuthService);
+
   members: any[] = [];
   isLoading = true;
   joining = false;
   isOwner = false;
   currentUserEmail = '';
-
-  constructor(
-    public dialogRef: MatDialogRef<GroupMembersModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { group: any },
-    private groupsService: GroupsService,
-    private toastService: ToastService,
-    private authService: AuthService
-  ) { }
 
   ngOnInit(): void {
     this.checkOwnership();

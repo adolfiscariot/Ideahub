@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges, OnChanges, inject } from '@angular/core';
 import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 
@@ -13,6 +13,8 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./media.component.scss']
 })
 export class MediaComponent implements OnInit, OnChanges {
+  private mediaService = inject(MediaService);
+
   @Input() ideaId?: number;
   @Input() commentId?: number;
   @Input() projectId?: number;
@@ -23,8 +25,6 @@ export class MediaComponent implements OnInit, OnChanges {
   mediaList: Media[] = [];
   isLoading = false;
   MediaType = MediaType;
-
-  constructor(private mediaService: MediaService) { }
 
   ngOnInit(): void {
     this.loadMedia();

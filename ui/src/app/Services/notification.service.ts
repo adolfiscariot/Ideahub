@@ -15,6 +15,7 @@ export interface CommentNotification {
         commenterName: string;
         ideaTitle: string | null;
         ideaId: number;
+        groupId: number;
     };
 }
 

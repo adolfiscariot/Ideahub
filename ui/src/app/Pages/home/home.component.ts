@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
@@ -61,6 +61,10 @@ import {
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
+  private analyticsService = inject(AnalyticsService);
+  private projectService = inject(ProjectService);
+  private router = inject(Router);
+
   mostVotedIdeas: MostVotedIdea[] = [];
   topContributors: TopContributor[] = [];
   promotedIdeas: PromotedIdea[] = [];
@@ -73,9 +77,6 @@ export class HomeComponent implements OnInit {
   selectedProjectId: number | null = null;
   selectedGroupId: string | null = null;
   currentProject: any = null;
-
-
-  constructor(private analyticsService: AnalyticsService, private projectService: ProjectService, private router: Router) { }
 
   ngOnInit(): void {
     this.fetchAnalytics();

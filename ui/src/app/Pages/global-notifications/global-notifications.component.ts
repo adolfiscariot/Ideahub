@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
 import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces';
 
@@ -18,6 +18,13 @@ import { Router } from '@angular/router';
   styleUrls: ['./global-notifications.component.scss'],
 })
 export class GlobalNotificationsComponent implements OnInit, OnDestroy {
+  private groupsService = inject(GroupsService);
+  private toastService = inject(ToastService);
+  private notificationsService = inject(NotificationsService);
+  private notificationService = inject(NotificationService);
+  private signalRService = inject(SignalrService);
+  private router = inject(Router);
+
 
   // ── Tab state ──────────────────────────────────────────────
   activeTab: 'requests' | 'comments' = 'requests';
@@ -38,15 +45,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   errorNotifications = '';
 
   private signalRSub?: Subscription;
-
-  constructor(
-    private groupsService: GroupsService,
-    private toastService: ToastService,
-    private notificationsService: NotificationsService,
-    private notificationService: NotificationService,
-    private signalRService: SignalrService,
-    private router: Router
-  ) { }
 
   ngOnInit(): void {
     this.viewRequests();

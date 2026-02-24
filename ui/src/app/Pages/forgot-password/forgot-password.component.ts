@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -13,6 +13,9 @@ import { passwordMatchValidator } from '../../Components/utils/password-match.ut
   styleUrls: ['./forgot-password.component.scss']
 })
 export class ForgotPasswordComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+
   form!: FormGroup;
 
   message = '';
@@ -21,8 +24,6 @@ export class ForgotPasswordComponent implements OnInit {
   resetCode = '';
   infoHovered = false;
   password = '';
-
-  constructor(private fb: FormBuilder, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.buildEmailForm();
