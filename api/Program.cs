@@ -127,6 +127,14 @@ builder.Services.AddAuthorization(options =>
             context.User.IsInRole(RoleConstants.GroupAdmin)
         )
     );
+
+    //CanJoinCommittee Policy
+    options.AddPolicy("CanJoinCommittee", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole(RoleConstants.SuperAdmin) ||
+            context.User.IsInRole(RoleConstants.CommitteeMember)
+        )
+    );
 });
 
 
@@ -247,7 +255,7 @@ while (retries > 0)
 
 // Seed roles after migrations
 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser };
+var roles = new[] { RoleConstants.SuperAdmin, RoleConstants.GroupAdmin, RoleConstants.RegularUser, RoleConstants.CommitteeMember };
 
 foreach (var role in roles)
 {
