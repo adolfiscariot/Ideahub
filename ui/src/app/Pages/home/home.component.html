@@ -75,7 +75,7 @@
     <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
       <div *ngIf="promotedIdeas.length > 0; else noPromoted">
         <div *ngFor="let idea of promotedIdeas" class="list-item" [class.clickable]="idea.projectId"
-          (click)="onPromotedIdeaClick(idea)">
+          (click)="idea.projectId && onPromotedIdeaClick(idea)">
           <div class="item-main">
             <h3>{{idea.title}}</h3>
             <p>{{idea.proposedSolution}}</p>

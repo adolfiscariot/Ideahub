@@ -4,14 +4,12 @@ export interface Idea {
   ProblemStatement: string;
   ProposedSolution: string;
   StrategicAlignment?: string;
-  UseCase?: string;
+  UseCase: string;
   InnovationCategory: string;
   SubCategory?: string;
   TechnologyInvolved?: string;
   Notes?: string;
-
   score?: number;
-  //filter: string[];
   isPromotedToProject: boolean;
   isDeleted: boolean;
   deletedAt?: Date;
@@ -39,8 +37,8 @@ export interface CreateIdeaRequest {
   Title: string;
   ProblemStatement: string;
   ProposedSolution: string;
-  StrategicAlignment?: string;
-  UseCase?: string;
+  StrategicAlignment: string;
+  UseCase: string;
   InnovationCategory: string;
   SubCategory?: string;
   TechnologyInvolved?: string;
@@ -85,8 +83,14 @@ export interface PromoteRequest {
 export interface IdeaUpdate {
   Title?: string;
   ProposedSolution?: string;
-  ProblemStatement: string;
+  ProblemStatement?: string;
   Status?: string;
+  StrategicAlignment?: string;
+  UseCase?: string;
+  InnovationCategory?: string;
+  SubCategory?: string;
+  TechnologyInvolved?: string;
+  Notes?: string;
 }
 
 export interface VoteResponse {
