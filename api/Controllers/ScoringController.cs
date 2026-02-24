@@ -171,7 +171,7 @@ public class ScoringController : ControllerBase
                     (int)dto.Risk + (int)dto.Scalability + (int)dto.Differentiation +
                     (int)dto.SustainabilityImpact + (int)dto.ProjectConfidence;
 
-        dimensions.Score = (sum / 60.0f) * 100;
+        dimensions.Score = MathF.Round((sum / 60.0f) * 100, 1);
 
         if (idea.ScoringDimensions == null)
         {

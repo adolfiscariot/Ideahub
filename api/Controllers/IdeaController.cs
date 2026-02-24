@@ -228,6 +228,7 @@ public class IdeaController : ControllerBase
             TechnologyInvolved = idea.TechnologyInvolved,
             Notes = idea.Notes,
             Score = idea.Score,
+            CurrentStage = idea.CurrentStage,
             Author = idea.User.DisplayName,
             Group = idea.Group.Name,
             Status = idea.Status.ToString(),
