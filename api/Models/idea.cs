@@ -8,6 +8,10 @@ namespace api.Models;
 public class Idea
 {
     public int Id {get; set;}
+    
+    [Required]
+    [MaxLength(256)]
+    public string Title { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(256)]

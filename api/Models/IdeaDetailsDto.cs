@@ -5,6 +5,7 @@ namespace api.Models;
 
 public class IdeaDetailsDto
 {
+    public string Title { get; set; } = string.Empty;
     public string StrategicAlignment { get; set; } = string.Empty;
     public string ProblemStatement { get; set; } = string.Empty;
     public string ProposedSolution { get; set; } = string.Empty;

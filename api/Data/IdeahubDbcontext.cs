@@ -85,6 +85,10 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.HasKey(i => i.Id);
 
             //Properties
+            i.Property(i => i.Title)
+                .IsRequired()
+                .HasMaxLength(256);
+
             i.Property(i => i.StrategicAlignment)
                 .IsRequired()
                 .HasMaxLength(256)

@@ -5,6 +5,7 @@ namespace api.Models;
 
 public class IdeaUpdateDto
 {
+    public string? Title { get; set; }
     public string? StrategicAlignment { get; set; }
     public string? ProblemStatement { get; set; }
     public string? ProposedSolution { get; set; }
