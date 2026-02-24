@@ -192,7 +192,7 @@ public class ScoringController : ControllerBase
         return Ok(ApiResponse.Ok("Phase 3: Scoring Dimensions completed.", new { 
             CalculatedPercentage = dimensions.Score,
             FullScore = sum,
-            NextStage = idea.CurrentStage.ToString()
+            CurrentStage = idea.CurrentStage.ToString()
         }));
     }
 }
