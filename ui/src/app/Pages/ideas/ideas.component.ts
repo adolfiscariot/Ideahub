@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -69,7 +70,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   modalEditData: any = {
     id: '',
     title: '',
-    description: ''
+    problemStatement: '',
+    proposedSolution: ''
   };
 
   sortMode: 'top' | 'newest' = 'top';
@@ -84,7 +86,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   currentIdeaToPromote: Idea | null = null;
   projectData: CreateProjectRequest = {
     title: '',
-    description: '',
+    proposedSolution: '',
+    //problemStatement:'',
     overseenByEmail: ''
   };
   showMemberLeaveModal = false;
@@ -93,6 +96,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isFormValid = false;
   shareTitleCount = 0;
   shareDescCount = 0;
+  shareProblemCount = 0;
+  shareUseCaseCount = 0;
+  shareNotesCount = 0;
 
   shareIdeaForm!: FormGroup;
 
@@ -171,11 +177,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
     // console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(20)]],
-      description: ['', Validators.required],
-      type: ['', Validators.required],
-      domain: ['', Validators.required],
-      impact: ['', Validators.required]
+      Title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
+      ProblemStatement: ['', [Validators.required, Validators.minLength(5)]],
+      ProposedSolution: ['', [Validators.required, Validators.minLength(5)]],
+      StrategicAlignment: ['', Validators.required],
+      UseCase: ['', Validators.required],
+      InnovationCategory: ['', Validators.required],
+      SubCategory: [''],
+      TechnologyInvolved: [''],
+      Notes: ['']
     });
 
     this.setupShareIdeaCharCounters();
@@ -247,18 +257,39 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private setupShareIdeaCharCounters(): void {
 
-    this.shareIdeaForm.get('title')?.valueChanges
+    this.shareIdeaForm.get('Title')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'title', 20);
+        const res = updateCharCount(this.shareIdeaForm, 'Title', 20);
         this.shareTitleCount = res.count;
       });
 
-    this.shareIdeaForm.get('description')?.valueChanges
+    this.shareIdeaForm.get('ProposedSolution')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+        const res = updateCharCount(this.shareIdeaForm, 'ProposedSolution', 1000);
         this.shareDescCount = res.count;
+      });
+
+    this.shareIdeaForm.get('ProblemStatement')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'ProblemStatement', 1000);
+        this.shareProblemCount = res.count;
+      });
+
+    this.shareIdeaForm.get('UseCase')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'UseCase', 1000);
+        this.shareUseCaseCount = res.count;
+      });
+
+    this.shareIdeaForm.get('Notes')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'Notes', 1000);
+        this.shareNotesCount = res.count;
       });
   }
 
@@ -311,9 +342,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
             const filteredIdeas = response.data.map((idea: any) => {
               const mappedIdea: Idea = {
                 id: idea.id?.toString() || '',
-                title: idea.title || '',
-                description: idea.description || '',
-                filter: idea.filter || '',
+                Title: idea.Title || idea.title || '',
+                ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+                ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+                StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+                UseCase: idea.UseCase || idea.useCase || '',
+                InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+                SubCategory: idea.SubCategory || idea.subCategory || '',
+                TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+                Notes: idea.Notes || idea.notes || '',
                 UserId: idea.userId || idea.UserId || '',
                 userId: idea.userId || idea.UserId || '',
                 groupId: this.groupId,
@@ -385,9 +422,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
               const mappedIdea: Idea = {
                 id: idea.id?.toString() || '',
-                title: idea.title || '',
-                description: idea.description || '',
-                filter: idea.filter || '',
+                Title: idea.Title || idea.title || '',
+                ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+                ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+                StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+                UseCase: idea.UseCase || idea.useCase || '',
+                InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+                SubCategory: idea.SubCategory || idea.subCategory || '',
+                TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+                Notes: idea.Notes || idea.notes || '',
                 UserId: idea.userId || idea.UserId || '',
                 userId: idea.userId || idea.UserId || '',
                 groupId: this.groupId,
@@ -856,18 +899,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.showRequestsModal = false;
   }
 
-
-
-  onUpdateIdeaFromModal(event: { title: string, description: string }): void {
+  onUpdateIdeaFromModal(event: IdeaUpdate): void {
     if (!this.selectedIdea) {
       return;
     }
 
-    // Create the update data according to your interface
     const updateData: IdeaUpdate = {
-      title: event.title,
-      description: event.description,
-      status: this.selectedIdea.status ?? "open"
+      ...event,
+      Status: this.selectedIdea.status ?? "open"
     };
 
 
@@ -878,18 +917,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
           // Update the idea in the local array
           const index = this.ideas.findIndex(i => i.id === this.selectedIdea.id);
           if (index !== -1) {
-            this.ideas[index].title = event.title;
-            this.ideas[index].description = event.description;
-            this.ideas[index].updatedAt = new Date();
-
-            // Update the ideas array reference
+            this.ideas[index] = { ...this.ideas[index], ...event, updatedAt: new Date() };
             this.ideas = [...this.ideas];
           }
 
           // Update selected idea
-          this.selectedIdea.title = event.title;
-          this.selectedIdea.description = event.description;
-          this.selectedIdea.updatedAt = new Date();
+          this.selectedIdea = { ...this.selectedIdea, ...event, updatedAt: new Date() };
 
           // Close modal and reset
           this.showShareModal = false;
@@ -1030,9 +1063,17 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
             const mappedIdea: Idea = {
               id: idea.id?.toString() || '',
-              title: idea.title || '',
-              description: idea.description || '',
-              filter: idea.filter || '',
+              Title: idea.Title || idea.title || '',
+              //description: idea.description || '',
+              ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+              ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+              StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+              UseCase: idea.UseCase || idea.useCase || '',
+              InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+              SubCategory: idea.SubCategory || idea.subCategory || '',
+              TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+              Notes: idea.Notes || idea.notes || '',
+              //filter: idea.filter || '',
               UserId: idea.userId || idea.UserId || '',
               userId: idea.userId || idea.UserId || '',
               groupId: this.groupId,
@@ -1083,7 +1124,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           // Then fetch vote counts for all filtered ideas
           if (this.ideas.length > 0) {
             await this.fetchAndUpdateVoteCounts();
-          } else {}
+          } else { }
 
           // Sort based on current mode
           if (this.showClosedIdeas) {
@@ -1179,16 +1220,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     // Always reset modalEditData to a valid object
     this.modalEditData = {
       id: '',
-      title: '',
-      description: ''
+      Title: '',
+      ProposedSolution: ''
     };
 
     // If in edit mode, populate with the idea data
     if (editMode && editData) {
       this.modalEditData = {
         id: editData.id || '',
-        title: editData.title || '',
-        description: editData.description || ''
+        Title: editData.Title || editData.title || '',
+        ProposedSolution: editData.ProposedSolution || editData.proposedSolution || '',
+        ProblemStatement: editData.ProblemStatement || editData.problemStatement || '',
+        StrategicAlignment: editData.StrategicAlignment || editData.strategicAlignment || '',
+        UseCase: editData.UseCase || editData.useCase || '',
+        InnovationCategory: editData.InnovationCategory || editData.innovationCategory || '',
+        SubCategory: editData.SubCategory || editData.subCategory || '',
+        TechnologyInvolved: editData.TechnologyInvolved || editData.technologyInvolved || '',
+        Notes: editData.Notes || editData.notes || ''
       };
     }
 
@@ -1241,10 +1289,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
     return detectMediaType(file);
   }
 
-  // Update your existing onShareIdea() method to handle media
-  async onShareIdea(ideaData: { title: string; description: string }): Promise<void> {
+  async onShareIdea(): Promise<void> {
+    // Validate form
     if (this.shareIdeaForm.invalid) {
       this.shareIdeaForm.markAllAsTouched();
+      console.log(this.shareIdeaForm.value);
+      console.log(this.shareIdeaForm.valid);
       this.toastService.show('Please fill in all required fields', 'error');
       return;
     }
@@ -1252,24 +1302,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.ideaUploadStatus = 'Creating idea...';
 
-    const filterArray = [
-      this.shareIdeaForm.get('type')?.value,
-      this.shareIdeaForm.get('domain')?.value,
-      this.shareIdeaForm.get('impact')?.value
-    ].filter(x => x);
-
+    // Build request using only actual fields
     const request: CreateIdeaRequest = {
-      title: ideaData.title,
-      description: ideaData.description,
-      groupId: this.groupId,
-      filter: filterArray
+      Title: this.shareIdeaForm.value.Title,
+      ProblemStatement: this.shareIdeaForm.value.ProblemStatement,
+      ProposedSolution: this.shareIdeaForm.value.ProposedSolution,
+      StrategicAlignment: this.shareIdeaForm.value.StrategicAlignment,
+      UseCase: this.shareIdeaForm.value.UseCase,
+      InnovationCategory: this.shareIdeaForm.value.InnovationCategory,
+      SubCategory: this.shareIdeaForm.value.SubCategory,
+      TechnologyInvolved: this.shareIdeaForm.value.TechnologyInvolved,
+      Notes: this.shareIdeaForm.value.Notes,
+      groupId: this.groupId
     };
 
     try {
-      // Create idea
-      const ideaResponse = await firstValueFrom(
-        this.ideasService.createIdea(request)
-      );
+      // Create the idea
+      const ideaResponse = await firstValueFrom(this.ideasService.createIdea(request));
 
       if (!ideaResponse.success || !ideaResponse.data?.id) {
         throw new Error('Failed to create idea');
@@ -1277,38 +1326,38 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
       const ideaId = ideaResponse.data.id;
 
-      // If there are files, upload them
+      // Handle media upload if files exist
       if (this.selectedIdeaFiles.length > 0) {
-        this.ideaUploadStatus = `Attaching ${this.selectedIdeaFiles.length} media file(s)...`;
+        this.ideaUploadStatus = `Uploading ${this.selectedIdeaFiles.length} media file(s)...`;
 
-        // Upload each file with the idea ID
         const uploadPromises = this.selectedIdeaFiles.map(file =>
           firstValueFrom(
             this.mediaService.uploadMedia(
               file,
               this.detectMediaType(file),
-              Number(ideaId), // the new idea ID
-              undefined,
-              undefined
+              Number(ideaId)
             )
           )
         );
 
-        // Wait for all uploads
         await Promise.all(uploadPromises);
 
-        this.toastService.show(`Idea created with ${this.selectedIdeaFiles.length} media file(s)`, 'success');
+        this.toastService.show(
+          `Idea created with ${this.selectedIdeaFiles.length} media file(s)`,
+          'success'
+        );
       } else {
         this.toastService.show('Idea created successfully!', 'success');
       }
 
+      // Reset modal and state
       this.closeShareModal();
       this.loadIdeas();
       this.selectedIdeaFiles = [];
       this.ideaUploadStatus = '';
 
     } catch (error: any) {
-      // console.error('Error creating idea:', error);
+      console.error('Error creating idea:', error);
       this.ideaUploadStatus = 'Failed to create idea. Please try again.';
       this.toastService.show(this.ideaUploadStatus, 'error');
     } finally {
@@ -1316,16 +1365,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
     }
   }
 
-
   openDescriptionModal(idea: any): void {
-    alert(`Full Description:\n\n${idea.description}`);
+    alert(`Full Description:\n\n${idea.ProposedSolution || idea.proposedSolution}`);
   }
 
   onViewIdea(ideaId: string): void {
     this.ideasService.getIdea(this.groupId, ideaId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          alert(`Idea Details:\n\nTitle: ${response.data.title}\n\nDescription: ${response.data.description}\n\nCreated: ${new Date(response.data.createdAt).toLocaleDateString()}`);
+          alert(`Idea Details:\n\nTitle: ${response.data.Title}\n\nDescription: ${response.data.ProposedSolution}\n\nCreated: ${new Date(response.data.createdAt).toLocaleDateString()}`);
         }
       },
       error: (error) => {
@@ -1582,7 +1630,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   // Add this helper method for displaying voters
   private showVotersModal(idea: Idea, voters: any[]): void {
-    let message = `Voters for "${idea.title}":\n\n`;
+    let message = `Voters for "${idea.Title}":\n\n`;
 
     if (voters.length === 0) {
       message += 'No votes yet';
@@ -1610,22 +1658,29 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isEditMode = true;
 
     this.modalEditData = {
-      title: this.selectedIdea.title,
-      description: this.selectedIdea.description
+      Title: this.selectedIdea.Title,
+      ProposedSolution: this.selectedIdea.ProposedSolution
     };
 
     // Patch form values with existing idea data
     this.shareIdeaForm.patchValue({
-      title: this.selectedIdea.title,
-      description: this.selectedIdea.description,
-      type: this.selectedIdea.type || '',
-      domain: this.selectedIdea.domain || '',
-      impact: this.selectedIdea.impact || ''
+      Title: this.selectedIdea.Title,
+      ProblemStatement: this.selectedIdea.ProblemStatement,
+      ProposedSolution: this.selectedIdea.ProposedSolution,
+      StrategicAlignment: this.selectedIdea.StrategicAlignment || '',
+      UseCase: this.selectedIdea.UseCase || '',
+      InnovationCategory: this.selectedIdea.InnovationCategory || '',
+      SubCategory: this.selectedIdea.SubCategory || '',
+      TechnologyInvolved: this.selectedIdea.TechnologyInvolved || '',
+      Notes: this.selectedIdea.Notes || ''
     });
 
     // Update character counts
-    this.shareTitleCount = this.selectedIdea.title?.length || 0;
-    this.shareDescCount = this.selectedIdea.description?.length || 0;
+    this.shareTitleCount = this.selectedIdea.Title?.length || 0;
+    this.shareDescCount = this.selectedIdea.ProposedSolution?.length || 0;
+    this.shareProblemCount = this.selectedIdea.ProblemStatement?.length || 0;
+    this.shareUseCaseCount = this.selectedIdea.UseCase?.length || 0;
+    this.shareNotesCount = this.selectedIdea.Notes?.length || 0;
   }
 
   // Method to fetch and update vote counts for all ideas
@@ -1691,8 +1746,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.currentIdeaToPromote = idea;
     this.projectData = {
-      title: idea.title,
-      description: idea.description,
+      title: idea.Title,
+      proposedSolution: idea.ProposedSolution || '',
+      //problemStatement: idea.ProblemStatement || '',
       overseenByEmail: ''
     };
     this.showProjectModal = true;
@@ -1764,7 +1820,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.loadIdeas();
 
       this.currentIdeaToPromote = null;
-      this.projectData = { title: '', description: '', overseenByEmail: '' };
+      this.projectData = { title: '', proposedSolution: '', overseenByEmail: '' };
     } else {
       alert('Project creation failed');
     }
