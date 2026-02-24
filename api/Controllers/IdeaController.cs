@@ -291,7 +291,7 @@ public class IdeaController : ControllerBase
             }
             else
             {
-                _logger.LogError("Invalid status string {statusString} provided for idea {idea}", ideaUpdateDto.Status, idea.StrategicAlignment);
+                _logger.LogError("Invalid status string {statusString} provided for idea {idea}", ideaUpdateDto.Status, idea.ProblemStatement);
                 return BadRequest(ApiResponse.Fail("Parsing failed. Invalid status string provided"));
             }
         }
@@ -318,7 +318,7 @@ public class IdeaController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Idea {ideaStrategicAlignment} updated by {userEmail}", idea.StrategicAlignment, userEmail);
+        _logger.LogInformation("Idea {ideaProblemStatement} updated by {userEmail}", idea.ProblemStatement, userEmail);
         return Ok(ApiResponse.Ok("Idea updated", updatedIdea));
     }
 
@@ -414,7 +414,7 @@ public class IdeaController : ControllerBase
             _context.Ideas.Remove(idea);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Idea '{ideaStrategicAlignment}' has been deleted by '{userEmail}' ", idea.StrategicAlignment, userEmail);
+            _logger.LogInformation("Idea '{ideaProblemStatement}' has been deleted by '{userEmail}' ", idea.ProblemStatement, userEmail);
             return Ok(ApiResponse.Ok("Idea deleted successfully"));
         }
         catch (Exception e)
