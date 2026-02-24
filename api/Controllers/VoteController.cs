@@ -104,7 +104,7 @@ public async Task<IActionResult> CastVote(int groupId, int ideaId)
             _context.Votes.Add(vote);
             await _context.SaveChangesAsync();
             
-            _logger.LogInformation("Cast Vote: Vote cast by {userEmail} for idea {ideaTitle}", userEmail, idea.Title);
+            _logger.LogInformation("Cast Vote: Vote cast by {userEmail} for idea {ideaProblemStatement}", userEmail, idea.ProblemStatement);
             return Ok(ApiResponse.Ok("Vote cast successfully", new {
                 id = vote.Id,
                 userId = vote.UserId,
