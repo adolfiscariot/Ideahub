@@ -59,6 +59,7 @@ public class IdeaController : ControllerBase
             //Create new idea
             var idea = new Idea
             {
+                Title = ideaDto.Title,
                 StrategicAlignment = ideaDto.StrategicAlignment,
                 ProblemStatement = ideaDto.ProblemStatement,
                 ProposedSolution = ideaDto.ProposedSolution,
@@ -135,6 +136,7 @@ public class IdeaController : ControllerBase
         {
             ideaDataToReturn.Add(new {
                 idea.Id,
+                idea.Title,
                 idea.StrategicAlignment,
                 idea.ProblemStatement,
                 idea.ProposedSolution,
@@ -202,6 +204,7 @@ public class IdeaController : ControllerBase
         //Create a list of idea data to return
         var ideaDataToReturn = new IdeaDetailsDto
         {
+            Title = idea.Title,
             StrategicAlignment = idea.StrategicAlignment,
             ProblemStatement = idea.ProblemStatement,
             ProposedSolution = idea.ProposedSolution,
@@ -247,7 +250,10 @@ public class IdeaController : ControllerBase
         }
 
         //apply changes to the idea
-        //apply changes to the idea
+        if (ideaUpdateDto.Title != null)
+        {
+            idea.Title = ideaUpdateDto.Title;
+        }
         if (ideaUpdateDto.StrategicAlignment != null)
         {
             idea.StrategicAlignment = ideaUpdateDto.StrategicAlignment;
@@ -298,6 +304,7 @@ public class IdeaController : ControllerBase
 
         var updatedIdea = new IdeaDetailsDto
         {
+            Title = idea.Title,
             StrategicAlignment = idea.StrategicAlignment,
             ProblemStatement = idea.ProblemStatement,
             ProposedSolution = idea.ProposedSolution,

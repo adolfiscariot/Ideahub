@@ -9,6 +9,10 @@ public class IdeaDto
 {
     [Required]
     [MaxLength(256)]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(256)]
     [Column (TypeName = "text")]
     public string StrategicAlignment {get; set;} = string.Empty;
 
