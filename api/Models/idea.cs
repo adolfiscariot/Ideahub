@@ -74,6 +74,7 @@ public class Idea
     public ICollection<Vote> Votes {get; set;} = new List<Vote>();
     public ICollection<Comment> Comments {get; set;} = new List<Comment>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
+    public BusinessCase? BusinessCase { get; set; }
 }
 
 public enum IdeaStatus 
