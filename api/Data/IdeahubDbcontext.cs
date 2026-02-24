@@ -20,6 +20,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<PasswordReset> PasswordResets { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<BusinessCase> BusinessCases { get; set; }
+    public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -243,6 +244,94 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             bc.HasOne(bc => bc.Idea)
                 .WithOne(i => i.BusinessCase)
                 .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //ScoringDimensions Configuration
+        builder.Entity<ScoringDimensions>(sd =>
+        {
+            sd.HasKey(sd => sd.Id);
+
+            sd.Property(sd => sd.StrategicAlignment)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.CustomerImpact)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.FinancialBenefit)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Feasibility)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.TimeToValue)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Cost)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Effort)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Risk)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Scalability)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Differentiation)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.SustainabilityImpact)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.ProjectConfidence)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Score)
+                .IsRequired();
+
+            sd.Property(sd => sd.ReviewerComments)
+                .IsRequired()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            sd.Property(sd => sd.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            sd.HasOne(sd => sd.Idea)
+                .WithOne(i => i.ScoringDimensions)
+                .HasForeignKey<ScoringDimensions>(sd => sd.IdeaId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
