@@ -11,16 +11,16 @@ using Microsoft.EntityFrameworkCore;
 namespace api.Controllers;
 
 [ApiController]
-[Route("api/{controller}")]
+[Route("api/[controller]")]
 [Authorize]
 public class CommentController : ControllerBase
 {
     private readonly IdeahubDbContext _context;
-    private readonly ILogger<ProjectController> _logger;
+    private readonly ILogger<CommentController> _logger;
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly INotificationService _notificationService;
 
-    public CommentController(IdeahubDbContext context, ILogger<ProjectController> logger, UserManager<IdeahubUser> userManager, INotificationService notificationService)
+    public CommentController(IdeahubDbContext context, ILogger<CommentController> logger, UserManager<IdeahubUser> userManager, INotificationService notificationService)
     {
         _context = context;
         _logger = logger;
@@ -69,7 +69,7 @@ public class CommentController : ControllerBase
             // Send notification to the idea owner
             if (idea.UserId != userId)
             {
-                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}", comment.Id);
+                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.StrategicAlignment}': {comment.Content}", comment.Id);
             }
 
              return Ok(ApiResponse.Ok(
@@ -111,14 +111,14 @@ public class CommentController : ControllerBase
             return NotFound(ApiResponse.Fail("Idea not found"));
         }
 
-        //Fetch ideas and votes
+        //Fetch comments
         var comments = await _context.Comments
             .Where(c => c.IdeaId == IdeaId)
             .ToListAsync();
 
         if (comments.Count == 0)
         {
-            _logger.LogInformation("No comments found in Idea: {ideaName}", idea.Title);
+            _logger.LogInformation("No comments found in Idea: {ideaName}", idea.StrategicAlignment);
             return Ok(ApiResponse.Ok("No comments found", new List<object>()));
         }
 
@@ -128,7 +128,7 @@ public class CommentController : ControllerBase
             commentDataToReturn.Add(new {comment.Id, comment.Content, comment.CreatedAt, comment.UserId, comment.IdeaId});
         }
         return Ok(ApiResponse.Ok($"{comments.Count()} Comments found", commentDataToReturn));
-}
+    }
 
     // Delete a comment
     [HttpDelete("{commentId}")]
@@ -167,6 +167,4 @@ public class CommentController : ControllerBase
         _logger.LogInformation("Comment {commentId} deleted by {userEmail}", commentId, userEmail);
         return Ok(ApiResponse.Ok("Comment deleted successfully"));
     }
-
- 
 }
