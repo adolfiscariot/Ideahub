@@ -2,6 +2,7 @@ using System.Security.Claims;
 using api.Data;
 using api.Helpers;
 using api.Models;
+using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -75,8 +76,42 @@ public class IdeaController : ControllerBase
             //add to database
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
-
             _logger.LogInformation("New idea created by {userEmail}", userEmail);
+
+            // Trigger Phase 1: Automated AI Evaluation
+            _logger.LogInformation("AI Scoring beginning...");
+            try
+            {
+                var llmService = HttpContext.RequestServices.GetRequiredService<ILlmService>();
+                var (aiScore, aiReasoning) = await llmService.EvaluateIdeaAsync(
+                    idea.Title,
+                    idea.StrategicAlignment,
+                    idea.ProblemStatement,
+                    idea.ProposedSolution,
+                    idea.UseCase,
+                    idea.InnovationCategory
+                );
+
+                idea.Score = aiScore;
+                idea.AiReasoning = aiReasoning;
+
+                if (aiScore >= 70)
+                {
+                    idea.CurrentStage = ScoringStage.BusinessCase;
+                }
+                else
+                {
+                    idea.CurrentStage = ScoringStage.Rejected;
+                }
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("AI Evaluation Successful!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during automated AI evaluation for idea {IdeaId}", idea.Id);
+            }
+
             return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}",
             new {
                     id = idea.Id

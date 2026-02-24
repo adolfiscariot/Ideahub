@@ -15,4 +15,5 @@ public class IdeaUpdateDto
     public string? TechnologyInvolved { get; set; }
     public string? Notes { get; set; }
     public string Status { get; set; } = string.Empty;
+    public float? Score { get; set; }
 }

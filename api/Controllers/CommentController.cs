@@ -69,7 +69,7 @@ public class CommentController : ControllerBase
             // Send notification to the idea owner
             if (idea.UserId != userId)
             {
-                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.ProblemStatement}': {comment.Content}", comment.Id);
+                await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}", comment.Id);
             }
 
              return Ok(ApiResponse.Ok(
@@ -118,7 +118,7 @@ public class CommentController : ControllerBase
 
         if (comments.Count == 0)
         {
-            _logger.LogInformation("No comments found in Idea: {ideaProblemStatement}", idea.ProblemStatement);
+            _logger.LogInformation("No comments found in Idea: {ideaTitle}", idea.Title);
             return Ok(ApiResponse.Ok("No comments found", new List<object>()));
         }
 
