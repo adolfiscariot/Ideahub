@@ -26,11 +26,9 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the top 5 most voted ideas that are not deleted.
+    /// Gets the top 3 most voted ideas that are not deleted.
     /// </summary>
     /// <returns>A list of ideas with their vote counts, authors, and group information.</returns>
-    /// <response code="200">Returns the most voted ideas successfully.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("most-voted")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -42,15 +40,14 @@ public class AnalyticsController : ControllerBase
                 .Include(i => i.User)
                 .Include(i => i.Group)
                 .Include(i => i.Votes)
-
                 .Where(i => !i.IsDeleted)
                 .OrderByDescending(i => i.Votes.Count(v => !v.IsDeleted))
                 .Take(3)
                 .Select(i => new
                 {
                     i.Id,
-                    i.Title,
-                    i.Description,
+                    i.StrategicAlignment,
+                    i.ProblemStatement,
                     Author = i.User.DisplayName,
                     GroupName = i.Group.Name,
                     VoteCount = i.Votes.Count(v => !v.IsDeleted)
@@ -67,11 +64,9 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the top 5 contributors based on the number of ideas created.
+    /// Gets the top 3 contributors based on the number of ideas created.
     /// </summary>
     /// <returns>A list of top contributors with their idea counts.</returns>
-    /// <response code="200">Returns the top contributors successfully.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("top-contributors")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -102,11 +97,9 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the top 5 most recently promoted ideas.
+    /// Gets the top 3 most recently promoted ideas.
     /// </summary>
     /// <returns>A list of promoted ideas with their promotion dates.</returns>
-    /// <response code="200">Returns the promoted ideas successfully.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("promoted-ideas")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -115,19 +108,18 @@ public class AnalyticsController : ControllerBase
         try
         {
             var ideas = await _context.Ideas
-
                 .Where(i => i.IsPromotedToProject && !i.IsDeleted)
                 .OrderByDescending(i => i.UpdatedAt)
                 .Take(3)
                 .Select(i => new
                 {
                     i.Id,
-                    i.Title,
-                    i.Description,
+                    i.StrategicAlignment,
+                    i.ProblemStatement,
                     Author = i.User.DisplayName,
                     GroupName = i.Group.Name,
                     PromotedDate = i.UpdatedAt,
-                    ProjectId = _context.Projects .Where(p => p.IdeaId == i.Id) .Select(p => p.Id) .FirstOrDefault()
+                    ProjectId = _context.Projects.Where(p => p.IdeaId == i.Id).Select(p => p.Id).FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -144,8 +136,6 @@ public class AnalyticsController : ControllerBase
     /// Gets aggregated statistics for all ideas (Total, Open, Promoted, Closed).
     /// </summary>
     /// <returns>An object containing idea statistics.</returns>
-    /// <response code="200">Returns the idea statistics successfully.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("idea-statistics")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -180,11 +170,9 @@ public class AnalyticsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the top 5 groups based on engagement (Idea Count + Vote Count).
+    /// Gets the top 3 groups based on engagement (Idea Count + Vote Count).
     /// </summary>
     /// <returns>A list of groups with their engagement metrics.</returns>
-    /// <response code="200">Returns the group engagement data successfully.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("group-engagement")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
@@ -220,9 +208,6 @@ public class AnalyticsController : ControllerBase
     /// Gets personal statistics for the currently authenticated user.
     /// </summary>
     /// <returns>An object containing the user's ideas created, votes cast, and projects involved.</returns>
-    /// <response code="200">Returns the personal statistics successfully.</response>
-    /// <response code="401">User is not authenticated.</response>
-    /// <response code="500">Internal server error occurred.</response>
     [HttpGet("personal-stats")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
