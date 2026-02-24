@@ -19,6 +19,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
     public DbSet<PasswordReset> PasswordResets { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<BusinessCase> BusinessCases { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -166,12 +167,83 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithOne(c => c.Idea)
                 .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its comments go with it
 
+            i.HasOne(i => i.BusinessCase)
+                .WithOne(bc => bc.Idea)
+                .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //Index
             i.HasIndex(i => i.StrategicAlignment);
             i.HasIndex(i => i.Status);
             i.HasIndex(i => i.GroupId);
             i.HasIndex(i => i.UserId);
             i.HasIndex(i => i.IsDeleted);
+        });
+
+        //BusinessCase Configuration
+        builder.Entity<BusinessCase>(bc =>
+        {
+            bc.HasKey(bc => bc.Id);
+
+            bc.Property(bc => bc.ExpectedBenefits)
+                .IsRequired()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.ImpactScope)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.RiskLevel)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.EvaluationStatus)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.OwnerDepartment)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.NextSteps)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.DecisionDate)
+                .IsRequired();
+
+            bc.Property(bc => bc.PlannedDurationWeeks)
+                .IsRequired();
+
+            bc.Property(bc => bc.CurrentStage)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.Verdict)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            bc.Property(bc => bc.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            bc.HasOne(bc => bc.Idea)
+                .WithOne(i => i.BusinessCase)
+                .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
          // Comments Configuration
