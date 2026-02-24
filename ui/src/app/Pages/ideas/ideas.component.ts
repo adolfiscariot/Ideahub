@@ -899,18 +899,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.showRequestsModal = false;
   }
 
-
-
-  onUpdateIdeaFromModal(event: Pick<Idea, 'Title' | 'ProblemStatement' | 'ProposedSolution'>): void {
+  onUpdateIdeaFromModal(event: IdeaUpdate): void {
     if (!this.selectedIdea) {
       return;
     }
 
-    // Create the update data according to your interface
     const updateData: IdeaUpdate = {
-      Title: event.Title,
-      ProblemStatement: this.shareIdeaForm.value.ProblemStatement,
-      ProposedSolution: this.shareIdeaForm.value.ProposedSolution,
+      ...event,
       Status: this.selectedIdea.status ?? "open"
     };
 
@@ -922,20 +917,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
           // Update the idea in the local array
           const index = this.ideas.findIndex(i => i.id === this.selectedIdea.id);
           if (index !== -1) {
-            this.ideas[index].Title = event.Title;
-            this.ideas[index].ProposedSolution = event.ProposedSolution;
-            this.ideas[index].ProblemStatement = event.ProblemStatement;
-            this.ideas[index].updatedAt = new Date();
-
-            // Update the ideas array reference
+            this.ideas[index] = { ...this.ideas[index], ...event, updatedAt: new Date() };
             this.ideas = [...this.ideas];
           }
 
           // Update selected idea
-          this.selectedIdea.Title = event.Title;
-          this.selectedIdea.ProposedSolution = event.ProposedSolution;
-          this.selectedIdea.ProblemStatement = event.ProblemStatement;
-          this.selectedIdea.updatedAt = new Date();
+          this.selectedIdea = { ...this.selectedIdea, ...event, updatedAt: new Date() };
 
           // Close modal and reset
           this.showShareModal = false;
@@ -1242,7 +1229,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.modalEditData = {
         id: editData.id || '',
         Title: editData.Title || editData.title || '',
-        ProposedSolution: editData.ProposedSolution || editData.proposedSolution || ''
+        ProposedSolution: editData.ProposedSolution || editData.proposedSolution || '',
+        ProblemStatement: editData.ProblemStatement || editData.problemStatement || '',
+        StrategicAlignment: editData.StrategicAlignment || editData.strategicAlignment || '',
+        UseCase: editData.UseCase || editData.useCase || '',
+        InnovationCategory: editData.InnovationCategory || editData.innovationCategory || '',
+        SubCategory: editData.SubCategory || editData.subCategory || '',
+        TechnologyInvolved: editData.TechnologyInvolved || editData.technologyInvolved || '',
+        Notes: editData.Notes || editData.notes || ''
       };
     }
 
