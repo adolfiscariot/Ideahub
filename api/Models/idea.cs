@@ -75,6 +75,7 @@ public class Idea
     public ICollection<Comment> Comments {get; set;} = new List<Comment>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
     public BusinessCase? BusinessCase { get; set; }
+    public ScoringDimensions? ScoringDimensions { get; set; }
 }
 
 public enum IdeaStatus 
