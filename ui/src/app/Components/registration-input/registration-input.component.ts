@@ -72,7 +72,7 @@ export class RegistrationInputComponent implements OnInit {
     { validators: confirmPasswordValidator }
   );
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   onPasswordInput() {
     const pwd = this.registrationForm.get('password')?.value || '';
@@ -85,16 +85,16 @@ export class RegistrationInputComponent implements OnInit {
   }
 
   get allPasswordMet(): boolean {
-  return this.passwordChecks.every(r => r.met);
-}
-
-togglePasswordVisibility() {
-  this.showPassword = !this.showPassword;
-  const passwordInput = document.getElementById('password-input') as HTMLInputElement;
-  if (passwordInput) {
-    passwordInput.type = this.showPassword ? 'text' : 'password';
+    return this.passwordChecks.every(r => r.met);
   }
-}
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+    const passwordInput = document.getElementById('password-input') as HTMLInputElement;
+    if (passwordInput) {
+      passwordInput.type = this.showPassword ? 'text' : 'password';
+    }
+  }
 
 
   get passwordStrength(): number {

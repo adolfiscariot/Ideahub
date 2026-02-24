@@ -29,7 +29,7 @@ import { NgModule, OnDestroy } from '@angular/core';
     ModalComponent,
     MatPaginatorModule,
     FormsModule
-],
+  ],
 })
 
 export class GroupsComponent implements OnInit, OnDestroy {

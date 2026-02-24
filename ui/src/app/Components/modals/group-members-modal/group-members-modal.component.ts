@@ -18,7 +18,7 @@ export class GroupMembersModalComponent implements OnInit {
   dialogRef = inject<MatDialogRef<GroupMembersModalComponent>>(MatDialogRef);
   data = inject<{
     group: any;
-}>(MAT_DIALOG_DATA);
+  }>(MAT_DIALOG_DATA);
   private groupsService = inject(GroupsService);
   private toastService = inject(ToastService);
   private authService = inject(AuthService);

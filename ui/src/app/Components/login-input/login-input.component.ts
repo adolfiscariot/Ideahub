@@ -14,6 +14,7 @@ import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
 import { NotificationsService } from '../../Services/notifications';
 import { SignalrService } from '../../Services/signalr.service';
+import { NotificationService } from '../../Services/notification.service';
 
 @Component({
   selector: 'app-login-input',
@@ -25,11 +26,12 @@ export class LoginInputComponent implements OnInit {
   authService = inject(AuthService);
   toastService = inject(ToastService);
   notificationsService = inject(NotificationsService);
+  notificationService = inject(NotificationService);
   router = inject(Router);
   isLoading = false;
   signalRService = inject(SignalrService);
 
-  ngOnInit(): void {this.notificationsService}
+  ngOnInit(): void { this.notificationsService }
 
   loginForm = new FormGroup({
     email: new FormControl('', {
@@ -57,6 +59,7 @@ export class LoginInputComponent implements OnInit {
           }, 50);
           this.router.navigate(['/home']);
           this.notificationsService.refreshPendingRequests();
+          this.notificationService.fetchUnreadCount();
           this.loginForm.reset();
         },
         error: (error) => {
