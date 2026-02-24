@@ -83,13 +83,41 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.HasKey(i => i.Id);
 
             //Properties
-            i.Property(i => i.Title)
+            i.Property(i => i.StrategicAlignment)
+                .IsRequired()
                 .HasMaxLength(256)
-                .IsRequired();
+                .HasColumnType("text");
 
-            i.Property(i => i.Description)
+            i.Property(i => i.ProblemStatement)
                 .IsRequired()
                 .HasColumnType("text");
+
+            i.Property(i => i.ProposedSolution)
+                .IsRequired()
+                .HasColumnType("text");
+
+            i.Property(i => i.UseCase)
+                .IsRequired()
+                .HasColumnType("text");
+
+            i.Property(i => i.InnovationCategory)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("text");
+
+            i.Property(i => i.SubCategory)
+                .HasColumnType("text");
+
+            i.Property(i => i.TechnologyInvolved)
+                .HasColumnType("text");
+
+            i.Property(i => i.Notes)
+                .HasColumnType("text");
+
+            i.Property(i => i.Score)
+                .HasColumnType("integer")
+                .IsRequired()
+                .HasDefaultValue(0);
 
             i.Property(i => i.IsPromotedToProject)
                 .HasDefaultValue(false);
@@ -114,13 +142,6 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.Property(i => i.DeletedAt)
                 .HasColumnName("DeletedAt");
 
-            i.Property(i => i.Filter)
-                .IsRequired()
-                .HasColumnType("jsonb")
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)!
-                );
             //Foreign Keys
             i.HasOne(i => i.User)
                 .WithMany(u => u.Ideas)
@@ -146,7 +167,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its comments go with it
 
             //Index
-            i.HasIndex(i => i.Title);
+            i.HasIndex(i => i.StrategicAlignment);
             i.HasIndex(i => i.Status);
             i.HasIndex(i => i.GroupId);
             i.HasIndex(i => i.UserId);
