@@ -76,12 +76,21 @@ public class IdeaController : ControllerBase
             //add to database
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("New idea created by {userEmail}", userEmail);
 
             // Trigger Phase 1: Automated AI Evaluation
+            _logger.LogInformation("AI Scoring beginning...");
             try
             {
                 var llmService = HttpContext.RequestServices.GetRequiredService<ILlmService>();
-                var (aiScore, aiReasoning) = await llmService.EvaluateIdeaAsync(idea);
+                var (aiScore, aiReasoning) = await llmService.EvaluateIdeaAsync(
+                    idea.Title,
+                    idea.StrategicAlignment,
+                    idea.ProblemStatement,
+                    idea.ProposedSolution,
+                    idea.UseCase,
+                    idea.InnovationCategory
+                );
 
                 idea.Score = aiScore;
                 idea.AiReasoning = aiReasoning;
@@ -96,13 +105,13 @@ public class IdeaController : ControllerBase
                 }
 
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("AI Evaluation Successful!");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during automated AI evaluation for idea {IdeaId}", idea.Id);
             }
 
-            _logger.LogInformation("New idea created and evaluated by AI by {userEmail}", userEmail);
             return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}",
             new {
                     id = idea.Id

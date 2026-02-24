@@ -35,16 +35,26 @@ public class ScoringController : ControllerBase
         var idea = await _context.Ideas.FirstOrDefaultAsync(i => i.Id == ideaId);
 
         // Check if idea exists
-        if (idea == null)
+        if (idea == null){
             _logger.LogError("Idea not found");
             return NotFound(ApiResponse.Fail("Idea not found."));
+        }
 
+        // Current stage must be evaluation
         if (idea.CurrentStage != ScoringStage.Evaluation)
             return BadRequest(ApiResponse.Fail($"Cannot evaluate idea in stage: {idea.CurrentStage}"));
 
+        // LLM Scoring
         try
         {
-            var (score, reasoning) = await _llmService.EvaluateIdeaAsync(idea);
+            var (score, reasoning) = await _llmService.EvaluateIdeaAsync(
+                idea.Title, 
+                idea.StrategicAlignment, 
+                idea.ProblemStatement, 
+                idea.ProposedSolution, 
+                idea.UseCase, 
+                idea.InnovationCategory
+            );
 
             idea.Score = score;
             idea.AiReasoning = reasoning;
@@ -59,9 +69,9 @@ public class ScoringController : ControllerBase
                 idea.CurrentStage = ScoringStage.Rejected;
             }
 
-            idea.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Phase 1 scoring complete");
             return Ok(ApiResponse.Ok("Phase 1: AI Evaluation completed.", new { 
                 Score = score, 
                 Reasoning = reasoning,
@@ -70,6 +80,7 @@ public class ScoringController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError("Phase 1 scoring failed");
             return StatusCode(500, ApiResponse.Fail($"Failed to evaluate idea: {ex.Message}"));
         }
     }
@@ -79,6 +90,8 @@ public class ScoringController : ControllerBase
     [Authorize(Roles = RoleConstants.CommitteeMember + "," + RoleConstants.SuperAdmin)]
     public async Task<IActionResult> SubmitBusinessCase(int ideaId, [FromBody] BusinessCaseDto dto)
     {
+        _logger.LogInformation("Phase 2 scoring (Business Case) beginning...");
+        // Fetch relevant idea
         var idea = await _context.Ideas
             .Include(i => i.BusinessCase)
             .FirstOrDefaultAsync(i => i.Id == ideaId);
@@ -120,11 +133,17 @@ public class ScoringController : ControllerBase
         if (businessCase.Verdict == Verdict.Approved)
         {
             idea.CurrentStage = ScoringStage.ScoringDimensions;
+            _logger.LogInformation("Proceeded to Phase 3 scoring");
+        }
+        else
+        {
+            _logger.LogInformation("Idea didn't meet scoring threshold for promotion to phase 3");
         }
 
         idea.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation("Phase 2 scoring successful!");
         return Ok(ApiResponse.Ok("Phase 2: Business Case submitted.", new { 
             Verdict = businessCase.Verdict.ToString(),
             NextStage = idea.CurrentStage.ToString()
@@ -136,6 +155,8 @@ public class ScoringController : ControllerBase
     [Authorize(Roles = RoleConstants.CommitteeMember + "," + RoleConstants.SuperAdmin)]
     public async Task<IActionResult> SubmitScoringDimensions(int ideaId, [FromBody] ScoringDimensionsDto dto)
     {
+        _logger.LogInformation("Phase 3 scoring beginning...");
+
         var idea = await _context.Ideas
             .Include(i => i.BusinessCase)
             .Include(i => i.ScoringDimensions)
@@ -167,14 +188,13 @@ public class ScoringController : ControllerBase
         dimensions.ProjectConfidence = dto.ProjectConfidence;
         dimensions.ReviewerComments = dto.ReviewerComments;
 
-        // Formula: (sum(12 fields) / 60) * 100
+        // Formula: ( sum(12 fields) / (No of fields * 5(max score of each field)) ) * 100
         float sum = (int)dto.StrategicAlignment + (int)dto.CustomerImpact + (int)dto.FinancialBenefit +
                     (int)dto.Feasibility + (int)dto.TimeToValue + (int)dto.Cost + (int)dto.Effort +
                     (int)dto.Risk + (int)dto.Scalability + (int)dto.Differentiation +
                     (int)dto.SustainabilityImpact + (int)dto.ProjectConfidence;
 
         dimensions.Score = (sum / 60.0f) * 100;
-        dimensions.UpdatedAt = DateTime.UtcNow;
 
         if (idea.ScoringDimensions == null)
         {
@@ -186,12 +206,12 @@ public class ScoringController : ControllerBase
         }
 
         // Final score stored in Idea model
-        idea.Score = (int)dimensions.Score;
+        idea.Score = (float)dimensions.Score;
         idea.CurrentStage = ScoringStage.Completed;
-        idea.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation("Phase 3 scoring successful!");
         return Ok(ApiResponse.Ok("Phase 3: Scoring Dimensions completed.", new { 
             CalculatedPercentage = dimensions.Score,
             FullScore = sum,

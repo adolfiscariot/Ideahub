@@ -45,7 +45,7 @@ public class Idea
     public string? Notes {get; set;}
 
     [Required]
-    public int Score {get; set;} = 0;
+    public float Score {get; set;} = 0.0f;
 
     public bool IsPromotedToProject { get; set; } = false;
 

@@ -121,7 +121,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasColumnType("text");
 
             i.Property(i => i.Score)
-                .HasColumnType("integer")
+                .HasColumnType("float")
                 .IsRequired()
                 .HasDefaultValue(0);
 

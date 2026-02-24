@@ -170,7 +170,7 @@ public class ProjectController : ControllerBase
                 project.Description,
                 OverseenByUserName = project.OverseenByUser?.DisplayName,
                 Status = project.Status.ToString(),
-                IdeaName = project.Idea?.ProblemStatement,
+                IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name
             }).ToList();
 
@@ -219,7 +219,7 @@ public class ProjectController : ControllerBase
                 OverseenByUserName = project.OverseenByUser?.DisplayName ?? "Unknown",
                 OverseenByUserId = project.OverseenByUserId,
                 Status = (int)project.Status,
-                IdeaName = project.Idea?.ProblemStatement,
+                IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name,
                 IsPublic = project.Group?.IsPublic
             }).ToList();
@@ -283,7 +283,7 @@ public class ProjectController : ControllerBase
                 Description = project.Description,
                 Status = project.Status.ToString(),
                 OverseenByUserName = project.OverseenByUser.DisplayName,
-                IdeaName = project.Idea.ProblemStatement,
+                IdeaName = project.Idea.Title,
                 GroupName = project.Group.Name
             };
 

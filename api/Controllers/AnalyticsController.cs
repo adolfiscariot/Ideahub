@@ -46,6 +46,7 @@ public class AnalyticsController : ControllerBase
                 .Select(i => new
                 {
                     i.Id,
+                    i.Title,
                     i.ProblemStatement,
                     i.ProposedSolution,
                     Author = i.User.DisplayName,
@@ -114,6 +115,7 @@ public class AnalyticsController : ControllerBase
                 .Select(i => new
                 {
                     i.Id,
+                    i.Title,
                     i.ProblemStatement,
                     i.ProposedSolution,
                     Author = i.User.DisplayName,

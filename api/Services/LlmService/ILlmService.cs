@@ -5,5 +5,5 @@ namespace api.Services;
 
 public interface ILlmService
 {
-    Task<(int Score, string Reasoning)> EvaluateIdeaAsync(Idea idea);
+    Task<(int Score, string Reasoning)> EvaluateIdeaAsync(string title, string alignment, string problem, string solution, string useCase, string innovationCategory);
 }
