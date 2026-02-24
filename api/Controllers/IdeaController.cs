@@ -82,29 +82,8 @@ public class IdeaController : ControllerBase
             _logger.LogInformation("AI Scoring beginning...");
             try
             {
-                var llmService = HttpContext.RequestServices.GetRequiredService<ILlmService>();
-                var (aiScore, aiReasoning) = await llmService.EvaluateIdeaAsync(
-                    idea.Title,
-                    idea.StrategicAlignment,
-                    idea.ProblemStatement,
-                    idea.ProposedSolution,
-                    idea.UseCase,
-                    idea.InnovationCategory
-                );
-
-                idea.Score = aiScore;
-                idea.AiReasoning = aiReasoning;
-
-                if (aiScore >= 70)
-                {
-                    idea.CurrentStage = ScoringStage.BusinessCase;
-                }
-                else
-                {
-                    idea.CurrentStage = ScoringStage.Rejected;
-                }
-
-                await _context.SaveChangesAsync();
+                var scoringController = HttpContext.RequestServices.GetRequiredService<ScoringController>();
+                await scoringController.EvaluateIdea(idea.Id);
                 _logger.LogInformation("AI Evaluation Successful!");
             }
             catch (Exception ex)

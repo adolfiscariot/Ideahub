@@ -200,6 +200,9 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
+// Scoring Controllers
+builder.Services.AddScoped<ScoringController>();
+
 // LLM Scoring Service
 builder.Services.AddScoped<ILlmService, MockLlmService>();
 
