@@ -274,14 +274,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.shareIdeaForm.get('ProblemStatement')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'ProblemStatement', 1000);
+        const res = updateCharCount(this.shareIdeaForm, 'ProblemStatement', 250);
         this.shareProblemCount = res.count;
       });
 
     this.shareIdeaForm.get('UseCase')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'UseCase', 1000);
+        const res = updateCharCount(this.shareIdeaForm, 'UseCase', 250);
         this.shareUseCaseCount = res.count;
       });
 
@@ -1799,6 +1799,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
   }
 
+  navigateToScoring(idea: Idea): void {
+    if (!idea || !this.groupId) return;
+    this.router.navigate([`/groups/${this.groupId}/ideas/${idea.id}/score`]);
+  }
 
   private handleSuccess(idea: Idea, response: any): void {
     this.isPromoting = false;
