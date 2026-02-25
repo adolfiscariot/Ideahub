@@ -1,0 +1,395 @@
+<div class="scoring-page">
+    <div class="scoring-container">
+        <div class="scoring-header">
+            <button class="back-btn" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> Back to Ideas
+            </button>
+            <h2>Idea Scoring & Review</h2>
+            <p *ngIf="idea" class="idea-title-banner">Reviewing: <strong>{{ idea.Title }}</strong></p>
+        </div>
+
+        <div *ngIf="isLoading" class="loading-state">
+            <p>Loading idea details...</p>
+        </div>
+
+        <form *ngIf="!isLoading && idea" [formGroup]="scoringForm" (ngSubmit)="onSubmit()">
+
+            <!-- PHASE 1: IDEA EVALUATION -->
+            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase1'">
+                <div class="accordion-header" (click)="toggleSection('phase1')">
+                    <div class="header-main">
+                        <span class="step-number">1</span>
+                        <h3>Phase 1: Idea Evaluation</h3>
+                    </div>
+                    <mat-icon>{{ expandedSection === 'phase1' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </div>
+
+                <div class="accordion-content" formGroupName="Phase1">
+                    <div class="read-only-details">
+                        <!-- Top Metadata Grid -->
+                        <div class="metadata-grid">
+                            <div class="meta-item">
+                                <mat-icon>person</mat-icon>
+                                <div>
+                                    <label>Author</label>
+                                    <p>{{ idea.author || idea.author || idea.userName || 'Anonymous' }}</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <mat-icon>track_changes</mat-icon>
+                                <div>
+                                    <label>Strategic Alignment</label>
+                                    <p>{{ idea.strategicAlignment || idea.StrategicAlignment || 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <mat-icon>category</mat-icon>
+                                <div>
+                                    <label>Innovation Category</label>
+                                    <p>{{ idea.innovationCategory || idea.InnovationCategory || 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <mat-icon>subtitles</mat-icon>
+                                <div>
+                                    <label>Sub Category</label>
+                                    <p>{{ idea.subCategory || idea.SubCategory || 'N/A' }}</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <mat-icon>memory</mat-icon>
+                                <div>
+                                    <label>Technology Involved</label>
+                                    <p>{{ idea.technologyInvolved || idea.TechnologyInvolved || 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Narrative Narrative Sections -->
+                        <div class="narrative-sections">
+                            <div class="narrative-card">
+                                <div class="card-header">
+                                    <mat-icon>error_outline</mat-icon>
+                                    <h4>Problem Statement</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ idea.problemStatement || idea.ProblemStatement || 'N/A' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="narrative-card">
+                                <div class="card-header">
+                                    <mat-icon>lightbulb_outline</mat-icon>
+                                    <h4>Proposed Solution</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ idea.proposedSolution || idea.ProposedSolution || 'N/A' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="narrative-card" *ngIf="idea.useCase || idea.UseCase">
+                                <div class="card-header">
+                                    <mat-icon>assignment</mat-icon>
+                                    <h4>Use Case & Benefits</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ idea.useCase || idea.UseCase || 'N/A' }}</p>
+                                </div>
+                            </div>
+
+                            <!-- AI Reasoning Highlight -->
+                            <div class="ai-insight-card" *ngIf="idea.AiReasoning || idea.AiReasoning">
+                                <div class="ai-header">
+                                    <mat-icon>psychology</mat-icon>
+                                    <h4>AI Evaluation Insight</h4>
+                                </div>
+                                <div class="ai-body">
+                                    <p>{{ idea.AiReasoning || idea.AiReasoning }}</p>
+                                </div>
+                            </div>
+
+                            <div class="narrative-card" *ngIf="idea.notes || idea.Notes">
+                                <div class="card-header">
+                                    <mat-icon>note</mat-icon>
+                                    <h4>Original Author Notes</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ idea.notes || idea.Notes || 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="scoring-inputs">
+                        <div class="form-group">
+                            <label for="score-p1">Evaluation Score (Threshold: 70%)</label>
+                            <input type="number" id="score-p1" formControlName="Score" min="0" max="100">
+                            <div class="threshold-indicator" [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
+                                {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Threshold Met' : '✗ Below
+                                Threshold' }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="phase-actions"
+                        style="display: flex; justify-content: flex-end; padding: 0 1.5rem 1.5rem;">
+                        <button type="button" class="btn btn-primary" (click)="updatePhase1Score()"
+                            [disabled]="isLoading">
+                            <mat-icon *ngIf="!isLoading">sync</mat-icon>
+                            <span *ngIf="isLoading" class="spinner-small"></span>
+                            {{ isLoading ? 'Updating...' : 'Update Idea' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 2: BUSINESS CASE -->
+            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase2'"
+                [class.locked]="isSectionLocked('phase2')"
+                [title]="isSectionLocked('phase2') ? 'Threshold not reached' : ''">
+                <div class="accordion-header" (click)="toggleSection('phase2')">
+                    <div class="header-main">
+                        <span class="step-number">2</span>
+                        <h3>Phase 2: Business Case</h3>
+                        <span *ngIf="isSectionLocked('phase2')" class="lock-icon"><mat-icon>lock</mat-icon></span>
+                    </div>
+                    <mat-icon>{{ expandedSection === 'phase2' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </div>
+
+                <div class="accordion-content" formGroupName="Phase2">
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label>Expected Benefits</label>
+                            <select formControlName="ExpectedBenefits">
+                                <option value="">Select Benefit</option>
+                                <option *ngFor="let opt of expectedBenefitsOptions" [value]="opt">{{ opt }}</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Impact Scope</label>
+                            <select formControlName="ImpactScope">
+                                <option value="">Select Scope</option>
+                                <option *ngFor="let opt of impactScopeOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Risk Level</label>
+                            <select formControlName="RiskLevel">
+                                <option value="">Select Risk</option>
+                                <option *ngFor="let opt of riskLevelOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Evaluation Status</label>
+                            <select formControlName="EvaluationStatus">
+                                <option value="">Select Status</option>
+                                <option *ngFor="let opt of evaluationStatusOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Owner / Responsible Department</label>
+                            <select formControlName="OwnerDepartment">
+                                <option value="">Select Dept</option>
+                                <option *ngFor="let opt of responsibleDeptOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Next Steps / Milestones</label>
+                            <select formControlName="NextSteps">
+                                <option value="">Select Next Step</option>
+                                <option *ngFor="let opt of actionStepOptions" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Decision Date</label>
+                            <input type="date" formControlName="DecisionDate" placeholder="dd/mm/yy">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Planned Duration (Weeks)</label>
+                            <input type="number" formControlName="PlannedDurationWeeks" placeholder="Select Duration">
+                        </div>
+
+                        <div class="form-group verdict-group">
+                            <label>Go / No-Go Verdict (Required for Phase 3)</label>
+                            <select formControlName="Verdict">
+                                <option value="">Select Verdict</option>
+                                <option *ngFor="let opt of verdictOptions" [value]="opt.value">{{ opt.label }}</option>
+                            </select>
+                            <div class="verdict-indicator"
+                                [class.met]="scoringForm.get('Phase2.Verdict')?.value === 'Approved'">
+                                <mat-icon>{{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? 'check_circle' :
+                                    'pending'
+                                    }}</mat-icon>
+                                {{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? '✓ Approved to Proceed' :
+                                'Waiting for Approval' }}
+                            </div>
+                        </div>
+
+                        <!-- Phase 2 Action Button -->
+                        <div class="phase-actions"
+                            style="grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 1rem;">
+                            <button type="button" class="btn btn-primary" (click)="onSubmitPhase2()"
+                                [disabled]="scoringForm.get('Phase2')?.invalid">
+                                SUBMIT BUSINESS CASE REVIEW
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 3: SCORING DIMENSIONS -->
+            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase3'"
+                [class.locked]="isSectionLocked('phase3')"
+                [title]="isSectionLocked('phase3') ? 'Threshold not reached' : ''">
+                <div class="accordion-header" (click)="toggleSection('phase3')">
+                    <div class="header-main">
+                        <span class="step-number">3</span>
+                        <h3>Phase 3: Scoring Dimensions</h3>
+                        <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
+                    </div>
+                    <div class="header-score" *ngIf="!isSectionLocked('phase3')">
+                        Final Score: <strong>{{ totalPhase3Score }}/60</strong>
+                    </div>
+                    <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </div>
+
+                <div class="accordion-content" formGroupName="Phase3">
+                    <!-- Instruction Note -->
+                    <p class="section-instruction">
+                        * Rank each dimension from 1 (lowest impact) to 5 (highest benefit).
+                    </p>
+
+                    <div class="dimensions-grid">
+                        <div class="dimension-card">
+                            <label>Strategic Alignment</label>
+                            <select formControlName="StrategicAlignment">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of strategicAlignmentScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Customer/Stakeholder Impact</label>
+                            <select formControlName="CustomerImpact">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of customerImpactScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Financial Benefit (ROI)</label>
+                            <select formControlName="FinancialBenefit">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of financialBenefitScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Feasibility (Tech/Ops)</label>
+                            <select formControlName="Feasibility">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of feasibilityScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Time to Value</label>
+                            <select formControlName="TimeToValue">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of timeToValueScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Project Cost</label>
+                            <select formControlName="Cost">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of costScores" [value]="opt.value">{{ opt.label }}</option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Implementation Effort</label>
+                            <select formControlName="Effort">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of effortScores" [value]="opt.value">{{ opt.label }}</option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Execution Risk</label>
+                            <select formControlName="Risk">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of riskScores" [value]="opt.value">{{ opt.label }}</option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Scalability</label>
+                            <select formControlName="Scalability">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of scalabilityScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Differentiation</label>
+                            <select formControlName="Differentiation">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of differentiationScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Sustainability & ESG</label>
+                            <select formControlName="SustainabilityImpact">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of sustainabilityScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="dimension-card">
+                            <label>Project Confidence</label>
+                            <select formControlName="ProjectConfidence">
+                                <option value="">Rank</option>
+                                <option *ngFor="let opt of confidenceScores" [value]="opt.value">{{ opt.label }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <div class="form-group">
+                            <label>Final Reviewer Comments <span class="text-danger">*</span></label>
+                            <textarea formControlName="ReviewerComments"
+                                placeholder="Summarize your final verdict..."></textarea>
+                        </div>
+
+                        <div class="phase-actions"
+                            style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-primary"
+                                [disabled]="scoringForm.invalid || isSectionLocked('phase3')">
+                                SUBMIT FINAL SCORE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scoring-actions" style="margin-top: 2rem;">
+                <app-buttons buttonText="CANCEL" buttonStyleClass="btn-cancel" (click)="goBack()"
+                    [disabled]="isLoading" />
+            </div>
+        </form>
+    </div>
+</div>
