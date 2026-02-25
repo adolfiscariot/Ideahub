@@ -63,6 +63,14 @@ export const routes: Routes = [
       import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   },
   {
+    path: 'groups/:groupId/ideas/:ideaId/score',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/idea-scoring/idea-scoring.component').then(
+        (m) => m.IdeaScoringComponent
+      ),
+  },
+  {
     path: 'notifications',
     canActivate: [AuthGuard],
     loadComponent: () =>
