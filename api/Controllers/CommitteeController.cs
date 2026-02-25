@@ -29,9 +29,10 @@ public class CommitteeController : ControllerBase
 
         var result = await _userManager.AddToRoleAsync(user, RoleConstants.CommitteeMember);
 
-        if (!result.Succeeded)
+        if (!result.Succeeded){
             _logger.LogError("Failed to add user to committee");
             return BadRequest(ApiResponse.Fail("Failed to add user to committee", result.Errors.Select(e => e.Description).ToList()));
+        }
 
         _logger.LogInformation("Successfuly added user to committee");
         return Ok(ApiResponse.Ok("User promoted to CommitteeMember"));
