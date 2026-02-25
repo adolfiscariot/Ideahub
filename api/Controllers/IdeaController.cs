@@ -340,6 +340,8 @@ public class IdeaController : ControllerBase
             SubCategory = idea.SubCategory,
             TechnologyInvolved = idea.TechnologyInvolved,
             Notes = idea.Notes,
+            AiReasoning = idea.AiReasoning,
+            CurrentStage = idea.CurrentStage,
             Score = idea.Score,
             Author = idea.User.DisplayName,
             Group = idea.Group.Name,
