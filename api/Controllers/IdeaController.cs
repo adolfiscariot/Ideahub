@@ -228,7 +228,7 @@ public class IdeaController : ControllerBase
             TechnologyInvolved = idea.TechnologyInvolved,
             Notes = idea.Notes,
             Score = idea.Score,
-            Reasoning = idea.AiReasoning,
+            AiReasoning = idea.AiReasoning,
             CurrentStage = idea.CurrentStage,
             Author = idea.User.DisplayName,
             Group = idea.Group.Name,
@@ -266,6 +266,19 @@ public class IdeaController : ControllerBase
         }
 
         //apply changes to the idea
+        if (ideaUpdateDto.Score != null)
+        {
+            // Reviewers can increase or decrease the score. The scoring stage should follow suitc
+            if (ideaUpdateDto.Score >= 70)
+            {
+                idea.CurrentStage = ScoringStage.BusinessCase;
+            }
+            else
+            {
+                idea.CurrentStage = ScoringStage.Evaluation;
+            }
+            idea.Score = ideaUpdateDto.Score.Value;
+        }
         if (ideaUpdateDto.Title != null)
         {
             idea.Title = ideaUpdateDto.Title;
@@ -303,17 +316,15 @@ public class IdeaController : ControllerBase
             idea.Notes = ideaUpdateDto.Notes;
         }
         //Parse the status string and convert it to type IdeaStatus enum
-        if (ideaUpdateDto.Status != null)
+        if (!string.IsNullOrWhiteSpace(ideaUpdateDto.Status))
         {
-            IdeaStatus _newStatus;
-
             if (Enum.TryParse(ideaUpdateDto.Status, true, out IdeaStatus newStatus))
             {
-                _newStatus = newStatus;
+                idea.Status = newStatus;
             }
             else
             {
-                _logger.LogError("Invalid status string {statusString} provided for idea {idea}", ideaUpdateDto.Status, idea.ProblemStatement);
+                _logger.LogError("Invalid status string {statusString} provided for idea {ideaId}", ideaUpdateDto.Status, ideaId);
                 return BadRequest(ApiResponse.Fail("Parsing failed. Invalid status string provided"));
             }
         }
@@ -341,7 +352,7 @@ public class IdeaController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Idea {ideaProblemStatement} updated by {userEmail}", idea.ProblemStatement, userEmail);
+        _logger.LogInformation("Idea {ideaId} updated by {userEmail}", ideaId, userEmail);
         return Ok(ApiResponse.Ok("Idea updated", updatedIdea));
     }
 

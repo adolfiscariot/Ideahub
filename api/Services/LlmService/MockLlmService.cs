@@ -10,7 +10,7 @@ public class MockLlmService : ILlmService
     {
         // Mock logic: Randomly give a score between 1 and 10
         var random = new Random();
-        int rawScore = random.Next(1, 11); // 1-10
+        int rawScore = random.Next(6, 11); // 1-10
         float finalScore = rawScore * 10; // Get percentage
         
         string reasoning = $"Mock AI evaluation for idea: {title}. The solution looks { (finalScore >= 70 ? "promising" : "weak") } based on organization needs. Raw score: {rawScore}/10.";
