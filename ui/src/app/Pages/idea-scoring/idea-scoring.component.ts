@@ -36,47 +36,54 @@ export class IdeaScoringComponent implements OnInit {
   scoringForm!: FormGroup;
 
   // Phase 2 Dropdown Options
-  expectedBenefitsOptions = ['Time savings', 'Cost reduction', 'Improved accuracy', 'Scalability', 'Efficiency', 'Lead generation'];
+  expectedBenefitsOptions = [
+    { label: 'Time savings', value: 'Time savings', tip: 'This idea will save people time on repetitive or manual tasks' },
+    { label: 'Cost reduction', value: 'Cost reduction', tip: 'This idea will directly reduce business costs or spending' },
+    { label: 'Improved accuracy', value: 'Improved accuracy', tip: 'This idea will reduce errors and improve data or process quality' },
+    { label: 'Scalability', value: 'Scalability', tip: 'This idea will help the business handle more work without adding resources' },
+    { label: 'Efficiency', value: 'Efficiency', tip: 'This idea will make existing workflows faster or smoother' },
+    { label: 'Lead generation', value: 'Lead generation', tip: 'This idea will help bring in new customers or business opportunities' }
+  ];
 
   // Enum-based Options (Label/Value)
   impactScopeOptions = [
-    { label: 'Department', value: ImpactScope.Department },
-    { label: 'Organization Wide', value: ImpactScope.OrganizationWide },
-    { label: 'External', value: ImpactScope.External }
+    { label: 'Department', value: ImpactScope.Department, tip: 'Only affects one team or department' },
+    { label: 'Organization Wide', value: ImpactScope.OrganizationWide, tip: 'Affects the entire company across multiple teams' },
+    { label: 'External', value: ImpactScope.External, tip: 'Affects customers, partners, or people outside the company' }
   ];
   riskLevelOptions = [
-    { label: 'Low', value: RiskLevel.Low },
-    { label: 'Medium', value: RiskLevel.Medium },
-    { label: 'High', value: RiskLevel.High }
+    { label: 'Low', value: RiskLevel.Low, tip: 'Minimal chance of problems — safe to try' },
+    { label: 'Medium', value: RiskLevel.Medium, tip: 'Some risks exist but they can be managed' },
+    { label: 'High', value: RiskLevel.High, tip: 'Significant risks — needs careful planning before starting' }
   ];
   evaluationStatusOptions = [
-    { label: 'Feasibility Research', value: EvaluationStatus.FeasibilityResearch },
-    { label: 'Approved', value: EvaluationStatus.Approved },
-    { label: 'Rejected', value: EvaluationStatus.Rejected }
+    { label: 'Feasibility Research', value: EvaluationStatus.FeasibilityResearch, tip: 'Still researching whether this idea is doable' },
+    { label: 'Approved', value: EvaluationStatus.Approved, tip: 'This idea has been reviewed and approved to move forward' },
+    { label: 'Rejected', value: EvaluationStatus.Rejected, tip: 'This idea has been reviewed and will not be pursued' }
   ];
   responsibleDeptOptions = [
-    { label: 'Finance', value: ResponsibleDepartment.Finance },
-    { label: 'IT', value: ResponsibleDepartment.IT },
-    { label: 'Operations', value: ResponsibleDepartment.Operations },
-    { label: 'Marketing & Sales', value: ResponsibleDepartment.MarketingAndSales },
-    { label: 'Strategy & Compliance', value: ResponsibleDepartment.StrategyAndCompliance }
+    { label: 'Finance', value: ResponsibleDepartment.Finance, tip: 'The Finance team will own this' },
+    { label: 'IT', value: ResponsibleDepartment.IT, tip: 'The IT / Technology team will own this' },
+    { label: 'Operations', value: ResponsibleDepartment.Operations, tip: 'The Operations team will own this' },
+    { label: 'Marketing & Sales', value: ResponsibleDepartment.MarketingAndSales, tip: 'The Marketing or Sales team will own this' },
+    { label: 'Strategy & Compliance', value: ResponsibleDepartment.StrategyAndCompliance, tip: 'The Strategy or Compliance team will own this' }
   ];
   actionStepOptions = [
-    { label: 'Prototype Development', value: ActionStep.PrototypeDevelopment },
-    { label: 'Stakeholder Review', value: ActionStep.StakeholderReview },
-    { label: 'Pilot Launch', value: ActionStep.PilotLaunch },
-    { label: 'Market Feasibility Study', value: ActionStep.MarketFeasibilityStudy },
-    { label: 'Rollout Planning', value: ActionStep.RolloutPlanning }
+    { label: 'Prototype Development', value: ActionStep.PrototypeDevelopment, tip: 'Build a small working version to test the concept' },
+    { label: 'Stakeholder Review', value: ActionStep.StakeholderReview, tip: 'Present to key decision-makers for feedback' },
+    { label: 'Pilot Launch', value: ActionStep.PilotLaunch, tip: 'Run a small-scale trial with real users' },
+    { label: 'Market Feasibility Study', value: ActionStep.MarketFeasibilityStudy, tip: 'Research market demand and competition first' },
+    { label: 'Rollout Planning', value: ActionStep.RolloutPlanning, tip: 'Plan the full launch across the business' }
   ];
   resultOutcomeOptions = [
-    { label: 'In Progress', value: BusinessCaseResult.InProgress },
-    { label: 'Pilot Stage', value: BusinessCaseResult.PilotStage },
-    { label: 'Awaiting Results', value: BusinessCaseResult.AwaitingResults }
+    { label: 'In Progress', value: BusinessCaseResult.InProgress, tip: 'Work is actively underway' },
+    { label: 'Pilot Stage', value: BusinessCaseResult.PilotStage, tip: 'Being tested with a small group first' },
+    { label: 'Awaiting Results', value: BusinessCaseResult.AwaitingResults, tip: 'Waiting for data or feedback before deciding' }
   ];
   verdictOptions = [
-    { label: 'Approved', value: Verdict.Approved },
-    { label: 'Awaiting Review', value: Verdict.AwaitingReview },
-    { label: 'Park', value: Verdict.Park }
+    { label: 'Approved', value: Verdict.Approved, tip: 'Go ahead — this idea is approved to proceed to scoring' },
+    { label: 'Awaiting Review', value: Verdict.AwaitingReview, tip: 'Not yet decided — still under review' },
+    { label: 'Park', value: Verdict.Park, tip: 'Put on hold — may be revisited later' }
   ];
 
   // Phase 3 Metric Options
