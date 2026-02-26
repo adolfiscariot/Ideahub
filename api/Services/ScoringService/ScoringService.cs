@@ -30,22 +30,27 @@ public class ScoringService : IScoringService
             idea.InnovationCategory
         );
 
-        idea.Score = score;
-        idea.AiReasoning = reasoning;
+        // Re-fetch from THIS service's DbContext — the passed-in `idea` may be tracked
+        // by a different DbContext instance (e.g. IdeaController's), so SaveChangesAsync
+        // on this context would have nothing to save, leaving the stage stuck at Evaluation.
+        var trackedIdea = await _context.Ideas.FindAsync(idea.Id) ?? idea;
+
+        trackedIdea.Score = score;
+        trackedIdea.AiReasoning = reasoning;
 
         // Stage transition logic
         if (score >= 70)
         {
-            idea.CurrentStage = ScoringStage.BusinessCase;
+            trackedIdea.CurrentStage = ScoringStage.BusinessCase;
             _logger.LogInformation("Idea {IdeaId} passed Phase 1 with score {score}. Moving to Business Case stage.", idea.Id, score);
         }
         else
         {
-            idea.CurrentStage = ScoringStage.Rejected;
+            trackedIdea.CurrentStage = ScoringStage.Rejected;
             _logger.LogInformation("Idea {IdeaId} failed Phase 1 with score {score}. Moving to Rejected stage.", idea.Id, score);
         }
 
-        idea.UpdatedAt = DateTime.UtcNow;
+        trackedIdea.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         return (score, reasoning);

@@ -68,119 +68,95 @@ public class ScoringDimensions
 public enum StrategicAlignmentScore
 {
     Unknown = 0,
-    NoAlignment = 1,
-    Low = 2,
-    Moderate = 3,
-    Strong = 4,
-    Full = 5
+    Low = 1,
+    Moderate = 2,
+    Strong = 3,
 }
 
 public enum CustomerImpactScore
 {
     Unknown = 0,
-    Minimal = 1,
-    Low = 2,
-    Moderate = 3,
-    High = 4,
-    Transformational = 5
+    Low = 1,
+    Moderate = 2,
+    High = 3,
 }
 
 public enum FinancialBenefitScore
 {
     Unknown = 0,
-    NoGain = 1,
-    Low = 2,
-    Moderate = 3,
-    High = 4,
-    Breakthrough = 5
+    Low = 1,
+    Moderate = 2,
+    High = 3,
 }
 
 public enum FeasibilityScore
 {
     Unknown = 0,
     VeryDifficult = 1,
-    Low = 2,
-    Moderate = 3,
-    High = 4,
-    VeryFeasible = 5
+    Moderate = 2,
+    High = 3,
 }
 
 public enum TimeToValueScore
 {
     Unknown = 0,
-    Over24Months = 1,
-    TwelveToTwentyFour = 2,
-    SixToTwelve = 3,
-    ThreeToSix = 4,
-    UnderThreeMonths = 5
+    SixToTwelve = 1,
+    ThreeToSix = 2,
+    UnderThreeMonths = 3,
 }
 
 public enum CostScore
 {
     Unknown = 0,
-    VeryHigh = 1,
-    High = 2,
-    Moderate = 3,
-    Low = 4,
-    VeryLow = 5
+    High = 1,
+    Moderate = 2,
+    Low = 3,
 }
 
 public enum EffortScore
 {
     Unknown = 0,
-    VeryHigh = 1,
-    High = 2,
-    Moderate = 3,
-    Low = 4,
-    VeryLow = 5
+    High = 1,
+    Moderate = 2,
+    Low = 3,
 }
 
 public enum RiskScore
 {
     Unknown = 0,
-    VeryHigh = 1,
-    High = 2,
-    Moderate = 3,
-    Low = 4,
-    VeryLow = 5
+    High = 1,
+    Moderate = 2,
+    Low = 3,
 }
 
 public enum ScalabilityScore
 {
     Unknown = 0,
-    NotScalable = 1,
-    Low = 2,
-    Moderate = 3,
-    High = 4,
-    FullyScalable = 5
+    Low = 1,
+    Moderate = 2,
+    High = 3,
 }
 
 public enum DifferentiationScore
 {
     Unknown = 0,
-    NoDifferentiation = 1,
-    LowUniqueness = 2,
-    ModerateUniqueness = 3,
-    HighDifferentiation = 4,
-    UniqueStrongIP = 5
+    LowUniqueness = 1,
+    ModerateUniqueness = 2,
+    HighDifferentiation = 3,
 }
 
 public enum SustainabilityScore
 {
     Unknown = 0,
-    NegativeImpact = 1,
-    MinimalBenefit = 2,
-    ModerateBenefit = 3,
-    StrongBenefit = 4,
-    MajorBenefit = 5
+    MinimalBenefit = 1,
+    ModerateBenefit = 2,
+    StrongBenefit = 3,
 }
 
 public enum ConfidenceScore
 {
     Unknown = 0,
-    VeryLow = 1,
-    Low = 2,
-    Moderate = 3,
-    High = 4,
-    VeryHigh = 5
+    Low = 1,
+    Moderate = 2,
+    High = 3,
 }

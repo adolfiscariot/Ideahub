@@ -11,7 +11,7 @@
             <p>Loading idea details...</p>
         </div>
 
-        <form *ngIf="!isLoading && idea" [formGroup]="scoringForm" (ngSubmit)="onSubmit()">
+        <form *ngIf="!isLoading && idea" [formGroup]="scoringForm" (ngSubmit)="onSubmitPhase3()">
 
             <!-- PHASE 1: IDEA EVALUATION -->
             <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase1'">
@@ -132,7 +132,12 @@
                     <div class="scoring-inputs">
                         <div class="form-group">
                             <label for="score-p1">Evaluation Score (Threshold: 70%)</label>
-                            <input type="number" id="score-p1" formControlName="Score" min="0" max="100">
+                            <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
+                                (input)="clampScore($event)">
+                            <small class="field-error"
+                                *ngIf="scoringForm.get('Phase1.Score')?.invalid && scoringForm.get('Phase1.Score')?.touched">
+                                Score must be between 0 and 100.
+                            </small>
                             <div class="threshold-indicator" [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
                                 {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Threshold Met' : '✗ Below
                                 Threshold' }}
@@ -171,7 +176,7 @@
                     <div class="vertical-form">
                         <div class="form-group">
                             <label>Expected Benefits <span class="info-tooltip"
-                                    title="What value does the idea bring to the business">ⓘ</span></label>
+                                    title="What primary value or advantage does this idea offer?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of expectedBenefitsOptions"
                                     [title]="opt.tip">
@@ -204,6 +209,18 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Evaluation Status <span class="info-tooltip"
+                                    title="What is the current status of this evaluation?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of evaluationStatusOptions"
+                                    [title]="opt.tip">
+                                    <input type="radio" formControlName="EvaluationStatus" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <label>Responsible Dept <span class="info-tooltip"
                                     title="Which team will own this?">ⓘ</span></label>
                             <div class="radio-group">
@@ -221,6 +238,17 @@
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of actionStepOptions" [title]="opt.tip">
                                     <input type="radio" formControlName="NextSteps" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Stage <span class="info-tooltip"
+                                    title="Where is this project currently?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of resultOutcomeOptions" [title]="opt.tip">
+                                    <input type="radio" formControlName="CurrentStage" [value]="opt.value">
                                     <span>{{ opt.label }}</span>
                                 </label>
                             </div>
@@ -259,8 +287,7 @@
                         </div>
 
                         <!-- Phase 2 Action Button -->
-                        <div class="phase-actions"
-                            style="grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 1rem;">
+                        <div class="phase-actions" style="display: flex; justify-content: flex-end; padding-top: 1rem;">
                             <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" (click)="onSubmitPhase2()"
                                 [disabled]="isSectionLocked('phase2') || (scoringForm.get('Phase2')?.invalid ?? false)" />
                         </div>
@@ -283,7 +310,7 @@
                         <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
                     <div class="header-score" *ngIf="!isSectionLocked('phase3')">
-                        Final Score: <strong>{{ totalPhase3Score }}/60</strong>
+                        Final Score: <strong>{{ totalPhase3Score }}/36</strong>
                     </div>
                     <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 </div>
@@ -313,173 +340,150 @@
                 </div>
 
                 <div class="accordion-content" formGroupName="Phase3">
-                    <div class="metadata-list">
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>track_changes</mat-icon>
-                                <label for="StrategicAlignment">Strategic Alignment</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="StrategicAlignment" formControlName="StrategicAlignment">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of strategicAlignmentScores" [value]="opt.value">{{
-                                        opt.label }}
-                                    </option>
-                                </select>
+                    <div class="vertical-form">
+                        <!-- Strategic Alignment -->
+                        <div class="form-group">
+                            <label>Strategic Alignment <span class="info-tooltip"
+                                    title="How well does this idea align with our strategic goals?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of strategicAlignmentScores"
+                                    [title]="opt.tip">
+                                    <input type="radio" formControlName="StrategicAlignment" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>people</mat-icon>
-                                <label for="CustomerImpact">Customer/Stakeholder Impact</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="CustomerImpact" formControlName="CustomerImpact">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of customerImpactScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Customer Impact -->
+                        <div class="form-group">
+                            <label>Customer Impact <span class="info-tooltip"
+                                    title="What is the expected impact on customers or stakeholders?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of customerImpactScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="CustomerImpact" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>monetization_on</mat-icon>
-                                <label for="FinancialBenefit">Financial Benefit (ROI)</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="FinancialBenefit" formControlName="FinancialBenefit">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of financialBenefitScores" [value]="opt.value">{{ opt.label
-                                        }}
-                                    </option>
-                                </select>
+                        <!-- Financial Benefit -->
+                        <div class="form-group">
+                            <label>Financial Benefit (ROI) <span class="info-tooltip"
+                                    title="What is the projected financial return on investment?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of financialBenefitScores"
+                                    [title]="opt.tip">
+                                    <input type="radio" formControlName="FinancialBenefit" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>build</mat-icon>
-                                <label for="Feasibility">Feasibility (Tech/Ops)</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Feasibility" formControlName="Feasibility">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of feasibilityScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Feasibility -->
+                        <div class="form-group">
+                            <label>Feasibility (Tech/Ops) <span class="info-tooltip"
+                                    title="How feasible is the technical and operational implementation?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of feasibilityScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Feasibility" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>timer</mat-icon>
-                                <label for="TimeToValue">Time to Value</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="TimeToValue" formControlName="TimeToValue">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of timeToValueScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Time to Value -->
+                        <div class="form-group">
+                            <label>Time to Value <span class="info-tooltip"
+                                    title="How soon will the benefits of this idea be realized?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of timeToValueScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="TimeToValue" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>account_balance_wallet</mat-icon>
-                                <label for="Cost">Project Cost</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Cost" formControlName="Cost">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of costScores" [value]="opt.value">{{ opt.label }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>fitness_center</mat-icon>
-                                <label for="Effort">Implementation Effort</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Effort" formControlName="Effort">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of effortScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Project Cost -->
+                        <div class="form-group">
+                            <label>Project Cost <span class="info-tooltip"
+                                    title="What is the estimated cost of this project?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of costScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Cost" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>warning</mat-icon>
-                                <label for="Risk">Execution Risk</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Risk" formControlName="Risk">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of riskScores" [value]="opt.value">{{ opt.label }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>trending_up</mat-icon>
-                                <label for="Scalability">Scalability</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Scalability" formControlName="Scalability">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of scalabilityScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Implementation Effort -->
+                        <div class="form-group">
+                            <label>Implementation Effort <span class="info-tooltip"
+                                    title="How much effort is required for implementation?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of effortScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Effort" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>verified_user</mat-icon>
-                                <label for="Differentiation">Differentiation</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="Differentiation" formControlName="Differentiation">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of differentiationScores" [value]="opt.value">{{ opt.label
-                                        }}
-                                    </option>
-                                </select>
+                        <!-- Execution Risk -->
+                        <div class="form-group">
+                            <label>Execution Risk <span class="info-tooltip"
+                                    title="What are the risks associated with executing this idea?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of riskScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Risk" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>eco</mat-icon>
-                                <label for="SustainabilityImpact">Sustainability & ESG</label>
-                            </div>
-                            <div class="meta-value">
-                                <select id="SustainabilityImpact" formControlName="SustainabilityImpact">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of sustainabilityScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        <!-- Scalability -->
+                        <div class="form-group">
+                            <label>Scalability <span class="info-tooltip"
+                                    title="How easily can this solution be scaled?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of scalabilityScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Scalability" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div class="meta-row">
-                            <div class="meta-key">
-                                <mat-icon>psychology</mat-icon>
-                                <label for="ProjectConfidence">Project Confidence</label>
+                        <!-- Differentiation -->
+                        <div class="form-group">
+                            <label>Differentiation <span class="info-tooltip"
+                                    title="How does this idea differentiate us from competitors?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of differentiationScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="Differentiation" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
-                            <div class="meta-value">
-                                <select id="ProjectConfidence" formControlName="ProjectConfidence">
-                                    <option value="">Rank</option>
-                                    <option *ngFor="let opt of confidenceScores" [value]="opt.value">{{ opt.label }}
-                                    </option>
-                                </select>
+                        </div>
+
+                        <!-- Sustainability Impact -->
+                        <div class="form-group">
+                            <label>Sustainability & ESG <span class="info-tooltip"
+                                    title="What is the impact on sustainability and ESG goals?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of sustainabilityScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="SustainabilityImpact" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Project Confidence -->
+                        <div class="form-group">
+                            <label>Project Confidence <span class="info-tooltip"
+                                    title="How confident are we in the success of this project?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of confidenceScores" [title]="opt.tip">
+                                    <input type="radio" formControlName="ProjectConfidence" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -495,7 +499,7 @@
                         <div class="phase-actions"
                             style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
                             <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="submit"
-                                [disabled]="(scoringForm.invalid ?? false) || isSectionLocked('phase3')" />
+                                [disabled]="(scoringForm.invalid) || isSectionLocked('phase3')" />
                         </div>
                     </div>
                 </div>
