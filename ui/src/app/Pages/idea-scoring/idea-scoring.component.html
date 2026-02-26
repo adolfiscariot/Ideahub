@@ -19,7 +19,10 @@
                 <div class="accordion-header" (click)="toggleSection('phase1')">
                     <div class="header-main">
                         <span class="step-number">1</span>
-                        <h3>Phase 1: Idea Evaluation</h3>
+                        <div class="header-text">
+                            <h3>Phase 1: Idea Evaluation</h3>
+                            <p class="phase-description">Outlines the idea details</p>
+                        </div>
                     </div>
                     <mat-icon>{{ expandedSection === 'phase1' ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 </div>
@@ -129,7 +132,6 @@
                                 Threshold' }}
                             </div>
                         </div>
-                        /[disabled]
                     </div>
 
                     <div class="phase-actions"
@@ -151,7 +153,10 @@
                 <div class="accordion-header" (click)="toggleSection('phase2')">
                     <div class="header-main">
                         <span class="step-number">2</span>
-                        <h3>Phase 2: Business Case</h3>
+                        <div class="header-text">
+                            <h3>Phase 2: Business Case</h3>
+                            <p class="phase-description">Is the idea viable for the business?</p>
+                        </div>
                         <span *ngIf="isSectionLocked('phase2')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
                     <mat-icon>{{ expandedSection === 'phase2' ? 'expand_more' : 'chevron_right' }}</mat-icon>
@@ -258,7 +263,10 @@
                 <div class="accordion-header" (click)="toggleSection('phase3')">
                     <div class="header-main">
                         <span class="step-number">3</span>
-                        <h3>Phase 3: Scoring Dimensions</h3>
+                        <div class="header-text">
+                            <h3>Phase 3: Scoring Dimensions</h3>
+                            <p class="phase-description">Score the idea based on the below values</p>
+                        </div>
                         <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
                     <div class="header-score" *ngIf="!isSectionLocked('phase3')">
