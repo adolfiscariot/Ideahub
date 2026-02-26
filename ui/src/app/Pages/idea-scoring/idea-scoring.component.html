@@ -161,8 +161,8 @@
                         <span class="step-number">2</span>
                         <div class="header-text">
                             <h3>Phase 2: Business Case</h3>
-                            <p class="phase-description">Outlines scores for the business case of this idea i.e. is it
-                                viable for the business</p>
+                            <p class="phase-description">Evaluate the ideas business viability, risk, and strategic fit
+                            </p>
                         </div>
                         <span *ngIf="isSectionLocked('phase2')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
@@ -170,77 +170,86 @@
                 </div>
 
                 <div class="accordion-content" formGroupName="Phase2">
-                    <div class="grid-form">
+                    <div class="vertical-form">
                         <div class="form-group">
-                            <label for="ExpectedBenefits">Expected Benefits</label>
-                            <select id="ExpectedBenefits" formControlName="ExpectedBenefits">
-                                <option value="">Select Benefit</option>
-                                <option *ngFor="let opt of expectedBenefitsOptions" [value]="opt">{{ opt }}</option>
-                            </select>
+                            <label>Expected Benefits <span class="info-tooltip"
+                                    title="What value does the idea bring to the business">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of expectedBenefitsOptions"
+                                    [title]="opt.tip">
+                                    <input type="radio" formControlName="ExpectedBenefits" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="ImpactScope">Impact Scope</label>
-                            <select id="ImpactScope" formControlName="ImpactScope">
-                                <option value="">Select Scope</option>
-                                <option *ngFor="let opt of impactScopeOptions" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+                            <label>Impact Scope <span class="info-tooltip"
+                                    title="Who does this idea affect?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of impactScopeOptions" [title]="opt.tip">
+                                    <input type="radio" formControlName="ImpactScope" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="RiskLevel">Risk Level</label>
-                            <select id="RiskLevel" formControlName="RiskLevel">
-                                <option value="">Select Risk</option>
-                                <option *ngFor="let opt of riskLevelOptions" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+                            <label>Risk Level <span class="info-tooltip"
+                                    title="How risky is this idea to pursue?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of riskLevelOptions" [title]="opt.tip">
+                                    <input type="radio" formControlName="RiskLevel" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="EvaluationStatus">Evaluation Status</label>
-                            <select id="EvaluationStatus" formControlName="EvaluationStatus">
-                                <option value="">Select Status</option>
-                                <option *ngFor="let opt of evaluationStatusOptions" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+                            <label>Responsible Dept <span class="info-tooltip"
+                                    title="Which team will own this?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of responsibleDeptOptions"
+                                    [title]="opt.tip">
+                                    <input type="radio" formControlName="OwnerDepartment" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="OwnerDepartment">Owner / Responsible Department</label>
-                            <select id="OwnerDepartment" formControlName="OwnerDepartment">
-                                <option value="">Select Dept</option>
-                                <option *ngFor="let opt of responsibleDeptOptions" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+                            <label>Next Steps <span class="info-tooltip"
+                                    title="What should happen next?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of actionStepOptions" [title]="opt.tip">
+                                    <input type="radio" formControlName="NextSteps" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="NextSteps">Next Steps / Milestones</label>
-                            <select id="NextSteps" formControlName="NextSteps">
-                                <option value="">Select Next Step</option>
-                                <option *ngFor="let opt of actionStepOptions" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="DecisionDate">Decision Date</label>
+                            <label for="DecisionDate">Decision Date <span class="info-tooltip"
+                                    title="When should a decision be made?">ⓘ</span></label>
                             <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
                         </div>
 
                         <div class="form-group">
-                            <label for="PlannedDurationWeeks">Planned Duration (Weeks)</label>
+                            <label for="PlannedDurationWeeks">Duration (Weeks) <span class="info-tooltip"
+                                    title="How long will this take?">ⓘ</span></label>
                             <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
                                 placeholder="Select Duration">
                         </div>
 
                         <div class="form-group verdict-group">
-                            <label for="Verdict">Go / No-Go Verdict (Required for Phase 3)</label>
-                            <select id="Verdict" formControlName="Verdict">
-                                <option value="">Select Verdict</option>
-                                <option *ngFor="let opt of verdictOptions" [value]="opt.value">{{ opt.label }}</option>
-                            </select>
+                            <label>Go / No-Go Verdict <span class="info-tooltip"
+                                    title="Should we go ahead with this idea?">ⓘ</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option" *ngFor="let opt of verdictOptions" [title]="opt.tip">
+                                    <input type="radio" formControlName="Verdict" [value]="opt.value">
+                                    <span>{{ opt.label }}</span>
+                                </label>
+                            </div>
                             <div class="verdict-indicator"
                                 [class.met]="scoringForm.get('Phase2.Verdict')?.value === 'Approved'">
                                 <mat-icon>{{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? 'check_circle' :
