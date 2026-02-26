@@ -129,7 +129,7 @@
                                 Threshold' }}
                             </div>
                         </div>
-
+                        /[disabled]
                     </div>
 
                     <div class="phase-actions"
@@ -160,16 +160,16 @@
                 <div class="accordion-content" formGroupName="Phase2">
                     <div class="grid-form">
                         <div class="form-group">
-                            <label>Expected Benefits</label>
-                            <select formControlName="ExpectedBenefits">
+                            <label for="ExpectedBenefits">Expected Benefits</label>
+                            <select id="ExpectedBenefits" formControlName="ExpectedBenefits">
                                 <option value="">Select Benefit</option>
                                 <option *ngFor="let opt of expectedBenefitsOptions" [value]="opt">{{ opt }}</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Impact Scope</label>
-                            <select formControlName="ImpactScope">
+                            <label for="ImpactScope">Impact Scope</label>
+                            <select id="ImpactScope" formControlName="ImpactScope">
                                 <option value="">Select Scope</option>
                                 <option *ngFor="let opt of impactScopeOptions" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -177,8 +177,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Risk Level</label>
-                            <select formControlName="RiskLevel">
+                            <label for="RiskLevel">Risk Level</label>
+                            <select id="RiskLevel" formControlName="RiskLevel">
                                 <option value="">Select Risk</option>
                                 <option *ngFor="let opt of riskLevelOptions" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -186,8 +186,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Evaluation Status</label>
-                            <select formControlName="EvaluationStatus">
+                            <label for="EvaluationStatus">Evaluation Status</label>
+                            <select id="EvaluationStatus" formControlName="EvaluationStatus">
                                 <option value="">Select Status</option>
                                 <option *ngFor="let opt of evaluationStatusOptions" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -195,8 +195,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Owner / Responsible Department</label>
-                            <select formControlName="OwnerDepartment">
+                            <label for="OwnerDepartment">Owner / Responsible Department</label>
+                            <select id="OwnerDepartment" formControlName="OwnerDepartment">
                                 <option value="">Select Dept</option>
                                 <option *ngFor="let opt of responsibleDeptOptions" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -204,8 +204,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Next Steps / Milestones</label>
-                            <select formControlName="NextSteps">
+                            <label for="NextSteps">Next Steps / Milestones</label>
+                            <select id="NextSteps" formControlName="NextSteps">
                                 <option value="">Select Next Step</option>
                                 <option *ngFor="let opt of actionStepOptions" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -213,18 +213,19 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Decision Date</label>
-                            <input type="date" formControlName="DecisionDate" placeholder="dd/mm/yy">
+                            <label for="DecisionDate">Decision Date</label>
+                            <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
                         </div>
 
                         <div class="form-group">
-                            <label>Planned Duration (Weeks)</label>
-                            <input type="number" formControlName="PlannedDurationWeeks" placeholder="Select Duration">
+                            <label for="PlannedDurationWeeks">Planned Duration (Weeks)</label>
+                            <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
+                                placeholder="Select Duration">
                         </div>
 
                         <div class="form-group verdict-group">
-                            <label>Go / No-Go Verdict (Required for Phase 3)</label>
-                            <select formControlName="Verdict">
+                            <label for="Verdict">Go / No-Go Verdict (Required for Phase 3)</label>
+                            <select id="Verdict" formControlName="Verdict">
                                 <option value="">Select Verdict</option>
                                 <option *ngFor="let opt of verdictOptions" [value]="opt.value">{{ opt.label }}</option>
                             </select>
@@ -241,8 +242,8 @@
                         <!-- Phase 2 Action Button -->
                         <div class="phase-actions"
                             style="grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 1rem;">
-                            <button type="button" class="btn btn-primary" (click)="onSubmitPhase2()"
-                                [disabled]="scoringForm.get('Phase2')?.invalid">
+                            <button type="button" class="btn btn-primary" (click)="onSubmitPhase2()" +
+                                [disabled]="isSectionLocked('phase2') || scoringForm.get('Phase2')?.invalid">
                                 SUBMIT BUSINESS CASE REVIEW
                             </button>
                         </div>
@@ -274,93 +275,93 @@
 
                     <div class="dimensions-grid">
                         <div class="dimension-card">
-                            <label>Strategic Alignment</label>
-                            <select formControlName="StrategicAlignment">
+                            <label for="StrategicAlignment">Strategic Alignment</label>
+                            <select id="StrategicAlignment" formControlName="StrategicAlignment">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of strategicAlignmentScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Customer/Stakeholder Impact</label>
-                            <select formControlName="CustomerImpact">
+                            <label for="CustomerImpact">Customer/Stakeholder Impact</label>
+                            <select id="CustomerImpact" formControlName="CustomerImpact">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of customerImpactScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Financial Benefit (ROI)</label>
-                            <select formControlName="FinancialBenefit">
+                            <label for="FinancialBenefit">Financial Benefit (ROI)</label>
+                            <select id="FinancialBenefit" formControlName="FinancialBenefit">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of financialBenefitScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Feasibility (Tech/Ops)</label>
-                            <select formControlName="Feasibility">
+                            <label for="Feasibility">Feasibility (Tech/Ops)</label>
+                            <select id="Feasibility" formControlName="Feasibility">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of feasibilityScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Time to Value</label>
-                            <select formControlName="TimeToValue">
+                            <label for="TimeToValue">Time to Value</label>
+                            <select id="TimeToValue" formControlName="TimeToValue">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of timeToValueScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Project Cost</label>
-                            <select formControlName="Cost">
+                            <label for="Cost">Project Cost</label>
+                            <select id="Cost" formControlName="Cost">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of costScores" [value]="opt.value">{{ opt.label }}</option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Implementation Effort</label>
-                            <select formControlName="Effort">
+                            <label for="Effort">Implementation Effort</label>
+                            <select id="Effort" formControlName="Effort">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of effortScores" [value]="opt.value">{{ opt.label }}</option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Execution Risk</label>
-                            <select formControlName="Risk">
+                            <label for="Risk">Execution Risk</label>
+                            <select id="Risk" formControlName="Risk">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of riskScores" [value]="opt.value">{{ opt.label }}</option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Scalability</label>
-                            <select formControlName="Scalability">
+                            <label for="Scalability">Scalability</label>
+                            <select id="Scalability" formControlName="Scalability">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of scalabilityScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Differentiation</label>
-                            <select formControlName="Differentiation">
+                            <label for="Differentiation">Differentiation</label>
+                            <select id="Differentiation" formControlName="Differentiation">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of differentiationScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Sustainability & ESG</label>
-                            <select formControlName="SustainabilityImpact">
+                            <label for="SustainabilityImpact">Sustainability & ESG</label>
+                            <select id="SustainabilityImpact" formControlName="SustainabilityImpact">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of sustainabilityScores" [value]="opt.value">{{ opt.label }}
                                 </option>
                             </select>
                         </div>
                         <div class="dimension-card">
-                            <label>Project Confidence</label>
-                            <select formControlName="ProjectConfidence">
+                            <label for="ProjectConfidence">Project Confidence</label>
+                            <select id="ProjectConfidence" formControlName="ProjectConfidence">
                                 <option value="">Rank</option>
                                 <option *ngFor="let opt of confidenceScores" [value]="opt.value">{{ opt.label }}
                                 </option>
@@ -370,8 +371,9 @@
 
                     <div class="summary-section">
                         <div class="form-group">
-                            <label>Final Reviewer Comments <span class="text-danger">*</span></label>
-                            <textarea formControlName="ReviewerComments"
+                            <label for="ReviewerComments">Final Reviewer Comments <span
+                                    class="text-danger">*</span></label>
+                            <textarea id="ReviewerComments" formControlName="ReviewerComments"
                                 placeholder="Summarize your final verdict..."></textarea>
                         </div>
 
