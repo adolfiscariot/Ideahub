@@ -29,94 +29,101 @@
 
                 <div class="accordion-content" formGroupName="Phase1">
                     <div class="read-only-details">
-                        <!-- Top Metadata Grid -->
-                        <div class="metadata-grid">
-                            <div class="meta-item">
-                                <mat-icon>person</mat-icon>
-                                <div>
+                        <!-- Sequential Information List (Metadata + Narratives) -->
+                        <div class="metadata-list">
+                            <!-- Metadata Rows -->
+                            <div class="meta-row">
+                                <div class="meta-key">
+                                    <mat-icon>person</mat-icon>
                                     <label>Author</label>
+                                </div>
+                                <div class="meta-value">
                                     <p>{{ idea.author || idea.author || idea.userName || 'Anonymous' }}</p>
                                 </div>
                             </div>
-                            <div class="meta-item">
-                                <mat-icon>track_changes</mat-icon>
-                                <div>
+                            <div class="meta-row">
+                                <div class="meta-key">
+                                    <mat-icon>track_changes</mat-icon>
                                     <label>Strategic Alignment</label>
+                                </div>
+                                <div class="meta-value">
                                     <p>{{ idea.strategicAlignment || idea.StrategicAlignment || 'N/A' }}</p>
                                 </div>
                             </div>
-                            <div class="meta-item">
-                                <mat-icon>category</mat-icon>
-                                <div>
+                            <div class="meta-row">
+                                <div class="meta-key">
+                                    <mat-icon>category</mat-icon>
                                     <label>Innovation Category</label>
+                                </div>
+                                <div class="meta-value">
                                     <p>{{ idea.innovationCategory || idea.InnovationCategory || 'N/A' }}</p>
                                 </div>
                             </div>
-                            <div class="meta-item">
-                                <mat-icon>subtitles</mat-icon>
-                                <div>
+                            <div class="meta-row">
+                                <div class="meta-key">
+                                    <mat-icon>subtitles</mat-icon>
                                     <label>Sub Category</label>
+                                </div>
+                                <div class="meta-value">
                                     <p>{{ idea.subCategory || idea.SubCategory || 'N/A' }}</p>
                                 </div>
                             </div>
-                            <div class="meta-item">
-                                <mat-icon>memory</mat-icon>
-                                <div>
+                            <div class="meta-row">
+                                <div class="meta-key">
+                                    <mat-icon>memory</mat-icon>
                                     <label>Technology Involved</label>
+                                </div>
+                                <div class="meta-value">
                                     <p>{{ idea.technologyInvolved || idea.TechnologyInvolved || 'N/A' }}</p>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Narrative Narrative Sections -->
-                        <div class="narrative-sections">
-                            <div class="narrative-card">
-                                <div class="card-header">
+                            <!-- Narrative Rows -->
+                            <div class="meta-row">
+                                <div class="meta-key">
                                     <mat-icon>error_outline</mat-icon>
-                                    <h4>Problem Statement</h4>
+                                    <label>Problem Statement</label>
                                 </div>
-                                <div class="card-body">
+                                <div class="meta-value">
                                     <p>{{ idea.problemStatement || idea.ProblemStatement || 'N/A' }}</p>
                                 </div>
                             </div>
-
-                            <div class="narrative-card">
-                                <div class="card-header">
+                            <div class="meta-row">
+                                <div class="meta-key">
                                     <mat-icon>lightbulb_outline</mat-icon>
-                                    <h4>Proposed Solution</h4>
+                                    <label>Proposed Solution</label>
                                 </div>
-                                <div class="card-body">
+                                <div class="meta-value">
                                     <p>{{ idea.proposedSolution || idea.ProposedSolution || 'N/A' }}</p>
                                 </div>
                             </div>
-
-                            <div class="narrative-card" *ngIf="idea.useCase || idea.UseCase">
-                                <div class="card-header">
+                            <div class="meta-row" *ngIf="idea.useCase || idea.UseCase">
+                                <div class="meta-key">
                                     <mat-icon>assignment</mat-icon>
-                                    <h4>Use Case & Benefits</h4>
+                                    <label>Use Case & Benefits</label>
                                 </div>
-                                <div class="card-body">
+                                <div class="meta-value">
                                     <p>{{ idea.useCase || idea.UseCase || 'N/A' }}</p>
                                 </div>
                             </div>
 
-                            <!-- AI Reasoning Highlight -->
-                            <div class="ai-insight-card" *ngIf="idea.AiReasoning || idea.AiReasoning">
-                                <div class="ai-header">
+                            <!-- AI Reasoning Highlight Row -->
+                            <div class="meta-row ai-insight-row" *ngIf="idea.AiReasoning || idea.AiReasoning">
+                                <div class="meta-key">
                                     <mat-icon>psychology</mat-icon>
-                                    <h4>AI Evaluation Insight</h4>
+                                    <label>AI Evaluation Insight</label>
                                 </div>
-                                <div class="ai-body">
+                                <div class="meta-value">
                                     <p>{{ idea.AiReasoning || idea.AiReasoning }}</p>
                                 </div>
                             </div>
 
-                            <div class="narrative-card" *ngIf="idea.notes || idea.Notes">
-                                <div class="card-header">
+                            <div class="meta-row" *ngIf="idea.notes || idea.Notes">
+                                <div class="meta-key">
                                     <mat-icon>note</mat-icon>
-                                    <h4>Original Author Notes</h4>
+                                    <label>Original Author Notes</label>
                                 </div>
-                                <div class="card-body">
+                                <div class="meta-value">
                                     <p>{{ idea.notes || idea.Notes || 'N/A' }}</p>
                                 </div>
                             </div>
@@ -155,7 +162,8 @@
                         <span class="step-number">2</span>
                         <div class="header-text">
                             <h3>Phase 2: Business Case</h3>
-                            <p class="phase-description">Is the idea viable for the business?</p>
+                            <p class="phase-description">Outlines scores for the business case of this idea i.e. is it
+                                viable for the business</p>
                         </div>
                         <span *ngIf="isSectionLocked('phase2')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
@@ -265,7 +273,7 @@
                         <span class="step-number">3</span>
                         <div class="header-text">
                             <h3>Phase 3: Scoring Dimensions</h3>
-                            <p class="phase-description">Score the idea based on the below values</p>
+                            <p class="phase-description">About the various scoring dimensions</p>
                         </div>
                         <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
