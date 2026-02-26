@@ -340,7 +340,7 @@ export class IdeaScoringComponent implements OnInit {
 
     const dto: BusinessCaseDto = phase2Group?.value;
 
-    this.scoringService.submitBusinessCase(Number(this.ideaId), dto).subscribe({
+    this.scoringService.submitBusinessCase(this.ideaId, dto).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastService.show('Business Case submitted successfully', 'success');
@@ -373,7 +373,7 @@ export class IdeaScoringComponent implements OnInit {
 
     console.log('Phase 3 Submission Payload:', dto);
 
-    this.scoringService.submitScoringDimensions(Number(this.ideaId), dto).subscribe({
+    this.scoringService.submitScoringDimensions(this.ideaId, dto).subscribe({
       next: (res) => {
         console.log('Phase 3 Submission Response:', res);
         if (res.success) {
