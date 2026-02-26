@@ -165,13 +165,13 @@ public class ScoringController : ControllerBase
         dimensions.ProjectConfidence = dto.ProjectConfidence;
         dimensions.ReviewerComments = dto.ReviewerComments;
 
-        // Formula: ( sum(12 fields) / (No of fields * 5(max score of each field)) ) * 100
+        // Formula: ( sum(12 fields) / (No of fields * 3(max score of each field)) ) * 100
         float sum = (int)dto.StrategicAlignment + (int)dto.CustomerImpact + (int)dto.FinancialBenefit +
                     (int)dto.Feasibility + (int)dto.TimeToValue + (int)dto.Cost + (int)dto.Effort +
                     (int)dto.Risk + (int)dto.Scalability + (int)dto.Differentiation +
                     (int)dto.SustainabilityImpact + (int)dto.ProjectConfidence;
 
-        dimensions.Score = MathF.Round((sum / 60.0f) * 100, 1);
+        dimensions.Score = MathF.Round((sum / 36.0f) * 100, 1);
 
         if (idea.ScoringDimensions == null)
         {

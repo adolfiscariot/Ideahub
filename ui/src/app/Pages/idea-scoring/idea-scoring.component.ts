@@ -31,7 +31,7 @@ export class IdeaScoringComponent implements OnInit {
   isLoading = true;
 
   // Accordion state
-  expandedSection: 'phase1' | 'phase2' | 'phase3' = 'phase1';
+  expandedSection: 'phase1' | 'phase2' | 'phase3' | null = 'phase1';
 
   scoringForm!: FormGroup;
 
@@ -88,88 +88,64 @@ export class IdeaScoringComponent implements OnInit {
 
   // Phase 3 Metric Options
   strategicAlignmentScores = [
-    { label: 'No Alignment', value: StrategicAlignmentScore.NoAlignment },
     { label: 'Low', value: StrategicAlignmentScore.Low },
     { label: 'Moderate', value: StrategicAlignmentScore.Moderate },
-    { label: 'Strong', value: StrategicAlignmentScore.Strong },
-    { label: 'Full Alignment', value: StrategicAlignmentScore.Full }
+    { label: 'High', value: StrategicAlignmentScore.Strong },
   ];
   customerImpactScores = [
-    { label: 'Minimal', value: CustomerImpactScore.Minimal },
     { label: 'Low', value: CustomerImpactScore.Low },
     { label: 'Moderate', value: CustomerImpactScore.Moderate },
     { label: 'High', value: CustomerImpactScore.High },
-    { label: 'Transformational', value: CustomerImpactScore.Transformational }
   ];
   financialBenefitScores = [
-    { label: 'No Gain', value: FinancialBenefitScore.NoGain },
     { label: 'Low', value: FinancialBenefitScore.Low },
     { label: 'Moderate', value: FinancialBenefitScore.Moderate },
     { label: 'High', value: FinancialBenefitScore.High },
-    { label: 'Breakthrough', value: FinancialBenefitScore.Breakthrough }
   ];
   feasibilityScores = [
     { label: 'Very Difficult', value: FeasibilityScore.VeryDifficult },
-    { label: 'Low', value: FeasibilityScore.Low },
     { label: 'Moderate', value: FeasibilityScore.Moderate },
     { label: 'High', value: FeasibilityScore.High },
-    { label: 'Very Feasible', value: FeasibilityScore.VeryFeasible }
   ];
   timeToValueScores = [
-    { label: 'Over 24 Months', value: TimeToValueScore.Over24Months },
-    { label: '12-24 Months', value: TimeToValueScore.TwelveToTwentyFour },
-    { label: '6-12 Months', value: TimeToValueScore.SixToTwelve },
+    { label: 'Over 6 Months', value: TimeToValueScore.SixToTwelve },
     { label: '3-6 Months', value: TimeToValueScore.ThreeToSix },
     { label: 'Under 3 Months', value: TimeToValueScore.UnderThreeMonths }
   ];
   costScores = [
-    { label: 'Very High', value: CostScore.VeryHigh },
     { label: 'High', value: CostScore.High },
     { label: 'Moderate', value: CostScore.Moderate },
     { label: 'Low', value: CostScore.Low },
-    { label: 'Very Low', value: CostScore.VeryLow }
   ];
   effortScores = [
-    { label: 'Very High', value: EffortScore.VeryHigh },
     { label: 'High', value: EffortScore.High },
     { label: 'Moderate', value: EffortScore.Moderate },
     { label: 'Low', value: EffortScore.Low },
-    { label: 'Very Low', value: EffortScore.VeryLow }
   ];
   riskScores = [
-    { label: 'Very High', value: RiskScore.VeryHigh },
     { label: 'High', value: RiskScore.High },
     { label: 'Moderate', value: RiskScore.Moderate },
     { label: 'Low', value: RiskScore.Low },
-    { label: 'Very Low', value: RiskScore.VeryLow }
   ];
   scalabilityScores = [
-    { label: 'Not Scalable', value: ScalabilityScore.NotScalable },
     { label: 'Low', value: ScalabilityScore.Low },
     { label: 'Moderate', value: ScalabilityScore.Moderate },
     { label: 'High', value: ScalabilityScore.High },
-    { label: 'Fully Scalable', value: ScalabilityScore.FullyScalable }
   ];
   differentiationScores = [
-    { label: 'No Differentiation', value: DifferentiationScore.NoDifferentiation },
     { label: 'Low Uniqueness', value: DifferentiationScore.LowUniqueness },
     { label: 'Moderate Uniqueness', value: DifferentiationScore.ModerateUniqueness },
-    { label: 'High Differentiation', value: DifferentiationScore.HighDifferentiation },
-    { label: 'Unique Strong IP', value: DifferentiationScore.UniqueStrongIP }
+    { label: 'High Uniqueness', value: DifferentiationScore.HighDifferentiation },
   ];
   sustainabilityScores = [
-    { label: 'Negative Impact', value: SustainabilityScore.NegativeImpact },
     { label: 'Minimal Benefit', value: SustainabilityScore.MinimalBenefit },
     { label: 'Moderate Benefit', value: SustainabilityScore.ModerateBenefit },
     { label: 'Strong Benefit', value: SustainabilityScore.StrongBenefit },
-    { label: 'Major Benefit', value: SustainabilityScore.MajorBenefit }
   ];
   confidenceScores = [
-    { label: 'Very Low', value: ConfidenceScore.VeryLow },
     { label: 'Low', value: ConfidenceScore.Low },
     { label: 'Moderate', value: ConfidenceScore.Moderate },
     { label: 'High', value: ConfidenceScore.High },
-    { label: 'Very High', value: ConfidenceScore.VeryHigh }
   ];
 
   ngOnInit(): void {
@@ -273,7 +249,7 @@ export class IdeaScoringComponent implements OnInit {
 
   toggleSection(section: 'phase1' | 'phase2' | 'phase3'): void {
     if (this.isSectionLocked(section)) return;
-    this.expandedSection = this.expandedSection === section ? 'phase1' : section;
+    this.expandedSection = this.expandedSection === section ? null : section;
   }
 
   isSectionLocked(section: 'phase1' | 'phase2' | 'phase3'): boolean {

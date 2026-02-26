@@ -1,9 +1,9 @@
 <div class="scoring-page">
     <div class="scoring-container">
         <div class="scoring-header">
-            <button class="back-btn" (click)="goBack()">
+            <app-buttons class="back-btn-wrapper" buttonText="" buttonStyleClass="btn-promote" (click)="goBack()">
                 <mat-icon>arrow_back</mat-icon> Back to Ideas
-            </button>
+            </app-buttons>
             <h2>Idea Scoring & Review</h2>
         </div>
 
@@ -142,12 +142,10 @@
 
                     <div class="phase-actions"
                         style="display: flex; justify-content: flex-end; padding: 0 1.5rem 1.5rem;">
-                        <button type="button" class="btn btn-primary" (click)="updatePhase1Score()"
-                            [disabled]="isLoading">
-                            <mat-icon *ngIf="!isLoading">sync</mat-icon>
-                            <span *ngIf="isLoading" class="spinner-small"></span>
-                            {{ isLoading ? 'Updating...' : 'Update Idea' }}
-                        </button>
+                        <app-buttons buttonText="Update Idea" buttonStyleClass="btn-promote"
+                            (click)="updatePhase1Score()" [disabled]="isLoading" [isLoading]="isLoading">
+                            <mat-icon>sync</mat-icon>
+                        </app-buttons>
                     </div>
                 </div>
             </div>
@@ -263,10 +261,8 @@
                         <!-- Phase 2 Action Button -->
                         <div class="phase-actions"
                             style="grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 1rem;">
-                            <button type="button" class="btn btn-primary" (click)="onSubmitPhase2()" +
-                                [disabled]="isSectionLocked('phase2') || scoringForm.get('Phase2')?.invalid">
-                                SUBMIT BUSINESS CASE REVIEW
-                            </button>
+                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" (click)="onSubmitPhase2()"
+                                [disabled]="isSectionLocked('phase2') || (scoringForm.get('Phase2')?.invalid ?? false)" />
                         </div>
                     </div>
                 </div>
@@ -281,7 +277,8 @@
                         <span class="step-number">3</span>
                         <div class="header-text">
                             <h3>Phase 3: Scoring Dimensions</h3>
-                            <p class="phase-description">About the various scoring dimensions</p>
+                            <p class="phase-description">Rank each dimension from 1 (lowest impact) to 5 (highest
+                                benefit)</p>
                         </div>
                         <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
@@ -291,105 +288,199 @@
                     <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 </div>
 
-                <div class="accordion-content" formGroupName="Phase3">
-                    <!-- Instruction Note -->
-                    <p class="section-instruction">
-                        * Rank each dimension from 1 (lowest impact) to 5 (highest benefit).
-                    </p>
+                <!-- Rank Definitions (0-10 Scale mapping) -->
+                <div class="low-high">
+                    <div class="def-group">
+                        <span class="def-rank low">Low (0-3)</span>
+                        <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource consumption.
+                            Suitable for small improvements.</p>
+                    </div>
+                    <div class="def-group">
+                        <span class="def-rank moderate">Moderate (4-6)</span>
+                        <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
+                            effort. Represents steady value addition.</p>
+                    </div>
+                    <div class="def-group">
+                        <span class="def-rank high">High (7-10)</span>
+                        <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
+                            commitment. Key to long-term strategy.</p>
+                    </div>
+                    <div class="def-note">
+                        <mat-icon>info</mat-icon>
+                        <p>Note: For <strong>Project Cost, Effort, and Risk</strong>, a "Low" score is a positive
+                            outcome (less cost/risk is better).</p>
+                    </div>
+                </div>
 
-                    <div class="dimensions-grid">
-                        <div class="dimension-card">
-                            <label for="StrategicAlignment">Strategic Alignment</label>
-                            <select id="StrategicAlignment" formControlName="StrategicAlignment">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of strategicAlignmentScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+                <div class="accordion-content" formGroupName="Phase3">
+                    <div class="metadata-list">
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>track_changes</mat-icon>
+                                <label for="StrategicAlignment">Strategic Alignment</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="StrategicAlignment" formControlName="StrategicAlignment">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of strategicAlignmentScores" [value]="opt.value">{{
+                                        opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="CustomerImpact">Customer/Stakeholder Impact</label>
-                            <select id="CustomerImpact" formControlName="CustomerImpact">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of customerImpactScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>people</mat-icon>
+                                <label for="CustomerImpact">Customer/Stakeholder Impact</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="CustomerImpact" formControlName="CustomerImpact">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of customerImpactScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="FinancialBenefit">Financial Benefit (ROI)</label>
-                            <select id="FinancialBenefit" formControlName="FinancialBenefit">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of financialBenefitScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>monetization_on</mat-icon>
+                                <label for="FinancialBenefit">Financial Benefit (ROI)</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="FinancialBenefit" formControlName="FinancialBenefit">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of financialBenefitScores" [value]="opt.value">{{ opt.label
+                                        }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Feasibility">Feasibility (Tech/Ops)</label>
-                            <select id="Feasibility" formControlName="Feasibility">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of feasibilityScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>build</mat-icon>
+                                <label for="Feasibility">Feasibility (Tech/Ops)</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Feasibility" formControlName="Feasibility">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of feasibilityScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="TimeToValue">Time to Value</label>
-                            <select id="TimeToValue" formControlName="TimeToValue">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of timeToValueScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>timer</mat-icon>
+                                <label for="TimeToValue">Time to Value</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="TimeToValue" formControlName="TimeToValue">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of timeToValueScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Cost">Project Cost</label>
-                            <select id="Cost" formControlName="Cost">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of costScores" [value]="opt.value">{{ opt.label }}</option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>account_balance_wallet</mat-icon>
+                                <label for="Cost">Project Cost</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Cost" formControlName="Cost">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of costScores" [value]="opt.value">{{ opt.label }}</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Effort">Implementation Effort</label>
-                            <select id="Effort" formControlName="Effort">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of effortScores" [value]="opt.value">{{ opt.label }}</option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>fitness_center</mat-icon>
+                                <label for="Effort">Implementation Effort</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Effort" formControlName="Effort">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of effortScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Risk">Execution Risk</label>
-                            <select id="Risk" formControlName="Risk">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of riskScores" [value]="opt.value">{{ opt.label }}</option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>warning</mat-icon>
+                                <label for="Risk">Execution Risk</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Risk" formControlName="Risk">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of riskScores" [value]="opt.value">{{ opt.label }}</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Scalability">Scalability</label>
-                            <select id="Scalability" formControlName="Scalability">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of scalabilityScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>trending_up</mat-icon>
+                                <label for="Scalability">Scalability</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Scalability" formControlName="Scalability">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of scalabilityScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="Differentiation">Differentiation</label>
-                            <select id="Differentiation" formControlName="Differentiation">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of differentiationScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>verified_user</mat-icon>
+                                <label for="Differentiation">Differentiation</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="Differentiation" formControlName="Differentiation">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of differentiationScores" [value]="opt.value">{{ opt.label
+                                        }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="SustainabilityImpact">Sustainability & ESG</label>
-                            <select id="SustainabilityImpact" formControlName="SustainabilityImpact">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of sustainabilityScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>eco</mat-icon>
+                                <label for="SustainabilityImpact">Sustainability & ESG</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="SustainabilityImpact" formControlName="SustainabilityImpact">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of sustainabilityScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="dimension-card">
-                            <label for="ProjectConfidence">Project Confidence</label>
-                            <select id="ProjectConfidence" formControlName="ProjectConfidence">
-                                <option value="">Rank</option>
-                                <option *ngFor="let opt of confidenceScores" [value]="opt.value">{{ opt.label }}
-                                </option>
-                            </select>
+
+                        <div class="meta-row">
+                            <div class="meta-key">
+                                <mat-icon>psychology</mat-icon>
+                                <label for="ProjectConfidence">Project Confidence</label>
+                            </div>
+                            <div class="meta-value">
+                                <select id="ProjectConfidence" formControlName="ProjectConfidence">
+                                    <option value="">Rank</option>
+                                    <option *ngFor="let opt of confidenceScores" [value]="opt.value">{{ opt.label }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -403,17 +494,15 @@
 
                         <div class="phase-actions"
                             style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
-                            <button type="submit" class="btn btn-primary"
-                                [disabled]="scoringForm.invalid || isSectionLocked('phase3')">
-                                SUBMIT FINAL SCORE
-                            </button>
+                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="submit"
+                                [disabled]="(scoringForm.invalid ?? false) || isSectionLocked('phase3')" />
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="scoring-actions" style="margin-top: 2rem;">
-                <app-buttons buttonText="CANCEL" buttonStyleClass="btn-cancel" (click)="goBack()"
+                <app-buttons buttonText="CANCEL" buttonStyleClass="btn-leave-group" (click)="goBack()"
                     [disabled]="isLoading" />
             </div>
         </form>
