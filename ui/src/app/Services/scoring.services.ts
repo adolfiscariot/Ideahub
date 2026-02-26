@@ -19,21 +19,21 @@ export class ScoringService {
     }
 
     // Phase 1: Automated AI Evaluation
-    evaluateIdea(ideaId: number): Observable<ApiResponse<any>> {
+    evaluateIdea(ideaId: string): Observable<ApiResponse<any>> {
         return this.http.post<any>(`${this.apiUrl}/evaluate/${ideaId}`, {}).pipe(
             map(res => this.convertResponse<any>(res))
         );
     }
 
     // Phase 2: Manual Business Case Submission
-    submitBusinessCase(ideaId: number, dto: BusinessCaseDto): Observable<ApiResponse<any>> {
+    submitBusinessCase(ideaId: string, dto: BusinessCaseDto): Observable<ApiResponse<any>> {
         return this.http.post<any>(`${this.apiUrl}/business-case/${ideaId}`, dto).pipe(
             map(res => this.convertResponse<any>(res))
         );
     }
 
     // Phase 3: Manual Scoring Dimensions
-    submitScoringDimensions(ideaId: number, dto: ScoringDimensionsDto): Observable<ApiResponse<any>> {
+    submitScoringDimensions(ideaId: string, dto: ScoringDimensionsDto): Observable<ApiResponse<any>> {
         return this.http.post<any>(`${this.apiUrl}/dimensions/${ideaId}`, dto).pipe(
             map(res => this.convertResponse<any>(res))
         );
