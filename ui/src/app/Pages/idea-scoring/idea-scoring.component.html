@@ -304,7 +304,7 @@
                         <span class="step-number">3</span>
                         <div class="header-text">
                             <h3>Phase 3: Scoring Dimensions</h3>
-                            <p class="phase-description">Rank each dimension from 1 (lowest impact) to 5 (highest
+                            <p class="phase-description">Rank each dimension from 1 (lowest impact) to 3 (highest
                                 benefit)</p>
                         </div>
                         <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
@@ -318,17 +318,17 @@
                 <!-- Rank Definitions (0-10 Scale mapping) -->
                 <div class="low-high">
                     <div class="def-group">
-                        <span class="def-rank low">Low (0-3)</span>
+                        <span class="def-rank low">Low (1)</span>
                         <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource consumption.
                             Suitable for small improvements.</p>
                     </div>
                     <div class="def-group">
-                        <span class="def-rank moderate">Moderate (4-6)</span>
+                        <span class="def-rank moderate">Moderate (2)</span>
                         <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
                             effort. Represents steady value addition.</p>
                     </div>
                     <div class="def-group">
-                        <span class="def-rank high">High (7-10)</span>
+                        <span class="def-rank high">High (3)</span>
                         <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
                             commitment. Key to long-term strategy.</p>
                     </div>

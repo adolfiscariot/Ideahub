@@ -30,10 +30,12 @@ public class ScoringService : IScoringService
             idea.InnovationCategory
         );
 
-        // Re-fetch from THIS service's DbContext — the passed-in `idea` may be tracked
-        // by a different DbContext instance (e.g. IdeaController's), so SaveChangesAsync
-        // on this context would have nothing to save, leaving the stage stuck at Evaluation.
-        var trackedIdea = await _context.Ideas.FindAsync(idea.Id) ?? idea;
+        var trackedIdea = await _context.Ideas.FindAsync(idea.Id);
+        if (trackedIdea is null)
+        {
+            _logger.LogError("Idea {IdeaId} was not found in ScoringService context.", idea.Id);
+            throw new InvalidOperationException($"Idea {idea.Id} was not found.");
+        }
 
         trackedIdea.Score = score;
         trackedIdea.AiReasoning = reasoning;
