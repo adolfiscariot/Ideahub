@@ -399,6 +399,12 @@
                   🛑 Close Idea
                 </app-buttons>
                 }
+                <!-- Review & Score button (visible to all for now) -->
+                <app-buttons buttonStyleClass="btn-primary"
+                  (click)="$event.stopPropagation(); navigateToScoring(selectedIdea); closeIdeaActionsMenu()"
+                  [disabled]="false" title="Review & Score Idea">
+                  Review
+                </app-buttons>
               </div>
               }
               <!-- Show vote count for closed ideas -->
@@ -422,6 +428,11 @@
         </div>
         }
         <div class="details-section">
+          <h4 class="details-section-title">Problem Statement</h4>
+          <p class="details-idea-description">{{ selectedIdea.ProblemStatement }}</p>
+        </div>
+        <div class="details-section">
+          <h4 class="details-section-title">Proposed Solution</h4>
           <p class="details-idea-description">{{ selectedIdea.ProposedSolution }}</p>
         </div>
         <!-- DISPLAY MEDIA FOR IDEAS -->
@@ -604,8 +615,8 @@
           <div class="form-group full-width">
             <label>Idea Title <span class="required">*</span></label>
             <input type="text" class="form-control" formControlName="Title"
-              placeholder="Enter a descriptive title for your idea" maxlength="50">
-            <div class="char-count">{{ shareTitleCount }}/50</div>
+              placeholder="Enter a descriptive title for your idea" maxlength="20">
+            <div class="char-count">{{ shareTitleCount }}/20</div>
             @if (shareIdeaForm.get('Title')?.touched) {
             @if (shareIdeaForm.get('Title')?.errors?.['required']) {
             <div class="error-message">Title is required</div>
@@ -621,13 +632,13 @@
             <label>Problem Statement <span class="required">*</span></label>
             <textarea class="form-control-description" formControlName="ProblemStatement" rows="3"
               placeholder="What is the problem you are trying to solve?"></textarea>
-            <div class="char-count">{{ shareProblemCount }}/1000</div>
+            <div class="char-count">{{ shareProblemCount }}/250</div>
             @if (shareIdeaForm.get('ProblemStatement')?.touched) {
             @if (shareIdeaForm.get('ProblemStatement')?.errors?.['required']) {
             <div class="error-message">Problem Statement is required</div>
             }
             @if (shareIdeaForm.get('ProblemStatement')?.errors?.['minlength']) {
-            <div class="error-message">Problem Statement must be at least 5 characters</div>
+            <div class="error-message">Problem Statement must be at least 100 characters</div>
             }
             }
           </div>
@@ -661,15 +672,15 @@
             <label>Strategic Objective Alignment <span class="required">*</span></label>
             <select class="form-control" formControlName="StrategicAlignment">
               <option value="" disabled>Select an objective</option>
-              <option value="revenue">Revenue Growth/Pipeline</option>
-              <option value="efficiency">Cost efficiency/productivity</option>
-              <option value="satisfaction">Customer/ Stakeholder Satisfaction</option>
-              <option value="quality">Quality/Compliance (ISO/QMS)</option>
-              <option value="excellence">Execution Excellence</option>
-              <option value="expansion">Market Expansion/Acquisition</option>
-              <option value="sustainability">Sustainability/ESG (SDGs 4/5/8)</option>
-              <option value="risk">Risk Reduction</option>
-              <option value="innovation">Innovation/New</option>
+              <option value="Revenue Growth/Pipeline">Revenue Growth/Pipeline</option>
+              <option value="Cost efficiency/productivity">Cost efficiency/productivity</option>
+              <option value="Customer/ Stakeholder Satisfaction">Customer/ Stakeholder Satisfaction</option>
+              <option value="Quality/Compliance (ISO/QMS)">Quality/Compliance (ISO/QMS)</option>
+              <option value="Execution Excellence">Execution Excellence</option>
+              <option value="Market Expansion/Acquisition">Market Expansion/Acquisition</option>
+              <option value="Sustainability/ESG (SDGs 4/5/8)">Sustainability/ESG (SDGs 4/5/8)</option>
+              <option value="Risk Reduction">Risk Reduction</option>
+              <option value="Innovation/New">Innovation/New</option>
             </select>
             @if (shareIdeaForm.get('StrategicAlignment')?.errors?.['required'] &&
             shareIdeaForm.get('StrategicAlignment')?.touched) {
@@ -681,13 +692,13 @@
             <label>Innovation Category <span class="required">*</span></label>
             <select class="form-control" formControlName="InnovationCategory">
               <option value="" disabled>Select a category</option>
-              <option value="process">Process & Operations</option>
-              <option value="tech">Tech & Infrastructure</option>
-              <option value="product">Software & Product</option>
-              <option value="ai">Automation & AI</option>
-              <option value="ux">Customer & User Experience</option>
-              <option value="cost">Cost & Efficiency</option>
-              <option value="strategy">Strategy & Business Model</option>
+              <option value="Process & Operations">Process & Operations</option>
+              <option value="Tech & Infrastructure">Tech & Infrastructure</option>
+              <option value="Software & Product">Software & Product</option>
+              <option value="Automation & AI">Automation & AI</option>
+              <option value="Customer & User Experience">Customer & User Experience</option>
+              <option value="Cost & Efficiency">Cost & Efficiency</option>
+              <option value="Strategy & Business Model">Strategy & Business Model</option>
             </select>
             @if (shareIdeaForm.get('InnovationCategory')?.errors?.['required'] &&
             shareIdeaForm.get('InnovationCategory')?.touched) {
@@ -716,34 +727,34 @@
             <label>Sub-Category / Functional Area</label>
             <select class="form-control" formControlName="SubCategory">
               <option value="" selected>Select functional area</option>
-              <option value="license">License Optimization</option>
-              <option value="cloudMigration">Cloud Migration</option>
-              <option value="edge">Edge Computing</option>
-              <option value="devops">DevOps/CI-CD</option>
-              <option value="containers">Containers & Services</option>
-              <option value="newFeatures">New features</option>
-              <option value="uiUx">UI/UX updates</option>
-              <option value="api">API integrations</option>
-              <option value="mobile">Mobile Enhancements</option>
-              <option value="rpa">Process Bots (RPA)</option>
-              <option value="ml">Machine Learning Models</option>
-              <option value="chatbots">Chatbots & Virtual Assistants</option>
-              <option value="monitoring">Smart Monitoring</option>
-              <option value="agile">Agile Practices</option>
-              <option value="iac">Infrastructure as Code</option>
-              <option value="itsm">Service Management (ITSM)</option>
-              <option value="incident">Automated Incident Response</option>
-              <option value="selfService">Self-Service Tools</option>
-              <option value="dashboards">Role-Based Dashboards</option>
-              <option value="feedback">Feedback Integration</option>
-              <option value="accessibility">Accessibility</option>
-              <option value="serverless">Serverless Computing</option>
-              <option value="energy">Energy Efficiency</option>
-              <option value="openSource">Open Source Adoption</option>
-              <option value="saas">SaaS Business Model</option>
-              <option value="marketplace">MarketPlace Channels</option>
-              <option value="monetization">Data Monetization</option>
-              <option value="security">Managed Security</option>
+              <option value="License Optimization">License Optimization</option>
+              <option value="Cloud Migration">Cloud Migration</option>
+              <option value="Edge Computing">Edge Computing</option>
+              <option value="DevOps/CI-CD">DevOps/CI-CD</option>
+              <option value="Containers & Services">Containers & Services</option>
+              <option value="New features">New features</option>
+              <option value="UI/UX updates">UI/UX updates</option>
+              <option value="API integrations">API integrations</option>
+              <option value="Mobile Enhancements">Mobile Enhancements</option>
+              <option value="Process Bots (RPA)">Process Bots (RPA)</option>
+              <option value="Machine Learning Models">Machine Learning Models</option>
+              <option value="Chatbots & Virtual Assistants">Chatbots & Virtual Assistants</option>
+              <option value="Smart Monitoring">Smart Monitoring</option>
+              <option value="Agile Practices">Agile Practices</option>
+              <option value="Infrastructure as Code">Infrastructure as Code</option>
+              <option value="Service Management (ITSM)">Service Management (ITSM)</option>
+              <option value="Automated Incident Response">Automated Incident Response</option>
+              <option value="Self-Service Tools">Self-Service Tools</option>
+              <option value="Role-Based Dashboards">Role-Based Dashboards</option>
+              <option value="Feedback Integration">Feedback Integration</option>
+              <option value="Accessibility">Accessibility</option>
+              <option value="Serverless Computing">Serverless Computing</option>
+              <option value="Energy Efficiency">Energy Efficiency</option>
+              <option value="Open Source Adoption">Open Source Adoption</option>
+              <option value="SaaS Business Model">SaaS Business Model</option>
+              <option value="MarketPlace Channels">MarketPlace Channels</option>
+              <option value="Data Monetization">Data Monetization</option>
+              <option value="Managed Security">Managed Security</option>
             </select>
           </div>
 
@@ -751,11 +762,11 @@
             <label>Technology Involved</label>
             <select class="form-control" formControlName="TechnologyInvolved">
               <option value="" selected>Select technology</option>
-              <option value="platforms">Cloud Computing Platforms</option>
-              <option value="orchestration">Containerization & Orchestration</option>
-              <option value="aiMl">AI and ML Learning Frameworks</option>
-              <option value="rpaTools">Robotic Process Automation (RPA) Tools</option>
-              <option value="cybersecurity">Cybersecurity & Identity Management</option>
+              <option value="Cloud Computing Platforms">Cloud Computing Platforms</option>
+              <option value="Containerization & Orchestration">Containerization & Orchestration</option>
+              <option value="AI and ML Learning Frameworks">AI and ML Learning Frameworks</option>
+              <option value="Robotic Process Automation (RPA) Tools">Robotic Process Automation (RPA) Tools</option>
+              <option value="Cybersecurity & Identity Management">Cybersecurity & Identity Management</option>
             </select>
           </div>
 
