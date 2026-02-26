@@ -30,22 +30,29 @@ public class ScoringService : IScoringService
             idea.InnovationCategory
         );
 
-        idea.Score = score;
-        idea.AiReasoning = reasoning;
+        var trackedIdea = await _context.Ideas.FindAsync(idea.Id);
+        if (trackedIdea is null)
+        {
+            _logger.LogError("Idea {IdeaId} was not found in ScoringService context.", idea.Id);
+            throw new InvalidOperationException($"Idea {idea.Id} was not found.");
+        }
+
+        trackedIdea.Score = score;
+        trackedIdea.AiReasoning = reasoning;
 
         // Stage transition logic
         if (score >= 70)
         {
-            idea.CurrentStage = ScoringStage.BusinessCase;
+            trackedIdea.CurrentStage = ScoringStage.BusinessCase;
             _logger.LogInformation("Idea {IdeaId} passed Phase 1 with score {score}. Moving to Business Case stage.", idea.Id, score);
         }
         else
         {
-            idea.CurrentStage = ScoringStage.Rejected;
+            trackedIdea.CurrentStage = ScoringStage.Rejected;
             _logger.LogInformation("Idea {IdeaId} failed Phase 1 with score {score}. Moving to Rejected stage.", idea.Id, score);
         }
 
-        idea.UpdatedAt = DateTime.UtcNow;
+        trackedIdea.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         return (score, reasoning);

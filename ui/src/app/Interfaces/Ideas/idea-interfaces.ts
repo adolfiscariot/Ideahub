@@ -192,110 +192,86 @@ export enum ScoringStage {
 // Phase 3 Scoring Enums
 export enum StrategicAlignmentScore {
   Unknown = 'Unknown',
-  NoAlignment = 'NoAlignment',
   Low = 'Low',
   Moderate = 'Moderate',
   Strong = 'Strong',
-  Full = 'Full'
 }
 
 export enum CustomerImpactScore {
   Unknown = 'Unknown',
-  Minimal = 'Minimal',
   Low = 'Low',
   Moderate = 'Moderate',
   High = 'High',
-  Transformational = 'Transformational'
 }
 
 export enum FinancialBenefitScore {
   Unknown = 'Unknown',
-  NoGain = 'NoGain',
   Low = 'Low',
   Moderate = 'Moderate',
   High = 'High',
-  Breakthrough = 'Breakthrough'
 }
 
 export enum FeasibilityScore {
   Unknown = 'Unknown',
   VeryDifficult = 'VeryDifficult',
-  Low = 'Low',
   Moderate = 'Moderate',
   High = 'High',
-  VeryFeasible = 'VeryFeasible'
 }
 
 export enum TimeToValueScore {
   Unknown = 'Unknown',
-  Over24Months = 'Over24Months',
-  TwelveToTwentyFour = 'TwelveToTwentyFour',
   SixToTwelve = 'SixToTwelve',
   ThreeToSix = 'ThreeToSix',
-  UnderThreeMonths = 'UnderThreeMonths'
+  UnderThreeMonths = 'UnderThreeMonths',
 }
 
 export enum CostScore {
   Unknown = 'Unknown',
-  VeryHigh = 'VeryHigh',
   High = 'High',
   Moderate = 'Moderate',
   Low = 'Low',
-  VeryLow = 'VeryLow'
 }
 
 export enum EffortScore {
   Unknown = 'Unknown',
-  VeryHigh = 'VeryHigh',
   High = 'High',
   Moderate = 'Moderate',
   Low = 'Low',
-  VeryLow = 'VeryLow'
 }
 
 export enum RiskScore {
   Unknown = 'Unknown',
-  VeryHigh = 'VeryHigh',
   High = 'High',
   Moderate = 'Moderate',
   Low = 'Low',
-  VeryLow = 'VeryLow'
 }
 
 export enum ScalabilityScore {
   Unknown = 'Unknown',
-  NotScalable = 'NotScalable',
   Low = 'Low',
   Moderate = 'Moderate',
   High = 'High',
-  FullyScalable = 'FullyScalable'
 }
 
 export enum DifferentiationScore {
   Unknown = 'Unknown',
-  NoDifferentiation = 'NoDifferentiation',
   LowUniqueness = 'LowUniqueness',
   ModerateUniqueness = 'ModerateUniqueness',
   HighDifferentiation = 'HighDifferentiation',
-  UniqueStrongIP = 'UniqueStrongIP'
 }
 
 export enum SustainabilityScore {
   Unknown = 'Unknown',
-  NegativeImpact = 'NegativeImpact',
   MinimalBenefit = 'MinimalBenefit',
   ModerateBenefit = 'ModerateBenefit',
   StrongBenefit = 'StrongBenefit',
-  MajorBenefit = 'MajorBenefit'
 }
 
 export enum ConfidenceScore {
   Unknown = 'Unknown',
-  VeryLow = 'VeryLow',
   Low = 'Low',
   Moderate = 'Moderate',
   High = 'High',
-  VeryHigh = 'VeryHigh'
 }
 
 // Scoring DTOs

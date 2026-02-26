@@ -1,3 +1,4 @@
+using Npgsql;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -127,6 +128,20 @@ public class ScoringController : ControllerBase
         }));
     }
 
+    // Get Business Case
+    [HttpGet("business-case/{ideaId}")]
+    [Authorize]
+    public async Task<IActionResult> GetBusinessCase(int ideaId)
+    {
+        var businessCase = await _context.BusinessCases
+            .FirstOrDefaultAsync(bc => bc.IdeaId == ideaId);
+
+        if (businessCase == null)
+            return NotFound(ApiResponse.Fail("Business case not found."));
+
+        return Ok(ApiResponse.Ok("Business case found.", businessCase));
+    }
+
     // Phase 3: Manual Scoring Dimensions
     [HttpPost("dimensions/{ideaId}")]
     [Authorize(Roles = RoleConstants.CommitteeMember + "," + RoleConstants.SuperAdmin)]
@@ -136,19 +151,27 @@ public class ScoringController : ControllerBase
 
         var idea = await _context.Ideas
             .Include(i => i.BusinessCase)
-            .Include(i => i.ScoringDimensions)
             .FirstOrDefaultAsync(i => i.Id == ideaId);
 
         if (idea == null)
             return NotFound(ApiResponse.Fail("Idea not found."));
 
-        if (idea.CurrentStage != ScoringStage.ScoringDimensions)
+        if (idea.CurrentStage != ScoringStage.ScoringDimensions){
+            _logger.LogError("Idea is not in the scoring dimensions stage");
             return BadRequest(ApiResponse.Fail("Idea is not in the Scoring Dimensions stage. Please ensure the Business Case was Approved."));
+        }
 
-        if (idea.BusinessCase == null || idea.BusinessCase.Verdict != Verdict.Approved)
+        if (idea.BusinessCase == null || idea.BusinessCase.Verdict != Verdict.Approved){
+            _logger.LogError("Business case verdict must be approved");
             return BadRequest(ApiResponse.Fail("Business Case Verdict must be Approved to enter Phase 3."));
+        }
 
-        var dimensions = idea.ScoringDimensions ?? new ScoringDimensions { IdeaId = idea.Id };
+        // Query DB directly — do not rely on navigation property, which can be null even when a row exists
+        var existingDimensions = await _context.ScoringDimensions
+            .FirstOrDefaultAsync(sd => sd.IdeaId == ideaId);
+
+        bool isNew = existingDimensions == null;
+        var dimensions = isNew ? new ScoringDimensions { IdeaId = idea.Id } : existingDimensions;
 
         // Map DTO
         dimensions.StrategicAlignment = dto.StrategicAlignment;
@@ -165,15 +188,15 @@ public class ScoringController : ControllerBase
         dimensions.ProjectConfidence = dto.ProjectConfidence;
         dimensions.ReviewerComments = dto.ReviewerComments;
 
-        // Formula: ( sum(12 fields) / (No of fields * 5(max score of each field)) ) * 100
+        // Formula: ( sum(12 fields) / (No of fields * 3(max score of each field)) ) * 100
         float sum = (int)dto.StrategicAlignment + (int)dto.CustomerImpact + (int)dto.FinancialBenefit +
                     (int)dto.Feasibility + (int)dto.TimeToValue + (int)dto.Cost + (int)dto.Effort +
                     (int)dto.Risk + (int)dto.Scalability + (int)dto.Differentiation +
                     (int)dto.SustainabilityImpact + (int)dto.ProjectConfidence;
 
-        dimensions.Score = MathF.Round((sum / 60.0f) * 100, 1);
+        dimensions.Score = MathF.Round((sum / 36.0f) * 100, 1);
 
-        if (idea.ScoringDimensions == null)
+        if (isNew)
         {
             _context.ScoringDimensions.Add(dimensions);
         }
@@ -186,10 +209,28 @@ public class ScoringController : ControllerBase
         idea.Score = (float)dimensions.Score;
         idea.CurrentStage = ScoringStage.Completed;
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is PostgresException pgEx &&
+            pgEx.SqlState == "23505"
+            )
+        {
+            _logger.LogWarning("Duplicate scoring submission detected.");
 
+            return Ok(ApiResponse.Ok("Phase 3 already submitted.", new
+            {
+                CalculatedPercentage = dimensions.Score,
+                FullScore = sum,
+                CurrentStage = idea.CurrentStage.ToString()
+            }));
+        }
         _logger.LogInformation("Phase 3 scoring successful!");
-        return Ok(ApiResponse.Ok("Phase 3: Scoring Dimensions completed.", new { 
+
+        return Ok(ApiResponse.Ok("Phase 3: Scoring Dimensions completed.", new
+        {
             CalculatedPercentage = dimensions.Score,
             FullScore = sum,
             CurrentStage = idea.CurrentStage.ToString()

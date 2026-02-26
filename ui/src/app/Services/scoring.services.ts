@@ -32,10 +32,22 @@ export class ScoringService {
         );
     }
 
+    getBusinessCase(ideaId: string): Observable<ApiResponse<BusinessCaseDto>> {
+        return this.http.get<any>(`${this.apiUrl}/business-case/${ideaId}`).pipe(
+            map(res => this.convertResponse<BusinessCaseDto>(res))
+        );
+    }
+
     // Phase 3: Manual Scoring Dimensions
     submitScoringDimensions(ideaId: string, dto: ScoringDimensionsDto): Observable<ApiResponse<any>> {
         return this.http.post<any>(`${this.apiUrl}/dimensions/${ideaId}`, dto).pipe(
             map(res => this.convertResponse<any>(res))
+        );
+    }
+
+    getScoringDimensions(ideaId: string): Observable<ApiResponse<ScoringDimensionsDto>> {
+        return this.http.get<any>(`${this.apiUrl}/dimensions/${ideaId}`).pipe(
+            map(res => this.convertResponse<ScoringDimensionsDto>(res))
         );
     }
 }
