@@ -19,7 +19,7 @@
                     <div class="header-main">
                         <span class="step-number">1</span>
                         <div class="header-text">
-                            <h3>Phase 1: Idea Evaluation</h3>
+                            <h3><mat-icon>assessment</mat-icon> Phase 1: Idea Evaluation</h3>
                             <p class="phase-description">Outlines the idea details</p>
                         </div>
                     </div>
@@ -131,7 +131,7 @@
 
                     <div class="scoring-inputs">
                         <div class="form-group">
-                            <label for="score-p1">Evaluation Score (Threshold: 70%)</label>
+                            <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold: 70%)</label>
                             <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
                                 (input)="clampScore($event)">
                             <small class="field-error"
@@ -163,7 +163,7 @@
                     <div class="header-main">
                         <span class="step-number">2</span>
                         <div class="header-text">
-                            <h3>Phase 2: Business Case</h3>
+                            <h3><mat-icon>assignment</mat-icon> Phase 2: Business Case</h3>
                             <p class="phase-description">Evaluate the ideas business viability, risk, and strategic fit
                             </p>
                         </div>
@@ -175,7 +175,7 @@
                 <div class="accordion-content" formGroupName="Phase2">
                     <div class="vertical-form">
                         <div class="form-group">
-                            <label>Expected Benefits <span class="info-tooltip"
+                            <label><mat-icon>stars</mat-icon> Expected Benefits <span class="info-tooltip"
                                     title="What primary value or advantage does this idea offer?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of expectedBenefitsOptions"
@@ -187,7 +187,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Impact Scope <span class="info-tooltip"
+                            <label><mat-icon>public</mat-icon> Impact Scope <span class="info-tooltip"
                                     title="Who does this idea affect?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of impactScopeOptions" [title]="opt.tip">
@@ -198,7 +198,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Risk Level <span class="info-tooltip"
+                            <label><mat-icon>warning_amber</mat-icon> Risk Level <span class="info-tooltip"
                                     title="How risky is this idea to pursue?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of riskLevelOptions" [title]="opt.tip">
@@ -209,7 +209,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Evaluation Status <span class="info-tooltip"
+                            <label><mat-icon>fact_check</mat-icon> Evaluation Status <span class="info-tooltip"
                                     title="What is the current status of this evaluation?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of evaluationStatusOptions"
@@ -221,7 +221,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Responsible Dept <span class="info-tooltip"
+                            <label><mat-icon>business</mat-icon> Responsible Dept <span class="info-tooltip"
                                     title="Which team will own this?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of responsibleDeptOptions"
@@ -233,7 +233,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Next Steps <span class="info-tooltip"
+                            <label><mat-icon>moving</mat-icon> Next Steps <span class="info-tooltip"
                                     title="What should happen next?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of actionStepOptions" [title]="opt.tip">
@@ -244,7 +244,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Current Stage <span class="info-tooltip"
+                            <label><mat-icon>pending_actions</mat-icon> Current Stage <span class="info-tooltip"
                                     title="Where is this project currently?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of resultOutcomeOptions" [title]="opt.tip">
@@ -255,20 +255,20 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="DecisionDate">Decision Date <span class="info-tooltip"
+                            <label for="DecisionDate"><mat-icon>event</mat-icon> Decision Date <span class="info-tooltip"
                                     title="When should a decision be made?">ⓘ</span></label>
                             <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
                         </div>
 
                         <div class="form-group">
-                            <label for="PlannedDurationWeeks">Duration (Weeks) <span class="info-tooltip"
+                            <label for="PlannedDurationWeeks"><mat-icon>history_toggle_off</mat-icon> Duration (Weeks) <span class="info-tooltip"
                                     title="How long will this take?">ⓘ</span></label>
                             <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
                                 placeholder="Select Duration">
                         </div>
 
                         <div class="form-group verdict-group">
-                            <label>Go / No-Go Verdict <span class="info-tooltip"
+                            <label><mat-icon>gavel</mat-icon> Go / No-Go Verdict <span class="info-tooltip"
                                     title="Should we go ahead with this idea?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of verdictOptions" [title]="opt.tip">
@@ -303,7 +303,7 @@
                     <div class="header-main">
                         <span class="step-number">3</span>
                         <div class="header-text">
-                            <h3>Phase 3: Scoring Dimensions</h3>
+                            <h3><mat-icon>insights</mat-icon> Phase 3: Scoring Dimensions</h3>
                             <p class="phase-description">Rank each dimension from 1 (lowest impact) to 3 (highest
                                 benefit)</p>
                         </div>
@@ -315,35 +315,38 @@
                     <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 </div>
 
-                <!-- Rank Definitions (0-10 Scale mapping) -->
-                <div class="low-high">
-                    <div class="def-group">
-                        <span class="def-rank low">Low (1)</span>
-                        <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource consumption.
-                            Suitable for small improvements.</p>
-                    </div>
-                    <div class="def-group">
-                        <span class="def-rank moderate">Moderate (2)</span>
-                        <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
-                            effort. Represents steady value addition.</p>
-                    </div>
-                    <div class="def-group">
-                        <span class="def-rank high">High (3)</span>
-                        <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
-                            commitment. Key to long-term strategy.</p>
-                    </div>
-                    <div class="def-note">
-                        <mat-icon>info</mat-icon>
-                        <p>Note: For <strong>Project Cost, Effort, and Risk</strong>, a "Low" score is a positive
-                            outcome (less cost/risk is better).</p>
-                    </div>
-                </div>
+
 
                 <div class="accordion-content" formGroupName="Phase3">
+                    <!-- Rank Definitions (0-10 Scale mapping) -->
+                    <div class="low-high">
+                        <div class="def-group">
+                            <span class="def-rank low">Low (1)</span>
+                            <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource
+                                consumption.
+                                Suitable for small improvements.</p>
+                        </div>
+                        <div class="def-group">
+                            <span class="def-rank moderate">Moderate (2)</span>
+                            <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
+                                effort. Represents steady value addition.</p>
+                        </div>
+                        <div class="def-group">
+                            <span class="def-rank high">High (3)</span>
+                            <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
+                                commitment. Key to long-term strategy.</p>
+                        </div>
+                        <div class="def-note">
+                            <mat-icon>info</mat-icon>
+                            <p>Note: For <strong>Project Cost, Effort, and Risk</strong>, a "Low" score is a positive
+                                outcome (less cost/risk is better).</p>
+                        </div>
+                    </div>
+
                     <div class="vertical-form">
                         <!-- Strategic Alignment -->
                         <div class="form-group">
-                            <label>Strategic Alignment <span class="info-tooltip"
+                            <label><mat-icon>track_changes</mat-icon> Strategic Alignment <span class="info-tooltip"
                                     title="How well does this idea align with our strategic goals?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of strategicAlignmentScores"
@@ -356,7 +359,7 @@
 
                         <!-- Customer Impact -->
                         <div class="form-group">
-                            <label>Customer Impact <span class="info-tooltip"
+                            <label><mat-icon>groups</mat-icon> Customer Impact <span class="info-tooltip"
                                     title="What is the expected impact on customers or stakeholders?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of customerImpactScores" [title]="opt.tip">
@@ -368,7 +371,7 @@
 
                         <!-- Financial Benefit -->
                         <div class="form-group">
-                            <label>Financial Benefit (ROI) <span class="info-tooltip"
+                            <label><mat-icon>monetization_on</mat-icon> Financial Benefit (ROI) <span class="info-tooltip"
                                     title="What is the projected financial return on investment?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of financialBenefitScores"
@@ -381,7 +384,7 @@
 
                         <!-- Feasibility -->
                         <div class="form-group">
-                            <label>Feasibility (Tech/Ops) <span class="info-tooltip"
+                            <label><mat-icon>construction</mat-icon> Feasibility (Tech/Ops) <span class="info-tooltip"
                                     title="How feasible is the technical and operational implementation?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of feasibilityScores" [title]="opt.tip">
@@ -393,7 +396,7 @@
 
                         <!-- Time to Value -->
                         <div class="form-group">
-                            <label>Time to Value <span class="info-tooltip"
+                            <label><mat-icon>speed</mat-icon> Time to Value <span class="info-tooltip"
                                     title="How soon will the benefits of this idea be realized?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of timeToValueScores" [title]="opt.tip">
@@ -405,7 +408,7 @@
 
                         <!-- Project Cost -->
                         <div class="form-group">
-                            <label>Project Cost <span class="info-tooltip"
+                            <label><mat-icon>savings</mat-icon> Project Cost <span class="info-tooltip"
                                     title="What is the estimated cost of this project?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of costScores" [title]="opt.tip">
@@ -417,7 +420,7 @@
 
                         <!-- Implementation Effort -->
                         <div class="form-group">
-                            <label>Implementation Effort <span class="info-tooltip"
+                            <label><mat-icon>engineering</mat-icon> Implementation Effort <span class="info-tooltip"
                                     title="How much effort is required for implementation?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of effortScores" [title]="opt.tip">
@@ -429,7 +432,7 @@
 
                         <!-- Execution Risk -->
                         <div class="form-group">
-                            <label>Execution Risk <span class="info-tooltip"
+                            <label><mat-icon>report_problem</mat-icon> Execution Risk <span class="info-tooltip"
                                     title="What are the risks associated with executing this idea?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of riskScores" [title]="opt.tip">
@@ -441,7 +444,7 @@
 
                         <!-- Scalability -->
                         <div class="form-group">
-                            <label>Scalability <span class="info-tooltip"
+                            <label><mat-icon>aspect_ratio</mat-icon> Scalability <span class="info-tooltip"
                                     title="How easily can this solution be scaled?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of scalabilityScores" [title]="opt.tip">
@@ -453,7 +456,7 @@
 
                         <!-- Differentiation -->
                         <div class="form-group">
-                            <label>Differentiation <span class="info-tooltip"
+                            <label><mat-icon>workspace_premium</mat-icon> Differentiation <span class="info-tooltip"
                                     title="How does this idea differentiate us from competitors?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of differentiationScores" [title]="opt.tip">
@@ -465,7 +468,7 @@
 
                         <!-- Sustainability Impact -->
                         <div class="form-group">
-                            <label>Sustainability & ESG <span class="info-tooltip"
+                            <label><mat-icon>eco</mat-icon> Sustainability & ESG <span class="info-tooltip"
                                     title="What is the impact on sustainability and ESG goals?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of sustainabilityScores" [title]="opt.tip">
@@ -477,7 +480,7 @@
 
                         <!-- Project Confidence -->
                         <div class="form-group">
-                            <label>Project Confidence <span class="info-tooltip"
+                            <label><mat-icon>verified</mat-icon> Project Confidence <span class="info-tooltip"
                                     title="How confident are we in the success of this project?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of confidenceScores" [title]="opt.tip">
@@ -490,7 +493,7 @@
 
                     <div class="summary-section">
                         <div class="form-group">
-                            <label for="ReviewerComments">Final Reviewer Comments <span
+                            <label for="ReviewerComments"><mat-icon>comment</mat-icon> Final Reviewer Comments <span
                                     class="text-danger">*</span></label>
                             <textarea id="ReviewerComments" formControlName="ReviewerComments"
                                 placeholder="Summarize your final verdict..."></textarea>

@@ -236,4 +236,18 @@ public class ScoringController : ControllerBase
             CurrentStage = idea.CurrentStage.ToString()
         }));
     }
+
+    // Get Phase 3 Scoring Dimensions
+    [HttpGet("dimensions/{ideaId}")]
+    [Authorize]
+    public async Task<IActionResult> GetScoringDimensions(int ideaId)
+    {
+        var dimensions = await _context.ScoringDimensions
+            .FirstOrDefaultAsync(sd => sd.IdeaId == ideaId);
+
+        if (dimensions == null)
+            return NotFound(ApiResponse.Fail("Scoring dimensions not found."));
+
+        return Ok(ApiResponse.Ok("Scoring dimensions found.", dimensions));
+    }
 }
