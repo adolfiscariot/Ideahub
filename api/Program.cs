@@ -276,6 +276,16 @@ foreach (var role in roles)
     }
 }
 
+var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdeahubUser>>();
+var superAdminEmail = builder.Configuration["SuperAdmin:Email"]
+    ?? throw new Exception("SuperAdmin email not configured!");
+
+var superAdminUser = await userManager.FindByEmailAsync(superAdminEmail);
+if (superAdminUser != null && !await userManager.IsInRoleAsync(superAdminUser, RoleConstants.SuperAdmin))
+{
+    await userManager.AddToRoleAsync(superAdminUser, RoleConstants.SuperAdmin);
+    Console.WriteLine($"SuperAdmin role assigned to {superAdminEmail}");
+}
 
 //4. Add MiddleWare
 if (app.Environment.IsDevelopment())
