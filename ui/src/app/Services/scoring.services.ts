@@ -2,12 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse, BusinessCaseDto, ScoringDimensionsDto } from '../Interfaces/Ideas/idea-interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ScoringService {
-    private apiUrl = 'http://localhost:5065/api/scoring';
+    private readonly apiUrl = `${environment.apiUrl}/scoring`;
     private http = inject(HttpClient);
 
     private convertResponse<T>(response: any): ApiResponse<T> {

@@ -3,12 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Media, MediaType, ApiResponse } from '../Interfaces/Media/media-interface';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MediaService {
-  private apiUrl = 'http://localhost:5065/api/media';
+  private readonly apiUrl = `${environment.apiUrl}/media`;
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: any): ApiResponse<T> {

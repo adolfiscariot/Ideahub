@@ -4,12 +4,13 @@ import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
 import { viewComment } from '../Interfaces/Ideas/idea-interfaces';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommentsService {
-  private apiUrl = 'http://localhost:5065/api/comment';
+  private readonly apiUrl = `${environment.apiUrl}/comment`;
   private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface

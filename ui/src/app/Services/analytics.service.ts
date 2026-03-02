@@ -2,12 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AnalyticsService {
-    private baseUrl = 'http://localhost:5065/api/analytics';
+    private readonly baseUrl = `${environment.apiUrl}/analytics`;
 
     private http = inject(HttpClient);
 

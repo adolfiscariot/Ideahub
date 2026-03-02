@@ -267,22 +267,35 @@ export class IdeaScoringComponent implements OnInit {
     if (!this.ideaId) return;
 
     // Load Phase 2: Business Case
-    // Backend returns camelCase keys; patchValue is case-sensitive, so we map explicitly.
     this.scoringService.getBusinessCase(this.ideaId).subscribe({
       next: (res) => {
         if (res.success && res.data) {
           const d: any = res.data;
+
+          // Helper to map integer enums to strings
+          const mapEnum = (val: any, enumObj: any) => {
+            if (typeof val === 'number') {
+              const keys = Object.keys(enumObj);
+              // In TS enums with string values, Object.keys returns the keys.
+              // We need to find the key whose index matches the value if it was an int enum.
+              // However, it's safer to just map explicitly or use the fact that backend ints
+              // usually correspond to the order of definition.
+              return keys[val] || keys[0];
+            }
+            return val;
+          };
+
           this.scoringForm.get('Phase2')?.patchValue({
             ExpectedBenefits: d.expectedBenefits ?? d.ExpectedBenefits ?? '',
-            ImpactScope: d.impactScope ?? d.ImpactScope ?? '',
-            RiskLevel: d.riskLevel ?? d.RiskLevel ?? '',
-            EvaluationStatus: d.evaluationStatus ?? d.EvaluationStatus ?? '',
-            OwnerDepartment: d.ownerDepartment ?? d.OwnerDepartment ?? '',
-            NextSteps: d.nextSteps ?? d.NextSteps ?? '',
+            ImpactScope: mapEnum(d.impactScope ?? d.ImpactScope, ImpactScope),
+            RiskLevel: mapEnum(d.riskLevel ?? d.RiskLevel, RiskLevel),
+            EvaluationStatus: mapEnum(d.evaluationStatus ?? d.EvaluationStatus, EvaluationStatus),
+            OwnerDepartment: mapEnum(d.ownerDepartment ?? d.OwnerDepartment, ResponsibleDepartment),
+            NextSteps: mapEnum(d.nextSteps ?? d.NextSteps, ActionStep),
             DecisionDate: (d.decisionDate ?? d.DecisionDate ?? '').toString().substring(0, 10),
             PlannedDurationWeeks: d.plannedDurationWeeks ?? d.PlannedDurationWeeks ?? '',
-            CurrentStage: d.currentStage ?? d.CurrentStage ?? '',
-            Verdict: d.verdict ?? d.Verdict ?? ''
+            CurrentStage: mapEnum(d.currentStage ?? d.CurrentStage, BusinessCaseResult),
+            Verdict: mapEnum(d.verdict ?? d.Verdict, Verdict)
           });
 
           // Auto-expand based on idea stage
@@ -299,19 +312,28 @@ export class IdeaScoringComponent implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           const d: any = res.data;
+
+          const mapEnum = (val: any, enumObj: any) => {
+            if (typeof val === 'number') {
+              const keys = Object.keys(enumObj);
+              return keys[val] || keys[0];
+            }
+            return val;
+          };
+
           this.scoringForm.get('Phase3')?.patchValue({
-            StrategicAlignment: d.strategicAlignment ?? d.StrategicAlignment ?? '',
-            CustomerImpact: d.customerImpact ?? d.CustomerImpact ?? '',
-            FinancialBenefit: d.financialBenefit ?? d.FinancialBenefit ?? '',
-            Feasibility: d.feasibility ?? d.Feasibility ?? '',
-            TimeToValue: d.timeToValue ?? d.TimeToValue ?? '',
-            Cost: d.cost ?? d.Cost ?? '',
-            Effort: d.effort ?? d.Effort ?? '',
-            Risk: d.risk ?? d.Risk ?? '',
-            Scalability: d.scalability ?? d.Scalability ?? '',
-            Differentiation: d.differentiation ?? d.Differentiation ?? '',
-            SustainabilityImpact: d.sustainabilityImpact ?? d.SustainabilityImpact ?? '',
-            ProjectConfidence: d.projectConfidence ?? d.ProjectConfidence ?? '',
+            StrategicAlignment: mapEnum(d.strategicAlignment ?? d.StrategicAlignment, StrategicAlignmentScore),
+            CustomerImpact: mapEnum(d.customerImpact ?? d.CustomerImpact, CustomerImpactScore),
+            FinancialBenefit: mapEnum(d.financialBenefit ?? d.FinancialBenefit, FinancialBenefitScore),
+            Feasibility: mapEnum(d.feasibility ?? d.Feasibility, FeasibilityScore),
+            TimeToValue: mapEnum(d.timeToValue ?? d.TimeToValue, TimeToValueScore),
+            Cost: mapEnum(d.cost ?? d.Cost, CostScore),
+            Effort: mapEnum(d.effort ?? d.Effort, EffortScore),
+            Risk: mapEnum(d.risk ?? d.Risk, RiskScore),
+            Scalability: mapEnum(d.scalability ?? d.Scalability, ScalabilityScore),
+            Differentiation: mapEnum(d.differentiation ?? d.Differentiation, DifferentiationScore),
+            SustainabilityImpact: mapEnum(d.sustainabilityImpact ?? d.SustainabilityImpact, SustainabilityScore),
+            ProjectConfidence: mapEnum(d.projectConfidence ?? d.ProjectConfidence, ConfidenceScore),
             ReviewerComments: d.reviewerComments ?? d.ReviewerComments ?? ''
           });
 
@@ -377,7 +399,7 @@ export class IdeaScoringComponent implements OnInit {
       }
     };
 
-    const total = 
+    const total =
       getMetricScore(p3.StrategicAlignment, 'StrategicAlignment') +
       getMetricScore(p3.CustomerImpact, 'CustomerImpact') +
       getMetricScore(p3.FinancialBenefit, 'FinancialBenefit') +
@@ -429,7 +451,9 @@ export class IdeaScoringComponent implements OnInit {
   onSubmitPhase3(): void {
     const phase3Group = this.scoringForm.get('Phase3');
     if (phase3Group?.invalid) {
+      console.error('Phase 3 Form Invalid:', phase3Group.errors, phase3Group.value);
       this.toastService.show('Please complete all Scoring Dimensions', 'info');
+      phase3Group.markAllAsTouched();
       return;
     }
 

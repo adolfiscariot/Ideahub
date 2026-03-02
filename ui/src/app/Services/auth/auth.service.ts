@@ -8,6 +8,7 @@ import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { ForgotPassword } from '../../Interfaces/Auth/forgot-password-interface';
 import { ResetPassword } from '../../Interfaces/Auth/reset-password-interface';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ import { Router } from '@angular/router';
 export class AuthService {
   router = inject(Router);
 
-  private readonly authUrl = 'http://localhost:5065/api/auth';
+  private readonly authUrl = `${environment.apiUrl}/auth`;
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
@@ -122,7 +123,7 @@ export class AuthService {
           localStorage.setItem('refreshToken', newRefreshToken);
           // Backend might not return expiry in refresh, calculate or assume valid
           this._isLoggedIn.next(true);
-        } else {}
+        } else { }
       }),
       catchError((error) => {
         this.logoutLocal();

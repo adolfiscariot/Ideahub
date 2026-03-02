@@ -4,12 +4,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse } from '../Interfaces/Projects/project-interface';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  private apiUrl = 'http://localhost:5065/api/project';
+  private readonly apiUrl = `${environment.apiUrl}/project`;
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: any): ApiResponse<T> {

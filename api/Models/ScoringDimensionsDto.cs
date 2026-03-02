@@ -41,8 +41,5 @@ public class ScoringDimensionsDto
     public ConfidenceScore ProjectConfidence { get; set; }
 
     [Required]
-    public float Score { get; set; }
-
-    [Required]
     public string ReviewerComments { get; set; } = string.Empty;
 }

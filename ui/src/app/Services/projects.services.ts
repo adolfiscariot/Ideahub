@@ -4,12 +4,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Ideas/idea-interfaces';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectsService {
-  private apiUrl = 'http://localhost:5065/api/project';
+  private readonly apiUrl = `${environment.apiUrl}/project`;
   private http = inject(HttpClient);
 
   // Helper method to convert backend response

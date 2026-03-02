@@ -10,12 +10,13 @@ import {
   ApiResponse
 } from '../Interfaces/Ideas/idea-interfaces';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VoteService {
-  private apiUrl = 'http://localhost:5065/api/vote';
+  private readonly apiUrl = `${environment.apiUrl}/vote`;
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: any): ApiResponse<T> {

@@ -131,7 +131,8 @@
 
                     <div class="scoring-inputs">
                         <div class="form-group">
-                            <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold: 70%)</label>
+                            <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold:
+                                70%)</label>
                             <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
                                 (input)="clampScore($event)">
                             <small class="field-error"
@@ -255,14 +256,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="DecisionDate"><mat-icon>event</mat-icon> Decision Date <span class="info-tooltip"
-                                    title="When should a decision be made?">ⓘ</span></label>
+                            <label for="DecisionDate"><mat-icon>event</mat-icon> Decision Date <span
+                                    class="info-tooltip" title="When should a decision be made?">ⓘ</span></label>
                             <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
                         </div>
 
                         <div class="form-group">
-                            <label for="PlannedDurationWeeks"><mat-icon>history_toggle_off</mat-icon> Duration (Weeks) <span class="info-tooltip"
-                                    title="How long will this take?">ⓘ</span></label>
+                            <label for="PlannedDurationWeeks"><mat-icon>history_toggle_off</mat-icon> Duration (Weeks)
+                                <span class="info-tooltip" title="How long will this take?">ⓘ</span></label>
                             <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
                                 placeholder="Select Duration">
                         </div>
@@ -371,7 +372,8 @@
 
                         <!-- Financial Benefit -->
                         <div class="form-group">
-                            <label><mat-icon>monetization_on</mat-icon> Financial Benefit (ROI) <span class="info-tooltip"
+                            <label><mat-icon>monetization_on</mat-icon> Financial Benefit (ROI) <span
+                                    class="info-tooltip"
                                     title="What is the projected financial return on investment?">ⓘ</span></label>
                             <div class="radio-group">
                                 <label class="radio-option" *ngFor="let opt of financialBenefitScores"
@@ -501,8 +503,9 @@
 
                         <div class="phase-actions"
                             style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
-                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="submit"
-                                [disabled]="(scoringForm.invalid) || isSectionLocked('phase3')" />
+                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="button"
+                                (click)="onSubmitPhase3()"
+                                [disabled]="(scoringForm.get('Phase3')?.invalid) || isSectionLocked('phase3')" />
                         </div>
                     </div>
                 </div>

@@ -4,12 +4,13 @@ import { Observable, map } from 'rxjs';
 import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest } from '../Interfaces/Ideas/idea-interfaces';
 import { VoteService } from './vote.service';
 import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IdeasService {
-  private apiUrl = 'http://localhost:5065/api/idea';
+  private readonly apiUrl = `${environment.apiUrl}/idea`;
   private http = inject(HttpClient);
   private voteService = inject(VoteService);
 
