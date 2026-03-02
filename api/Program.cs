@@ -2,6 +2,7 @@ using api.Data;
 using api.Models;
 using api.Helpers;
 using api.Constants;
+using api.Services;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using api.Services;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -88,13 +88,29 @@ builder.Services.AddAuthentication(options =>
             RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         };
         options.Events = new JwtBearerEvents
+{
+    OnMessageReceived = context =>
+    {
+
+        var path = context.HttpContext.Request.Path;
+        if (path.StartsWithSegments("/hubs/notifications"))
         {
-            OnAuthenticationFailed = ctx =>
+            var accessToken = context.Request.Query["access_token"];
+            if (!string.IsNullOrEmpty(accessToken))
             {
-                Console.WriteLine($"Auth failed: {ctx.Exception}");
-                return Task.CompletedTask;
+                context.Token = accessToken;
             }
-        };
+        }
+
+        return Task.CompletedTask;
+    },
+    OnAuthenticationFailed = ctx =>
+    {
+        Console.WriteLine($"Auth failed: {ctx.Exception}");
+        return Task.CompletedTask;
+    }
+};
+
     });
 
 //2.5 Authorization Service
@@ -111,7 +127,21 @@ builder.Services.AddAuthorization(options =>
             context.User.IsInRole(RoleConstants.GroupAdmin)
         )
     );
+
+    //CanJoinCommittee Policy
+    options.AddPolicy("CanJoinCommittee", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole(RoleConstants.SuperAdmin) ||
+            context.User.IsInRole(RoleConstants.CommitteeMember)
+        )
+    );
 });
+
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>()
+    ?? throw new Exception("AllowedOrigins required but not found in appsettings.json");
 
 //2.6 CORS Service
 builder.Services.AddCors(options =>
@@ -120,6 +150,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://44.211.34.131:5065")
               .AllowAnyHeader()
               .AllowAnyMethod()
+              .AllowCredentials()
     );
 });
 
@@ -163,6 +194,16 @@ builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
 
 // Password Reset Service
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+
+// Notification Service
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Scoring Services
+builder.Services.AddScoped<IScoringService, ScoringService>();
+
+// LLM Scoring Service
+builder.Services.AddScoped<ILlmService, MockLlmService>();
 
 // convert enum to string
 builder.Services.AddControllers()
@@ -217,13 +258,14 @@ while (retries > 0)
     }
 }
 
-// Seed roles AFTER migrations
-var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-var roles = new[]
-{
-    RoleConstants.SuperAdmin,
-    RoleConstants.GroupAdmin,
-    RoleConstants.RegularUser
+// Seed roles after migrations
+var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+var roles = new[] 
+{ 
+    RoleConstants.SuperAdmin, 
+    RoleConstants.GroupAdmin, 
+    RoleConstants.RegularUser, 
+    RoleConstants.CommitteeMember 
 };
 
 foreach (var role in roles)
@@ -251,6 +293,7 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<api.Hubs.NotificationHub>("/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
 //5. Run the App

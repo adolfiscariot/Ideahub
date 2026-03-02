@@ -18,6 +18,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
     public DbSet<PasswordReset> PasswordResets { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<BusinessCase> BusinessCases { get; set; }
+    public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -83,12 +86,44 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             //Properties
             i.Property(i => i.Title)
-                .HasMaxLength(256)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(256);
 
-            i.Property(i => i.Description)
+            i.Property(i => i.StrategicAlignment)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("text");
+
+            i.Property(i => i.ProblemStatement)
                 .IsRequired()
                 .HasColumnType("text");
+
+            i.Property(i => i.ProposedSolution)
+                .IsRequired()
+                .HasColumnType("text");
+
+            i.Property(i => i.UseCase)
+                .IsRequired()
+                .HasColumnType("text");
+
+            i.Property(i => i.InnovationCategory)
+                .IsRequired()
+                .HasMaxLength(256)
+                .HasColumnType("text");
+
+            i.Property(i => i.SubCategory)
+                .HasColumnType("text");
+
+            i.Property(i => i.TechnologyInvolved)
+                .HasColumnType("text");
+
+            i.Property(i => i.Notes)
+                .HasColumnType("text");
+
+            i.Property(i => i.Score)
+                .HasColumnType("float")
+                .IsRequired()
+                .HasDefaultValue(0);
 
             i.Property(i => i.IsPromotedToProject)
                 .HasDefaultValue(false);
@@ -106,20 +141,23 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             i.Property(i => i.Status)
                 .IsRequired()
                 .HasMaxLength(24)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasDefaultValue(IdeaStatus.Open);
+
+            i.Property(i => i.CurrentStage)
+                .IsRequired()
+                .HasMaxLength(24)
+                .HasConversion<string>()
+                .HasDefaultValue(ScoringStage.Evaluation);
+
+            i.Property(i => i.AiReasoning)
+                .HasColumnType("text");
 
             i.HasQueryFilter(i => !i.IsDeleted);
 
             i.Property(i => i.DeletedAt)
                 .HasColumnName("DeletedAt");
 
-            i.Property(i => i.Filter)
-                .IsRequired()
-                .HasColumnType("jsonb")
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)!
-                );
             //Foreign Keys
             i.HasOne(i => i.User)
                 .WithMany(u => u.Ideas)
@@ -144,12 +182,171 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithOne(c => c.Idea)
                 .OnDelete(DeleteBehavior.Cascade); //If an idea is deleted all its comments go with it
 
+            i.HasOne(i => i.BusinessCase)
+                .WithOne(bc => bc.Idea)
+                .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //Index
-            i.HasIndex(i => i.Title);
+            i.HasIndex(i => i.StrategicAlignment);
             i.HasIndex(i => i.Status);
             i.HasIndex(i => i.GroupId);
             i.HasIndex(i => i.UserId);
             i.HasIndex(i => i.IsDeleted);
+        });
+
+        //BusinessCase Configuration
+        builder.Entity<BusinessCase>(bc =>
+        {
+            bc.HasKey(bc => bc.Id);
+
+            bc.Property(bc => bc.ExpectedBenefits)
+                .IsRequired()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.ImpactScope)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.RiskLevel)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.EvaluationStatus)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.OwnerDepartment)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.NextSteps)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.DecisionDate)
+                .IsRequired();
+
+            bc.Property(bc => bc.PlannedDurationWeeks)
+                .IsRequired();
+
+            bc.Property(bc => bc.CurrentStage)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.Verdict)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            bc.Property(bc => bc.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            bc.Property(bc => bc.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            bc.HasOne(bc => bc.Idea)
+                .WithOne(i => i.BusinessCase)
+                .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //ScoringDimensions Configuration
+        builder.Entity<ScoringDimensions>(sd =>
+        {
+            sd.HasKey(sd => sd.Id);
+
+            sd.Property(sd => sd.StrategicAlignment)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.CustomerImpact)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.FinancialBenefit)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Feasibility)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.TimeToValue)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Cost)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Effort)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Risk)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Scalability)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Differentiation)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.SustainabilityImpact)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.ProjectConfidence)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.Score)
+                .IsRequired();
+
+            sd.Property(sd => sd.ReviewerComments)
+                .IsRequired()
+                .HasColumnType("text");
+
+            sd.Property(sd => sd.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            sd.Property(sd => sd.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            sd.HasOne(sd => sd.Idea)
+                .WithOne(i => i.ScoringDimensions)
+                .HasForeignKey<ScoringDimensions>(sd => sd.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
          // Comments Configuration
@@ -402,6 +599,34 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             pr.HasOne(pr => pr.User)
                 .WithMany(u => u.PasswordResets)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Notification>(n =>
+        {
+            n.HasKey(n => n.Id); 
+
+            n.Property(n => n.IsRead)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            n.Property(n => n.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
+                .ValueGeneratedOnAdd(); 
+
+            n.HasOne(n => n.User) 
+                .WithMany(u => u.Notifications) 
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            n.HasOne(n => n.Comment)
+                .WithMany()
+                .HasForeignKey(n => n.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            n.HasIndex(n => n.RecipientId);
+            n.HasIndex(n => n.CommentId);
+
         });
 
         builder.Entity<GroupMembershipRequest>(gmr =>

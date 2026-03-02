@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+namespace api.Controllers;
+
 [ApiController]
 [Route("api/project")]
 [Authorize]

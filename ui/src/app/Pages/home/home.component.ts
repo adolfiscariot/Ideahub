@@ -112,12 +112,11 @@ export class HomeComponent implements OnInit {
         if (results.engagement.status) this.groupEngagement = results.engagement.data;
         if (results.personal.status) this.personalStats = results.personal.data;
       },
-      error: (err) => console.error('Error fetching analytics', err)
+      // error: (err) => console.error('Error fetching analytics', err)
     });
   }
 
   onPromotedIdeaClick(idea: PromotedIdea) {
-    console.log("Clicked idea:", idea);
   if (!idea.projectId) return;
 
   this.router.navigate(['/projects'], {

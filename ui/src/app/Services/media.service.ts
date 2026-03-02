@@ -21,12 +21,12 @@ export class MediaService {
   }
 
   validateFileSize(file: File): { valid: boolean; message?: string } {
-    const maxSize = 20 * 1024 * 1024; 
-    
+    const maxSize = 20 * 1024 * 1024;
+
     if (file.size > maxSize) {
-      return { 
-        valid: false, 
-        message: `File size exceeds 20MB limit` 
+      return {
+        valid: false,
+        message: `File size exceeds 20MB limit`
       };
     }
     return { valid: true };
@@ -35,7 +35,7 @@ export class MediaService {
   detectMediaType(file: File): MediaType {
     const fileName = file.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
-    
+
     if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)) {
       return MediaType.Image;
     }
@@ -46,10 +46,10 @@ export class MediaService {
   }
 
   uploadMedia(
-    file: File, 
-    mediaType: MediaType, 
-    ideaId?: number, 
-    commentId?: number, 
+    file: File,
+    mediaType: MediaType,
+    ideaId?: number,
+    commentId?: number,
     projectId?: number
   ): Observable<ApiResponse<Media>> {
     const formData = new FormData();
@@ -66,12 +66,12 @@ export class MediaService {
   }
 
   viewMedia(
-    ideaId?: number, 
-    commentId?: number, 
+    ideaId?: number,
+    commentId?: number,
     projectId?: number
   ): Observable<ApiResponse<Media[]>> {
     let params = new HttpParams();
-    
+
     if (ideaId) params = params.set('ideaId', ideaId.toString());
     if (commentId) params = params.set('commentId', commentId.toString());
     if (projectId) params = params.set('projectId', projectId.toString());

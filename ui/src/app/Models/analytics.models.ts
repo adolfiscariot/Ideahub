@@ -1,7 +1,7 @@
 export interface MostVotedIdea {
     id: string;
     title: string;
-    description: string;
+    proposedSolution: string;
     author: string;
     groupName: string;
     voteCount: number;
@@ -16,7 +16,7 @@ export interface TopContributor {
 export interface PromotedIdea {
     id: string;
     title: string;
-    description: string;
+    proposedSolution: string;
     author: string;
     groupName: string;
     promotedDate: string;

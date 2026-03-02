@@ -12,8 +12,6 @@ export class ProjectsService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/Project`;
 
-    constructor() { }
-
     getMyProjects(): Observable<Project[]> {
         return this.http.get<ApiResponse>(`${this.apiUrl}/all`).pipe(
             map(response => {
@@ -35,7 +33,6 @@ export class ProjectsService {
                 } as Project));
             }),
             catchError(error => {
-                console.error('Error fetching projects:', error);
                 return throwError(() => new Error(error.message || 'Failed to fetch projects'));
             })
         );
@@ -45,7 +42,6 @@ export class ProjectsService {
         return this.http.put<ApiResponse>(`${this.apiUrl}/${id}`, projectData).pipe(
             map(response => response.data),
             catchError(error => {
-                console.error('Error updating project:', error);
                 return throwError(() => new Error(error.message || 'Failed to update project'));
             })
         );

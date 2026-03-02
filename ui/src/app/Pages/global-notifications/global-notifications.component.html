@@ -1,71 +1,98 @@
-<div *ngIf="loadingRequests" class="loading">Loading pending requests...</div>
-<div *ngIf="errorRequests" class="error">{{ errorRequests }}</div>
-<div *ngIf="!loadingRequests && groupedRequests.length === 0" class="no-requests">
-  No pending requests
+<!-- Tab Toggle -->
+<div class="tab-toggle">
+  <button class="tab-btn" [class.active]="activeTab === 'requests'" (click)="setTab('requests')">
+    Requests
+    <span class="tab-badge" *ngIf="totalRequests > 0">{{ totalRequests > 9 ? '9+' : totalRequests }}</span>
+  </button>
+  <button class="tab-btn" [class.active]="activeTab === 'comments'" (click)="setTab('comments')">
+    Comments
+    <span class="tab-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+  </button>
 </div>
 
-<div *ngIf="!loadingRequests && groupedRequests.length > 0" class="group-requests-container">
-  <!-- Header Section -->
-  <div class="requests-header">
-    <div class="header-title">
-      <h2>Group Requests</h2>
-      <span class="total-count">{{ totalRequests }} pending request (s) across {{ groupedRequests.length }} group (s)</span>
-    </div>
+<ng-container *ngIf="activeTab === 'requests'">
+  <div *ngIf="loadingRequests" class="loading">Loading pending requests...</div>
+  <div *ngIf="errorRequests" class="error">{{ errorRequests }}</div>
+  <div *ngIf="!loadingRequests && groupedRequests.length === 0" class="no-requests">
+    No pending requests
   </div>
 
-  <!-- Groups Section -->
-  <div *ngFor="let group of groupedRequests" class="group-panel">
-    <!-- Group Header -->
-    <div class="group-header" (click)="toggleGroup(group)">
-      <div class="group-title-section">
-        <span class="group-name">{{ group.groupName }}</span>
-      </div>
-      <div class="group-header-right">
-        <span class="badge">{{ group.requests.length }}</span>
-        <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
+  <div *ngIf="!loadingRequests && groupedRequests.length > 0" class="group-requests-container">
+    <div class="requests-header">
+      <div class="header-title">
+        <h2>Group Requests</h2>
+        <span class="total-count">{{ totalRequests }} pending request(s) across {{ groupedRequests.length }}
+          group(s)</span>
       </div>
     </div>
 
-    <!-- Requests List (when open) -->
-    <div *ngIf="group.open" class="requests-container">
-      <div *ngFor="let req of group.requests" class="request-item">
-        <span class="request-email">{{ req.userEmail }}</span>
-      <div class="action-buttons">
-         <app-buttons
-            [buttonText]="'Accept'"
-            [buttonStyleClass]="'btn-accept'"
-            [buttonType]="'button'"
-            (click)="acceptRequest(req)">
-        </app-buttons>
-
-        <app-buttons
-        [buttonText]="'Reject'"
-        [buttonStyleClass]="'btn-reject'"
-        [buttonType]="'button'"
-        (click)="rejectRequest(req)">
-        </app-buttons>
+    <div *ngFor="let group of groupedRequests" class="group-panel">
+      <div class="group-header" (click)="toggleGroup(group)">
+        <div class="group-title-section">
+          <span class="group-name">{{ group.groupName }}</span>
+        </div>
+        <div class="group-header-right">
+          <span class="badge">{{ group.requests.length }}</span>
+          <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
         </div>
       </div>
-      
-      <!-- Group Action Buttons -->
-      <div class="group-action-buttons">
-        <app-buttons
-            *ngIf="group.requests.length > 1"
-            [buttonText]="'Reject All'"
-            [buttonStyleClass]="'btn-reject'"
-            [buttonType]="'button'"
-            (click)="rejectAll(group)">
-        </app-buttons>
 
-        <app-buttons
-        *ngIf="group.requests.length > 1"
-        [buttonText]="'Accept All'"
-        [buttonStyleClass]="'btn-accept'"
-        [buttonType]="'button'"
-        (click)="acceptAll(group)">
-        </app-buttons>
+      <div *ngIf="group.open" class="requests-container">
+        <div *ngFor="let req of group.requests" class="request-item">
+          <span class="request-email">{{ req.userEmail }}</span>
+          <div class="action-buttons">
+            <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
+              (click)="acceptRequest(req)">
+            </app-buttons>
+            <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+              (click)="rejectRequest(req)">
+            </app-buttons>
+          </div>
+        </div>
 
+        <div class="group-action-buttons">
+          <app-buttons *ngIf="group.requests.length > 1" [buttonText]="'Reject All'" [buttonStyleClass]="'btn-reject'"
+            [buttonType]="'button'" (click)="rejectAll(group)">
+          </app-buttons>
+          <app-buttons *ngIf="group.requests.length > 1" [buttonText]="'Accept All'" [buttonStyleClass]="'btn-accept'"
+            [buttonType]="'button'" (click)="acceptAll(group)">
+          </app-buttons>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="activeTab === 'comments'">
+  <div *ngIf="loadingNotifications" class="loading">Loading notifications...</div>
+  <div *ngIf="errorNotifications" class="error">{{ errorNotifications }}</div>
+
+  <div *ngIf="!loadingNotifications && commentNotifications.length === 0" class="no-requests">
+    No comment notifications
+  </div>
+
+  <div *ngIf="!loadingNotifications && commentNotifications.length > 0" class="comment-notifications-container">
+    <div class="requests-header">
+      <div class="header-title">
+        <h2>Comment Notifications</h2>
+        <span class="total-count">{{ commentNotifications.length }} notification(s), {{ unreadCount }} unread</span>
+      </div>
+      <button class="mark-all-btn" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+        Mark all as read
+      </button>
+    </div>
+
+    <div *ngFor="let notif of commentNotifications" class="notif-card" [class.unread]="!notif.isRead">
+      <div class="notif-body">
+        <div class="notif-meta">
+          <span class="notif-commenter">{{ notif.comment.commenterName }}</span>
+          <span class="notif-idea">commented on <strong>{{ notif.comment.ideaTitle }}</strong></span>
+        </div>
+        <p class="notif-content">"{{ notif.comment.content }}"</p>
+      </div>
+      <button *ngIf="!notif.isRead" class="mark-read-btn" (click)="markAsRead(notif)">
+        Mark as read
+      </button>
+    </div>
+  </div>
+</ng-container>

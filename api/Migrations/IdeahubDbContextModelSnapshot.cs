@@ -154,6 +154,73 @@ namespace Ideahub.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("api.Models.BusinessCase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("CurrentStage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("DecisionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EvaluationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExpectedBenefits")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IdeaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImpactScope")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NextSteps")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerDepartment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PlannedDurationWeeks")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RiskLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Verdict")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdeaId")
+                        .IsUnique();
+
+                    b.ToTable("BusinessCases");
+                });
+
             modelBuilder.Entity("api.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
@@ -296,25 +363,32 @@ namespace Ideahub.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AiReasoning")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
+                    b.Property<string>("CurrentStage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasDefaultValue("Evaluation");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("DeletedAt");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Filter")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("InnovationCategory")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -324,10 +398,39 @@ namespace Ideahub.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProblemStatement")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProposedSolution")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<float>("Score")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(0f);
+
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("character varying(24)")
+                        .HasDefaultValue("Open");
+
+                    b.Property<string>("StrategicAlignment")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubCategory")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TechnologyInvolved")
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -338,6 +441,10 @@ namespace Ideahub.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("UseCase")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -351,7 +458,7 @@ namespace Ideahub.Migrations
 
                     b.HasIndex("Status");
 
-                    b.HasIndex("Title");
+                    b.HasIndex("StrategicAlignment");
 
                     b.HasIndex("UserId");
 
@@ -498,6 +605,40 @@ namespace Ideahub.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Media");
+                });
+
+            modelBuilder.Entity("api.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("RecipientId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("RecipientId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("api.Models.PasswordReset", b =>
@@ -647,6 +788,90 @@ namespace Ideahub.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("api.Models.ScoringDimensions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Cost")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("CustomerImpact")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Differentiation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Effort")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Feasibility")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FinancialBenefit")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IdeaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProjectConfidence")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewerComments")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Risk")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Scalability")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.Property<string>("StrategicAlignment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SustainabilityImpact")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TimeToValue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdeaId")
+                        .IsUnique();
+
+                    b.ToTable("ScoringDimensions");
+                });
+
             modelBuilder.Entity("api.Models.UserGroup", b =>
                 {
                     b.Property<string>("UserId")
@@ -757,6 +982,17 @@ namespace Ideahub.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("api.Models.BusinessCase", b =>
+                {
+                    b.HasOne("api.Models.Idea", "Idea")
+                        .WithOne("BusinessCase")
+                        .HasForeignKey("api.Models.BusinessCase", "IdeaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Idea");
+                });
+
             modelBuilder.Entity("api.Models.Comment", b =>
                 {
                     b.HasOne("api.Models.Idea", "Idea")
@@ -857,6 +1093,25 @@ namespace Ideahub.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("api.Models.Notification", b =>
+                {
+                    b.HasOne("api.Models.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("api.Models.PasswordReset", b =>
                 {
                     b.HasOne("api.Models.IdeahubUser", "User")
@@ -914,6 +1169,17 @@ namespace Ideahub.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("api.Models.ScoringDimensions", b =>
+                {
+                    b.HasOne("api.Models.Idea", "Idea")
+                        .WithOne("ScoringDimensions")
+                        .HasForeignKey("api.Models.ScoringDimensions", "IdeaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Idea");
+                });
+
             modelBuilder.Entity("api.Models.UserGroup", b =>
                 {
                     b.HasOne("api.Models.Group", "Group")
@@ -968,11 +1234,15 @@ namespace Ideahub.Migrations
 
             modelBuilder.Entity("api.Models.Idea", b =>
                 {
+                    b.Navigation("BusinessCase");
+
                     b.Navigation("Comments");
 
                     b.Navigation("Media");
 
                     b.Navigation("Projects");
+
+                    b.Navigation("ScoringDimensions");
 
                     b.Navigation("Votes");
                 });
@@ -986,6 +1256,8 @@ namespace Ideahub.Migrations
                     b.Navigation("GroupsCreated");
 
                     b.Navigation("Ideas");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("PasswordResets");
 

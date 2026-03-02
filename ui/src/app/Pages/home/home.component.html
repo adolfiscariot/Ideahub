@@ -1,185 +1,179 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>Analytics Dashboard</h1>
+    <p>Insights into community engagement and top ideas.</p>
+  </header>
 
-    <div class="dashboard-container">
-        <header class="dashboard-header">
-            <h1>Analytics Dashboard</h1>
-            <p>Insights into community engagement and top ideas.</p>
-        </header>
+  <!-- Idea Statistics Summary -->
+  <div class="stats-summary" *ngIf="ideaStats">
+    <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb" variant="total"></app-stat-card>
+    <app-stat-card label="Open" [value]="ideaStats.total - ideaStats.promoted" icon="heroLockOpen"
+      variant="open"></app-stat-card>
+    <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
+      variant="promoted"></app-stat-card>
+    <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed" variant="closed"></app-stat-card>
+  </div>
 
-        <!-- Idea Statistics Summary -->
-        <div class="stats-summary" *ngIf="ideaStats">
-            <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb"
-                variant="total"></app-stat-card>
-            <app-stat-card label="Open" [value]="ideaStats.total - ideaStats.promoted" icon="heroLockOpen" variant="open"></app-stat-card>
-            <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
-                variant="promoted"></app-stat-card>
-            <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed"
-                variant="closed"></app-stat-card>
+  <div class="analytics-grid">
+    <!-- Most Voted Ideas -->
+    <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
+      <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
+        <div *ngFor="let idea of mostVotedIdeas" class="list-item">
+          <div class="item-main">
+            <h3>{{idea.title}}</h3>
+            <p>{{idea.proposedSolution}}</p>
+          </div>
+          <div class="item-meta">
+            <span class="author">by {{idea.author}}</span>
+            <span class="badge vote-badge">{{idea.voteCount}} votes</span>
+          </div>
         </div>
-
-        <div class="analytics-grid">
-            <!-- Most Voted Ideas -->
-            <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
-                <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
-                    <div *ngFor="let idea of mostVotedIdeas" class="list-item">
-                        <div class="item-main">
-                            <h3>{{idea.title}}</h3>
-                            <p>{{idea.description}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="author">by {{idea.author}}</span>
-                            <span class="badge vote-badge">{{idea.voteCount}} votes</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noVotes>
-                    <div class="empty-state">No votes recorded yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Top Contributors -->
-            <app-dashboard-card title="Top Contributors" variant="top-contributors" icon="heroTrophy">
-                <div *ngIf="topContributors.length > 0; else noContributors">
-                    <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
-                        <div class="rank">{{i + 1}}</div>
-                        <div class="item-main">
-                            <h3>{{user.displayName}}</h3>
-                            <p class="email">{{user.email}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noContributors>
-                    <div class="empty-state">No contributors yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Group Engagement -->
-            <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
-                <div *ngIf="groupEngagement.length > 0; else noGroups">
-                    <div *ngFor="let group of groupEngagement" class="list-item">
-                        <div class="item-main">
-                            <h3>{{group.name}}</h3>
-                        </div>
-                        <div class="item-meta">
-                            <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
-                            <span class="badge vote-badge">{{group.voteCount}} votes</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noGroups>
-                    <div class="empty-state">No active groups yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-
-            <!-- Promoted Ideas -->
-            <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
-                <div *ngIf="promotedIdeas.length > 0; else noPromoted">
-                    <div *ngFor="let idea of promotedIdeas" class="list-item"
-                        [class.clickable]="idea.projectId"
-                        (click)="onPromotedIdeaClick(idea)">
-                        <div class="item-main">
-                            <h3>{{idea.title}}</h3>
-                            <p>{{idea.description}}</p>
-                        </div>
-                        <div class="item-meta">
-                            <span class="author">by {{idea.author}}</span>
-                            <span class="date">{{idea.promotedDate | date}}</span>
-                        </div>
-                    </div>
-                </div>
-                <ng-template #noPromoted>
-                    <div class="empty-state">No ideas promoted yet.</div>
-                </ng-template>
-            </app-dashboard-card>
-        </div>
-
-        <!-- Personal Stats -->
-        <div class="personal-stats-section" *ngIf="personalStats">
-            <h2>Your Impact</h2>
-            <div class="personal-stats-grid">
-                <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated || 0" icon="heroLightBulb"
-                    variant="created"></app-stat-card>
-                <app-stat-card label="Votes Cast" [value]="personalStats.votesCast || 0" icon="heroHandThumbUp"
-                    variant="votes"></app-stat-card>
-                <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved || 0"
-                    icon="heroBriefcase" variant="projects"></app-stat-card>
-                <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated || 0" icon="heroUserGroup"
-                    variant="groups"></app-stat-card>
-            </div>
-        </div>
-
-     <app-modal
-  [isOpen]="showWelcomeInfoModal"
-  title="Welcome Guide"
-  size="md"
-  (closeModal)="closeWelcomeInfo()">
-
-  <div modal-body>
-    <div class="welcome-info-modal">
-      <div class="section">
-
-        <!-- Welcome -->
-        <h3 class="section-title">
-          <span class="icon">👋</span>
-          Welcome to IdeaHub
-        </h3>
-        <p>
-          IdeaHub is Adept Technologies’ internal platform for capturing, tracking, and turning employee ideas into real, executable initiatives.
-        </p>
-
       </div>
+      <ng-template #noVotes>
+        <div class="empty-state">No votes recorded yet.</div>
+      </ng-template>
+    </app-dashboard-card>
 
-      <div class="section">
-
-        <!-- Getting Started -->
-        <h3 class="section-title">
-          <span class="icon">📊</span>
-          Getting Started
-        </h3>
-
-        <ul class="rule-list">
-          <li class="rule-item">
-            <div class="rule-header">
-              <span class="bullet"></span>
-              <span>
-                The homepage gives you a quick snapshot of idea activity at Adept and your personal involvement.
-              </span>
-            </div>
-          </li>
-
-          <li class="rule-item">
-            <div class="rule-header">
-              <span class="bullet"></span>
-              <span>
-                To participate, go to the <strong>Groups</strong> page and join an existing group or create a new one to contribute valuable ideas.
-              </span>
-            </div>
-          </li>
-
-          <li class="rule-item">
-            <div class="rule-header">
-              <span class="bullet"></span>
-              <span>
-                When an idea gains enough support and meets the required threshold, it is promoted into a project. At that point, an overseer is assigned to act as the project owner, and the idea moves from discussion into execution within the company.
-              </span>
-            </div>
-          </li>
-        </ul>
-
+    <!-- Top Contributors -->
+    <app-dashboard-card title="Top Contributors" variant="top-contributors" icon="heroTrophy">
+      <div *ngIf="topContributors.length > 0; else noContributors">
+        <div *ngFor="let user of topContributors; let i = index" class="list-item contributor-item">
+          <div class="rank">{{i + 1}}</div>
+          <div class="item-main">
+            <h3>{{user.displayName}}</h3>
+            <p class="email">{{user.email}}</p>
+          </div>
+          <div class="item-meta">
+            <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
+          </div>
+        </div>
       </div>
+      <ng-template #noContributors>
+        <div class="empty-state">No contributors yet.</div>
+      </ng-template>
+    </app-dashboard-card>
+
+    <!-- Group Engagement -->
+    <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
+      <div *ngIf="groupEngagement.length > 0; else noGroups">
+        <div *ngFor="let group of groupEngagement" class="list-item">
+          <div class="item-main">
+            <h3>{{group.name}}</h3>
+          </div>
+          <div class="item-meta">
+            <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
+            <span class="badge vote-badge">{{group.voteCount}} votes</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noGroups>
+        <div class="empty-state">No active groups yet.</div>
+      </ng-template>
+    </app-dashboard-card>
+
+    <!-- Promoted Ideas -->
+    <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
+      <div *ngIf="promotedIdeas.length > 0; else noPromoted">
+        <div *ngFor="let idea of promotedIdeas" class="list-item" [class.clickable]="idea.projectId"
+          (click)="idea.projectId && onPromotedIdeaClick(idea)">
+          <div class="item-main">
+            <h3>{{idea.title}}</h3>
+            <p>{{idea.proposedSolution}}</p>
+          </div>
+          <div class="item-meta">
+            <span class="author">by {{idea.author}}</span>
+            <span class="date">{{idea.promotedDate | date}}</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noPromoted>
+        <div class="empty-state">No ideas promoted yet.</div>
+      </ng-template>
+    </app-dashboard-card>
+  </div>
+
+  <!-- Personal Stats -->
+  <div class="personal-stats-section" *ngIf="personalStats">
+    <h2>Your Impact</h2>
+    <div class="personal-stats-grid">
+      <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated || 0" icon="heroLightBulb"
+        variant="created"></app-stat-card>
+      <app-stat-card label="Votes Cast" [value]="personalStats.votesCast || 0" icon="heroHandThumbUp"
+        variant="votes"></app-stat-card>
+      <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved || 0" icon="heroBriefcase"
+        variant="projects"></app-stat-card>
+      <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated || 0" icon="heroUserGroup"
+        variant="groups"></app-stat-card>
     </div>
   </div>
 
-  <div modal-footer>
-    <div class="modal-footer-content">
-      <app-buttons
-        [buttonText]="'Got it, let’s go!'"
-        [buttonStyleClass]="'btn-promote'"
-        (click)="closeWelcomeInfo()">
-      </app-buttons>
-    </div>
-  </div>
+  <app-modal [isOpen]="showWelcomeInfoModal" title="Welcome Guide" size="md" (closeModal)="closeWelcomeInfo()">
 
-</app-modal>
+    <div modal-body>
+      <div class="welcome-info-modal">
+        <div class="section">
+
+          <!-- Welcome -->
+          <h3 class="section-title">
+            <span class="icon">👋</span>
+            Welcome to IdeaHub
+          </h3>
+          <p>
+            IdeaHub is Adept Technologies’ internal platform for capturing, tracking, and turning employee ideas into
+            real, executable initiatives.
+          </p>
+
+        </div>
+
+        <div class="section">
+
+          <!-- Getting Started -->
+          <h3 class="section-title">
+            <span class="icon">📊</span>
+            Getting Started
+          </h3>
+
+          <ul class="rule-list">
+            <li class="rule-item">
+              <div class="rule-header">
+                <span class="bullet"></span>
+                <span>
+                  The homepage gives you a quick snapshot of idea activity at Adept and your personal involvement.
+                </span>
+              </div>
+            </li>
+
+            <li class="rule-item">
+              <div class="rule-header">
+                <span class="bullet"></span>
+                <span>
+                  To participate, go to the <strong>Groups</strong> page and join an existing group or create a new one
+                  to contribute valuable ideas.
+                </span>
+              </div>
+            </li>
+
+            <li class="rule-item">
+              <div class="rule-header">
+                <span class="bullet"></span>
+                <span>
+                  When an idea gains enough support and meets the required threshold, it is promoted into a project. At
+                  that point, an overseer is assigned to act as the project owner, and the idea moves from discussion
+                  into execution within the company.
+                </span>
+              </div>
+            </li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <div class="modal-footer-content">
+        <app-buttons [buttonText]="'Got it, let’s go!'" [buttonStyleClass]="'btn-promote'" (click)="closeWelcomeInfo()">
+        </app-buttons>
+      </div>
+    </div>
+
+  </app-modal>

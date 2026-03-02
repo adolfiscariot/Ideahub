@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { NavbarComponent } from '../../Components/navbar/navbar.component';
 import { CtaComponent } from '../../Components/cta/cta.component';
 
 @Component({
@@ -9,4 +8,4 @@ import { CtaComponent } from '../../Components/cta/cta.component';
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
 })
-export class LandingPageComponent {}
+export class LandingPageComponent { }

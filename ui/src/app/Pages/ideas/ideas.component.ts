@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { IdeasService } from '../../Services/ideas.services';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
-import { Idea, CreateIdeaRequest, IdeaUpdate, PromoteRequest, viewComment, createComment } from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, CreateIdeaRequest, IdeaUpdate, viewComment } from '../../Interfaces/Ideas/idea-interfaces';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { VoteService } from '../../Services/vote.service';
@@ -20,7 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommentsService } from '../../Services/comments.service';
 import { MediaComponent } from '../media/media.component';
-import { MediaType, Media } from '../../Interfaces/Media/media-interface';
+import { MediaType } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
@@ -33,43 +34,44 @@ import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFile
   styleUrls: ['./ideas.component.scss']
 })
 export class IdeasComponent implements OnInit, OnDestroy {
-  groupId: string = '';
-  groupName: string = '';
+  groupId = '';
+  groupName = '';
   ideas: Idea[] = [];
-  isLoading: boolean = false;
-  isSubmitting: boolean = false;
-  showShareModal: boolean = false;
-  currentUserId: string = '';
+  isLoading = false;
+  isSubmitting = false;
+  showShareModal = false;
+  currentUserId = '';
 
   selectedIdea: any = null;
-  membersCount: string = '0';
+  membersCount = '0';
 
-  isVoting: boolean = false;
-  isUnvoting: boolean = false;
-  isViewingVoters: boolean = false;
+  isVoting = false;
+  isUnvoting = false;
+  isViewingVoters = false;
   selectedIdeaForVoters: Idea | null = null;
   votersList: any[] = [];
 
-  groupCreatorId: string = '';
+  groupCreatorId = '';
 
   //showMembersModal = false;
-  showAdminLeaveModal: boolean = false;
-  showTransferOwnershipModal: boolean = false;
+  showAdminLeaveModal = false;
+  showTransferOwnershipModal = false;
 
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
-  groupCreatorIdFromState: string = ''; // set from route state
+  groupCreatorIdFromState = ''; // set from route state
 
-  isPromoting: boolean = false;
+  isPromoting = false;
   currentlyPromotingIdeaId: string | null = null;
 
   groupMembers: any[] = [];
 
-  isEditMode: boolean = false;
+  isEditMode = false;
 
   modalEditData: any = {
     id: '',
     title: '',
-    description: ''
+    problemStatement: '',
+    proposedSolution: ''
   };
 
   sortMode: 'top' | 'newest' = 'top';
@@ -84,7 +86,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   currentIdeaToPromote: Idea | null = null;
   projectData: CreateProjectRequest = {
     title: '',
-    description: '',
+    proposedSolution: '',
+    //problemStatement:'',
     overseenByEmail: ''
   };
   showMemberLeaveModal = false;
@@ -93,6 +96,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isFormValid = false;
   shareTitleCount = 0;
   shareDescCount = 0;
+  shareProblemCount = 0;
+  shareUseCaseCount = 0;
+  shareNotesCount = 0;
 
   shareIdeaForm!: FormGroup;
 
@@ -105,19 +111,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
   //showCloseIdea=false;
   ideaIdToClose: string | null = null;
 
-  selectedType: string = '';
-  selectedDomain: string = '';
-  selectedImpact: string = '';
+  selectedType = '';
+  selectedDomain = '';
+  selectedImpact = '';
 
   isDropdownOpen = false;
 
-  selectedOptionLabel: string = 'All Categories';
+  selectedOptionLabel = 'All Categories';
 
   isReadyForPromotion = false;
 
   comments: viewComment[] = [];
-  newCommentContent: string = '';
-  isLoadingComments: boolean = false;
+  newCommentContent = '';
+  isLoadingComments = false;
 
   selectedCommentFiles: File[] = [];
   isPostingComment = false;
@@ -131,21 +137,37 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showClosedIdeas: boolean = false;
   closedIdeas: Idea[] = [];
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private ideasService: IdeasService,
-    private groupsService: GroupsService,
-    private authService: AuthService,
-    private voteService: VoteService,
-    private toastService: ToastService,
-    private dialog: MatDialog,
-    private projectService: ProjectService,
-    private commentService: CommentsService,
-    private mediaService: MediaService,
-    private fb: FormBuilder
-  ) {
+  showMobileMenu: boolean = false;
+  showIdeaActionsMenu: boolean = false;
+
+  toggleMobileMenu() {
+    this.showMobileMenu = !this.showMobileMenu;
   }
+
+  closeMobileMenu() {
+    this.showMobileMenu = false;
+  }
+
+  toggleIdeaActionsMenu() {
+    this.showIdeaActionsMenu = !this.showIdeaActionsMenu;
+  }
+
+  closeIdeaActionsMenu() {
+    this.showIdeaActionsMenu = false;
+  }
+
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private ideasService = inject(IdeasService);
+  private groupsService = inject(GroupsService);
+  private authService = inject(AuthService);
+  private voteService = inject(VoteService);
+  private toastService = inject(ToastService);
+  private dialog = inject(MatDialog);
+  private projectService = inject(ProjectService);
+  private commentService = inject(CommentsService);
+  private mediaService = inject(MediaService);
+  private fb = inject(FormBuilder);
 
   ngOnInit(): void {
     // console.log('=== INITIALIZING IDEAS COMPONENT ===');
@@ -155,11 +177,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
     // console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(20)]],
-      description: ['', Validators.required],
-      type: ['', Validators.required],
-      domain: ['', Validators.required],
-      impact: ['', Validators.required]
+      Title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
+      ProblemStatement: ['', [Validators.required, Validators.minLength(5)]],
+      ProposedSolution: ['', [Validators.required, Validators.minLength(5)]],
+      StrategicAlignment: ['', Validators.required],
+      UseCase: ['', Validators.required],
+      InnovationCategory: ['', Validators.required],
+      SubCategory: [''],
+      TechnologyInvolved: [''],
+      Notes: ['']
     });
 
     this.setupShareIdeaCharCounters();
@@ -231,18 +257,39 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private setupShareIdeaCharCounters(): void {
 
-    this.shareIdeaForm.get('title')?.valueChanges
+    this.shareIdeaForm.get('Title')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'title', 20);
+        const res = updateCharCount(this.shareIdeaForm, 'Title', 20);
         this.shareTitleCount = res.count;
       });
 
-    this.shareIdeaForm.get('description')?.valueChanges
+    this.shareIdeaForm.get('ProposedSolution')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'description', 1000);
+        const res = updateCharCount(this.shareIdeaForm, 'ProposedSolution', 1000);
         this.shareDescCount = res.count;
+      });
+
+    this.shareIdeaForm.get('ProblemStatement')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'ProblemStatement', 250);
+        this.shareProblemCount = res.count;
+      });
+
+    this.shareIdeaForm.get('UseCase')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'UseCase', 250);
+        this.shareUseCaseCount = res.count;
+      });
+
+    this.shareIdeaForm.get('Notes')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const res = updateCharCount(this.shareIdeaForm, 'Notes', 1000);
+        this.shareNotesCount = res.count;
       });
   }
 
@@ -295,9 +342,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
             const filteredIdeas = response.data.map((idea: any) => {
               const mappedIdea: Idea = {
                 id: idea.id?.toString() || '',
-                title: idea.title || '',
-                description: idea.description || '',
-                filter: idea.filter || '',
+                Title: idea.Title || idea.title || '',
+                ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+                ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+                StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+                UseCase: idea.UseCase || idea.useCase || '',
+                InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+                SubCategory: idea.SubCategory || idea.subCategory || '',
+                TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+                Notes: idea.Notes || idea.notes || '',
                 UserId: idea.userId || idea.UserId || '',
                 userId: idea.userId || idea.UserId || '',
                 groupId: this.groupId,
@@ -335,7 +388,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error('Error filtering ideas:', err);
+          // console.error('Error filtering ideas:', err);
         }
       });
   }
@@ -369,9 +422,15 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
               const mappedIdea: Idea = {
                 id: idea.id?.toString() || '',
-                title: idea.title || '',
-                description: idea.description || '',
-                filter: idea.filter || '',
+                Title: idea.Title || idea.title || '',
+                ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+                ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+                StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+                UseCase: idea.UseCase || idea.useCase || '',
+                InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+                SubCategory: idea.SubCategory || idea.subCategory || '',
+                TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+                Notes: idea.Notes || idea.notes || '',
                 UserId: idea.userId || idea.UserId || '',
                 userId: idea.userId || idea.UserId || '',
                 groupId: this.groupId,
@@ -500,7 +559,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   }
 
   selectIdea(idea: any): void {
-    console.log('Selecting idea:', idea);
     this.selectedIdea = idea;
     this.loadComments(idea.id);
   }
@@ -585,8 +643,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
       }, 2000);
 
     } catch (error: any) {
-      console.error('Error posting comment:', error);
-      this.commentStatus = error.message || 'Failed to post comment. Please try again.';
+      this.commentStatus = error.message || 'Failed to post comment. Please try again.'; // research on whether error.message exposes any sensitive stuff to the client
       this.toastService.show(this.commentStatus, 'error');
     } finally {
       this.isPostingComment = false;
@@ -787,7 +844,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   dontShowIdeaInfoAgain() {
     localStorage.setItem('hideIdeaInfo', 'true');
-    console.log('hide idea information')
     this.showIdeaInfoModal = false;
   }
 
@@ -796,22 +852,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.groupsService.leaveGroup(this.groupId).subscribe({
       next: (res) => {
-        console.log('Left group response:', res); // check backend response
         this.toastService.show('You have left the group', 'success');          // simple feedback for now
         this.router.navigate(['/groups']);         // redirect after leaving
       },
       error: (err) => {
-        console.error('Failed to leave group:', err);
+        //console.error('Failed to leave group:', err);
         this.toastService.show('Failed to leave the group', 'error');       // simple error feedback
       }
     });
   }
 
   acceptRequest(groupId: string, requestUserEmail: string) {
-    console.log('Accept request:', requestUserEmail);
     this.groupsService.acceptRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request accepted for user:', requestUserEmail);
         this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
 
         if (this.pendingRequests.length === 0) {
@@ -820,15 +873,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
         }
         this.loadGroupMembers();
       },
-      error: (err) => console.error('Error accepting request:', err)
+      // error: (err) => console.error('Error accepting request:', err)
     });
   }
 
   rejectRequest(groupId: string, requestUserEmail: string) {
-    console.log('Reject request:', requestUserEmail);
     this.groupsService.rejectRequest(groupId, requestUserEmail).subscribe({
       next: () => {
-        console.log('Request rejected for user:', requestUserEmail);
         this.pendingRequests = this.pendingRequests.filter(r => r.email !== requestUserEmail);
 
         if (this.pendingRequests.length === 0) {
@@ -837,7 +888,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
         }
         this.loadGroupMembers();
       },
-      error: (err) => console.error('Error rejecting request:', err)
+      // error: (err) => console.error('Error rejecting request:') //console.error('Error rejecting request:', err)
     });
 
 
@@ -848,44 +899,30 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.showRequestsModal = false;
   }
 
-
-
-  onUpdateIdeaFromModal(event: { title: string, description: string }): void {
+  onUpdateIdeaFromModal(event: IdeaUpdate): void {
     if (!this.selectedIdea) {
-      console.log('No idea selected for modal update');
       return;
     }
 
-    console.log('Updating idea from modal:', event);
-
-    // Create the update data according to your interface
     const updateData: IdeaUpdate = {
-      title: event.title,
-      description: event.description,
-      status: this.selectedIdea.status ?? "open"
+      ...event,
+      Status: this.selectedIdea.status ?? "open"
     };
 
 
     this.ideasService.updateIdea(this.selectedIdea.id, updateData).subscribe({
       next: (response) => {
         if (response.success) {
-          console.log('Idea updated from modal successfully');
 
           // Update the idea in the local array
           const index = this.ideas.findIndex(i => i.id === this.selectedIdea.id);
           if (index !== -1) {
-            this.ideas[index].title = event.title;
-            this.ideas[index].description = event.description;
-            this.ideas[index].updatedAt = new Date();
-
-            // Update the ideas array reference
+            this.ideas[index] = { ...this.ideas[index], ...event, updatedAt: new Date() };
             this.ideas = [...this.ideas];
           }
 
           // Update selected idea
-          this.selectedIdea.title = event.title;
-          this.selectedIdea.description = event.description;
-          this.selectedIdea.updatedAt = new Date();
+          this.selectedIdea = { ...this.selectedIdea, ...event, updatedAt: new Date() };
 
           // Close modal and reset
           this.showShareModal = false;
@@ -897,7 +934,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error updating idea from modal:', error);
+        //console.error('Error updating idea from modal:', error);
         this.toastService.show('An error occurred while updating the idea.', 'error');
       }
     });
@@ -906,14 +943,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
   loadGroupInfo(): void {
     // Skip if we already have the info from route state
     if (this.groupCreatorIdFromState && this.groupName) {
-      console.log('Skipping loadGroupInfo - already have data from route state');
       this.groupCreatorId = this.groupCreatorIdFromState;
       return;
     }
 
     this.groupsService.getGroups().subscribe({
       next: (response) => {
-        console.log('=== GROUP INFO RESPONSE ===');
 
         if (response.success && response.data) {
           const group = response.data.find((g: any) => g.id === this.groupId);
@@ -929,24 +964,17 @@ export class IdeasComponent implements OnInit, OnDestroy {
             if (!this.groupCreatorId) {
               this.groupCreatorId = group.createdByUserId || group.userId || group.createdBy || group.ownerId || '';
             }
-
-            console.log('Group info loaded:', {
-              groupName: this.groupName,
-              groupCreatorId: this.groupCreatorId,
-              fromState: !!this.groupCreatorIdFromState
-            });
           }
         }
       },
       error: (error) => {
-        console.error('Error loading group info:', error);
+        // console.error('Error loading group info:', error);
       }
     });
   }
 
 
   openMembersModal() {
-    console.log('Opening members modal for group:', this.groupId);
 
     this.dialog.open(GroupMembersModalComponent, {
       width: '600px',
@@ -1035,9 +1063,17 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
             const mappedIdea: Idea = {
               id: idea.id?.toString() || '',
-              title: idea.title || '',
-              description: idea.description || '',
-              filter: idea.filter || '',
+              Title: idea.Title || idea.title || '',
+              //description: idea.description || '',
+              ProposedSolution: idea.ProposedSolution || idea.proposedSolution || '',
+              ProblemStatement: idea.ProblemStatement || idea.problemStatement || '',
+              StrategicAlignment: idea.StrategicAlignment || idea.strategicAlignment || '',
+              UseCase: idea.UseCase || idea.useCase || '',
+              InnovationCategory: idea.InnovationCategory || idea.innovationCategory || '',
+              SubCategory: idea.SubCategory || idea.subCategory || '',
+              TechnologyInvolved: idea.TechnologyInvolved || idea.technologyInvolved || '',
+              Notes: idea.Notes || idea.notes || '',
+              //filter: idea.filter || '',
               UserId: idea.userId || idea.UserId || '',
               userId: idea.userId || idea.UserId || '',
               groupId: this.groupId,
@@ -1075,31 +1111,20 @@ export class IdeasComponent implements OnInit, OnDestroy {
               return isClosed;
             });
             this.ideas = closedIdeas;
-            console.log(`Filtered to ${this.ideas.length} CLOSED ideas`);
           } else {
             // Show only OPEN ideas (not closed)
             const openIdeas = allIdeas.filter(idea => {
               const isOpen = idea.status !== 'Closed';
-              console.log(`Checking idea "${idea.title}": status="${idea.status}", isOpen=${isOpen}`);
               return isOpen;
             });
             this.ideas = openIdeas;
-            console.log(`Filtered to ${this.ideas.length} OPEN ideas`);
           }
 
-          // If no ideas after filtering, log it
-          if (this.ideas.length === 0) {
-            console.log('⚠️ No ideas found after filtering!');
-            console.log('Current view mode:', this.showClosedIdeas ? 'Closed' : 'Open');
-            console.log('Total ideas from API:', allIdeas.length);
-          }
 
           // Then fetch vote counts for all filtered ideas
           if (this.ideas.length > 0) {
             await this.fetchAndUpdateVoteCounts();
-          } else {
-            console.log('No ideas to fetch vote counts for');
-          }
+          } else { }
 
           // Sort based on current mode
           if (this.showClosedIdeas) {
@@ -1110,32 +1135,28 @@ export class IdeasComponent implements OnInit, OnDestroy {
             this.sortIdeas();
           }
 
-          console.log('=== FINAL IDEAS ARRAY ===');
-          this.ideas.forEach((idea, index) => {
-            console.log(`${index + 1}. "${idea.title}" - Status: "${idea.status}" - Votes: ${idea.voteCount}`);
-          });
+          // this.ideas.forEach((idea, index) => {
+          //   console.log(`${index + 1}. "${idea.title}" - Status: "${idea.status}" - Votes: ${idea.voteCount}`);
+          // });
 
           // Update selected idea if it exists
           if (this.selectedIdea) {
             const updatedSelectedIdea = this.ideas.find(i => i.id === this.selectedIdea?.id);
             if (updatedSelectedIdea) {
               this.selectedIdea = updatedSelectedIdea;
-              console.log('Updated selected idea:', this.selectedIdea.title);
             } else {
               this.selectedIdea = null;
-              console.log('Selected idea not found in current view, cleared selection');
             }
           }
 
-          console.log('=== IDEAS LOADING COMPLETE ===');
         } else {
-          console.warn('⚠️ Failed to load ideas:', response.message);
+          //console.warn('⚠️ Failed to load ideas:', response.message);
           this.ideas = [];
         }
       },
       error: (error) => {
         this.isLoading = false;
-        console.error('❌ Error loading ideas:', error);
+        //console.error('❌ Error loading ideas:', error);
         this.ideas = [];
       }
     });
@@ -1147,19 +1168,18 @@ export class IdeasComponent implements OnInit, OnDestroy {
   // Check if current user is the owner of an idea
   isUserIdeaOwner(idea: any): boolean {
     if (!idea || !this.currentUserId) {
-      console.log('Ownership check failed: missing data', {
-        hasIdea: !!idea,
-        hasCurrentUserId: !!this.currentUserId,
-        ideaUserId: idea?.userId,
-        currentUserId: this.currentUserId
-      });
+      // console.log('Ownership check failed: missing data', {
+      //   hasIdea: !!idea,
+      //   hasCurrentUserId: !!this.currentUserId,
+      //   ideaUserId: idea?.userId,
+      //   currentUserId: this.currentUserId
+      // });
       return false;
     }
 
     const ideaUserId = idea.userId;
 
     if (!ideaUserId) {
-      console.log('No userId found in idea:', idea);
       return false;
     }
 
@@ -1169,47 +1189,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     const isOwner = normalizedIdeaUserId === normalizedCurrentUserId;
 
-    console.log(`Ownership check for "${idea.title}":`, {
-      ideaUserId,
-      currentUserId: this.currentUserId,
-      normalizedIdeaUserId,
-      normalizedCurrentUserId,
-      isOwner
-    });
-
     return isOwner;
   }
 
   isGroupCreator(): boolean {
-    console.log('=== isGroupCreator() CALLED ===');
 
     // First check if we already have the value from route state
     if (this.isGroupCreatorFromState !== undefined) {
-      console.log('Using pre-determined group creator status from route state:', this.isGroupCreatorFromState);
-      console.log('Route state values:', {
-        isGroupCreatorFromState: this.isGroupCreatorFromState,
-        groupCreatorIdFromState: this.groupCreatorIdFromState,
-        currentUserId: this.currentUserId
-      });
       return this.isGroupCreatorFromState;
     }
 
-    console.log('No route state, checking via IDs...');
-    console.log('Current values:', {
-      groupCreatorId: this.groupCreatorId,
-      currentUserId: this.currentUserId,
-      hasGroupCreatorId: !!this.groupCreatorId,
-      hasCurrentUserId: !!this.currentUserId
-    });
 
     // Fallback to checking IDs if no state was passed
     if (!this.groupCreatorId || !this.currentUserId) {
-      console.log('Group creator check failed - missing IDs:', {
-        hasGroupCreatorId: !!this.groupCreatorId,
-        hasCurrentUserId: !!this.currentUserId,
-        groupCreatorId: this.groupCreatorId,
-        currentUserId: this.currentUserId
-      });
       return false;
     }
 
@@ -1218,41 +1210,37 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     const isCreator = normalizedGroupCreatorId === normalizedCurrentUserId;
 
-    console.log('Group creator check (calculated):', {
-      groupCreatorId: this.groupCreatorId,
-      currentUserId: this.currentUserId,
-      normalizedGroupCreatorId,
-      normalizedCurrentUserId,
-      isCreator
-    });
-
     return isCreator;
   }
 
   openShareModal(editMode = false, editData: any = null): void {
-    console.log('Opening share modal in edit mode:', editMode);
-    console.log('Edit data:', editData);
 
     this.isEditMode = editMode;
 
     // Always reset modalEditData to a valid object
     this.modalEditData = {
       id: '',
-      title: '',
-      description: ''
+      Title: '',
+      ProposedSolution: ''
     };
 
     // If in edit mode, populate with the idea data
     if (editMode && editData) {
       this.modalEditData = {
         id: editData.id || '',
-        title: editData.title || '',
-        description: editData.description || ''
+        Title: editData.Title || editData.title || '',
+        ProposedSolution: editData.ProposedSolution || editData.proposedSolution || '',
+        ProblemStatement: editData.ProblemStatement || editData.problemStatement || '',
+        StrategicAlignment: editData.StrategicAlignment || editData.strategicAlignment || '',
+        UseCase: editData.UseCase || editData.useCase || '',
+        InnovationCategory: editData.InnovationCategory || editData.innovationCategory || '',
+        SubCategory: editData.SubCategory || editData.subCategory || '',
+        TechnologyInvolved: editData.TechnologyInvolved || editData.technologyInvolved || '',
+        Notes: editData.Notes || editData.notes || ''
       };
     }
 
     this.showShareModal = true;
-    console.log('Modal edit data set to:', this.modalEditData);
   }
   closeShareModal(): void {
     this.showShareModal = false;
@@ -1301,10 +1289,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
     return detectMediaType(file);
   }
 
-  // Update your existing onShareIdea() method to handle media
-  async onShareIdea(ideaData: { title: string; description: string }): Promise<void> {
+  async onShareIdea(): Promise<void> {
+    // Validate form
     if (this.shareIdeaForm.invalid) {
       this.shareIdeaForm.markAllAsTouched();
+      console.log(this.shareIdeaForm.value);
+      console.log(this.shareIdeaForm.valid);
       this.toastService.show('Please fill in all required fields', 'error');
       return;
     }
@@ -1312,24 +1302,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.ideaUploadStatus = 'Creating idea...';
 
-    const filterArray = [
-      this.shareIdeaForm.get('type')?.value,
-      this.shareIdeaForm.get('domain')?.value,
-      this.shareIdeaForm.get('impact')?.value
-    ].filter(x => x);
-
+    // Build request using only actual fields
     const request: CreateIdeaRequest = {
-      title: ideaData.title,
-      description: ideaData.description,
-      groupId: this.groupId,
-      filter: filterArray
+      Title: this.shareIdeaForm.value.Title,
+      ProblemStatement: this.shareIdeaForm.value.ProblemStatement,
+      ProposedSolution: this.shareIdeaForm.value.ProposedSolution,
+      StrategicAlignment: this.shareIdeaForm.value.StrategicAlignment,
+      UseCase: this.shareIdeaForm.value.UseCase,
+      InnovationCategory: this.shareIdeaForm.value.InnovationCategory,
+      SubCategory: this.shareIdeaForm.value.SubCategory,
+      TechnologyInvolved: this.shareIdeaForm.value.TechnologyInvolved,
+      Notes: this.shareIdeaForm.value.Notes,
+      groupId: this.groupId
     };
 
     try {
-      // Create idea
-      const ideaResponse = await firstValueFrom(
-        this.ideasService.createIdea(request)
-      );
+      // Create the idea
+      const ideaResponse = await firstValueFrom(this.ideasService.createIdea(request));
 
       if (!ideaResponse.success || !ideaResponse.data?.id) {
         throw new Error('Failed to create idea');
@@ -1337,31 +1326,31 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
       const ideaId = ideaResponse.data.id;
 
-      // If there are files, upload them
+      // Handle media upload if files exist
       if (this.selectedIdeaFiles.length > 0) {
-        this.ideaUploadStatus = `Attaching ${this.selectedIdeaFiles.length} media file(s)...`;
+        this.ideaUploadStatus = `Uploading ${this.selectedIdeaFiles.length} media file(s)...`;
 
-        // Upload each file with the idea ID
         const uploadPromises = this.selectedIdeaFiles.map(file =>
           firstValueFrom(
             this.mediaService.uploadMedia(
               file,
               this.detectMediaType(file),
-              Number(ideaId), // the new idea ID
-              undefined,
-              undefined
+              Number(ideaId)
             )
           )
         );
 
-        // Wait for all uploads
         await Promise.all(uploadPromises);
 
-        this.toastService.show(`Idea created with ${this.selectedIdeaFiles.length} media file(s)`, 'success');
+        this.toastService.show(
+          `Idea created with ${this.selectedIdeaFiles.length} media file(s)`,
+          'success'
+        );
       } else {
         this.toastService.show('Idea created successfully!', 'success');
       }
 
+      // Reset modal and state
       this.closeShareModal();
       this.loadIdeas();
       this.selectedIdeaFiles = [];
@@ -1376,20 +1365,19 @@ export class IdeasComponent implements OnInit, OnDestroy {
     }
   }
 
-
   openDescriptionModal(idea: any): void {
-    alert(`Full Description:\n\n${idea.description}`);
+    alert(`Full Description:\n\n${idea.ProposedSolution || idea.proposedSolution}`);
   }
 
   onViewIdea(ideaId: string): void {
     this.ideasService.getIdea(this.groupId, ideaId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          alert(`Idea Details:\n\nTitle: ${response.data.title}\n\nDescription: ${response.data.description}\n\nCreated: ${new Date(response.data.createdAt).toLocaleDateString()}`);
+          alert(`Idea Details:\n\nTitle: ${response.data.Title}\n\nDescription: ${response.data.ProposedSolution}\n\nCreated: ${new Date(response.data.createdAt).toLocaleDateString()}`);
         }
       },
       error: (error) => {
-        console.error('Error loading idea:', error);
+        // console.error('Error loading idea:', error);
       }
     });
   }
@@ -1399,13 +1387,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
   }
 
   onVote(ideaId: string): void {
-    console.log(`=== VOTING FOR IDEA ${ideaId} ===`);
     this.isVoting = true;
 
     this.ideasService.voteForIdea(this.groupId, ideaId).subscribe({
       next: (response) => {
         this.isVoting = false;
-        console.log('Vote response:', response);
 
         if (response.success && response.data) {
           const voteId = response.data?.id;
@@ -1427,14 +1413,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
             }
           }
 
-          console.log('✓ Vote successful!');
         } else {
           this.toastService.show(`Failed to vote: ${response.message}`, 'error');
         }
       },
       error: (error) => {
         this.isVoting = false;
-        console.error('Error voting:', error);
+        // console.error('Error voting:', error);
         this.toastService.show('An error occurred while voting.', 'error');
       }
     });
@@ -1443,10 +1428,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   onUnvote(idea: Idea, event?: Event): void {
     if (event) event.stopPropagation();
 
-    console.log(`=== UNVOTING FOR IDEA ${idea.id} ===`);
 
     if (!idea.userVoteId) {
-      console.error('Cannot unvote: No vote ID found');
       this.toastService.show('Cannot unvote: No vote ID found. Please refresh the page.', 'error');
       return;
     }
@@ -1455,7 +1438,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.ideasService.removeVote(idea.userVoteId).subscribe({
       next: (response) => {
         this.isUnvoting = false;
-        console.log('Unvote response:', response);
 
         if (response.success) {
           // Update local state
@@ -1470,14 +1452,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
             this.selectedIdea.userVoteId = undefined;
           }
 
-          console.log('✓ Unvote successful!');
         } else {
           this.toastService.show(`Failed to unvote: ${response.message}`, 'error');
         }
       },
       error: (error) => {
         this.isUnvoting = false;
-        console.error('Error unvoting:', error);
+        //console.error('Error unvoting:', error);
 
         if (error.status === 404) {
           this.toastService.show('Vote not found. It may have already been removed.', 'warning');
@@ -1514,7 +1495,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isViewingVoters = false;
-        console.error('Error fetching voters:', error);
+        //console.error('Error fetching voters:', error);
         this.toastService.show('Failed to load voters', 'error');
         this.closeVotersModal();
       }
@@ -1558,17 +1539,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
    * Check votes for all ideas in the list
    */
   async checkUserVotesForAllIdeas(): Promise<void> {
-    console.log('=== CHECKING USER VOTES FOR ALL IDEAS ===');
-    console.log('Current User ID:', this.currentUserId);
-
     if (!this.currentUserId) {
-      console.warn('No current user ID, skipping vote check');
       return;
     }
 
     // Create an array of promises for parallel processing
     const voteChecks = this.ideas.map(async (idea, index) => {
-      console.log(`[${index + 1}/${this.ideas.length}] Checking votes for idea "${idea.title}"...`);
 
       try {
         const voteInfo = await this.getUserVoteForIdea(idea.id);
@@ -1576,17 +1552,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
         if (voteInfo.hasVoted) {
           idea.userVoted = true;
           idea.userVoteId = voteInfo.voteId;
-          console.log(`✓ User has voted for "${idea.title}"`, {
-            voteId: voteInfo.voteId,
-            voteTime: voteInfo.voteTime
-          });
         } else {
           idea.userVoted = false;
           idea.userVoteId = undefined;
-          console.log(`✗ User has NOT voted for "${idea.title}"`);
         }
       } catch (error) {
-        console.error(`Error checking votes for idea ${idea.id}:`, error);
+        //console.error(`Error checking votes for idea`, error);
         idea.userVoted = false;
         idea.userVoteId = undefined;
       }
@@ -1599,7 +1570,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     // Update the UI
     this.ideas = [...this.ideas];
-    console.log('=== VOTE CHECK COMPLETE ===');
     this.logVoteStatus();
   }
 
@@ -1611,14 +1581,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.ideasService.getVotesForIdea(ideaId).subscribe({
         next: (response) => {
           if (response.success && response.data && Array.isArray(response.data)) {
-            console.log(`Votes for idea ${ideaId}:`, {
-              count: response.data.length,
-              voters: response.data.map((v: any) => ({
-                userId: v.userId,
-                userName: v.userName,
-                voteId: v.voteId
-              }))
-            });
 
             // Find vote by current user that's not deleted
             const userVote = response.data.find((vote: any) => {
@@ -1630,10 +1592,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
             });
 
             if (userVote) {
-              console.log(`Found user vote for idea ${ideaId}:`, {
-                voteId: userVote.voteId,
-                time: userVote.time
-              });
 
               resolve({
                 hasVoted: true,
@@ -1641,16 +1599,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 voteTime: userVote.time
               });
             } else {
-              console.log(`No active vote found for current user on idea ${ideaId}`);
               resolve({ hasVoted: false });
             }
           } else {
-            console.log(`No votes found for idea ${ideaId} or invalid response`);
             resolve({ hasVoted: false });
           }
         },
         error: (error) => {
-          console.error(`Error fetching votes for idea ${ideaId}:`, error);
+          //console.error(`Error fetching votes for idea`, error);
           reject(error);
         }
       });
@@ -1661,22 +1617,20 @@ export class IdeasComponent implements OnInit, OnDestroy {
    * Log current vote status for debugging
    */
   private logVoteStatus(): void {
-    console.log('=== CURRENT VOTE STATUS ===');
     this.ideas.forEach((idea, index) => {
-      console.log(`${index + 1}. "${idea.title}":`, {
-        voted: idea.userVoted,
-        voteId: idea.userVoteId,
-        totalVotes: idea.voteCount
-      });
+      // console.log(`${index + 1}. "${idea.title}":`, {
+      //   voted: idea.userVoted,
+      //   voteId: idea.userVoteId,
+      //   totalVotes: idea.voteCount
+      // });
     });
 
     const votedCount = this.ideas.filter(i => i.userVoted).length;
-    console.log(`Summary: ${votedCount}/${this.ideas.length} ideas voted`);
   }
 
   // Add this helper method for displaying voters
   private showVotersModal(idea: Idea, voters: any[]): void {
-    let message = `Voters for "${idea.title}":\n\n`;
+    let message = `Voters for "${idea.Title}":\n\n`;
 
     if (voters.length === 0) {
       message += 'No votes yet';
@@ -1704,27 +1658,33 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isEditMode = true;
 
     this.modalEditData = {
-      title: this.selectedIdea.title,
-      description: this.selectedIdea.description
+      Title: this.selectedIdea.Title,
+      ProposedSolution: this.selectedIdea.ProposedSolution
     };
 
     // Patch form values with existing idea data
     this.shareIdeaForm.patchValue({
-      title: this.selectedIdea.title,
-      description: this.selectedIdea.description,
-      type: this.selectedIdea.type || '',
-      domain: this.selectedIdea.domain || '',
-      impact: this.selectedIdea.impact || ''
+      Title: this.selectedIdea.Title,
+      ProblemStatement: this.selectedIdea.ProblemStatement,
+      ProposedSolution: this.selectedIdea.ProposedSolution,
+      StrategicAlignment: this.selectedIdea.StrategicAlignment || '',
+      UseCase: this.selectedIdea.UseCase || '',
+      InnovationCategory: this.selectedIdea.InnovationCategory || '',
+      SubCategory: this.selectedIdea.SubCategory || '',
+      TechnologyInvolved: this.selectedIdea.TechnologyInvolved || '',
+      Notes: this.selectedIdea.Notes || ''
     });
 
     // Update character counts
-    this.shareTitleCount = this.selectedIdea.title?.length || 0;
-    this.shareDescCount = this.selectedIdea.description?.length || 0;
+    this.shareTitleCount = this.selectedIdea.Title?.length || 0;
+    this.shareDescCount = this.selectedIdea.ProposedSolution?.length || 0;
+    this.shareProblemCount = this.selectedIdea.ProblemStatement?.length || 0;
+    this.shareUseCaseCount = this.selectedIdea.UseCase?.length || 0;
+    this.shareNotesCount = this.selectedIdea.Notes?.length || 0;
   }
 
   // Method to fetch and update vote counts for all ideas
   async fetchAndUpdateVoteCounts(): Promise<void> {
-    console.log('=== FETCHING VOTE COUNTS ===');
 
     // Create an array of promises to fetch votes for each idea
     const voteCountPromises = this.ideas.map(async (idea) => {
@@ -1745,8 +1705,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
             idea.isReadyForPromotion = false; // Closed ideas can't be promoted
           }
 
-          console.log(`Idea "${idea.title}" (${idea.status}): ${activeVotes.length} votes`);
-
           // Also check if current user has voted
           const userVote = activeVotes.find((vote: any) =>
             vote.userId?.toString() === this.currentUserId
@@ -1755,15 +1713,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
           if (userVote) {
             idea.userVoted = true;
             idea.userVoteId = userVote.voteId?.toString();
-            console.log(`  - User has voted (voteId: ${userVote.voteId})`);
           }
         } else {
           idea.voteCount = 0;
           idea.isReadyForPromotion = false;
-          console.log(`Idea "${idea.title}": 0 votes (no data or error)`);
         }
       } catch (error) {
-        console.error(`Error fetching votes for idea ${idea.id}:`, error);
+        //console.error(`Error fetching votes for idea`, error);
         idea.voteCount = 0;
         idea.isReadyForPromotion = false;
       }
@@ -1774,16 +1730,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
     // Wait for all vote counts to be fetched
     await Promise.all(voteCountPromises);
 
-    console.log('=== VOTE COUNTS UPDATED ===');
-
     // Update the array reference to trigger change detection
     this.ideas = [...this.ideas];
 
-    // Log final vote counts
-    console.log('Final vote counts:');
-    this.ideas.forEach((idea, index) => {
-      console.log(`${index + 1}. "${idea.title}" (${idea.status}): ${idea.voteCount} votes, userVoted: ${idea.userVoted}`);
-    });
   }
 
   //Promote Idea to project and create project
@@ -1797,8 +1746,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.currentIdeaToPromote = idea;
     this.projectData = {
-      title: idea.title,
-      description: idea.description,
+      title: idea.Title,
+      proposedSolution: idea.ProposedSolution || '',
+      //problemStatement: idea.ProblemStatement || '',
       overseenByEmail: ''
     };
     this.showProjectModal = true;
@@ -1839,16 +1789,20 @@ export class IdeasComponent implements OnInit, OnDestroy {
           });
         } else {
           this.isPromoting = false;
-          alert('Promotion failed');
+          this.toastService.show('Promotion failed', 'error');
         }
       },
       error: (err) => {
         this.isPromoting = false;
-        alert('Error promoting');
+        this.toastService.show('Error promoting', 'error');
       }
     });
   }
 
+  navigateToScoring(idea: Idea): void {
+    if (!idea || !this.groupId) return;
+    this.router.navigate([`/groups/${this.groupId}/ideas/${idea.id}/score`]);
+  }
 
   private handleSuccess(idea: Idea, response: any): void {
     this.isPromoting = false;
@@ -1870,7 +1824,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.loadIdeas();
 
       this.currentIdeaToPromote = null;
-      this.projectData = { title: '', description: '', overseenByEmail: '' };
+      this.projectData = { title: '', proposedSolution: '', overseenByEmail: '' };
     } else {
       alert('Project creation failed');
     }
@@ -1900,10 +1854,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.ideasService.deleteIdea(this.ideaIdToDelete).subscribe({
       next: (response) => {
-        console.log('Delete response:', response);
 
         if (response.success) {
-          console.log('Delete successful');
 
           // 1. Remove from local ideas array (immediate UI update)
           const index = this.ideas.findIndex(idea => idea.id === this.ideaIdToDelete);
@@ -1916,12 +1868,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
           if (this.selectedIdea?.id === this.ideaIdToDelete) {
             this.selectedIdea = null;
             this.isEditMode = false; // Exit edit mode if open
-            console.log('Closed details panel for deleted idea');
           }
 
           this.toastService.show('Idea deleted successfully!', 'success');
         } else {
-          this.toastService.show('Failed to delete idea: ${response.message}', 'error');
+          this.toastService.show('Failed to delete idea', 'error');
         }
         this.cancelDeleteIdea();
       },

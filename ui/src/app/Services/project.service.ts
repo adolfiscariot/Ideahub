@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse} from '../Interfaces/Projects/project-interface';
+import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse } from '../Interfaces/Projects/project-interface';
 import { environment } from '../../environments/environment.prod';
 
 @Injectable({
@@ -26,8 +26,8 @@ export class ProjectService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
-    
-     return this.http.post<any>(`${this.apiUrl}/create-project`, request, { params }).pipe(
+
+    return this.http.post<any>(`${this.apiUrl}/create-project`, request, { params }).pipe(
       map(response => this.convertResponse<{ projectId: number }>(response))
     );
   }
@@ -35,7 +35,7 @@ export class ProjectService {
   // READ: Get all projects for a group
   getProjectsByGroup(groupId: string): Observable<ApiResponse<ProjectSummary[]>> {
     const params = new HttpParams().set('groupId', groupId);
-    
+
     return this.http.get<any>(`${this.apiUrl}/view-projects`, { params }).pipe(
       map(response => this.convertResponse<ProjectSummary[]>(response))
     );
@@ -46,7 +46,7 @@ export class ProjectService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('projectId', projectId);
-    
+
     return this.http.get<any>(`${this.apiUrl}/open-project`, { params }).pipe(
       map(response => this.convertResponse<ProjectDetails>(response))
     );

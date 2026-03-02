@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Groups/groups-interfaces';
 import { viewComment, createComment } from '../Interfaces/Ideas/idea-interfaces';
@@ -24,7 +24,7 @@ export class CommentsService {
 
   // GET /api/comment/view-comments?ideaID
   getComments(ideaId: number): Observable<ApiResponse<viewComment[]>> {
-    const params = new HttpParams().set('IdeaId', ideaId);
+    //const params = new HttpParams().set('IdeaId', ideaId);
     return this.http.get<any>(`${this.apiUrl}/view-comments?ideaId=${ideaId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );

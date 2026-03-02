@@ -27,7 +27,7 @@ export class ProjectsService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
-    
+
     return this.http.post<any>(`${this.apiUrl}/create-project`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );

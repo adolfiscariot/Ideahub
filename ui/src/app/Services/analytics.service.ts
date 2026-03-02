@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
@@ -9,8 +9,9 @@ import { environment } from '../../environments/environment.prod';
 })
 export class AnalyticsService {
     private baseUrl = `${environment.apiUrl}/analytics`;
+    private http = inject(HttpClient);
 
-    constructor(private http: HttpClient) { }
+    constructor() { }
 
     getMostVotedIdeas(): Observable<ApiResponse> {
         return this.http.get<ApiResponse>(`${this.baseUrl}/most-voted`);

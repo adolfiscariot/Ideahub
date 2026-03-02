@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map, tap, throwError } from 'rxjs';
-import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest  } from '../Interfaces/Ideas/idea-interfaces';
+import { Observable, map } from 'rxjs';
+import { Idea, CreateIdeaRequest, ApiResponse, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest } from '../Interfaces/Ideas/idea-interfaces';
 import { VoteService } from './vote.service';
 import { environment } from '../../environments/environment.prod';
 
@@ -45,7 +45,7 @@ export class IdeasService {
     const params = new HttpParams()
       .set('groupId', groupId)
       .set('ideaId', ideaId);
-    
+
     return this.http.get<any>(`${this.apiUrl}/open-idea`, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
@@ -54,10 +54,17 @@ export class IdeasService {
   // POST create new idea
   createIdea(request: CreateIdeaRequest): Observable<ApiResponse<Idea>> {
     const params = new HttpParams().set('groupId', request.groupId);
+
     return this.http.post<any>(`${this.apiUrl}/create-idea`, {
-      title: request.title,
-      description: request.description,
-      filter: request.filter
+      Title: request.Title,
+      ProblemStatement: request.ProblemStatement,
+      ProposedSolution: request.ProposedSolution,
+      StrategicAlignment: request.StrategicAlignment,
+      UseCase: request.UseCase,
+      InnovationCategory: request.InnovationCategory,
+      SubCategory: request.SubCategory,
+      TechnologyInvolved: request.TechnologyInvolved,
+      Notes: request.Notes
     }, { params }).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
@@ -65,7 +72,6 @@ export class IdeasService {
 
   // PUT update idea
   updateIdea(ideaId: string, updateIdea: IdeaUpdate): Observable<ApiResponse<Idea>> {
-    console.log('Updating idea:', ideaId, updateIdea);
     return this.http.put<any>(`${this.apiUrl}/${ideaId}`, updateIdea).pipe(
       map(response => this.convertResponse<Idea>(response))
     );
@@ -93,7 +99,7 @@ export class IdeasService {
     const params = new HttpParams()
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
-    
+
     return this.http.post<any>(`${this.apiUrl}/promote-idea`, {}, { params }).pipe(
       map(response => this.convertResponse<any>(response))
     );

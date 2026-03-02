@@ -7,7 +7,6 @@ import { authInterceptor } from './Interceptors/auth/auth.interceptor';
 
 import { provideAnimations } from '@angular/platform-browser/animations';
 
-import { NgIconsModule } from '@ng-icons/core';
 import { heroBell } from '@ng-icons/heroicons/outline';
 
 import { provideIcons } from '@ng-icons/core';
@@ -22,6 +21,6 @@ export const appConfig: ApplicationConfig = {
         withInterceptors([authInterceptor])
       ),
       provideRouter(routes),
-      provideIcons({ heroBell})
+      provideIcons({ heroBell })
     ]
 };

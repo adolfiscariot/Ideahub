@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment.prod';
 })
 export class GroupsService {
   private apiUrl = `${environment.apiUrl}/group`;
-  
+
   constructor(private http: HttpClient) { }
 
   // Helper method to convert backend response to our interface

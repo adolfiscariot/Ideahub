@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { GroupsService } from './groups.service';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,9 @@ export class NotificationsService {
   private pendingRequestsSubject = new BehaviorSubject<number>(0);
   pendingRequests$ = this.pendingRequestsSubject.asObservable();
 
-  constructor(private groupsService: GroupsService) {
+  private groupsService = inject(GroupsService);
+
+  constructor() {
     this.refreshPendingRequests();
   }
 
@@ -23,11 +26,11 @@ export class NotificationsService {
     });
   }
 
-  increment(count: number = 1) {
+  increment(count = 1) {
     this.pendingRequestsSubject.next(this.pendingRequestsSubject.value + count);
   }
 
-  decrement(count: number = 1) {
+  decrement(count = 1) {
     this.pendingRequestsSubject.next(Math.max(this.pendingRequestsSubject.value - count, 0));
   }
 

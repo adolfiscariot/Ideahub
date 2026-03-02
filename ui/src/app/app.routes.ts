@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { LandingPageComponent } from './Pages/landing-page/landing-page.component';
-import { RegisterComponent } from './Pages/register/register.component';
 import { AuthGuard } from './Guards/auth.guard';
 import { LandingGuard } from './Guards/landing.guard';
 
@@ -34,9 +32,10 @@ export const routes: Routes = [
         (m) => m.LoginPageComponent
       ),
   },
-  { path: 'forgot-password', 
-    loadComponent: () => 
-      import('./Pages/forgot-password/forgot-password.component').then( (m) => m.ForgotPasswordComponent ),
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./Pages/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
   },
   {
     path: 'home',
@@ -63,7 +62,15 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/ideas/ideas.component').then((m) => m.IdeasComponent),
   },
-   {
+  {
+    path: 'groups/:groupId/ideas/:ideaId/score',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/idea-scoring/idea-scoring.component').then(
+        (m) => m.IdeaScoringComponent
+      ),
+  },
+  {
     path: 'notifications',
     canActivate: [AuthGuard],
     loadComponent: () =>

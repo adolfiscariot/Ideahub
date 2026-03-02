@@ -13,6 +13,7 @@ import { ToastService } from '../../Services/toast.service';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
 import { NotificationsService } from '../../Services/notifications';
+import { SignalrService } from '../../Services/signalr.service';
 
 @Component({
   selector: 'app-login-input',
@@ -26,6 +27,7 @@ export class LoginInputComponent implements OnInit {
   notificationsService = inject(NotificationsService);
   router = inject(Router);
   isLoading = false;
+  signalRService = inject(SignalrService);
 
   ngOnInit(): void {this.notificationsService}
 
@@ -41,7 +43,6 @@ export class LoginInputComponent implements OnInit {
   });
 
   onSubmit(event: Event) {
-    console.log(`${this.loginForm.value.email} is logging in...`);
 
     if (this.loginForm.valid) {
       this.isLoading = true;
@@ -51,6 +52,9 @@ export class LoginInputComponent implements OnInit {
         next: (response) => {
           this.isLoading = false;
           this.toastService.show(response.message, 'success');
+          setTimeout(() => {
+            this.signalRService.startConnection();
+          }, 50);
           this.router.navigate(['/home']);
           this.notificationsService.refreshPendingRequests();
           this.loginForm.reset();

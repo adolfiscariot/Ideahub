@@ -2,6 +2,7 @@ using System.Security.Claims;
 using api.Data;
 using api.Helpers;
 using api.Models;
+using api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -60,8 +61,14 @@ public class IdeaController : ControllerBase
             var idea = new Idea
             {
                 Title = ideaDto.Title,
-                Description = ideaDto.Description,
-                Filter = ideaDto.Filter,
+                StrategicAlignment = ideaDto.StrategicAlignment,
+                ProblemStatement = ideaDto.ProblemStatement,
+                ProposedSolution = ideaDto.ProposedSolution,
+                UseCase = ideaDto.UseCase,
+                InnovationCategory = ideaDto.InnovationCategory,
+                SubCategory = ideaDto.SubCategory,
+                TechnologyInvolved = ideaDto.TechnologyInvolved,
+                Notes = ideaDto.Notes,
                 UserId = userId,
                 GroupId = groupId
             };
@@ -69,12 +76,25 @@ public class IdeaController : ControllerBase
             //add to database
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
-
             _logger.LogInformation("New idea created by {userEmail}", userEmail);
+
+            // Trigger Phase 1: Automated AI Evaluation
+            _logger.LogInformation("AI Scoring beginning...");
+            try
+            {
+                var scoringService = HttpContext.RequestServices.GetRequiredService<IScoringService>();
+                await scoringService.EvaluateAndStageIdeaAsync(idea);
+                _logger.LogInformation("AI Evaluation Successful!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during automated AI evaluation for idea {IdeaId}", idea.Id);
+            }
+
             return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}",
             new {
                     id = idea.Id
-                } 
+                }
             ));
         }
         catch (Exception e)
@@ -119,29 +139,6 @@ public class IdeaController : ControllerBase
             .Include(i => i.Votes)
             .ToListAsync();
 
-        if (!string.IsNullOrWhiteSpace(type))
-        {
-            ideas = ideas
-                .Where(i => i.Filter != null && i.Filter.Contains(type))
-                .ToList();
-        }
-
-        if (!string.IsNullOrWhiteSpace(domain))
-        {
-            ideas = ideas
-                .Where(i => i.Filter != null && i.Filter.Contains(domain))
-                .ToList();
-        }
-
-        if (!string.IsNullOrWhiteSpace(impact))
-        {
-            ideas = ideas
-                .Where(i => i.Filter != null && i.Filter.Contains(impact))
-                .ToList();
-        }
-        else {
-            _logger.LogInformation("No ideas found for that category");
-        }
         if (ideas.Count == 0)
         {
             _logger.LogInformation("No ideas found in group: {groupName}", group.Name);
@@ -151,7 +148,27 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {idea.Id, idea.Title, idea.Description, idea.Filter, idea.UserId, idea.Group.Name, idea.CreatedAt, idea.IsPromotedToProject, idea.IsDeleted, voteCount = idea.Votes.Count, userVoted = idea.Votes.Any(v => v.UserId == userId), Status = idea.Status.ToString()});
+            ideaDataToReturn.Add(new {
+                idea.Id,
+                idea.Title,
+                idea.StrategicAlignment,
+                idea.ProblemStatement,
+                idea.ProposedSolution,
+                idea.UseCase,
+                idea.InnovationCategory,
+                idea.SubCategory,
+                idea.TechnologyInvolved,
+                idea.Notes,
+                idea.Score,
+                idea.UserId,
+                idea.Group.Name,
+                idea.CreatedAt,
+                idea.IsPromotedToProject,
+                idea.IsDeleted,
+                voteCount = idea.Votes.Count,
+                userVoted = idea.Votes.Any(v => v.UserId == userId),
+                Status = idea.Status.ToString()
+            });
         }
 
         
@@ -202,7 +219,17 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new IdeaDetailsDto
         {
             Title = idea.Title,
-            Description = idea.Description,
+            StrategicAlignment = idea.StrategicAlignment,
+            ProblemStatement = idea.ProblemStatement,
+            ProposedSolution = idea.ProposedSolution,
+            UseCase = idea.UseCase,
+            InnovationCategory = idea.InnovationCategory,
+            SubCategory = idea.SubCategory,
+            TechnologyInvolved = idea.TechnologyInvolved,
+            Notes = idea.Notes,
+            Score = idea.Score,
+            AiReasoning = idea.AiReasoning,
+            CurrentStage = idea.CurrentStage,
             Author = idea.User.DisplayName,
             Group = idea.Group.Name,
             Status = idea.Status.ToString(),
@@ -239,26 +266,65 @@ public class IdeaController : ControllerBase
         }
 
         //apply changes to the idea
+        if (ideaUpdateDto.Score != null)
+        {
+            // Reviewers can increase or decrease the score. The scoring stage should follow suitc
+            if (ideaUpdateDto.Score >= 70)
+            {
+                idea.CurrentStage = ScoringStage.BusinessCase;
+            }
+            else
+            {
+                idea.CurrentStage = ScoringStage.Evaluation;
+            }
+            idea.Score = ideaUpdateDto.Score.Value;
+        }
         if (ideaUpdateDto.Title != null)
         {
             idea.Title = ideaUpdateDto.Title;
         }
-        if (ideaUpdateDto.Description != null)
+        if (ideaUpdateDto.StrategicAlignment != null)
         {
-            idea.Description = ideaUpdateDto.Description;
+            idea.StrategicAlignment = ideaUpdateDto.StrategicAlignment;
+        }
+        if (ideaUpdateDto.ProblemStatement != null)
+        {
+            idea.ProblemStatement = ideaUpdateDto.ProblemStatement;
+        }
+        if (ideaUpdateDto.ProposedSolution != null)
+        {
+            idea.ProposedSolution = ideaUpdateDto.ProposedSolution;
+        }
+        if (ideaUpdateDto.UseCase != null)
+        {
+            idea.UseCase = ideaUpdateDto.UseCase;
+        }
+        if (ideaUpdateDto.InnovationCategory != null)
+        {
+            idea.InnovationCategory = ideaUpdateDto.InnovationCategory;
+        }
+        if (ideaUpdateDto.SubCategory != null)
+        {
+            idea.SubCategory = ideaUpdateDto.SubCategory;
+        }
+        if (ideaUpdateDto.TechnologyInvolved != null)
+        {
+            idea.TechnologyInvolved = ideaUpdateDto.TechnologyInvolved;
+        }
+        if (ideaUpdateDto.Notes != null)
+        {
+            idea.Notes = ideaUpdateDto.Notes;
         }
         //Parse the status string and convert it to type IdeaStatus enum
-        if (ideaUpdateDto.Status != null)
+        if (!string.IsNullOrWhiteSpace(ideaUpdateDto.Status))
         {
-            IdeaStatus _newStatus;
-
             if (Enum.TryParse(ideaUpdateDto.Status, true, out IdeaStatus newStatus))
             {
-                _newStatus = newStatus;
+                idea.Status = newStatus;
             }
             else
             {
-                _logger.LogError("Invalid status string {statusString} provided for idea {idea}", ideaUpdateDto.Status, idea.Title);
+                _logger.LogError("Invalid status string {statusString} provided for idea {ideaId}", ideaUpdateDto.Status, ideaId);
                 return BadRequest(ApiResponse.Fail("Parsing failed. Invalid status string provided"));
             }
         }
@@ -266,7 +332,17 @@ public class IdeaController : ControllerBase
         var updatedIdea = new IdeaDetailsDto
         {
             Title = idea.Title,
-            Description = idea.Description,
+            StrategicAlignment = idea.StrategicAlignment,
+            ProblemStatement = idea.ProblemStatement,
+            ProposedSolution = idea.ProposedSolution,
+            UseCase = idea.UseCase,
+            InnovationCategory = idea.InnovationCategory,
+            SubCategory = idea.SubCategory,
+            TechnologyInvolved = idea.TechnologyInvolved,
+            Notes = idea.Notes,
+            AiReasoning = idea.AiReasoning,
+            CurrentStage = idea.CurrentStage,
+            Score = idea.Score,
             Author = idea.User.DisplayName,
             Group = idea.Group.Name,
             Status = idea.Status.ToString(),
@@ -278,7 +354,7 @@ public class IdeaController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Idea {ideaTitle} updated by {userEmail}", idea.Title, userEmail);
+        _logger.LogInformation("Idea {ideaId} updated by {userEmail}", ideaId, userEmail);
         return Ok(ApiResponse.Ok("Idea updated", updatedIdea));
     }
 
@@ -374,7 +450,7 @@ public class IdeaController : ControllerBase
             _context.Ideas.Remove(idea);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Idea '{ideaTitle}' has been deleted by '{userEmail}' ", idea.Title, userEmail);
+            _logger.LogInformation("Idea '{ideaProblemStatement}' has been deleted by '{userEmail}' ", idea.ProblemStatement, userEmail);
             return Ok(ApiResponse.Ok("Idea deleted successfully"));
         }
         catch (Exception e)
@@ -383,5 +459,4 @@ public class IdeaController : ControllerBase
             return StatusCode(500, ApiResponse.Fail("Failed to delete idea"));
         }
     }
-
 }
