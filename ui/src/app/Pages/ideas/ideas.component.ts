@@ -260,7 +260,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.shareIdeaForm.get('Title')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const res = updateCharCount(this.shareIdeaForm, 'Title', 20);
+        const res = updateCharCount(this.shareIdeaForm, 'Title', 50);
         this.shareTitleCount = res.count;
       });
 
