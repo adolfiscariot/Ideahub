@@ -615,8 +615,8 @@
           <div class="form-group full-width">
             <label>Idea Title <span class="required">*</span></label>
             <input type="text" class="form-control" formControlName="Title"
-              placeholder="Enter a descriptive title for your idea" maxlength="20">
-            <div class="char-count">{{ shareTitleCount }}/20</div>
+              placeholder="Enter a descriptive title for your idea" maxlength="50">
+            <div class="char-count">{{ shareTitleCount }}/50</div>
             @if (shareIdeaForm.get('Title')?.touched) {
             @if (shareIdeaForm.get('Title')?.errors?.['required']) {
             <div class="error-message">Title is required</div>
