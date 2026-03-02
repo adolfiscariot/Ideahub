@@ -24,6 +24,10 @@
       <mat-icon>topic</mat-icon>
       <span class="link-text">Projects</span>
     </a>
+    <a routerLink="/committeemembers" routerLinkActive="active" aria-label="Navigate to Committee Members page">
+      <mat-icon>verified_user</mat-icon>
+      <span class="link-text">Committee Members</span>
+    </a>
   </nav>
   }
 
@@ -77,6 +81,9 @@
         </a>
         <a routerLink="/projects" routerLinkActive="active" (click)="closeMobileMenu()">
           <mat-icon>topic</mat-icon> Projects
+        </a>
+        <a routerLink="/committeemembers" routerLinkActive="active" (click)="closeMobileMenu()">
+          <mat-icon>verified_user</mat-icon> Committee
         </a>
 
         <a routerLink="/notifications" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-notif-link">

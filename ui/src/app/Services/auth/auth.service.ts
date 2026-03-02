@@ -197,10 +197,12 @@ export class AuthService {
         email:
           payload.email ||
           payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
-        roles:
-          payload.role ||
-          payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-          []
+        roles: (() => {
+          const r = payload.role ||
+            payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+            [];
+          return Array.isArray(r) ? r : [r];
+        })()
       };
 
     } catch {
@@ -238,6 +240,11 @@ export class AuthService {
   // Check if user is RegularUser
   isRegularUser(): boolean {
     return this.hasRole('RegularUser') || this.hasRole('REGULARUSER');
+  }
+
+  // Check if user is CommitteeMember
+  isCommitteeMember(): boolean {
+    return this.hasRole('CommitteeMember') || this.hasRole('COMMITTEEMEMBER');
   }
 
   // Check if user has any of the given roles

@@ -77,5 +77,13 @@ export const routes: Routes = [
       import('./Pages/global-notifications/global-notifications.component').then(
         (m) => m.GlobalNotificationsComponent
       ),
+  },
+  {
+    path: 'committeemembers',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/committeemembers/committeemembers.component').then(
+        (m) => m.CommitteeMembersComponent
+      ),
   }
 ];
