@@ -1,0 +1,66 @@
+<div class="projects-page-container">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Committee Members</h1>
+            <p class="page-subtitle">Manage the individuals responsible for scoring and reviewing ideas.</p>
+        </div>
+    </header>
+
+    <div class="card add-member-card">
+        <div class="card-header-styled">
+            <i class="fas fa-user-plus"></i>
+            <span>Add New Member</span>
+        </div>
+        <div class="card-body-styled">
+            <div class="add-controls">
+                <select [(ngModel)]="selectedUserEmail" class="standard-select">
+                    <option value="" disabled selected>Select user by email...</option>
+                    <option *ngFor="let user of allUsers" [value]="user.email">
+                        {{ user.email }} ({{ user.displayName }})
+                    </option>
+                </select>
+                <app-buttons *ngIf="isSuperAdmin || isCommitteeMember" [buttonText]="'Add to Committee'"
+                    [buttonStyleClass]="'btn-promote'" (click)="addMember()" [disabled]="!selectedUserEmail">
+                </app-buttons>
+                <p *ngIf="!isSuperAdmin && !isCommitteeMember" class="restriction-notice">
+                    <i class="fas fa-lock"></i> Only committee members can add new people.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card list-card">
+        <div class="table-responsive">
+            <table class="standard-table">
+                <thead>
+                    <tr>
+                        <th class="col-avatar"></th>
+                        <th class="col-name">Name</th>
+                        <th class="col-email">Email</th>
+                        <th class="col-role">Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let member of committeeMembers">
+                        <td class="cell-avatar">
+                            <div class="avatar-circle">{{ member.displayName?.charAt(0) || 'U' }}</div>
+                        </td>
+                        <td class="cell-name">{{ member.displayName }}</td>
+                        <td class="cell-email">{{ member.email }}</td>
+                        <td class="cell-role">
+                            <span class="badge status-completed">Committee Member</span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="committeeMembers.length === 0">
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-users-slash"></i>
+                                <p>No committee members found.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
