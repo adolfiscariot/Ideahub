@@ -52,6 +52,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 --------------------------------------------------------------------------------
+Package: @microsoft/signalr
+License: "MIT"
+
+
+--------------------------------------------------------------------------------
 Package: @ng-icons/core
 License: "MIT"
 
