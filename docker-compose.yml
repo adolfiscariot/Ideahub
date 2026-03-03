@@ -28,12 +28,15 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-      HOMEPAGE_URL: "http://44.211.34.131:5065/home"
+      HOMEPAGE_URL: "${DOMAIN_URL}/home"
       SENDGRID_SENDER_NAME: ${SENDGRID_SENDER_NAME}
       SENDGRID_SENDER_EMAIL: ${SENDGRID_SENDER_EMAIL}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       SUPERADMIN__EMAIL: ${SUPERADMIN_EMAIL}
+      JWT__KEY: ${JWT_KEY}
+      JWT__ISSUER: ${DOMAIN_URL}
+      JWT__AUDIENCE: ${DOMAIN_URL}
+      CONNECTIONSTRINGS__IDEAHUBSTRING: "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
 
     ports:
       - "5065:5065"

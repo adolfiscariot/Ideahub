@@ -188,3 +188,126 @@
         font-size: 1.1rem;
     }
 }
+
+@media (max-width: 768px) {
+    .projects-page-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+        }
+    }
+
+    .add-member-card {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+
+        .card-header-styled {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-controls {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+
+            .standard-select {
+                width: 100%;
+            }
+
+            app-buttons {
+                width: 100%;
+
+                ::ng-deep .btn-promote {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+        }
+
+        .restriction-notice {
+            white-space: normal;
+            font-size: 0.85rem;
+            padding: 0.75rem;
+        }
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: block !important;
+    }
+
+    .member-mobile-card {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .member-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+
+            .avatar-circle {
+                width: 44px;
+                height: 44px;
+                background-color: var(--primary-color);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .member-info {
+                flex: 1;
+                min-width: 0;
+
+                .member-name {
+                    font-weight: 600;
+                    color: var(--text-main);
+                    font-size: 1rem;
+                    margin-bottom: 2px;
+                }
+
+                .member-email {
+                    color: var(--text-muted);
+                    font-size: 0.85rem;
+                    word-break: break-all;
+                }
+            }
+        }
+
+        .member-card-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-only {
+        display: none !important;
+    }
+}
