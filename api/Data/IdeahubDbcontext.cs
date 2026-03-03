@@ -255,6 +255,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
                 .ValueGeneratedOnAddOrUpdate();
 
+            bc.HasQueryFilter(bc => !bc.Idea.IsDeleted);
+
             bc.HasOne(bc => bc.Idea)
                 .WithOne(i => i.BusinessCase)
                 .HasForeignKey<BusinessCase>(bc => bc.IdeaId)
@@ -343,6 +345,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
                 .ValueGeneratedOnAddOrUpdate();
 
+            sd.HasQueryFilter(sd => !sd.Idea.IsDeleted);
+
             sd.HasOne(sd => sd.Idea)
                 .WithOne(i => i.ScoringDimensions)
                 .HasForeignKey<ScoringDimensions>(sd => sd.IdeaId)
@@ -362,6 +366,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
                 .ValueGeneratedOnAdd();
+
+            c.HasQueryFilter(c => !c.Idea.IsDeleted);
 
             //Foreign Keys
             c.HasOne(c => c.User)
@@ -585,6 +591,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            pr.HasQueryFilter(pr => !pr.User.IsDeleted);
+
             // pr.Property(pr => pr.RequestIp)
             //     .HasMaxLength(45);
 
@@ -613,6 +621,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
                 .ValueGeneratedOnAdd(); 
+
+            n.HasQueryFilter(n => !n.User.IsDeleted);
 
             n.HasOne(n => n.User) 
                 .WithMany(u => u.Notifications) 
@@ -687,6 +697,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
                 .ValueGeneratedOnAdd();
+
+            m.HasQueryFilter(m => !m.User.IsDeleted);
 
             // Foreign Keys
             m.HasOne(m => m.Idea)
