@@ -30,7 +30,7 @@
     </div>
 
     <div class="card list-card">
-        <div class="table-responsive">
+        <div class="table-responsive desktop-only" *ngIf="committeeMembers.length > 0">
             <table class="standard-table">
                 <thead>
                     <tr>
@@ -51,16 +51,28 @@
                             <span class="badge status-completed">Committee Member</span>
                         </td>
                     </tr>
-                    <tr *ngIf="committeeMembers.length === 0">
-                        <td colspan="4">
-                            <div class="empty-state">
-                                <i class="fas fa-users-slash"></i>
-                                <p>No committee members found.</p>
-                            </div>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="mobile-only" *ngIf="committeeMembers.length > 0">
+            <div *ngFor="let member of committeeMembers" class="member-mobile-card">
+                <div class="member-card-header">
+                    <div class="avatar-circle">{{ member.displayName?.charAt(0) || 'U' }}</div>
+                    <div class="member-info">
+                        <div class="member-name">{{ member.displayName }}</div>
+                        <div class="member-email">{{ member.email }}</div>
+                    </div>
+                </div>
+                <div class="member-card-footer">
+                    <span class="badge status-completed">Committee Member</span>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="committeeMembers.length === 0" class="empty-state">
+            <i class="fas fa-users-slash"></i>
+            <p>No committee members found.</p>
         </div>
     </div>
 </div>
