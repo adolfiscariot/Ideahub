@@ -17,7 +17,7 @@ export class ToastService {
     private counter = 0;
     private timeouts: Map<number, ReturnType<typeof setTimeout>> = new Map();
 
-    show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', duration = 3000) {
+    show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', duration = 3000): number {
         const id = this.counter++;
         const newToast: Toast = { id, message, type, duration };
 
@@ -29,6 +29,8 @@ export class ToastService {
             }, duration);
             this.timeouts.set(id, timeoutId);
         }
+
+        return id;
     }
 
     remove(id: number) {
