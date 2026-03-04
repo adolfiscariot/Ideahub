@@ -492,7 +492,8 @@
           </div>
           <div id="comments-list">
             @for (comment of comments; track comment) {
-            <div class="comment" [id]="'comment-' + comment.id" [class.own-comment]="comment.userId === currentUserId">
+            <div class="comment" [id]="'comment-' + comment.id" [class.own-comment]="comment.userId === currentUserId"
+              [class.highlight-comment]="comment.id === highlightedCommentId">
               <div class="comment-header">
                 <div class="comment-meta">
                   <span class="comment-author">
