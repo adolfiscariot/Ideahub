@@ -45,6 +45,7 @@ export interface Idea {
   technologyInvolved?: string;
   notes?: string;
   score?: number;
+  aiReasoning?: string;
 }
 
 export interface CreateIdeaRequest {
