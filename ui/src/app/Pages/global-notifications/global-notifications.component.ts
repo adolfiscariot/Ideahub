@@ -8,6 +8,7 @@ import { NotificationsService } from '../../Services/notifications';
 import { NotificationService, CommentNotification } from '../../Services/notification.service';
 import { SignalrService } from '../../Services/signalr.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-global-notifications',
@@ -43,7 +44,8 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private notificationsService: NotificationsService,
     private notificationService: NotificationService,
-    private signalRService: SignalrService
+    private signalRService: SignalrService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -86,7 +88,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.loadingRequests = false;
       },
       error: (err) => {
-        this.errorRequests = 'Failed to load requests';
+        //this.errorRequests = 'Failed to load requests';
         this.loadingRequests = false;
       }
     });
@@ -196,7 +198,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.loadingNotifications = false;
       },
       error: () => {
-        this.errorNotifications = 'Failed to load notifications';
+        //this.errorNotifications = 'Failed to load notifications';
         this.loadingNotifications = false;
       }
     });
@@ -209,7 +211,9 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       next: () => {
         notification.isRead = true;
       },
-      error: () => this.toastService.show('Failed to mark as read', 'error')
+      error: () => {
+        this.toastService.show('Failed to mark as read', 'error');
+      }
     });
   }
 
@@ -223,8 +227,20 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
           this.commentNotifications = this.commentNotifications.filter(n => !n.isRead);
         }, 30000);
       },
-      error: () => this.toastService.show('Failed to mark all as read', 'error')
+      error: () => {
+        this.toastService.show('Failed to mark all as read', 'error');
+      }
     });
+  }
+
+  onNotificationClick(notification: CommentNotification): void {
+    this.router.navigate(['/groups', notification.comment.groupId, 'ideas'], {
+      queryParams: { ideaId: notification.comment.ideaId, commentId: notification.comment.id }
+    });
+
+    if (!notification.isRead) {
+      this.markAsRead(notification);
+    }
   }
 
   get unreadCount(): number {
