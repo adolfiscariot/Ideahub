@@ -29,6 +29,7 @@ export class IdeaScoringComponent implements OnInit {
   ideaId = '';
   idea: Idea | null = null;
   isLoading = true;
+  parsedReasoning: { label: string, content: string }[] = [];
 
   // Accordion state
   expandedSection: 'phase1' | 'phase2' | 'phase3' | null = 'phase1';
@@ -247,6 +248,10 @@ export class IdeaScoringComponent implements OnInit {
             // Pre-populate Phase 1 — backend returns camelCase, but handle both
             const score = d.score ?? d.Score ?? 0;
             const notes = d.notes ?? d.Notes ?? '';
+            const reasoning = d.aiReasoning ?? d.AiReasoning ?? '';
+
+            this.idea.AiReasoning = reasoning;
+            this.parsedReasoning = this.formatReasoning(reasoning);
             this.scoringForm.get('Phase1.Score')?.patchValue(score);
             this.scoringForm.get('Phase1.Notes')?.patchValue(notes);
 
@@ -483,5 +488,44 @@ export class IdeaScoringComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate([`/groups/${this.groupId}/ideas`]);
+  }
+
+  formatReasoning(text: string): { label: string, content: string }[] {
+    if (!text) return [];
+
+    const sections = [
+      'Strategic alignment',
+      'Problem viability',
+      'Solution feasibility',
+      'Business impact',
+      'Overall assessment'
+    ];
+
+    const result: { label: string, content: string }[] = [];
+
+    // Match any of the labels case-insensitively, followed by a colon
+    const labelPattern = new RegExp(`(${sections.join('|')}):`, 'gi');
+    const parts = text.split(labelPattern);
+
+    // If we have parts, the first one is the text before the first label (usually empty)
+    for (let i = 1; i < parts.length; i += 2) {
+      const label = parts[i];
+      let content = parts[i + 1] || '';
+
+      // Basic cleanup of the extracted content
+      content = content.trim().replace(/^[:\s-]+/, '').trim();
+
+      if (label && content) {
+        // Normalize label casing to Title Case for UI consistency
+        const normalizedLabel = label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+        result.push({ label: normalizedLabel, content });
+      }
+    }
+
+    if (result.length === 0) {
+      result.push({ label: 'Analysis', content: text });
+    }
+
+    return result;
   }
 }
