@@ -27,13 +27,13 @@ public class LlmService : ILlmService
         _logger = logger;
     }
 
-    public async Task<(float Score, string Reasoning)> EvaluateIdeaAsync(string title, string alignment, string problem, string solution, string useCase, string innovationCategory)
+    public async Task<(float Score, string Reasoning)> EvaluateIdeaAsync(string title, string alignment, string problem, string solution, string useCase, string innovationCategory, CancellationToken cancellationToken = default)
     {
         try
         {
             if (string.IsNullOrEmpty(_settings.ApiKey))
             {
-                //_logger.LogError("LlmService: Gemini API Key is MISSING. Please set it in user-secrets.");
+                _logger.LogError("LlmService: Gemini API Key is MISSING. Please set it in user-secrets.");
                 return (0, "AI Evaluation failed: API Key not configured.");
             }
 
@@ -41,7 +41,7 @@ public class LlmService : ILlmService
             var promptPath = Path.Combine(_env.ContentRootPath, "Services", "LlmService", "Prompts", "SystemPrompt.txt");
             if (!File.Exists(promptPath))
             {
-                 //_logger.LogError("LlmService: SystemPrompt.txt NOT FOUND at {Path}", promptPath);
+                 _logger.LogError("LlmService: SystemPrompt.txt NOT FOUND at {Path}", promptPath);
                  return (0, "AI Evaluation failed: System prompt file missing.");
             }
 
@@ -57,8 +57,7 @@ public class LlmService : ILlmService
                 .Replace("{useCase}", useCase);
 
             // Prepare the API request
-            var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.ModelName}:generateContent?key={_settings.ApiKey}";
-
+            var requestUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{_settings.ModelName}:generateContent";
 
             var requestBody = new
             {
@@ -80,12 +79,19 @@ public class LlmService : ILlmService
 
             // Call the Gemini API
             _logger.LogInformation("LlmService: Sending request to Gemini API...");
-            var response = await _httpClient.PostAsJsonAsync(requestUrl, requestBody);
+            
+            using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+            request.Content = JsonContent.Create(requestBody);
+            request.Headers.Add("x-goog-api-key", _settings.ApiKey);
+
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(30));
+            var response = await _httpClient.SendAsync(request, cts.Token);
             
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                //_logger.LogError("LlmService: Gemini API request failed. Status: {StatusCode}, Error: {Error}", response.StatusCode, errorContent);
+                _logger.LogError("LlmService: Gemini API request failed. Status: {StatusCode}, Error: {Error}", response.StatusCode, errorContent);
                 return (0, $"AI Evaluation failed: API returned {response.StatusCode}.");
             }
 
@@ -96,7 +102,7 @@ public class LlmService : ILlmService
 
             if (string.IsNullOrWhiteSpace(jsonResult))
             {
-                //_logger.LogWarning("LlmService: Received empty or malformed response from Gemini. Response Body: {RawContent}", rawContent);
+                _logger.LogWarning("LlmService: Received empty or malformed response from Gemini. Response Body: {RawContent}", rawContent);
                 return (0, "AI Evaluation returned an empty result.");
             }
 
@@ -106,13 +112,13 @@ public class LlmService : ILlmService
                 PropertyNameCaseInsensitive = true
             });
 
-            //_logger.LogInformation("LlmService: Evaluation successful. Score: {Score}, Reasoning: {Reasoning}", evaluation?.Score, evaluation?.Reasoning);
+            _logger.LogInformation("LlmService: Evaluation successful. Score: {Score}, Reasoning: {Reasoning}", evaluation?.Score, evaluation?.Reasoning);
 
             return (evaluation?.Score ?? 0, evaluation?.Reasoning ?? "No reasoning provided.");
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, "LlmService: An unexpected error occurred during evaluation.");
+            _logger.LogError(ex, "LlmService: An unexpected error occurred during evaluation.");
             return (0, "An unexpected error occurred during AI evaluation.");
         }
     }
