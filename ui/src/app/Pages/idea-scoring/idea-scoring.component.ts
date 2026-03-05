@@ -214,7 +214,6 @@ export class IdeaScoringComponent implements OnInit {
     const score = this.scoringForm.get('Phase1.Score')?.value;
     const update = { Score: score };
 
-    console.log('Syncing Phase 1 Score:', update);
     this.isLoading = true;
 
     this.ideasService.updateIdea(this.ideaId, update).subscribe({
@@ -230,8 +229,7 @@ export class IdeaScoringComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Update Phase 1 Score failed:', err);
-        this.toastService.show('Failed to sync score with backend', 'error');
+        this.toastService.show(err.error.message, 'error');
         this.isLoading = false;
       }
     });
@@ -424,7 +422,6 @@ export class IdeaScoringComponent implements OnInit {
   onSubmitPhase2(): void {
     const phase2Group = this.scoringForm.get('Phase2');
     if (phase2Group?.invalid) {
-      console.error('Phase 2 Form Invalid:', phase2Group.errors, phase2Group.value);
       this.toastService.show('Please complete all required Phase 2 fields', 'info');
 
       // Mark all as touched to show validation errors
@@ -447,8 +444,7 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.toastService.show('Failed to submit business case', 'error');
-        console.error(err);
+        this.toastService.show(err.error.message, 'error');
       }
     });
   }
@@ -456,7 +452,6 @@ export class IdeaScoringComponent implements OnInit {
   onSubmitPhase3(): void {
     const phase3Group = this.scoringForm.get('Phase3');
     if (phase3Group?.invalid) {
-      console.error('Phase 3 Form Invalid:', phase3Group.errors, phase3Group.value);
       this.toastService.show('Please complete all Scoring Dimensions', 'info');
       phase3Group.markAllAsTouched();
       return;
@@ -467,11 +462,9 @@ export class IdeaScoringComponent implements OnInit {
       Score: this.totalPhase3Score
     };
 
-    console.log('Phase 3 Submission Payload:', dto);
 
     this.scoringService.submitScoringDimensions(this.ideaId, dto).subscribe({
       next: (res) => {
-        console.log('Phase 3 Submission Response:', res);
         if (res.success) {
           this.toastService.show('Final Scoring Dimensions submitted successfully', 'success');
           this.router.navigate([`/groups/${this.groupId}/ideas`]);
@@ -480,8 +473,7 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Phase 3 API Error:', err);
-        this.toastService.show('Failed to submit final score', 'error');
+        this.toastService.show(err.error.message, 'error');
       }
     });
   }
