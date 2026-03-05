@@ -447,6 +447,7 @@ export class GroupsComponent implements OnInit {
 
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
+          this.loadGroups();
           this.groups = this.groups.filter(group => group.id !== groupId);
           this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
