@@ -56,8 +56,6 @@ export class GroupsComponent implements OnInit {
   groupMembers: any[] = [];
   isLoadingMembers = false;
   isDeleting: boolean = false;
-  confirmationInput: string = '';
-  isDeletedDisabled: boolean = true;
   nameCount = 0;
   descCount = 0;
   nameLimitReached = false;
@@ -173,7 +171,7 @@ export class GroupsComponent implements OnInit {
             return {
               ...group,
               id: group.id,
-              name: group.name || group.Name,
+              name: (group.name || group.Name || '').trim(),
               description: group.description || group.Description,
               isMember: group.isMember || group.IsMember || false,
               hasPendingRequest: group.hasPendingRequest || group.HasPendingRequest || false,
@@ -273,7 +271,7 @@ export class GroupsComponent implements OnInit {
     this.deleteConfirmControl.setValidators([
       Validators.required,
       (control: AbstractControl) =>
-        control.value === group.name ? null : { mismatch: true }
+        control.value?.trim().toLowerCase() === group.name?.trim().toLowerCase() ? null : { mismatch: true }
     ]);
     this.deleteConfirmControl.updateValueAndValidity();
   }
@@ -285,10 +283,6 @@ export class GroupsComponent implements OnInit {
     this.selectedGroup = null;
   }
 
-  onConfirmationInput(value: string): void {
-    this.confirmationInput = value;
-    this.isDeletedDisabled = value !== this.selectedGroup?.name;
-  }
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
