@@ -183,7 +183,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
     // Get current user ID from auth service
     this.currentUserId = this.authService.getCurrentUserId();
     this.checkCommitteeMembership();
-    // console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
       Title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],

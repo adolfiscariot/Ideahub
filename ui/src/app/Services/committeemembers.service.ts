@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ApiResponse } from '../Interfaces/Api-Response/api-response';
+import { ApiResponse } from '../Interfaces/Ideas/idea-interfaces';
 
 @Injectable({
     providedIn: 'root'
@@ -11,15 +11,30 @@ export class CommitteeMembersService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/Committee`;
 
-    getCommitteeMembers(): Observable<ApiResponse> {
-        return this.http.get<ApiResponse>(this.apiUrl);
+    // Helper method to convert backend response to our interface
+    private convertResponse<T>(response: any): ApiResponse<T> {
+        return {
+            success: response.status || false,
+            message: response.message || '',
+            data: response.data
+        };
     }
 
-    getAllUsers(): Observable<ApiResponse> {
-        return this.http.get<ApiResponse>(`${this.apiUrl}/users`);
+    getCommitteeMembers(): Observable<ApiResponse<any>> {
+        return this.http.get<any>(this.apiUrl).pipe(
+            map(response => this.convertResponse<any>(response))
+        );
     }
 
-    addCommitteeMember(email: string): Observable<ApiResponse> {
-        return this.http.post<ApiResponse>(`${this.apiUrl}/add/${email}`, {});
+    getAllUsers(): Observable<ApiResponse<any>> {
+        return this.http.get<any>(`${this.apiUrl}/users`).pipe(
+            map(response => this.convertResponse<any>(response))
+        );
+    }
+
+    addCommitteeMember(email: string): Observable<ApiResponse<any>> {
+        return this.http.post<any>(`${this.apiUrl}/add/${email}`, {}).pipe(
+            map(response => this.convertResponse<any>(response))
+        );
     }
 }

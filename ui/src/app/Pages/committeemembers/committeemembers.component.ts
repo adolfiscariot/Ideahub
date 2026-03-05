@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { ActionStep, ApiResponse, BusinessCaseDto, BusinessCaseResult, ConfidenceScore, CostScore, CreateIdeaRequest, CustomerImpactScore, DifferentiationScore, EffortScore, EvaluationStatus, FeasibilityScore, FinancialBenefitScore, Idea, IdeaUpdate, ImpactScope, ResponsibleDepartment, RiskLevel, RiskScore, ScalabilityScore, ScoringDimensionsDto, ScoringStage, SeeVotesRequest, StrategicAlignmentScore, SustainabilityScore, TimeToValueScore, UnvoteRequest, Verdict, VoteDetails, VoteRequest, createComment, viewComment } from '../../Interfaces/Ideas/idea-interfaces';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 
 @Component({
@@ -34,8 +34,8 @@ export class CommitteeMembersComponent implements OnInit {
 
     loadCommitteeMembers(): void {
         this.committeeService.getCommitteeMembers().subscribe({
-            next: (response: ApiResponse) => {
-                if (response.status) {
+            next: (response: ApiResponse<any>) => {
+                if (response.success) {
                     this.committeeMembers = response.data;
                 }
             },
@@ -47,8 +47,8 @@ export class CommitteeMembersComponent implements OnInit {
 
     loadAllUsers(): void {
         this.committeeService.getAllUsers().subscribe({
-            next: (response: ApiResponse) => {
-                if (response.status) {
+            next: (response: ApiResponse<any>) => {
+                if (response.success) {
                     this.allUsers = response.data;
                 }
             },
@@ -65,8 +65,8 @@ export class CommitteeMembersComponent implements OnInit {
         }
 
         this.committeeService.addCommitteeMember(this.selectedUserEmail).subscribe({
-            next: (response: ApiResponse) => {
-                if (response.status) {
+            next: (response: ApiResponse<any>) => {
+                if (response.success) {
                     this.toastService.show('Committee member added successfully', 'success');
                     this.loadCommitteeMembers();
                     this.selectedUserEmail = '';
