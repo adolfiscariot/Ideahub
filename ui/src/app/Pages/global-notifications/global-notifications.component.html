@@ -77,7 +77,7 @@
         <h2>Comment Notifications</h2>
         <span class="total-count">{{ commentNotifications.length }} notification(s), {{ unreadCount }} unread</span>
       </div>
-      <button class="mark-all-btn" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+      <button class="mark-all-btn" *ngIf="unreadCount > 0" (click)="$event.stopPropagation(); markAllAsRead()">
         Mark all as read
       </button>
     </div>
@@ -91,7 +91,7 @@
         </div>
         <p class="notif-content">"{{ notif.comment.content }}"</p>
       </div>
-      <button *ngIf="!notif.isRead" class="mark-read-btn" (click)="markAsRead(notif)">
+      <button *ngIf="!notif.isRead" class="mark-read-btn" (click)="$event.stopPropagation(); markAsRead(notif)">
         Mark as read
       </button>
     </div>

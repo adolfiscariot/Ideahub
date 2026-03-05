@@ -105,6 +105,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   shareIdeaForm!: FormGroup;
 
   private routeSub: Subscription = new Subscription();
+  private queryParamsSub: Subscription = new Subscription();
 
   showDeleteIdeaModal = false;
   ideaIdToDelete: string | null = null;
@@ -198,7 +199,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.setupShareIdeaCharCounters();
     // Subscribe to query params for notification deep-linking
-    this.route.queryParams.subscribe(params => {
+    this.queryParamsSub = this.route.queryParams.subscribe(params => {
       if (params['ideaId']) {
         this.targetIdeaId = params['ideaId'];
         this.targetCommentId = params['commentId'] ? Number(params['commentId']) : null;
@@ -268,6 +269,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
+    this.queryParamsSub.unsubscribe();
   }
 
   private destroy$ = new Subject<void>();
