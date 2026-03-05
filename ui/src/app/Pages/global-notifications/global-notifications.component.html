@@ -82,7 +82,8 @@
       </button>
     </div>
 
-    <div *ngFor="let notif of commentNotifications" class="notif-card" [class.unread]="!notif.isRead">
+    <div *ngFor="let notif of commentNotifications" class="notif-card" [class.unread]="!notif.isRead"
+      (click)="onNotificationClick(notif)" style="cursor: pointer;">
       <div class="notif-body">
         <div class="notif-meta">
           <span class="notif-commenter">{{ notif.comment.commenterName }}</span>
