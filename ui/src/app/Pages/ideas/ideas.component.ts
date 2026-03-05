@@ -589,7 +589,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   async addComment(): Promise<void> {
     const content = this.newCommentContent?.trim();
     if (!content) {
-      return this.toastService.show('To post a comment, you are required to provide one', 'info');
+      this.toastService.show('To post a comment, you are required to provide one', 'info');
+      return;
     }
 
     this.isPostingComment = true;
@@ -1302,6 +1303,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.ideaUploadStatus = 'Creating idea...';
 
+    // Show a persistent loading toast since AI scoring takes time
+    const loadingToastId = this.toastService.show(
+      'Submitting idea and performing AI evaluation...',
+      'info',
+      0 // 0 means it won't auto-close
+    );
+
     // Build request using only actual fields
     const request: CreateIdeaRequest = {
       Title: this.shareIdeaForm.value.Title,
@@ -1342,12 +1350,16 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
         await Promise.all(uploadPromises);
 
+        // Remove the loading toast before showing success
+        this.toastService.remove(loadingToastId);
         this.toastService.show(
-          `Idea created with ${this.selectedIdeaFiles.length} media file(s)`,
+          `Idea created with ${this.selectedIdeaFiles.length} media file(s) and evaluated successfully!`,
           'success'
         );
       } else {
-        this.toastService.show('Idea created successfully!', 'success');
+        // Remove the loading toast before showing success
+        this.toastService.remove(loadingToastId);
+        this.toastService.show('Idea created and evaluated successfully!', 'success');
       }
 
       // Reset modal and state
@@ -1358,6 +1370,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     } catch (error: any) {
       console.error('Error creating idea:', error);
+      // Remove the loading toast on error too
+      this.toastService.remove(loadingToastId);
       this.ideaUploadStatus = 'Failed to create idea. Please try again.';
       this.toastService.show(this.ideaUploadStatus, 'error');
     } finally {
