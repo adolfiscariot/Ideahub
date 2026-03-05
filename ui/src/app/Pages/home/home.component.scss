@@ -3,7 +3,7 @@
     height: 100%;
     min-height: 0;
     overflow-y: auto;
-  
+
 }
 
 .dashboard-container {
@@ -13,79 +13,80 @@
     display: flex;
     flex-direction: column;
     padding: 50px;
-    
+
 }
 
 .modal-footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 16px 16px 16px;
-  border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 16px 16px 16px;
+    border-top: 1px solid #e2e8f0;
 
 }
 
 :host ::ng-deep .modal-body {
-  padding: 20px;
+    padding: 20px;
 }
 
 .welcome-info-modal .section {
-  margin-bottom: 24px;
+    margin-bottom: 24px;
 }
 
 .welcome-info-modal .section:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .welcome-info-modal .section-title {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin: 0 0 12px 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 12px 0;
 }
 
 .welcome-info-modal p {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  color: #4a5568;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
 }
 
 .welcome-info-modal .rule-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .welcome-info-modal .rule-item {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  color: #4a5568;
-  line-height: 1.5;
-  padding-left: 24px;
-  position: relative;
-  margin-bottom: 12px;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.5;
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 12px;
 }
 
 .welcome-info-modal .rule-item:last-child {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .welcome-info-modal .rule-item::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #000;
-  font-size: 18px;
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #000;
+    font-size: 18px;
 }
 
 .welcome-info-modal .rule-header strong {
-  color: #2d3748;
-  font-weight: 600;
+    color: #2d3748;
+    font-weight: 600;
 }
+
 .dashboard-header {
     margin-bottom: 2rem;
 
@@ -236,5 +237,14 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
+    }
+}
+
+.clickable {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: var(--surface-hover, rgba(0, 0, 0, 0.04)) !important;
     }
 }

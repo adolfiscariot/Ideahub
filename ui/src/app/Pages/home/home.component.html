@@ -18,7 +18,7 @@
     <!-- Most Voted Ideas -->
     <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
       <div *ngIf="mostVotedIdeas.length > 0; else noVotes">
-        <div *ngFor="let idea of mostVotedIdeas" class="list-item">
+        <div *ngFor="let idea of mostVotedIdeas" class="list-item clickable" (click)="onIdeaClick(idea)">
           <div class="item-main">
             <h3>{{idea.title}}</h3>
             <p>{{idea.proposedSolution}}</p>
@@ -56,7 +56,7 @@
     <!-- Group Engagement -->
     <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
       <div *ngIf="groupEngagement.length > 0; else noGroups">
-        <div *ngFor="let group of groupEngagement" class="list-item">
+        <div *ngFor="let group of groupEngagement" class="list-item clickable" (click)="onGroupClick(group)">
           <div class="item-main">
             <h3>{{group.name}}</h3>
           </div>
