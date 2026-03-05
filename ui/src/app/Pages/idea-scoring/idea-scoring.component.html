@@ -106,16 +106,6 @@
                                 </div>
                             </div>
 
-                            <!-- AI Reasoning Highlight Row -->
-                            <div class="meta-row ai-insight-row" *ngIf="idea.AiReasoning || idea.AiReasoning">
-                                <div class="meta-key">
-                                    <mat-icon>psychology</mat-icon>
-                                    <label>AI Evaluation Insight</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.AiReasoning || idea.AiReasoning }}</p>
-                                </div>
-                            </div>
 
                             <div class="meta-row" *ngIf="idea.notes || idea.Notes">
                                 <div class="meta-key">
@@ -130,18 +120,35 @@
                     </div>
 
                     <div class="scoring-inputs">
-                        <div class="form-group">
+                        <div class="form-group score-input-section">
                             <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold:
                                 70%)</label>
-                            <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
-                                (input)="clampScore($event)">
+                            <div class="score-control">
+                                <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
+                                    (input)="clampScore($event)">
+                                <div class="threshold-indicator"
+                                    [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
+                                    {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Met' : '✗ Low' }}
+                                </div>
+                            </div>
                             <small class="field-error"
                                 *ngIf="scoringForm.get('Phase1.Score')?.invalid && scoringForm.get('Phase1.Score')?.touched">
                                 Score must be between 0 and 100.
                             </small>
-                            <div class="threshold-indicator" [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
-                                {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Threshold Met' : '✗ Below
-                                Threshold' }}
+                        </div>
+
+                        <!-- AI Reasoning Card -->
+                        <div class="ai-reasoning-card" *ngIf="idea.AiReasoning">
+                            <div class="card-header">
+                                <mat-icon>psychology</mat-icon>
+                                <h4>AI Evaluation Analysis</h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="reasoning-item" *ngFor="let item of parsedReasoning"
+                                    [class.overall]="item.label.toLowerCase().includes('overall')">
+                                    <span class="reasoning-label">{{ item.label }}</span>
+                                    <p class="reasoning-text">{{ item.content }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
