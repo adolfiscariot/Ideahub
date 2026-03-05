@@ -301,6 +301,13 @@
             ✔ Promoted
           </span>
           }
+          <!-- Review button (left panel) -->
+          @if (idea.status !== 'Closed' && isCommitteeMember) {
+          <app-buttons buttonStyleClass="btn-primary" (click)="$event.stopPropagation(); navigateToScoring(idea)"
+            [disabled]="false" title="Review & Score Idea">
+            Review
+          </app-buttons>
+          }
         </div>
       </div>
       <!-- Divider -->
@@ -399,12 +406,6 @@
                   🛑 Close Idea
                 </app-buttons>
                 }
-                <!-- Review & Score button (visible to all for now) -->
-                <app-buttons buttonStyleClass="btn-primary"
-                  (click)="$event.stopPropagation(); navigateToScoring(selectedIdea); closeIdeaActionsMenu()"
-                  [disabled]="false" title="Review & Score Idea">
-                  Review
-                </app-buttons>
               </div>
               }
               <!-- Show vote count for closed ideas -->

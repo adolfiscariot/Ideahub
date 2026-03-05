@@ -25,6 +25,7 @@ import { MediaType } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { CommitteeMembersService } from '../../Services/committeemembers.service';
 
 @Component({
   selector: 'app-ideas',
@@ -99,6 +100,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   shareProblemCount = 0;
   shareUseCaseCount = 0;
   shareNotesCount = 0;
+  isCommitteeMember = false;
 
   shareIdeaForm!: FormGroup;
 
@@ -167,6 +169,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private projectService = inject(ProjectService);
   private commentService = inject(CommentsService);
   private mediaService = inject(MediaService);
+  private committeeService = inject(CommitteeMembersService);
   private fb = inject(FormBuilder);
 
   ngOnInit(): void {
@@ -174,6 +177,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     // Get current user ID from auth service
     this.currentUserId = this.authService.getCurrentUserId();
+    this.checkCommitteeMembership();
     // console.log('Current User ID:', this.currentUserId);
 
     this.shareIdeaForm = this.fb.group({
@@ -1929,5 +1933,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show('Failed to transfer ownership', 'error');
         }
       });
+  }
+
+  checkCommitteeMembership(): void {
+    const userEmail = this.authService.getEmail();
+    if (!userEmail) return;
+
+    this.committeeService.getCommitteeMembers().subscribe({
+      next: (response: any) => {
+        if (response.status && Array.isArray(response.data)) {
+          this.isCommitteeMember = response.data.some((member: any) =>
+            member.email?.toLowerCase() === userEmail.toLowerCase()
+          );
+        }
+      },
+      error: () => {
+        this.isCommitteeMember = false;
+      }
+    });
   }
 }
