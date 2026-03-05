@@ -187,7 +187,8 @@ export enum ScoringStage {
   Evaluation = 'Evaluation',
   BusinessCase = 'BusinessCase',
   ScoringDimensions = 'ScoringDimensions',
-  Completed = 'Completed'
+  Accepted = 'Accepted',
+  Rejected = 'Rejected'
 }
 
 // Phase 3 Scoring Enums

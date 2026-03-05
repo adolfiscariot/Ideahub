@@ -93,7 +93,7 @@ public enum ScoringStage
     Evaluation = 0,       // Phase 1 (Automated)
     BusinessCase = 1,     // Phase 2 (Manual)
     ScoringDimensions = 2, // Phase 3 (Manual)
-    Completed = 3,
+    Accepted = 3,
     Rejected = 4
 }
 
