@@ -140,6 +140,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showMobileMenu: boolean = false;
   showIdeaActionsMenu: boolean = false;
 
+  targetIdeaId: string | null = null;
+  targetCommentId: number | null = null;
+  highlightedCommentId: number | null = null;
+
   toggleMobileMenu() {
     this.showMobileMenu = !this.showMobileMenu;
   }
@@ -189,6 +193,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
 
     this.setupShareIdeaCharCounters();
+    // Subscribe to query params for notification deep-linking
+    this.route.queryParams.subscribe(params => {
+      if (params['ideaId']) {
+        this.targetIdeaId = params['ideaId'];
+        this.targetCommentId = params['commentId'] ? Number(params['commentId']) : null;
+      }
+    });
+
     // Check browser history state FIRST (in case of page refresh)
     // console.log('Browser history state:', history.state);
 
@@ -573,6 +585,25 @@ export class IdeasComponent implements OnInit, OnDestroy {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
 
+          // HIGHLIGHT COMMENT from notification
+          if (this.targetCommentId) {
+            this.highlightedCommentId = this.targetCommentId;
+
+            // Wait for DOM
+            setTimeout(() => {
+              const element = document.getElementById(`comment-${this.targetCommentId}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+
+              // Clear highlight and targets after 3 seconds
+              setTimeout(() => {
+                this.highlightedCommentId = null;
+                this.targetCommentId = null;
+                this.targetIdeaId = null;
+              }, 3000);
+            }, 500);
+          }
 
         } else {
           this.comments = [];
@@ -1146,6 +1177,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
               this.selectedIdea = updatedSelectedIdea;
             } else {
               this.selectedIdea = null;
+            }
+          }
+
+          if (this.targetIdeaId && !this.selectedIdea) {
+            const ideaToSelect = this.ideas.find(i => i.id === this.targetIdeaId);
+            if (ideaToSelect) {
+              this.selectIdea(ideaToSelect);
             }
           }
 
