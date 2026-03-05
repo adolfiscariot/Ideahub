@@ -1,10 +1,12 @@
 export interface MostVotedIdea {
-    id: string;
+    id: number;
     title: string;
     proposedSolution: string;
     author: string;
     groupName: string;
     voteCount: number;
+    groupId: number;
+    isMember: boolean;
 }
 
 export interface TopContributor {
@@ -14,14 +16,14 @@ export interface TopContributor {
 }
 
 export interface PromotedIdea {
-    id: string;
+    id: number;
     title: string;
     proposedSolution: string;
     author: string;
     groupName: string;
     promotedDate: string;
     projectId: number;
-    groupId: string;
+    groupId: number;
 }
 
 export interface IdeaStats {
@@ -32,9 +34,11 @@ export interface IdeaStats {
 }
 
 export interface GroupEngagement {
+    id: number;
     name: string;
     ideaCount: number;
     voteCount: number;
+    isMember: boolean;
 }
 
 export interface PersonalStats {
