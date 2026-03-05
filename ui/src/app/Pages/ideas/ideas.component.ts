@@ -1941,7 +1941,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.committeeService.getCommitteeMembers().subscribe({
       next: (response: any) => {
-        if (response.status && Array.isArray(response.data)) {
+        if (response.success && Array.isArray(response.data)) {
           this.isCommitteeMember = response.data.some((member: any) =>
             member.email?.toLowerCase() === userEmail.toLowerCase()
           );
