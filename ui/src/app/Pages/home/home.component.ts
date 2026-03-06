@@ -121,7 +121,8 @@ export class HomeComponent implements OnInit {
         queryParams: { ideaId: idea.id }
       });
     } else {
-      this.toastService.show('Not a member of the group to see ideas. Join the group first.', 'warning');
+      this.toastService.show('Join this group to view its ideas', 'info');
+      this.router.navigate(['/groups'], { queryParams: { joinGroupId: idea.groupId } })
     }
   }
 
@@ -129,8 +130,8 @@ export class HomeComponent implements OnInit {
     if (group.isMember) {
       this.router.navigate(['/groups', group.id.toString(), 'ideas']);
     } else {
-      this.toastService.show(`Not a member of the group. Click Join Group to join ${group.name}`, 'info');
-      this.router.navigate(['/groups']);
+      this.toastService.show(`Join Group to join ${group.name} to access its ideas`, 'info');
+      this.router.navigate(['/groups'], { queryParams: { joinGroupId: group.id } });
     }
   }
 

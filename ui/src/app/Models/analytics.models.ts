@@ -23,7 +23,7 @@ export interface PromotedIdea {
     groupName: string;
     promotedDate: string;
     projectId: number;
-    groupId: number;
+    groupId?: number;
 }
 
 export interface IdeaStats {
