@@ -289,7 +289,7 @@
             }
           </app-buttons>
           <!-- View voters button (left panel) -->
-          @if (isGroupCreator() && (idea.voteCount || 0) > 0) {
+          @if (idea.status !== 'Closed' && isGroupCreator() && (idea.voteCount || 0) > 0) {
           <app-buttons buttonStyleClass="btn-view-voters" (click)="$event.stopPropagation(); onViewVoters(idea, $event)"
             [disabled]="false" title="View voters">
             👁️ Voters
@@ -354,7 +354,7 @@
                 }
               </app-buttons>
               <!-- View voters button prominent -->
-              @if (isGroupCreator() && (selectedIdea?.voteCount || 0) > 0) {
+              @if (selectedIdea.status !== 'Closed' && isGroupCreator() && (selectedIdea?.voteCount || 0) > 0) {
               <app-buttons buttonStyleClass="btn-view-voters"
                 (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
                 title="View voters">
