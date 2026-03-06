@@ -36,6 +36,7 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var ideas = await _context.Ideas
                 .Include(i => i.User)
                 .Include(i => i.Group)
@@ -50,8 +51,10 @@ public class AnalyticsController : ControllerBase
                     i.ProblemStatement,
                     i.ProposedSolution,
                     Author = i.User.DisplayName,
+                    i.GroupId,
                     GroupName = i.Group.Name,
-                    VoteCount = i.Votes.Count(v => !v.IsDeleted)
+                    VoteCount = i.Votes.Count(v => !v.IsDeleted),
+                    IsMember = !string.IsNullOrEmpty(userId) && i.Group.UserGroups.Any(ug => ug.UserId == userId)
                 })
                 .ToListAsync();
 
@@ -182,16 +185,19 @@ public class AnalyticsController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var groups = await _context.Groups
                 .Where(g => !g.IsDeleted && g.IsActive)
                 .Select(g => new
                 {
+                    g.Id,
                     g.Name,
                     IdeaCount = g.Ideas.Count(i => !i.IsDeleted),
                     VoteCount = g.Ideas
                         .Where(i => !i.IsDeleted)
                         .SelectMany(i => i.Votes)
-                        .Count(v => !v.IsDeleted)
+                        .Count(v => !v.IsDeleted),
+                    IsMember = !string.IsNullOrEmpty(userId) && g.UserGroups.Any(ug => ug.UserId == userId)
                 })
                 .OrderByDescending(g => g.IdeaCount + g.VoteCount)
                 .Take(3)

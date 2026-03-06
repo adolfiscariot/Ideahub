@@ -8,14 +8,8 @@ import { ModalComponent } from '../../Components/modal/modal.component';
 import { ProjectService } from '../../Services/project.service';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
-import {
-  MostVotedIdea,
-  TopContributor,
-  PromotedIdea,
-  IdeaStats,
-  GroupEngagement,
-  PersonalStats
-} from '../../Models/analytics.models';
+import { ToastService } from '../../Services/toast.service';
+import { PromotedIdea, IdeaStats, GroupEngagement, PersonalStats, MostVotedIdea, TopContributor } from '../../Models/analytics.models';
 
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -75,7 +69,12 @@ export class HomeComponent implements OnInit {
   currentProject: any = null;
 
 
-  constructor(private analyticsService: AnalyticsService, private projectService: ProjectService, private router: Router) { }
+  constructor(
+    private analyticsService: AnalyticsService,
+    private projectService: ProjectService,
+    private router: Router,
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.fetchAnalytics();
@@ -116,11 +115,30 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  onPromotedIdeaClick(idea: PromotedIdea) {
-  if (!idea.projectId) return;
+  onIdeaClick(idea: MostVotedIdea) {
+    if (idea.isMember) {
+      this.router.navigate(['/groups', idea.groupId.toString(), 'ideas'], {
+        queryParams: { ideaId: idea.id }
+      });
+    } else {
+      this.toastService.show('Not a member of the group to see ideas. Join the group first.', 'warning');
+    }
+  }
 
-  this.router.navigate(['/projects'], {
-    queryParams: { openProject: idea.projectId }
-  });
-}
+  onGroupClick(group: GroupEngagement) {
+    if (group.isMember) {
+      this.router.navigate(['/groups', group.id.toString(), 'ideas']);
+    } else {
+      this.toastService.show(`Not a member of the group. Click Join Group to join ${group.name}`, 'info');
+      this.router.navigate(['/groups']);
+    }
+  }
+
+  onPromotedIdeaClick(idea: PromotedIdea) {
+    if (!idea.projectId) return;
+
+    this.router.navigate(['/projects'], {
+      queryParams: { openProject: idea.projectId }
+    });
+  }
 }
