@@ -261,6 +261,12 @@
               @if (idea.status === 'Closed') {
               <span class="closed-badge-title">CLOSED</span>
               }
+              @if (idea.Score || idea.score) {
+              <span class="score-pill" [class.score-high]="(idea.Score || idea.score || 0) >= 70"
+                [class.score-low]="(idea.Score || idea.score || 0) < 70">
+                {{ idea.Score || idea.score }}%
+              </span>
+              }
             </h3>
             @if (idea.isReadyForPromotion) {
             <span class="promotion-badge-title"> ⭐ Ready for Promotion </span>
@@ -346,8 +352,14 @@
           <div class="details-row-1">
             <h3 class="details-idea-title">{{ selectedIdea.Title }}
               <!-- Closed badge in details -->
-              @if (showClosedIdeas || selectedIdea.status === 'Closed') {
+              @if (selectedIdea.status === 'Closed') {
               <span class="closed-badge-details">CLOSED</span>
+              }
+              @if (selectedIdea.Score || selectedIdea.score) {
+              <span class="score-pill" [class.score-high]="(selectedIdea.Score || selectedIdea.score || 0) >= 70"
+                [class.score-low]="(selectedIdea.Score || selectedIdea.score || 0) < 70">
+                {{ selectedIdea.Score || selectedIdea.score }}%
+              </span>
               }
             </h3>
             <div class="details-actions-right">

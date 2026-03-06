@@ -384,7 +384,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score,
+                score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -464,7 +466,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score,
+                score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -1127,7 +1131,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
               userVoteId: undefined,
               groupName: idea.name || '',
               name: idea.name || '',
-              mediaCount: 0
+              mediaCount: 0,
+              Score: idea.Score ?? idea.score,
+              score: idea.Score ?? idea.score
             };
             return mappedIdea;
           });
