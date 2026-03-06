@@ -135,6 +135,14 @@ builder.Services.AddAuthorization(options =>
             context.User.IsInRole(RoleConstants.CommitteeMember)
         )
     );
+
+    //CanCreateProject Policy
+    options.AddPolicy("GroupAdminOrCommitteeMember", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole(RoleConstants.GroupAdmin) ||
+            context.User.IsInRole(RoleConstants.CommitteeMember)
+        )
+    );
 });
 
 

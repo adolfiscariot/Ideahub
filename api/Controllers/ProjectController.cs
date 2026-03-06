@@ -26,7 +26,7 @@ public class ProjectController : ControllerBase
     }
 
     //Create a project
-    [Authorize(Policy = "GroupAdminOnly")]
+    [Authorize(Policy = "GroupAdminOrCommitteeMember")]
     [HttpPost("create-project")]
     public async Task<IActionResult> CreateProject(int groupId, int ideaId, ProjectDto projectDto)
     {
@@ -111,7 +111,6 @@ public class ProjectController : ControllerBase
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-
 
             _logger.LogInformation("Create Project: New Project {projectTitle} created", newProject.Title);
             return Ok(ApiResponse.Ok("New project created", new { projectId = newProject.Id }));

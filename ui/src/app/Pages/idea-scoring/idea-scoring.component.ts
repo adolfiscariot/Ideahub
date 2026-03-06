@@ -579,42 +579,24 @@ export class IdeaScoringComponent implements OnInit {
 
     this.isPromoting = true;
 
-    const promoteRequest: PromoteRequest = {
-      groupId: this.groupId,
-      ideaId: this.ideaId
-    };
-
-    this.ideasService.promoteIdea(promoteRequest).subscribe({
-      next: (promoteRes) => {
-        if (promoteRes.success) {
-          this.projectService.createProject(
-            this.groupId,
-            this.ideaId,
-            this.projectData
-          ).subscribe({
-            next: (createRes) => {
-              if (createRes.success) {
-                this.toastService.show('Idea promoted to project successfully!', 'success');
-                if (this.idea) {
-                  this.idea.isPromotedToProject = true;
-                }
-              } else {
-                this.toastService.show(createRes.message || 'Project creation failed', 'error');
-              }
-              this.isPromoting = false;
-            },
-            error: (err) => {
-              this.toastService.show(err.error?.message || 'Error creating project', 'error');
-              this.isPromoting = false;
-            }
-          });
+    this.projectService.createProject(
+      this.groupId,
+      this.ideaId,
+      this.projectData
+    ).subscribe({
+      next: (createRes) => {
+        if (createRes.success) {
+          this.toastService.show('Idea promoted to project successfully!', 'success');
+          if (this.idea) {
+            this.idea.isPromotedToProject = true;
+          }
         } else {
-          this.toastService.show(promoteRes.message || 'Promotion failed', 'error');
-          this.isPromoting = false;
+          this.toastService.show(createRes.message || 'Project creation failed', 'error');
         }
+        this.isPromoting = false;
       },
       error: (err) => {
-        this.toastService.show(err.error?.message || 'Error promoting idea', 'error');
+        this.toastService.show(err.error?.message || 'Error creating project', 'error');
         this.isPromoting = false;
       }
     });

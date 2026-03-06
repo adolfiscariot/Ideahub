@@ -363,6 +363,7 @@ public class IdeaController : ControllerBase
     //Promote an idea to a project
     [Authorize(Policy = "GroupAdminOnly")]
     [HttpPost("promote-idea")]
+    [Obsolete("Promotion is now handled atomically during Project creation (/api/Project/create-project).")]
     public async Task<IActionResult> PromoteIdea(int groupId, int ideaId)
     {
         //Fetch user info
