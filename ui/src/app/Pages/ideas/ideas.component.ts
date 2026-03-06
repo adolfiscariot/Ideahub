@@ -61,9 +61,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
   groupCreatorIdFromState = ''; // set from route state
 
-  isPromoting = false;
-  currentlyPromotingIdeaId: string | null = null;
-
   groupMembers: any[] = [];
 
   isEditMode = false;
@@ -75,7 +72,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     proposedSolution: ''
   };
 
-  sortMode: 'top' | 'newest' = 'top';
+  sortMode: 'top' | 'newest' | 'highest-scored' = 'top';
 
   showRequestsModal = false;
   pendingRequests: any[] = [];
@@ -83,14 +80,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   errorRequests = '';
   newOwnerEmail!: string;
 
-  showProjectModal = false;
-  currentIdeaToPromote: Idea | null = null;
-  projectData: CreateProjectRequest = {
-    title: '',
-    proposedSolution: '',
-    //problemStatement:'',
-    overseenByEmail: ''
-  };
   showMemberLeaveModal = false;
   titleLength = 0;
   descLength = 0;
@@ -171,7 +160,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private voteService = inject(VoteService);
   private toastService = inject(ToastService);
   private dialog = inject(MatDialog);
-  private projectService = inject(ProjectService);
   private commentService = inject(CommentsService);
   private mediaService = inject(MediaService);
   private committeeService = inject(CommitteeMembersService);
@@ -384,7 +372,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -464,7 +453,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -558,7 +548,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.modalEditData = { ...idea };
   }
 
-  setSortMode(mode: 'top' | 'newest'): void {
+  setSortMode(mode: 'top' | 'newest' | 'highest-scored'): void {
     this.sortMode = mode;
     this.sortIdeas();
   }
@@ -572,6 +562,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.ideas.sort((a, b) => {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
+    } else if (this.sortMode === 'highest-scored') {
+      this.ideas.sort((a, b) => (b.Score || b.score || 0) - (a.Score || a.score || 0));
     }
   }
 
@@ -1127,7 +1119,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
               userVoteId: undefined,
               groupName: idea.name || '',
               name: idea.name || '',
-              mediaCount: 0
+              mediaCount: 0,
+              Score: idea.Score ?? idea.score,
+              score: idea.Score ?? idea.score
             };
             return mappedIdea;
           });
@@ -1792,117 +1786,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   }
 
-  //Promote Idea to project and create project
-  onPromoteIdea(idea: Idea, event?: Event): void {
-    event?.stopPropagation();
-
-    if (idea.isPromotedToProject) {
-      alert('Already promoted!');
-      return;
-    }
-
-    this.currentIdeaToPromote = idea;
-    this.projectData = {
-      title: idea.Title,
-      proposedSolution: idea.ProposedSolution || '',
-      //problemStatement: idea.ProblemStatement || '',
-      overseenByEmail: ''
-    };
-    this.showProjectModal = true;
-  }
-
-  createProjectFromIdea(): void {
-    if (!this.currentIdeaToPromote || !this.groupId) return;
-    if (!this.projectData.overseenByEmail) {
-      alert('Enter overseer email');
-      return;
-    }
-
-    this.isPromoting = true;
-    const idea = this.currentIdeaToPromote;
-
-    this.ideasService.promoteIdea({
-      ideaId: idea.id,
-      groupId: this.groupId
-    }).subscribe({
-      next: (promoteRes) => {
-        if (promoteRes.success) {
-          this.projectService.createProject(
-            this.groupId,
-            idea.id,
-            this.projectData
-          ).subscribe({
-            next: (projectRes) => {
-              if (projectRes.success && projectRes.data?.projectId) {
-                const projectId = projectRes.data?.projectId;
-                this.handleSuccess(idea, projectRes);
-              }
-              else {
-                this.handleProjectError('Failed to promote idea');
-              }
-            },
-
-            error: (err) => this.handleProjectError(err)
-          });
-        } else {
-          this.isPromoting = false;
-          this.toastService.show('Promotion failed', 'error');
-        }
-      },
-      error: (err) => {
-        this.isPromoting = false;
-        this.toastService.show('Error promoting', 'error');
-      }
-    });
-  }
 
   navigateToScoring(idea: Idea): void {
     if (!idea || !this.groupId) return;
     this.router.navigate([`/groups/${this.groupId}/ideas/${idea.id}/score`]);
   }
 
-  private handleSuccess(idea: Idea, response: any): void {
-    this.isPromoting = false;
-    this.showProjectModal = false;
-
-    if (response.success) {
-      idea.isPromotedToProject = true;
-      idea.projectId = response.projectId;
-      idea.status = 'Promoted';
-
-      if (this.selectedIdea?.id === idea.id) {
-        this.selectedIdea.isPromotedToProject = true;
-        this.selectedIdea.status = 'Promoted';
-      }
-
-      this.ideas = [...this.ideas];
-      this.toastService.show('Project created', 'success');
-      this.selectedIdea = false;
-      this.loadIdeas();
-
-      this.currentIdeaToPromote = null;
-      this.projectData = { title: '', proposedSolution: '', overseenByEmail: '' };
-    } else {
-      alert('Project creation failed');
-    }
-  }
-
-  private handleProjectError(error: any): void {
-    this.isPromoting = false;
-
-    if (error.status === 404) {
-      alert(`User not found: ${this.projectData.overseenByEmail}`);
-    } else {
-      alert('Failed to create project');
-    }
-  }
-
-  closeProjectModal(): void {
-    if (!this.isPromoting) {
-      this.showProjectModal = false;
-      this.currentIdeaToPromote = null;
-    }
-  }
 
 
   // DELETE IDEA METHOD
