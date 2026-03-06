@@ -56,8 +56,6 @@ export class GroupsComponent implements OnInit {
   groupMembers: any[] = [];
   isLoadingMembers = false;
   isDeleting: boolean = false;
-  confirmationInput: string = '';
-  isDeletedDisabled: boolean = true;
   nameCount = 0;
   descCount = 0;
   nameLimitReached = false;
@@ -173,7 +171,7 @@ export class GroupsComponent implements OnInit {
             return {
               ...group,
               id: group.id,
-              name: group.name || group.Name,
+              name: (group.name || group.Name || '').trim(),
               description: group.description || group.Description,
               isMember: group.isMember || group.IsMember || false,
               hasPendingRequest: group.hasPendingRequest || group.HasPendingRequest || false,
@@ -272,8 +270,15 @@ export class GroupsComponent implements OnInit {
     this.deleteConfirmControl.setValue('');
     this.deleteConfirmControl.setValidators([
       Validators.required,
-      (control: AbstractControl) =>
-        control.value === group.name ? null : { mismatch: true }
+
+      // Ensure group is a match regardless of whitespaces within or at the edges of input
+      (control: AbstractControl) => {
+        const normalize = (value: unknown) =>
+          String(value ?? '')
+            .toLowerCase()
+            .replace(/\s+/g, '');
+        return normalize(control.value) === normalize(group.name) ? null : { mismatch: true };
+      }
     ]);
     this.deleteConfirmControl.updateValueAndValidity();
   }
@@ -285,10 +290,6 @@ export class GroupsComponent implements OnInit {
     this.selectedGroup = null;
   }
 
-  onConfirmationInput(value: string): void {
-    this.confirmationInput = value;
-    this.isDeletedDisabled = value !== this.selectedGroup?.name;
-  }
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string): void {
@@ -453,6 +454,7 @@ export class GroupsComponent implements OnInit {
 
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
+          this.loadGroups();
           this.groups = this.groups.filter(group => group.id !== groupId);
           this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
