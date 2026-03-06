@@ -288,11 +288,11 @@
             <span class="vote-count">{{ idea.voteCount || 0 }}</span>
             }
           </app-buttons>
-          <!-- Promote button -->
-          @if (isGroupCreator() && !idea.isPromotedToProject && idea.status !== 'Closed') {
-          <app-buttons buttonStyleClass="btn-promote" (click)="$event.stopPropagation(); onPromoteIdea(idea, $event)"
-            [disabled]="isPromoting && currentlyPromotingIdeaId === idea.id" title="Promote to Project">
-            Promote
+          <!-- View voters button (left panel) -->
+          @if (isGroupCreator() && (idea.voteCount || 0) > 0) {
+          <app-buttons buttonStyleClass="btn-view-voters" (click)="$event.stopPropagation(); onViewVoters(idea, $event)"
+            [disabled]="false" title="View voters">
+            👁️ Voters
           </app-buttons>
           }
           <!-- Promoted badge -->
@@ -310,12 +310,6 @@
           }
         </div>
       </div>
-      <!-- Divider -->
-      @if (!last) {
-      <div class="card-divider">
-        <div class="divider-line"></div>
-      </div>
-      }
       }
     </div>
     }
@@ -359,6 +353,14 @@
                 <span class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
                 }
               </app-buttons>
+              <!-- View voters button prominent -->
+              @if (isGroupCreator() && (selectedIdea?.voteCount || 0) > 0) {
+              <app-buttons buttonStyleClass="btn-view-voters"
+                (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
+                title="View voters">
+                👁️ Voters
+              </app-buttons>
+              }
               <!-- For closed ideas, hide action buttons -->
               @if (!showClosedIdeas && selectedIdea.status !== 'Closed') {
               <!-- Mobile Actions Menu Button -->
@@ -367,27 +369,10 @@
               </button>
               <!-- Actions Container (Desktop: Row, Mobile: Dropdown) -->
               <div class="idea-actions-container" [class.show-mobile-menu]="showIdeaActionsMenu">
-                <!-- Edit button opens modal -->
                 @if (isUserIdeaOwner(selectedIdea)) {
                 <app-buttons buttonStyleClass="btn-edit" (click)="startEditing(); closeIdeaActionsMenu()"
                   [disabled]="false" title="Edit idea">
                   ✎ Edit
-                </app-buttons>
-                }
-                <!-- Promote button for admins -->
-                @if (isGroupCreator() && !selectedIdea.isPromotedToProject) {
-                <app-buttons buttonStyleClass="btn-promote"
-                  (click)="$event.stopPropagation(); onPromoteIdea(selectedIdea, $event); closeIdeaActionsMenu()"
-                  [disabled]="isPromoting" title="Promote to Project">
-                  🚀 Promote
-                </app-buttons>
-                }
-                <!-- View voters button for admins -->
-                @if (isGroupCreator() && selectedIdea.voteCount > 0) {
-                <app-buttons buttonStyleClass="btn-view-voters"
-                  (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event); closeIdeaActionsMenu()"
-                  [disabled]="false" title="View voters">
-                  👁️ Voters
                 </app-buttons>
                 }
                 <!-- Delete button for idea owner -->
@@ -833,57 +818,6 @@
     </div>
 
   </app-modal>
-
-  <!-- Project Creation Modal -->
-  @if (showProjectModal) {
-  <div class="project-modal-overlay" (click)="closeProjectModal()">
-    <div class="project-modal-content" (click)="$event.stopPropagation()">
-      <div class="project-modal-header">
-        <h3>Create Project from Idea</h3>
-        <button class="project-modal-close" (click)="closeProjectModal()">&times;</button>
-      </div>
-      <div class="project-modal-body">
-        <p class="project-modal-subtitle">
-          You're promoting "<strong>{{currentIdeaToPromote?.Title}}</strong>" to a project.
-        </p>
-        <div class="form-group">
-          <label>Project Title</label>
-          <input type="text" [(ngModel)]="projectData.title" class="form-control" placeholder="Enter project title"
-            [disabled]="isPromoting">
-        </div>
-        <div class="form-group">
-          <label>Project Description</label>
-          <textarea [(ngModel)]="projectData.proposedSolution" class="form-control" rows="3"
-            placeholder="Enter project description" [disabled]="isPromoting"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Project Overseer Email *</label>
-          <select [(ngModel)]="projectData.overseenByEmail" class="form-control" required
-            [disabled]="isPromoting || !groupMembers.length">
-            <option value="" disabled selected>Select project overseer</option>
-            @for (member of groupMembers; track member) {
-            <option [value]="member.email">
-              {{member.userName || 'Unnamed User'}} - {{member.email}}
-            </option>
-            }
-          </select>
-        </div>
-      </div>
-      <div modal-footer>
-        <div class="footer-buttons">
-          <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" [disabled]="isPromoting"
-            (click)="closeProjectModal()">
-          </app-buttons>
-          <app-buttons [buttonText]="isPromoting ? 'Creating Project...' : 'Create Project'"
-            [buttonStyleClass]="'btn-promote'"
-            [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
-            (click)="createProjectFromIdea()">
-          </app-buttons>
-        </div>
-      </div>
-    </div>
-  </div>
-  }
 
   <!-- Admin Leave Group Modal -->
   @if (showAdminLeaveModal) {
