@@ -16,7 +16,7 @@ export interface Project {
 
 export interface CreateProjectRequest {
   title: string;
-  proposedSolution: string;
+  description: string;
   overseenByEmail: string;
 }
 

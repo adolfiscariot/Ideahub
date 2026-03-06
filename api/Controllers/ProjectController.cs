@@ -105,6 +105,10 @@ public class ProjectController : ControllerBase
                 media.ProjectId = newProject.Id;
             }
 
+            // Mark the idea as promoted and closed now that the project exists
+            idea.IsPromotedToProject = true;
+            idea.Status = IdeaStatus.Closed;
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
