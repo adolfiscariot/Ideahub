@@ -270,8 +270,15 @@ export class GroupsComponent implements OnInit {
     this.deleteConfirmControl.setValue('');
     this.deleteConfirmControl.setValidators([
       Validators.required,
-      (control: AbstractControl) =>
-        control.value?.trim().toLowerCase() === group.name?.trim().toLowerCase() ? null : { mismatch: true }
+
+      // Ensure group is a match regardless of whitespaces within or at the edges of input
+      (control: AbstractControl) => {
+        const normalize = (value: unknown) =>
+          String(value ?? '')
+            .toLowerCase()
+            .replace(/\s+/g, '');
+        return normalize(control.value) === normalize(group.name) ? null : { mismatch: true };
+      }
     ]);
     this.deleteConfirmControl.updateValueAndValidity();
   }
