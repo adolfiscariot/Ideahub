@@ -406,7 +406,7 @@ export class IdeaScoringComponent implements OnInit {
     }
 
     if (section === 'phase4') {
-      return !this.isAccepted;
+      return this.isSectionLocked('phase3') || !this.isAccepted;
     }
 
     return false;

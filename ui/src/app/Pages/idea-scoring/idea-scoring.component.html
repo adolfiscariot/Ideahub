@@ -142,7 +142,7 @@
                         </div>
 
                         <!-- AI Reasoning Card -->
-                        <div class="ai-reasoning-card" *ngIf="idea.AiReasoning">
+                        <div class="ai-reasoning-card" *ngIf="parsedReasoning && parsedReasoning.length > 0">
                             <div class="card-header">
                                 <mat-icon>psychology</mat-icon>
                                 <h4>AI Evaluation Analysis</h4>
@@ -524,7 +524,8 @@
 
             <!-- PHASE 4: PROMOTE TO PROJECT -->
             <div class="scoring-accordion phase4-special" [class.expanded]="expandedSection === 'phase4'"
-                *ngIf="idea && isAccepted">
+                [class.locked]="isSectionLocked('phase4')"
+                [title]="isSectionLocked('phase4') ? 'Prior evaluations must pass' : ''" *ngIf="idea">
                 <div class="accordion-header" (click)="toggleSection('phase4')">
                     <div class="header-main">
                         <span class="step-number">4</span>
@@ -532,10 +533,11 @@
                             <h3><mat-icon>rocket_launch</mat-icon> Phase 4: Project Promotion</h3>
                             <p class="phase-description">Finalize project details and assign an overseer.</p>
                         </div>
+                        <span *ngIf="isSectionLocked('phase4')" class="lock-icon"><mat-icon>lock</mat-icon></span>
                     </div>
 
                     <div class="header-status" *ngIf="idea.isPromotedToProject">
-                        
+
                     </div>
 
                     <mat-icon class="expand-icon">{{ expandedSection === 'phase4' ? 'expand_more' : 'chevron_right'
