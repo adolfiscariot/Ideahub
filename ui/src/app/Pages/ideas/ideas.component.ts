@@ -75,7 +75,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     proposedSolution: ''
   };
 
-  sortMode: 'top' | 'newest' = 'top';
+  sortMode: 'top' | 'newest' | 'highest-scored' = 'top';
 
   showRequestsModal = false;
   pendingRequests: any[] = [];
@@ -562,7 +562,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.modalEditData = { ...idea };
   }
 
-  setSortMode(mode: 'top' | 'newest'): void {
+  setSortMode(mode: 'top' | 'newest' | 'highest-scored'): void {
     this.sortMode = mode;
     this.sortIdeas();
   }
@@ -575,6 +575,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
     } else if (this.sortMode === 'newest') {
       this.ideas.sort((a, b) => {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+    } else if (this.sortMode === 'highest-scored') {
+      this.ideas.sort((a, b) => {
+        const scoreA = a.Score ?? a.score ?? 0;
+        const scoreB = b.Score ?? b.score ?? 0;
+        return scoreB - scoreA;
       });
     }
   }

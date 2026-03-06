@@ -119,6 +119,14 @@
               (click)="setSortMode('newest')" [disabled]="false" title="Sort ideas by newest first">
               Newest
             </app-buttons>
+
+            <div class="sort-separator">|</div>
+
+            <!-- Sort Option: Highest Scored -->
+            <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'highest-scored' ? 'btn-sort-active' : '')"
+              (click)="setSortMode('highest-scored')" [disabled]="false" title="Sort ideas by highest verified score">
+              Top Scored
+            </app-buttons>
           </div>
         </div>
 
@@ -355,12 +363,7 @@
               @if (selectedIdea.status === 'Closed') {
               <span class="closed-badge-details">CLOSED</span>
               }
-              @if (selectedIdea.Score || selectedIdea.score) {
-              <span class="score-pill" [class.score-high]="(selectedIdea.Score || selectedIdea.score || 0) >= 70"
-                [class.score-low]="(selectedIdea.Score || selectedIdea.score || 0) < 70">
-                {{ selectedIdea.Score || selectedIdea.score }}%
-              </span>
-              }
+            
             </h3>
             <div class="details-actions-right">
               <app-buttons [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
