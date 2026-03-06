@@ -18,6 +18,8 @@ public class IdeaController : ControllerBase
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly ILogger<IdeaController> _logger;
     private readonly IdeahubDbContext _context;
+    private readonly float SCORING_THRESHOLD = 70.0f;
+
     public IdeaController(ILogger<IdeaController> logger, IdeahubDbContext context, UserManager<IdeahubUser> userManager)
     {
         _logger = logger;
@@ -268,8 +270,8 @@ public class IdeaController : ControllerBase
         //apply changes to the idea
         if (ideaUpdateDto.Score != null)
         {
-            // Reviewers can increase or decrease the score. The scoring stage should follow suitc
-            if (ideaUpdateDto.Score >= 70)
+            // Reviewers can increase or decrease the score.            // Update status based on score
+            if (ideaUpdateDto.Score.Value >= SCORING_THRESHOLD)
             {
                 idea.CurrentStage = ScoringStage.BusinessCase;
             }
@@ -361,6 +363,7 @@ public class IdeaController : ControllerBase
     //Promote an idea to a project
     [Authorize(Policy = "GroupAdminOnly")]
     [HttpPost("promote-idea")]
+    [Obsolete("Promotion is now handled atomically during Project creation (/api/Project/create-project).")]
     public async Task<IActionResult> PromoteIdea(int groupId, int ideaId)
     {
         //Fetch user info

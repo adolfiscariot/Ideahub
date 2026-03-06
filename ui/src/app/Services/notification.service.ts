@@ -15,6 +15,7 @@ export interface CommentNotification {
         commenterName: string;
         ideaTitle: string | null;
         ideaId: number;
+        groupId: number;
     };
 }
 
@@ -22,7 +23,7 @@ export interface CommentNotification {
     providedIn: 'root'
 })
 export class NotificationService {
-    private readonly baseUrl = `${environment.apiUrl}/api/notification`;
+    private readonly baseUrl = `${environment.apiUrl}/notification`;
 
     private _unreadCount = new BehaviorSubject<number>(0);
     unreadCount$ = this._unreadCount.asObservable();

@@ -1,19 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IdeasService } from '../../Services/ideas.services';
-import { Idea } from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, PromoteRequest } from '../../Interfaces/Ideas/idea-interfaces';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../Services/toast.service';
 import { ScoringService } from '../../Services/scoring.services';
-import { ActionStep, BusinessCaseDto, BusinessCaseResult, EvaluationStatus, ImpactScope, ResponsibleDepartment, RiskLevel, Verdict, StrategicAlignmentScore, CustomerImpactScore, FinancialBenefitScore, FeasibilityScore, TimeToValueScore, CostScore, EffortScore, RiskScore, ScalabilityScore, DifferentiationScore, SustainabilityScore, ConfidenceScore, ScoringDimensionsDto } from '../../Interfaces/Ideas/idea-interfaces';
+import { ActionStep, BusinessCaseDto, BusinessCaseResult, EvaluationStatus, ImpactScope, ResponsibleDepartment, RiskLevel, Verdict, StrategicAlignmentScore, CustomerImpactScore, FinancialBenefitScore, FeasibilityScore, TimeToValueScore, CostScore, EffortScore, RiskScore, ScalabilityScore, DifferentiationScore, SustainabilityScore, ConfidenceScore, ScoringDimensionsDto, ScoringStage } from '../../Interfaces/Ideas/idea-interfaces';
+import { ProjectService } from '../../Services/project.service';
+import { CommitteeMembersService } from '../../Services/committeemembers.service';
+import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
+import { AuthService } from '../../Services/auth/auth.service';
 
 @Component({
   selector: 'app-idea-scoring',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonsComponent, MatIconModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ButtonsComponent, MatIconModule, RouterModule],
   templateUrl: './idea-scoring.component.html',
   styleUrl: './idea-scoring.component.scss',
 })
@@ -24,14 +28,28 @@ export class IdeaScoringComponent implements OnInit {
   private ideasService = inject(IdeasService);
   private scoringService = inject(ScoringService);
   private toastService = inject(ToastService);
+  private projectService = inject(ProjectService);
+  private committeeService = inject(CommitteeMembersService);
+  private authService = inject(AuthService);
 
   groupId = '';
   ideaId = '';
   idea: Idea | null = null;
   isLoading = true;
+  parsedReasoning: { label: string, content: string }[] = [];
+
+  // Promotion state
+  showProjectModal = false;
+  isPromoting = false;
+  allUsers: any[] = [];
+  projectData: CreateProjectRequest = {
+    title: '',
+    description: '',
+    overseenByEmail: ''
+  };
 
   // Accordion state
-  expandedSection: 'phase1' | 'phase2' | 'phase3' | null = 'phase1';
+  expandedSection: 'phase1' | 'phase2' | 'phase3' | 'phase4' | null = 'phase1';
 
   scoringForm!: FormGroup;
 
@@ -154,6 +172,7 @@ export class IdeaScoringComponent implements OnInit {
 
     this.initForm();
     this.loadIdea();
+    this.loadAllUsers();
   }
 
   initForm(): void {
@@ -213,7 +232,6 @@ export class IdeaScoringComponent implements OnInit {
     const score = this.scoringForm.get('Phase1.Score')?.value;
     const update = { Score: score };
 
-    console.log('Syncing Phase 1 Score:', update);
     this.isLoading = true;
 
     this.ideasService.updateIdea(this.ideaId, update).subscribe({
@@ -229,8 +247,7 @@ export class IdeaScoringComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Update Phase 1 Score failed:', err);
-        this.toastService.show('Failed to sync score with backend', 'error');
+        this.toastService.show(err.error?.message || 'Error updating score', 'error');
         this.isLoading = false;
       }
     });
@@ -242,17 +259,15 @@ export class IdeaScoringComponent implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           this.idea = res.data;
-          if (this.idea) {
-            const d: any = this.idea;
-            // Pre-populate Phase 1 — backend returns camelCase, but handle both
-            const score = d.score ?? d.Score ?? 0;
-            const notes = d.notes ?? d.Notes ?? '';
-            this.scoringForm.get('Phase1.Score')?.patchValue(score);
-            this.scoringForm.get('Phase1.Notes')?.patchValue(notes);
+          const d: any = this.idea;
+          const score = d.score ?? d.Score ?? 0;
+          const reasoning = d.aiReasoning ?? d.AiReasoning ?? '';
 
-            // Fetch Phase 2 and 3 data if they exist
-            this.loadScoringData();
-          }
+          this.parsedReasoning = this.formatReasoning(reasoning);
+          this.scoringForm.get('Phase1.Score')?.patchValue(score);
+
+          this.initializeProjectData();
+          this.loadScoringData();
         }
         this.isLoading = false;
       },
@@ -300,7 +315,7 @@ export class IdeaScoringComponent implements OnInit {
 
           // Auto-expand based on idea stage
           const currentStage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
-          if (currentStage === 'BusinessCase' || currentStage === 'ScoringDimensions' || currentStage === 'Completed') {
+          if (currentStage === 'BusinessCase' || currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
             this.expandedSection = 'phase2';
           }
         }
@@ -339,7 +354,7 @@ export class IdeaScoringComponent implements OnInit {
 
           // Auto-expand if in Phase 3 or Completed
           const currentStage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
-          if (currentStage === 'ScoringDimensions' || currentStage === 'Completed') {
+          if (currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
             this.expandedSection = 'phase3';
           }
         }
@@ -347,12 +362,36 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  toggleSection(section: 'phase1' | 'phase2' | 'phase3'): void {
-    if (this.isSectionLocked(section)) return;
-    this.expandedSection = this.expandedSection === section ? null : section;
+  private initializeProjectData(): void {
+    if (!this.idea) {
+      console.warn('InitializeProjectData called with null idea');
+      return;
+    }
+
+    const ideaObj = this.idea as any;
+
+    const finalTitle = this.idea.Title || ideaObj.title || ideaObj.Title || '';
+    const finalDescription = this.idea.ProposedSolution || ideaObj.proposedSolution || ideaObj.ProposedSolution || '';
+
+    this.projectData = {
+      title: finalTitle,
+      description: finalDescription,
+      overseenByEmail: this.projectData.overseenByEmail || ''
+    };
+
+    console.log('Project data initialized:', this.projectData);
   }
 
-  isSectionLocked(section: 'phase1' | 'phase2' | 'phase3'): boolean {
+  toggleSection(section: 'phase1' | 'phase2' | 'phase3' | 'phase4'): void {
+    if (this.isSectionLocked(section)) return;
+    this.expandedSection = this.expandedSection === section ? null : section;
+
+    if (this.expandedSection === 'phase4') {
+      this.initializeProjectData();
+    }
+  }
+
+  isSectionLocked(section: 'phase1' | 'phase2' | 'phase3' | 'phase4'): boolean {
     if (section === 'phase1') return false;
 
     if (section === 'phase2') {
@@ -364,6 +403,10 @@ export class IdeaScoringComponent implements OnInit {
       if (this.isSectionLocked('phase2')) return true;
       const verdict = this.scoringForm.get('Phase2.Verdict')?.value;
       return (verdict as any) !== Verdict.Approved;
+    }
+
+    if (section === 'phase4') {
+      return this.isSectionLocked('phase3') || !this.isAccepted;
     }
 
     return false;
@@ -399,8 +442,7 @@ export class IdeaScoringComponent implements OnInit {
       }
     };
 
-    const total =
-      getMetricScore(p3.StrategicAlignment, 'StrategicAlignment') +
+    return getMetricScore(p3.StrategicAlignment, 'StrategicAlignment') +
       getMetricScore(p3.CustomerImpact, 'CustomerImpact') +
       getMetricScore(p3.FinancialBenefit, 'FinancialBenefit') +
       getMetricScore(p3.Feasibility, 'Feasibility') +
@@ -412,17 +454,12 @@ export class IdeaScoringComponent implements OnInit {
       getMetricScore(p3.Differentiation, 'Differentiation') +
       getMetricScore(p3.SustainabilityImpact, 'SustainabilityImpact') +
       getMetricScore(p3.ProjectConfidence, 'ProjectConfidence');
-
-    return total;
   }
 
   onSubmitPhase2(): void {
     const phase2Group = this.scoringForm.get('Phase2');
     if (phase2Group?.invalid) {
-      console.error('Phase 2 Form Invalid:', phase2Group.errors, phase2Group.value);
       this.toastService.show('Please complete all required Phase 2 fields', 'info');
-
-      // Mark all as touched to show validation errors
       phase2Group.markAllAsTouched();
       return;
     }
@@ -433,7 +470,6 @@ export class IdeaScoringComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.toastService.show('Business Case submitted successfully', 'success');
-          // If approved, expand Phase 3
           if (dto.Verdict === Verdict.Approved) {
             this.expandedSection = 'phase3';
           }
@@ -442,8 +478,7 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.toastService.show('Failed to submit business case', 'error');
-        console.error(err);
+        this.toastService.show(err.error?.message || 'Error submitting business case', 'error');
       }
     });
   }
@@ -451,7 +486,6 @@ export class IdeaScoringComponent implements OnInit {
   onSubmitPhase3(): void {
     const phase3Group = this.scoringForm.get('Phase3');
     if (phase3Group?.invalid) {
-      console.error('Phase 3 Form Invalid:', phase3Group.errors, phase3Group.value);
       this.toastService.show('Please complete all Scoring Dimensions', 'info');
       phase3Group.markAllAsTouched();
       return;
@@ -462,26 +496,114 @@ export class IdeaScoringComponent implements OnInit {
       Score: this.totalPhase3Score
     };
 
-    console.log('Phase 3 Submission Payload:', dto);
 
     this.scoringService.submitScoringDimensions(this.ideaId, dto).subscribe({
       next: (res) => {
-        console.log('Phase 3 Submission Response:', res);
         if (res.success) {
           this.toastService.show('Final Scoring Dimensions submitted successfully', 'success');
-          this.router.navigate([`/groups/${this.groupId}/ideas`]);
+
+          this.loadIdea();
+
+          // Auto-expand Phase 4 if accepted
+          setTimeout(() => {
+            if (this.isAccepted && !this.idea?.isPromotedToProject) {
+              this.expandedSection = 'phase4';
+              this.initializeProjectData();
+            }
+          }, 800);
         } else {
           this.toastService.show(res.message || 'Submission failed', 'error');
         }
       },
       error: (err) => {
-        console.error('Phase 3 API Error:', err);
-        this.toastService.show('Failed to submit final score', 'error');
+        this.toastService.show(err.error?.message || 'Error submitting scoring dimensions', 'error');
       }
     });
   }
 
   goBack(): void {
     this.router.navigate([`/groups/${this.groupId}/ideas`]);
+  }
+
+  formatReasoning(text: string): { label: string, content: string }[] {
+    if (!text) return [];
+
+    const sections = [
+      'Strategic alignment',
+      'Problem viability',
+      'Solution feasibility',
+      'Business impact',
+      'Overall assessment'
+    ];
+
+    const result: { label: string, content: string }[] = [];
+    const labelPattern = new RegExp(`(${sections.join('|')}):`, 'gi');
+    const parts = text.split(labelPattern);
+
+    for (let i = 1; i < parts.length; i += 2) {
+      const label = parts[i];
+      let content = parts[i + 1] || '';
+      content = content.trim().replace(/^[:\s-]+/, '').trim();
+
+      if (label && content) {
+        const normalizedLabel = label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+        result.push({ label: normalizedLabel, content });
+      }
+    }
+
+    if (result.length === 0) {
+      result.push({ label: 'Analysis', content: text });
+    }
+
+    return result;
+  }
+
+  loadAllUsers(): void {
+    this.committeeService.getAllUsers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.allUsers = res.data;
+        }
+      },
+      error: () => {
+        this.toastService.show('Failed to load user list for overseer selection', 'error');
+      }
+    });
+  }
+
+  createProjectFromIdea(): void {
+    if (!this.idea || !this.projectData.overseenByEmail || !this.projectData.title) {
+      this.toastService.show('Please complete all required fields', 'error');
+      return;
+    }
+
+    this.isPromoting = true;
+
+    this.projectService.createProject(
+      this.groupId,
+      this.ideaId,
+      this.projectData
+    ).subscribe({
+      next: (createRes) => {
+        if (createRes.success) {
+          this.toastService.show('Idea promoted to project successfully!', 'success');
+          if (this.idea) {
+            this.idea.isPromotedToProject = true;
+          }
+        } else {
+          this.toastService.show(createRes.message || 'Project creation failed', 'error');
+        }
+        this.isPromoting = false;
+      },
+      error: (err) => {
+        this.toastService.show(err.error?.message || 'Error creating project', 'error');
+        this.isPromoting = false;
+      }
+    });
+  }
+
+  get isAccepted(): boolean {
+    const stage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
+    return stage === 3 || stage === ScoringStage.Accepted || stage === 'Accepted' || (this.idea as any)?.status === 'Accepted';
   }
 }

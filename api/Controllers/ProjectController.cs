@@ -26,23 +26,18 @@ public class ProjectController : ControllerBase
     }
 
     //Create a project
-    [Authorize(Policy = "GroupAdminOnly")]
+    [Authorize(Policy = "GroupAdminOrCommitteeMember")]
     [HttpPost("create-project")]
     public async Task<IActionResult> CreateProject(int groupId, int ideaId, ProjectDto projectDto)
     {
         try
         {
-            //check if idea is promoted to project
+            //check if idea exists
             var idea = await _context.Ideas.FindAsync(ideaId);
             if (idea is null)
             {
                 _logger.LogError("Create Project: Idea with ID {ideaId} not found", ideaId);
                 return NotFound(ApiResponse.Fail("Idea not found"));
-            }
-            if (!idea.IsPromotedToProject)
-            {
-                _logger.LogError("Create Project: Idea {ideaId} hasn't been promoted to a project yet", ideaId);
-                return BadRequest(ApiResponse.Fail("Idea hasn't been promoted to a project yet"));
             }
 
             //user info
@@ -105,9 +100,12 @@ public class ProjectController : ControllerBase
                 media.ProjectId = newProject.Id;
             }
 
+            // Mark the idea as promoted and closed now that the project exists
+            idea.IsPromotedToProject = true;
+            idea.Status = IdeaStatus.Closed;
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-
 
             _logger.LogInformation("Create Project: New Project {projectTitle} created", newProject.Title);
             return Ok(ApiResponse.Ok("New project created", new { projectId = newProject.Id }));

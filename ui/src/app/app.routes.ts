@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './Guards/auth.guard';
 import { LandingGuard } from './Guards/landing.guard';
+import { CommitteeGuard } from './Guards/committee.guard';
 
 export const routes: Routes = [
   {
@@ -64,7 +65,7 @@ export const routes: Routes = [
   },
   {
     path: 'groups/:groupId/ideas/:ideaId/score',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, CommitteeGuard],
     loadComponent: () =>
       import('./Pages/idea-scoring/idea-scoring.component').then(
         (m) => m.IdeaScoringComponent

@@ -1,10 +1,14 @@
 <div class="scoring-page">
     <div class="scoring-container">
         <div class="scoring-header">
-            <app-buttons class="back-btn-wrapper" buttonText="" buttonStyleClass="btn-promote" (click)="goBack()">
-                <mat-icon>arrow_back</mat-icon> Back to Ideas
-            </app-buttons>
-            <h2>Idea Scoring & Review</h2>
+            <div class="header-left">
+                <app-buttons class="back-btn-wrapper" buttonText="" buttonStyleClass="btn-promote" (click)="goBack()">
+                    <mat-icon>arrow_back</mat-icon> Back to Ideas
+                </app-buttons>
+                <h2>Idea Scoring & Review</h2>
+            </div>
+            <div class="header-right" *ngIf="idea && idea.isPromotedToProject">
+            </div>
         </div>
 
         <div *ngIf="isLoading" class="loading-state">
@@ -106,16 +110,6 @@
                                 </div>
                             </div>
 
-                            <!-- AI Reasoning Highlight Row -->
-                            <div class="meta-row ai-insight-row" *ngIf="idea.AiReasoning || idea.AiReasoning">
-                                <div class="meta-key">
-                                    <mat-icon>psychology</mat-icon>
-                                    <label>AI Evaluation Insight</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.AiReasoning || idea.AiReasoning }}</p>
-                                </div>
-                            </div>
 
                             <div class="meta-row" *ngIf="idea.notes || idea.Notes">
                                 <div class="meta-key">
@@ -130,18 +124,35 @@
                     </div>
 
                     <div class="scoring-inputs">
-                        <div class="form-group">
+                        <div class="form-group score-input-section">
                             <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold:
                                 70%)</label>
-                            <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
-                                (input)="clampScore($event)">
+                            <div class="score-control">
+                                <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
+                                    (input)="clampScore($event)">
+                                <div class="threshold-indicator"
+                                    [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
+                                    {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Met' : '✗ Low' }}
+                                </div>
+                            </div>
                             <small class="field-error"
                                 *ngIf="scoringForm.get('Phase1.Score')?.invalid && scoringForm.get('Phase1.Score')?.touched">
                                 Score must be between 0 and 100.
                             </small>
-                            <div class="threshold-indicator" [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
-                                {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Threshold Met' : '✗ Below
-                                Threshold' }}
+                        </div>
+
+                        <!-- AI Reasoning Card -->
+                        <div class="ai-reasoning-card" *ngIf="parsedReasoning && parsedReasoning.length > 0">
+                            <div class="card-header">
+                                <mat-icon>psychology</mat-icon>
+                                <h4>AI Evaluation Analysis</h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="reasoning-item" *ngFor="let item of parsedReasoning"
+                                    [class.overall]="item.label.toLowerCase().includes('overall')">
+                                    <span class="reasoning-label">{{ item.label }}</span>
+                                    <p class="reasoning-text">{{ item.content }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -506,6 +517,99 @@
                             <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="button"
                                 (click)="onSubmitPhase3()"
                                 [disabled]="(scoringForm.get('Phase3')?.invalid) || isSectionLocked('phase3')" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 4: PROMOTE TO PROJECT -->
+            <div class="scoring-accordion phase4-special" [class.expanded]="expandedSection === 'phase4'"
+                [class.locked]="isSectionLocked('phase4')"
+                [title]="isSectionLocked('phase4') ? 'Prior evaluations must pass' : ''" *ngIf="idea">
+                <div class="accordion-header" (click)="toggleSection('phase4')">
+                    <div class="header-main">
+                        <span class="step-number">4</span>
+                        <div class="header-text">
+                            <h3><mat-icon>rocket_launch</mat-icon> Phase 4: Project Promotion</h3>
+                            <p class="phase-description">Finalize project details and assign an overseer.</p>
+                        </div>
+                        <span *ngIf="isSectionLocked('phase4')" class="lock-icon"><mat-icon>lock</mat-icon></span>
+                    </div>
+
+                    <div class="header-status" *ngIf="idea.isPromotedToProject">
+
+                    </div>
+
+                    <mat-icon class="expand-icon">{{ expandedSection === 'phase4' ? 'expand_more' : 'chevron_right'
+                        }}</mat-icon>
+                </div>
+
+                <div class="accordion-content">
+                    <div class="vertical-form promotion-form-container">
+                        <div class="promotion-info-card" *ngIf="!idea.isPromotedToProject">
+                            <mat-icon>info</mat-icon>
+                            <p>This idea has been <strong>Accepted</strong>. Promoting it will create a formal project
+                                in the tracking system.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label><mat-icon>title</mat-icon> Project Final Title</label>
+                            <div class="input-with-icon textarea-icon">
+                                <mat-icon>title</mat-icon>
+                                <textarea [(ngModel)]="projectData.title" [ngModelOptions]="{standalone: true}"
+                                    name="projectTitle" class="form-control premium" rows="2"
+                                    placeholder="Enter final project title"
+                                    [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><mat-icon>description</mat-icon> Description</label>
+                            <div class="input-with-icon textarea-icon">
+                                <mat-icon>notes</mat-icon>
+                                <textarea [(ngModel)]="projectData.description" [ngModelOptions]="{standalone: true}"
+                                    name="projectDescription" class="form-control premium" rows="4"
+                                    placeholder="Enter final project description"
+                                    [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><mat-icon>person</mat-icon> Project Overseer</label>
+                            <div class="select-with-icon">
+                                <mat-icon>person_search</mat-icon>
+                                <select [(ngModel)]="projectData.overseenByEmail" [ngModelOptions]="{standalone: true}"
+                                    name="overseerEmail" class="form-control premium" required
+                                    [disabled]="isPromoting || idea.isPromotedToProject || !allUsers.length">
+                                    <option value="" disabled selected>Select an overseer to lead this project
+                                    </option>
+                                    <option *ngFor="let user of allUsers" [value]="user.email">
+                                        {{user.displayName || user.userName || 'Unnamed User'}} ({{user.email}})
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="promotion-footer" *ngIf="!idea.isPromotedToProject">
+                            <button type="button" class="btn-primary-compact"
+                                [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
+                                (click)="createProjectFromIdea()">
+                                <mat-icon *ngIf="!isPromoting">rocket_launch</mat-icon>
+                                <span>{{ isPromoting ? 'Promoting...' : 'Promote to Project' }}</span>
+                            </button>
+                        </div>
+
+                        <div class="promotion-success-display" *ngIf="idea.isPromotedToProject">
+                            <div class="success-content">
+                                <div class="success-icon-wrapper">
+                                    <mat-icon>check_circle</mat-icon>
+                                </div>
+                                <div class="success-text">
+                                    <h4>Project Successfully Promoted</h4>
+                                    <p>The idea is now being tracked as a project. You can view its progress in the
+                                        Projects tab.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

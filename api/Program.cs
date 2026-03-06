@@ -135,6 +135,14 @@ builder.Services.AddAuthorization(options =>
             context.User.IsInRole(RoleConstants.CommitteeMember)
         )
     );
+
+    //CanCreateProject Policy
+    options.AddPolicy("GroupAdminOrCommitteeMember", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole(RoleConstants.GroupAdmin) ||
+            context.User.IsInRole(RoleConstants.CommitteeMember)
+        )
+    );
 });
 
 
@@ -203,7 +211,8 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IScoringService, ScoringService>();
 
 // LLM Scoring Service
-builder.Services.AddScoped<ILlmService, MockLlmService>();
+builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
+builder.Services.AddHttpClient<ILlmService, LlmService>();
 
 // convert enum to string
 builder.Services.AddControllers()

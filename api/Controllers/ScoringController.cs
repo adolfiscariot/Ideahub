@@ -20,6 +20,7 @@ public class ScoringController : ControllerBase
     private readonly IdeahubDbContext _context;
     private readonly IScoringService _scoringService;
     private readonly ILogger<ScoringController> _logger;
+    private readonly float SCORING_THRESHOLD = 70.0f;
 
     public ScoringController(IdeahubDbContext context, IScoringService scoringService, ILogger<ScoringController> logger)
     {
@@ -78,9 +79,9 @@ public class ScoringController : ControllerBase
             return NotFound(ApiResponse.Fail("Idea not found."));
 
         if (idea.CurrentStage != ScoringStage.BusinessCase)
-            return BadRequest(ApiResponse.Fail("Idea is not in the Business Case stage. Please ensure Phase 1 passed with 70%+."));
+            return BadRequest(ApiResponse.Fail($"Idea is not in the Business Case stage. Please ensure Phase 1 passed with {SCORING_THRESHOLD}%+."));
 
-        if (idea.Score < 70)
+        if (idea.Score < SCORING_THRESHOLD)
             return BadRequest(ApiResponse.Fail("Phase 1 score threshold not met."));
 
         var businessCase = idea.BusinessCase ?? new BusinessCase { IdeaId = idea.Id };
@@ -207,7 +208,11 @@ public class ScoringController : ControllerBase
 
         // Final score stored in Idea model
         idea.Score = (float)dimensions.Score;
-        idea.CurrentStage = ScoringStage.Completed;
+        if (idea.Score >= SCORING_THRESHOLD)
+            idea.CurrentStage = ScoringStage.Accepted;
+        else
+            idea.CurrentStage = ScoringStage.Rejected;
+
 
         try
         {

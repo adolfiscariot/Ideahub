@@ -45,6 +45,7 @@ export interface Idea {
   technologyInvolved?: string;
   notes?: string;
   score?: number;
+  aiReasoning?: string;
 }
 
 export interface CreateIdeaRequest {
@@ -186,7 +187,8 @@ export enum ScoringStage {
   Evaluation = 'Evaluation',
   BusinessCase = 'BusinessCase',
   ScoringDimensions = 'ScoringDimensions',
-  Completed = 'Completed'
+  Accepted = 'Accepted',
+  Rejected = 'Rejected'
 }
 
 // Phase 3 Scoring Enums

@@ -25,6 +25,7 @@ import { MediaType } from '../../Interfaces/Media/media-interface';
 import { MediaService } from '../../Services/media.service';
 import { firstValueFrom } from 'rxjs';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { CommitteeMembersService } from '../../Services/committeemembers.service';
 
 @Component({
   selector: 'app-ideas',
@@ -60,9 +61,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isGroupCreatorFromState: boolean | undefined = undefined; // set from route state
   groupCreatorIdFromState = ''; // set from route state
 
-  isPromoting = false;
-  currentlyPromotingIdeaId: string | null = null;
-
   groupMembers: any[] = [];
 
   isEditMode = false;
@@ -74,7 +72,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     proposedSolution: ''
   };
 
-  sortMode: 'top' | 'newest' = 'top';
+  sortMode: 'top' | 'newest' | 'highest-scored' = 'top';
 
   showRequestsModal = false;
   pendingRequests: any[] = [];
@@ -82,14 +80,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   errorRequests = '';
   newOwnerEmail!: string;
 
-  showProjectModal = false;
-  currentIdeaToPromote: Idea | null = null;
-  projectData: CreateProjectRequest = {
-    title: '',
-    proposedSolution: '',
-    //problemStatement:'',
-    overseenByEmail: ''
-  };
   showMemberLeaveModal = false;
   titleLength = 0;
   descLength = 0;
@@ -99,10 +89,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
   shareProblemCount = 0;
   shareUseCaseCount = 0;
   shareNotesCount = 0;
+  isCommitteeMember = false;
 
   shareIdeaForm!: FormGroup;
 
   private routeSub: Subscription = new Subscription();
+  private queryParamsSub: Subscription = new Subscription();
 
   showDeleteIdeaModal = false;
   ideaIdToDelete: string | null = null;
@@ -140,6 +132,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
   showMobileMenu: boolean = false;
   showIdeaActionsMenu: boolean = false;
 
+  targetIdeaId: string | null = null;
+  targetCommentId: number | null = null;
+  highlightedCommentId: number | null = null;
+
   toggleMobileMenu() {
     this.showMobileMenu = !this.showMobileMenu;
   }
@@ -164,9 +160,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private voteService = inject(VoteService);
   private toastService = inject(ToastService);
   private dialog = inject(MatDialog);
-  private projectService = inject(ProjectService);
   private commentService = inject(CommentsService);
   private mediaService = inject(MediaService);
+  private committeeService = inject(CommitteeMembersService);
   private fb = inject(FormBuilder);
 
   ngOnInit(): void {
@@ -174,7 +170,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     // Get current user ID from auth service
     this.currentUserId = this.authService.getCurrentUserId();
-    // console.log('Current User ID:', this.currentUserId);
+    this.checkCommitteeMembership();
 
     this.shareIdeaForm = this.fb.group({
       Title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]],
@@ -189,6 +185,14 @@ export class IdeasComponent implements OnInit, OnDestroy {
     });
 
     this.setupShareIdeaCharCounters();
+    // Subscribe to query params for notification deep-linking
+    this.queryParamsSub = this.route.queryParams.subscribe(params => {
+      if (params['ideaId']) {
+        this.targetIdeaId = params['ideaId'];
+        this.targetCommentId = params['commentId'] ? Number(params['commentId']) : null;
+      }
+    });
+
     // Check browser history state FIRST (in case of page refresh)
     // console.log('Browser history state:', history.state);
 
@@ -252,6 +256,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routeSub.unsubscribe();
+    this.queryParamsSub.unsubscribe();
   }
 
   private destroy$ = new Subject<void>();
@@ -367,7 +372,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -447,7 +453,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
                 userVoteId: undefined,
                 groupName: idea.name || '',
                 name: idea.name || '',
-                mediaCount: 0
+                mediaCount: 0,
+                Score: idea.Score ?? idea.score
               };
               return mappedIdea;
             });
@@ -541,7 +548,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.modalEditData = { ...idea };
   }
 
-  setSortMode(mode: 'top' | 'newest'): void {
+  setSortMode(mode: 'top' | 'newest' | 'highest-scored'): void {
     this.sortMode = mode;
     this.sortIdeas();
   }
@@ -555,6 +562,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.ideas.sort((a, b) => {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
+    } else if (this.sortMode === 'highest-scored') {
+      this.ideas.sort((a, b) => (b.Score || b.score || 0) - (a.Score || a.score || 0));
     }
   }
 
@@ -573,6 +582,25 @@ export class IdeasComponent implements OnInit, OnDestroy {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
 
+          // HIGHLIGHT COMMENT from notification
+          if (this.targetCommentId) {
+            this.highlightedCommentId = this.targetCommentId;
+
+            // Wait for DOM
+            setTimeout(() => {
+              const element = document.getElementById(`comment-${this.targetCommentId}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+
+              // Clear highlight and targets after 3 seconds
+              setTimeout(() => {
+                this.highlightedCommentId = null;
+                this.targetCommentId = null;
+                this.targetIdeaId = null;
+              }, 3000);
+            }, 500);
+          }
 
         } else {
           this.comments = [];
@@ -589,7 +617,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
   async addComment(): Promise<void> {
     const content = this.newCommentContent?.trim();
     if (!content) {
-      return this.toastService.show('To post a comment, you are required to provide one', 'info');
+      this.toastService.show('To post a comment, you are required to provide one', 'info');
+      return;
     }
 
     this.isPostingComment = true;
@@ -1090,7 +1119,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
               userVoteId: undefined,
               groupName: idea.name || '',
               name: idea.name || '',
-              mediaCount: 0
+              mediaCount: 0,
+              Score: idea.Score ?? idea.score,
+              score: idea.Score ?? idea.score
             };
             return mappedIdea;
           });
@@ -1146,6 +1177,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
               this.selectedIdea = updatedSelectedIdea;
             } else {
               this.selectedIdea = null;
+            }
+          }
+
+          if (this.targetIdeaId && !this.selectedIdea) {
+            const ideaToSelect = this.ideas.find(i => i.id === this.targetIdeaId);
+            if (ideaToSelect) {
+              this.selectIdea(ideaToSelect);
             }
           }
 
@@ -1302,6 +1340,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.ideaUploadStatus = 'Creating idea...';
 
+    // Show a persistent loading toast since AI scoring takes time
+    const loadingToastId = this.toastService.show(
+      'Submitting idea and performing AI evaluation...',
+      'info',
+      0 // 0 means it won't auto-close
+    );
+
     // Build request using only actual fields
     const request: CreateIdeaRequest = {
       Title: this.shareIdeaForm.value.Title,
@@ -1342,12 +1387,16 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
         await Promise.all(uploadPromises);
 
+        // Remove the loading toast before showing success
+        this.toastService.remove(loadingToastId);
         this.toastService.show(
-          `Idea created with ${this.selectedIdeaFiles.length} media file(s)`,
+          `Idea created with ${this.selectedIdeaFiles.length} media file(s) and evaluated successfully!`,
           'success'
         );
       } else {
-        this.toastService.show('Idea created successfully!', 'success');
+        // Remove the loading toast before showing success
+        this.toastService.remove(loadingToastId);
+        this.toastService.show('Idea created and evaluated successfully!', 'success');
       }
 
       // Reset modal and state
@@ -1358,6 +1407,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     } catch (error: any) {
       console.error('Error creating idea:', error);
+      // Remove the loading toast on error too
+      this.toastService.remove(loadingToastId);
       this.ideaUploadStatus = 'Failed to create idea. Please try again.';
       this.toastService.show(this.ideaUploadStatus, 'error');
     } finally {
@@ -1735,117 +1786,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   }
 
-  //Promote Idea to project and create project
-  onPromoteIdea(idea: Idea, event?: Event): void {
-    event?.stopPropagation();
-
-    if (idea.isPromotedToProject) {
-      alert('Already promoted!');
-      return;
-    }
-
-    this.currentIdeaToPromote = idea;
-    this.projectData = {
-      title: idea.Title,
-      proposedSolution: idea.ProposedSolution || '',
-      //problemStatement: idea.ProblemStatement || '',
-      overseenByEmail: ''
-    };
-    this.showProjectModal = true;
-  }
-
-  createProjectFromIdea(): void {
-    if (!this.currentIdeaToPromote || !this.groupId) return;
-    if (!this.projectData.overseenByEmail) {
-      alert('Enter overseer email');
-      return;
-    }
-
-    this.isPromoting = true;
-    const idea = this.currentIdeaToPromote;
-
-    this.ideasService.promoteIdea({
-      ideaId: idea.id,
-      groupId: this.groupId
-    }).subscribe({
-      next: (promoteRes) => {
-        if (promoteRes.success) {
-          this.projectService.createProject(
-            this.groupId,
-            idea.id,
-            this.projectData
-          ).subscribe({
-            next: (projectRes) => {
-              if (projectRes.success && projectRes.data?.projectId) {
-                const projectId = projectRes.data?.projectId;
-                this.handleSuccess(idea, projectRes);
-              }
-              else {
-                this.handleProjectError('Failed to promote idea');
-              }
-            },
-
-            error: (err) => this.handleProjectError(err)
-          });
-        } else {
-          this.isPromoting = false;
-          this.toastService.show('Promotion failed', 'error');
-        }
-      },
-      error: (err) => {
-        this.isPromoting = false;
-        this.toastService.show('Error promoting', 'error');
-      }
-    });
-  }
 
   navigateToScoring(idea: Idea): void {
     if (!idea || !this.groupId) return;
     this.router.navigate([`/groups/${this.groupId}/ideas/${idea.id}/score`]);
   }
 
-  private handleSuccess(idea: Idea, response: any): void {
-    this.isPromoting = false;
-    this.showProjectModal = false;
-
-    if (response.success) {
-      idea.isPromotedToProject = true;
-      idea.projectId = response.projectId;
-      idea.status = 'Promoted';
-
-      if (this.selectedIdea?.id === idea.id) {
-        this.selectedIdea.isPromotedToProject = true;
-        this.selectedIdea.status = 'Promoted';
-      }
-
-      this.ideas = [...this.ideas];
-      this.toastService.show('Project created', 'success');
-      this.selectedIdea = false;
-      this.loadIdeas();
-
-      this.currentIdeaToPromote = null;
-      this.projectData = { title: '', proposedSolution: '', overseenByEmail: '' };
-    } else {
-      alert('Project creation failed');
-    }
-  }
-
-  private handleProjectError(error: any): void {
-    this.isPromoting = false;
-
-    if (error.status === 404) {
-      alert(`User not found: ${this.projectData.overseenByEmail}`);
-    } else {
-      alert('Failed to create project');
-    }
-  }
-
-  closeProjectModal(): void {
-    if (!this.isPromoting) {
-      this.showProjectModal = false;
-      this.currentIdeaToPromote = null;
-    }
-  }
 
 
   // DELETE IDEA METHOD
@@ -1915,5 +1861,23 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show('Failed to transfer ownership', 'error');
         }
       });
+  }
+
+  checkCommitteeMembership(): void {
+    const userEmail = this.authService.getEmail();
+    if (!userEmail) return;
+
+    this.committeeService.getCommitteeMembers().subscribe({
+      next: (response: any) => {
+        if (response.success && Array.isArray(response.data)) {
+          this.isCommitteeMember = response.data.some((member: any) =>
+            member.email?.toLowerCase() === userEmail.toLowerCase()
+          );
+        }
+      },
+      error: () => {
+        this.isCommitteeMember = false;
+      }
+    });
   }
 }

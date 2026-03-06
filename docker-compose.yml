@@ -3,11 +3,11 @@ services:
     image: postgres:15
     container_name: ideahub-db
     environment:
-      POSTGRES_USER: ideahub_user
-      POSTGRES_PASSWORD: ideahub_admin
-      POSTGRES_DB: ideahub_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:5432"
+      - "${LOCAL_DB_PORT}:${DB_PORT}"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
@@ -36,6 +36,7 @@ services:
       JWT__KEY: ${JWT_KEY}
       JWT__ISSUER: ${DOMAIN_URL}
       JWT__AUDIENCE: ${DOMAIN_URL}
+      GEMINISETTINGS__APIKEY: ${GEMINI_API_KEY}
       CONNECTIONSTRINGS__IDEAHUBSTRING: "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
 
     ports:
