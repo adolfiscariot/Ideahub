@@ -32,17 +32,12 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            //check if idea is promoted to project
+            //check if idea exists
             var idea = await _context.Ideas.FindAsync(ideaId);
             if (idea is null)
             {
                 _logger.LogError("Create Project: Idea with ID {ideaId} not found", ideaId);
                 return NotFound(ApiResponse.Fail("Idea not found"));
-            }
-            if (!idea.IsPromotedToProject)
-            {
-                _logger.LogError("Create Project: Idea {ideaId} hasn't been promoted to a project yet", ideaId);
-                return BadRequest(ApiResponse.Fail("Idea hasn't been promoted to a project yet"));
             }
 
             //user info
