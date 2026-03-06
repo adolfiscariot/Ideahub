@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${LOCAL_DB_PORT}:${DB_PORT}"
+      - "5433:5432"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
