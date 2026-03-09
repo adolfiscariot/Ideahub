@@ -55,10 +55,10 @@ export class MediaComponent implements OnInit {
   }
 
   getMediaUrl(filePath: string): string {
-    // Remove 'media/' prefix 
-    const cleanFileName = filePath.replace(/^media\//, '');
-    return `${environment.apiUrl}/uploads/${cleanFileName}`;
-  }
+  const cleanFileName = filePath.replace(/^media\//, '');
+  const baseUrl = environment.apiUrl.replace(/\/api$/, ''); 
+  return `${baseUrl}/uploads/${cleanFileName}`;
+}
 
   getFileExtension(filePath: string): string {
     return filePath.split('.').pop()?.toUpperCase() || 'FILE';
