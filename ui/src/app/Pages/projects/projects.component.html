@@ -82,7 +82,9 @@
                                     (click)="$event.stopPropagation()">
                                     <div class="popup-header">Attached Media</div>
                                     <div class="popup-body">
-                                        <app-media [projectId]="project.id" [compactMode]="true"></app-media>
+                                        <app-media *ngIf="project.media?.length" [projectId]="project.id"
+                                            [compactMode]="true"></app-media>
+                                        <div *ngIf="!project.media?.length" class="empty-media">No attached files</div>
                                     </div>
                                 </div>
                             </div>
