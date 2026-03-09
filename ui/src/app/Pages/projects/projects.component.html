@@ -81,12 +81,8 @@
                                 <div class="media-popup" *ngIf="activeMediaProjectId === project.id"
                                     (click)="$event.stopPropagation()">
                                     <div class="popup-header">Attached Media</div>
-                                    <div class="popup-content">
-                                        <div *ngFor="let m of project.media" class="media-item" (click)="openMedia(m)">
-                                            <mat-icon class="media-download-icon">file_download</mat-icon>
-                                            <span class="media-name">{{ getDisplayMediaName(m.filePath) }}</span>
-                                        </div>
-                                        <div *ngIf="!project.media?.length" class="empty-media">No files attached</div>
+                                    <div class="popup-body">
+                                        <app-media [projectId]="project.id" [compactMode]="true"></app-media>
                                     </div>
                                 </div>
                             </div>
