@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
@@ -43,6 +43,7 @@ export class ProjectsComponent implements OnInit {
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
     currentUserId: string = '';
     selectedProject: Project | null = null;
     isEditModalOpen = false;
@@ -260,6 +261,11 @@ export class ProjectsComponent implements OnInit {
                 this.toastService.show(err.message || 'Failed to delete project', 'error');
             }
         });
+    }
+
+    navigateToTasks(projectId: number): void {
+        this.router.navigate(['/projects', projectId, 'tasks']);
+        this.activeActionMenuId = null;
     }
 
     closeModals() {

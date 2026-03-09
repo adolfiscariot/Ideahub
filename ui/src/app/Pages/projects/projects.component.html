@@ -96,6 +96,9 @@
                                 </button>
                                 <div class="action-dropdown" *ngIf="activeActionMenuId === project.id"
                                     (click)="$event.stopPropagation()">
+                                    <button (click)="navigateToTasks(project.id)">
+                                        <mat-icon class="action-icon">add_task</mat-icon> Create Task
+                                    </button>
                                     <button (click)="openEditModal(project); activeActionMenuId = null">
                                         <mat-icon class="action-icon">edit</mat-icon> Edit
                                     </button>
