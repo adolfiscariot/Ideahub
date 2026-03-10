@@ -29,6 +29,12 @@ public class Media
     [ForeignKey("Comment")]
     public int? CommentId { get; set; }
 
+    [ForeignKey("ProjectTask")]
+    public int? ProjectTaskId { get; set; }
+
+    [ForeignKey("SubTask")]
+    public int? SubTaskId { get; set; }
+
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -38,6 +44,8 @@ public class Media
     public IdeahubUser User { get; set; } = null!;
     public Project? Project { get; set; }
     public Comment? Comment { get; set; }
+    public ProjectTask? ProjectTask { get; set; }
+    public SubTask? SubTask { get; set; }
 }
 
 public enum MediaType

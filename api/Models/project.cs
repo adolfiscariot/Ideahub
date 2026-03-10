@@ -56,6 +56,7 @@ public class Project
     public IdeahubUser CreatedByUser {get; set;} = null!;
     public IdeahubUser OverseenByUser {get; set;} = null!;
     public ICollection<Media> Media { get; set; } = new List<Media>();
+    public ICollection<ProjectTask> Tasks { get; set; } = new List<ProjectTask>();
 
 }
 
