@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
@@ -84,10 +84,6 @@ export class ProjectsComponent implements OnInit {
             });
         });
 
-        window.addEventListener('click', () => {
-            this.activeActionMenuId = null;
-            this.activeMediaProjectId = null;
-        });
     }
 
 
@@ -113,6 +109,13 @@ export class ProjectsComponent implements OnInit {
         this.activeMediaProjectId = this.activeMediaProjectId === projectId ? null : projectId;
         this.activeActionMenuId = null;
     }
+
+    @HostListener('document:click')
+    closeMenus(): void {
+        this.activeActionMenuId = null;
+        this.activeMediaProjectId = null;
+    }
+
 
     canEdit(project: Project): boolean {
         // Strict check: Only overseer can edit
