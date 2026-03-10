@@ -21,6 +21,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<BusinessCase> BusinessCases { get; set; }
     public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
+    public DbSet<ProjectTask> ProjectTasks { get; set; }
+    public DbSet<SubTask> SubTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -726,8 +728,82 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             m.HasIndex(m => m.UserId);
             m.HasIndex(m => m.ProjectId);
             m.HasIndex(m => m.CommentId);
+            m.HasIndex(m => m.ProjectTaskId);
+            m.HasIndex(m => m.SubTaskId);
             m.HasIndex(m => m.MediaType);
 
+        });
+
+        // ProjectTask Configuration
+        builder.Entity<ProjectTask>(pt =>
+        {
+            pt.HasKey(pt => pt.Id);
+
+            pt.Property(pt => pt.Title)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            pt.Property(pt => pt.Description)
+                .HasColumnType("text");
+
+            pt.Property(pt => pt.AssigneeIds)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
+                .HasColumnType("text");
+
+            pt.Property(pt => pt.Labels)
+                .HasMaxLength(512);
+
+            pt.Property(pt => pt.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            pt.Property(pt => pt.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            // Relationships
+            pt.HasOne(pt => pt.Project)
+                .WithMany(p => p.Tasks)
+                .HasForeignKey(pt => pt.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            pt.HasMany(pt => pt.SubTasks)
+                .WithOne(st => st.ProjectTask)
+                .HasForeignKey(st => st.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            pt.HasMany(pt => pt.Media)
+                .WithOne(m => m.ProjectTask)
+                .HasForeignKey(m => m.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // SubTask Configuration
+        builder.Entity<SubTask>(st =>
+        {
+            st.HasKey(st => st.Id);
+
+            st.Property(st => st.Title)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            st.Property(st => st.Description)
+                .HasColumnType("text");
+
+            st.Property(st => st.AssigneeIds)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
+                .HasColumnType("text");
+
+            st.HasMany(st => st.Media)
+                .WithOne(m => m.SubTask)
+                .HasForeignKey(m => m.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
     }
