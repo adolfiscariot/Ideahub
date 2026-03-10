@@ -11,6 +11,7 @@ import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { TaskService } from '../../Services/task.service';
 import { firstValueFrom } from 'rxjs';
 
 type EditProjectForm = {
@@ -40,6 +41,7 @@ export class ProjectsComponent implements OnInit {
 
     private projectsService = inject(ProjectsService);
     private mediaService = inject(MediaService);
+    private taskService = inject(TaskService);
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);

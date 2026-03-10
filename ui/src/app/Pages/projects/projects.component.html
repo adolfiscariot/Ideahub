@@ -7,73 +7,93 @@
             </div>
         </header>
 
-        <div class="card projects-card">
-            <div class="table-responsive" [class.reloading]="isReloading">
-                <table class="projects-table">
-                    <thead>
-                        <tr>
-                            <th class="col-title">Title</th>
-                            <th class="col-desc">Description</th>
-                            <th class="col-overseer">Overseen By</th>
-                            <th class="col-status">Status</th>
-                            <th class="col-date">Created At</th>
-                            <th class="col-date">Ended At</th>
-                            <th class="col-media">Media</th>
-                            <th class="col-actions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let project of projects; trackBy: trackByProjectId" (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
-                            [class.clickable-row]="canEdit(project)" [class.readonly-row]="!canEdit(project)">
-                            <td class="cell-title">
-                                <div class="title-wrapper">
-                                    <span class="project-title-text">{{ project.title }}</span>
-                                    <div class="metadata-badges">
-                                        <span class="meta-badge" *ngIf="project.groupName">
-                                            <i class="fas fa-users"></i> {{ project.groupName }}
-                                        </span>
-                                        <span class="meta-badge" *ngIf="project.ideaTitle">
-                                            <i class="fas fa-lightbulb"></i> Idea: {{ project.ideaTitle }}
-                                        </span>
+    <div class="card projects-card">
+        <div class="table-responsive" [class.reloading]="isReloading">
+            <table class="projects-table">
+                <thead>
+                    <tr>
+                        <th class="col-project">Project</th>
+                        <th class="col-overseer">Overseen By</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-timeline">Timeline</th>
+                        <th class="col-progress">Progress</th>
+                        <th class="col-media">Media</th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let project of projects; trackBy: trackByProjectId"
+                        (click)="navigateToTasks(project.id)"
+                        [class.clickable-row]="true">
+                        <td class="cell-project">
+                            <div class="project-info">
+                                <span class="project-title-text">{{ project.title }}</span>
+                                <span class="project-desc-subtext">{{ project.description }}</span>
+                                <div class="metadata-badges">
+                                    <span class="meta-badge" *ngIf="project.groupName">
+                                        <mat-icon class="meta-icon">groups</mat-icon> {{ project.groupName }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="cell-overseer">
+                            <div class="user-info">
+                                <div class="avatar-circle">{{ project.overseenBy.charAt(0) }}</div>
+                                <span>{{ project.overseenBy }}</span>
+                            </div>
+                        </td>
+                        <td class="cell-status">
+                            <span class="badge" [ngClass]="getStatusClass(project.status)">
+                                {{ getStatusLabel(project.status) }}
+                            </span>
+                        </td>
+                        <td class="cell-timeline">
+                            <div class="timeline-wrapper">
+                                <ng-container *ngIf="project.status !== ProjectStatus.Planning; else unstarted">
+                                    <span class="date-main">{{ project.createdAt | date:'mediumDate' }}</span>
+                                    <span class="date-arrow"
+                                        *ngIf="project.endedAt || project.status !== ProjectStatus.Cancelled">→</span>
+                                    <span class="date-sub" *ngIf="project.endedAt">{{ project.endedAt |
+                                        date:'mediumDate'
+                                        }}</span>
+                                    <span class="date-sub ongoing"
+                                        *ngIf="!project.endedAt && project.status === ProjectStatus.Active">Ongoing</span>
+                                </ng-container>
+                                <ng-template #unstarted>
+                                    <span class="date-sub not-started">Not Started</span>
+                                </ng-template>
+                            </div>
+                        </td>
+                        <td class="cell-progress">
+                            <div class="progress-container">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" [style.width.%]="calculateProgress(project.status)"
+                                        [ngClass]="getStatusClass(project.status)"></div>
+                                </div>
+                                <span class="progress-percentage">{{ calculateProgress(project.status) }}%</span>
+                            </div>
+                        </td>
+                        <td class="cell-media">
+                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, project.id)">
+                                <mat-icon class="media-file-icon">description</mat-icon>
+                                <span class="media-count">{{ project.media?.length || 0 }}</span>
+
+                                <!-- Media Popup -->
+                                <div class="media-popup" *ngIf="activeMediaProjectId === project.id"
+                                    (click)="$event.stopPropagation()">
+                                    <div class="popup-header">Attached Media</div>
+                                    <div class="popup-body">
+                                        <app-media *ngIf="project.media?.length" [projectId]="project.id"
+                                            [compactMode]="true"></app-media>
+                                        <div *ngIf="!project.media?.length" class="empty-media">No attached files</div>
                                     </div>
                                 </div>
-                            </td>
-                            <td class="cell-desc">
-                                <span class="desc-text" [title]="project.description">{{ project.description }}</span>
-                            </td>
-                            <td class="cell-overseer">
-                                <div class="user-info">
-                                    <div class="avatar-circle">{{ project.overseenBy.charAt(0) }}</div>
-                                    <span>{{ project.overseenBy }}</span>
-                                </div>
-                            </td>
-                            <td class="cell-status">
-                                <span class="badge" [ngClass]="getStatusClass(project.status)">
-                                    {{ getStatusLabel(project.status) }}
-                                </span>
-                            </td>
-                            <td class="cell-date">
-                                {{ project.createdAt | date:'mediumDate' }}
-                            </td>
-                            <td class="cell-date">
-                                <span *ngIf="project.endedAt">{{ project.endedAt | date:'mediumDate' }}</span>
-                                <span *ngIf="!project.endedAt" class="text-muted">-</span>
-                            </td>
-
-                            <td class="cell-media">
-                                <div class="media-vertical">
-                                    <app-media 
-                                    [media]="project.media"
-                                    [projectId]="project.id" 
-                                    [title]="'Project Media'" 
-                                    [compactMode]="true">
-                                    </app-media>
-                                </div>
-                            </td>
-                            <td class="cell-actions">
-                                <button *ngIf="canEdit(project)" class="btn-icon" title="Edit Project"
-                                    (click)="openEditModal(project); $event.stopPropagation()">
-                                    <i class="fas fa-edit"></i>
+                            </div>
+                        </td>
+                        <td class="cell-actions">
+                            <div class="action-menu-container" *ngIf="canEdit(project)">
+                                <button class="btn-icon dots-btn" (click)="toggleActionMenu($event, project.id)">
+                                    <mat-icon>more_vert</mat-icon>
                                 </button>
                                 <button class="btn-icon" title="View Details" (click)="$event.stopPropagation()">
                                     <i class="fas fa-eye"></i>
