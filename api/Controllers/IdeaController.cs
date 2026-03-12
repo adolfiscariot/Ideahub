@@ -163,21 +163,36 @@ public class IdeaController : ControllerBase
 
             // 1. Notify Group Members
             _logger.LogInformation("Processing notifications for {count} Group Members...", groupMembers.Count);
-            foreach (var recipient in groupMembers)
+            var groupTasks = groupMembers.Select(async recipient =>
             {
-                await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
-                sentEmails.Add(recipient.Email);
-                _logger.LogInformation("Notification sent to Group Member: {email}", recipient.Email);
-            }
+                try
+                {
+                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
+                    _logger.LogInformation("Notification sent to Group Member: {email}", recipient.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send notification to Group Member: {email}", recipient.Email);
+                }
+            }).ToList();
 
-            // 2. Notify Committee Members (who haven't already received it)
+            await Task.WhenAll(groupTasks);
             var committeeToNotify = committeeMembers.Where(cm => !sentEmails.Contains(cm.Email)).ToList();
             _logger.LogInformation("Processing notifications for {count} Committee Members...", committeeToNotify.Count);
-            foreach (var recipient in committeeToNotify)
+            var committeeTasks = committeeToNotify.Select(async recipient =>
             {
-                await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
-                _logger.LogInformation("Notification sent to Committee Member: {email}", recipient.Email);
-            }
+                try
+                {
+                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
+                    _logger.LogInformation("Notification sent to Committee Member: {email}", recipient.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send notification to Committee Member: {email}", recipient.Email);
+                }
+            }).ToList();
+
+            await Task.WhenAll(committeeTasks);
             
             _logger.LogInformation("Finished sending notifications for idea {ideaId}. Total sent: {count}", idea.Id, groupMembers.Count + committeeToNotify.Count);
         }
@@ -205,8 +220,8 @@ public class IdeaController : ControllerBase
               
               <div style=""background: #f1f5f9; border-radius: 8px; padding: 20px; margin: 25px 0;"">
                 <h3 style=""margin-top: 0; color: #4f46e5; font-size: 18px;"">{idea.Title}</h3>
-                <p style=""font-size: 14px; margin-bottom: 10px;""><strong>Problem:</strong> {(idea.ProblemStatement.Length > 150 ? idea.ProblemStatement.Substring(0, 150) + "..." : idea.ProblemStatement)}</p>
-                <p style=""font-size: 14px; margin: 0;""><strong>Solution:</strong> {(idea.ProposedSolution.Length > 150 ? idea.ProposedSolution.Substring(0, 150) + "..." : idea.ProposedSolution)}</p>
+                <p style=""font-size: 14px; margin-bottom: 10px;""><strong>Problem:</strong> {(idea.ProblemStatement?.Length > 150 ? idea.ProblemStatement.Substring(0, 150) + "..." : idea.ProblemStatement ?? "N/A")}</p>
+                <p style=""font-size: 14px; margin: 0;""><strong>Solution:</strong> {(idea.ProposedSolution?.Length > 150 ? idea.ProposedSolution.Substring(0, 150) + "..." : idea.ProposedSolution ?? "N/A")}</p>
               </div>
 
               <div style=""text-align: center; margin-top: 30px;"">
