@@ -69,6 +69,7 @@ export class ProjectsComponent implements OnInit {
     isDeleteModalOpen = false;
     projectToDelete: Project | null = null;
     deleteConfirmName = '';
+    isDeletingProject = false;
 
     private toastService = inject(ToastService);
 
@@ -245,6 +246,7 @@ export class ProjectsComponent implements OnInit {
         this.isDeleteModalOpen = false;
         this.projectToDelete = null;
         this.deleteConfirmName = '';
+        this.isDeletingProject = false;
     }
 
     get isDeleteNameMatch(): boolean {
@@ -252,15 +254,18 @@ export class ProjectsComponent implements OnInit {
     }
 
     confirmDelete(): void {
-        if (!this.projectToDelete || !this.isDeleteNameMatch) return;
+        if (!this.projectToDelete || !this.isDeleteNameMatch || this.isDeletingProject) return;
 
+        this.isDeletingProject = true;
         this.projectsService.deleteProject(this.projectToDelete.id).subscribe({
             next: () => {
                 this.toastService.show('Project deleted successfully', 'success');
+                this.isDeletingProject = false;
                 this.closeDeleteModal();
                 this.loadProjects().subscribe();
             },
             error: (err) => {
+                this.isDeletingProject = false;
                 this.toastService.show(err.message || 'Failed to delete project', 'error');
             }
         });

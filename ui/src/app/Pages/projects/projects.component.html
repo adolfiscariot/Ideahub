@@ -185,8 +185,9 @@
             <div class="modal-actions">
                 <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
                     (click)="closeDeleteModal()"></app-buttons>
-                <button class="btn-confirm-delete" [disabled]="!isDeleteNameMatch" (click)="confirmDelete()">
-                    Permanently Delete Project
+                <button class="btn-confirm-delete" [disabled]="!isDeleteNameMatch || isDeletingProject"
+                    (click)="confirmDelete()">
+                    {{ isDeletingProject ? 'Deleting...' : 'Permanently Delete Project' }}
                 </button>
             </div>
         </div>
