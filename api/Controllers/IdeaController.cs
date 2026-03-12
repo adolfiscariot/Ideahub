@@ -129,7 +129,7 @@ public class IdeaController : ControllerBase
             // 1. Get Group Members (excluding author)
             var groupMembers = await scopedContext.UserGroups
                 .Where(ug => ug.GroupId == idea.GroupId && ug.UserId != idea.UserId)
-                .Select(ug => new { ug.User.Email, Name = ug.User.DisplayName ?? ug.User.UserName })
+                .Select(ug => new { Email = ug.User!.Email, Name = ug.User.DisplayName ?? ug.User.UserName })
                 .Where(u => !string.IsNullOrEmpty(u.Email))
                 .ToListAsync();
 
@@ -137,7 +137,7 @@ public class IdeaController : ControllerBase
             var committeeUsers = await scopedUserManager.GetUsersInRoleAsync(Constants.RoleConstants.CommitteeMember);
             var committeeMembers = committeeUsers
                 .Where(u => u.Id != idea.UserId)
-                .Select(u => new { u.Email, Name = u.DisplayName ?? u.UserName })
+                .Select(u => new { Email = u.Email!, Name = u.DisplayName ?? u.UserName })
                 .Where(u => !string.IsNullOrEmpty(u.Email))
                 .ToList();
 
@@ -167,7 +167,7 @@ public class IdeaController : ControllerBase
             {
                 try
                 {
-                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
+                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email!, recipient.Name!, subject, groupName, idea);
                     _logger.LogInformation("Notification sent to Group Member: {email}", recipient.Email);
                 }
                 catch (Exception ex)
@@ -177,13 +177,13 @@ public class IdeaController : ControllerBase
             }).ToList();
 
             await Task.WhenAll(groupTasks);
-            var committeeToNotify = committeeMembers.Where(cm => !sentEmails.Contains(cm.Email)).ToList();
+            var committeeToNotify = committeeMembers.Where(cm => !sentEmails.Contains(cm.Email!)).ToList();
             _logger.LogInformation("Processing notifications for {count} Committee Members...", committeeToNotify.Count);
             var committeeTasks = committeeToNotify.Select(async recipient =>
             {
                 try
                 {
-                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email, recipient.Name, subject, groupName, idea);
+                    await SendPersonalizedEmailAsync(scopedEmailSender, recipient.Email!, recipient.Name!, subject, groupName, idea);
                     _logger.LogInformation("Notification sent to Committee Member: {email}", recipient.Email);
                 }
                 catch (Exception ex)

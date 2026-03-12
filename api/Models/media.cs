@@ -38,6 +38,10 @@ public class Media
     public IdeahubUser User { get; set; } = null!;
     public Project? Project { get; set; }
     public Comment? Comment { get; set; }
+    public int? ProjectTaskId { get; set; } 
+    public int? SubTaskId { get; set; }
+    public ProjectTask ProjectTask { get; set; } 
+    public SubTask SubTask { get; set; }
 }
 
 public enum MediaType

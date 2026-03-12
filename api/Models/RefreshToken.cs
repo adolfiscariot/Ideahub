@@ -22,5 +22,5 @@ public class RefreshToken
     public string UserId { get; set; } = string.Empty;
 
     [ForeignKey(nameof(UserId))]
-    public IdeahubUser User { get; set; }
+    public IdeahubUser User { get; set; } = null!;
 }
