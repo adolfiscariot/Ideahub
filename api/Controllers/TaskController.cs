@@ -1,0 +1,333 @@
+using System.Security.Claims;
+using api.Data;
+using api.Helpers;
+using api.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class TaskController : ControllerBase
+{
+    private readonly IdeahubDbContext _context;
+    private readonly ILogger<TaskController> _logger;
+    private readonly UserManager<IdeahubUser> _userManager;
+
+    public TaskController(IdeahubDbContext context, ILogger<TaskController> logger, UserManager<IdeahubUser> userManager)
+    {
+        _context = context;
+        _logger = logger;
+        _userManager = userManager;
+    }
+
+    #region Task Endpoints
+
+    [HttpPost("project/{projectId}")]
+    public async Task<IActionResult> CreateTask(int projectId, TaskDto taskDto)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var project = await _context.Projects.FindAsync(projectId);
+
+            if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
+
+            // Access Control: Only Overseer or Committee Member/Admin can create tasks
+            if (project.OverseenByUserId != userId && !User.IsInRole("CommitteeMember") && !User.IsInRole("GroupAdmin"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can create tasks."));
+            }
+
+            var task = new ProjectTask
+            {
+                Title = taskDto.Title,
+                Description = taskDto.Description,
+                StartDate = taskDto.StartDate,
+                EndDate = taskDto.EndDate,
+                Labels = taskDto.Labels,
+                ProjectId = projectId,
+                AssigneeIds = taskDto.AssigneeIds,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.ProjectTasks.Add(task);
+            await _context.SaveChangesAsync();
+
+            var response = new TaskDetailsDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                StartDate = task.StartDate,
+                EndDate = task.EndDate,
+                Labels = task.Labels,
+                IsCompleted = task.IsCompleted,
+                AssigneeIds = task.AssigneeIds,
+                ProjectId = task.ProjectId
+            };
+
+            return Ok(ApiResponse.Ok("Task created successfully", response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    [HttpGet("project/{projectId}")]
+    public async Task<IActionResult> GetProjectTasks(int projectId)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var project = await _context.Projects
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
+                        .ThenInclude(st => st.Media)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.Media)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
+
+            // Check if user has access to workspace (Overseer, Task Assignee, or Subtask Assignee)
+            var isTaskAssignee = project.Tasks.Any(t => t.AssigneeIds.Contains(userId!));
+            var isSubTaskAssignee = project.Tasks.Any(t => t.SubTasks.Any(st => st.AssigneeIds.Contains(userId!)));
+
+            if (project.OverseenByUserId != userId && !isTaskAssignee && !isSubTaskAssignee && !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("You do not have permissions to view this project workspace."));
+            }
+
+            var tasks = project.Tasks.Where(t => !t.IsDeleted).Select(t => new TaskDetailsDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                StartDate = t.StartDate,
+                EndDate = t.EndDate,
+                Labels = t.Labels,
+                IsCompleted = t.IsCompleted,
+                AssigneeIds = t.AssigneeIds,
+                ProjectId = t.ProjectId,
+                MediaCount = t.Media.Count,
+                SubTasks = t.SubTasks.Select(st => new SubTaskDetailsDto
+                {
+                    Id = st.Id,
+                    Title = st.Title,
+                    Description = st.Description,
+                    StartDate = st.StartDate,
+                    EndDate = st.EndDate,
+                    IsCompleted = st.IsCompleted,
+                    AssigneeIds = st.AssigneeIds,
+                    ProjectTaskId = st.ProjectTaskId,
+                    MediaCount = st.Media?.Count ?? 0
+                }).ToList()
+            }).ToList();
+
+            return Ok(ApiResponse.Ok("Tasks retrieved", tasks));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching tasks");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    [HttpPut("{taskId}")]
+    public async Task<IActionResult> UpdateTask(int taskId, TaskUpdateDto taskDto)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
+
+            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!) && !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to update this task."));
+            }
+
+            if (taskDto.Title != null) task.Title = taskDto.Title;
+            if (taskDto.Description != null) task.Description = taskDto.Description;
+            if (taskDto.StartDate != null) task.StartDate = taskDto.StartDate;
+            if (taskDto.EndDate != null) task.EndDate = taskDto.EndDate;
+            if (taskDto.Labels != null) task.Labels = taskDto.Labels;
+            if (taskDto.IsCompleted != null) task.IsCompleted = taskDto.IsCompleted.Value;
+            if (taskDto.AssigneeIds != null) task.AssigneeIds = taskDto.AssigneeIds;
+
+            task.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(ApiResponse.Ok("Task updated successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    [HttpDelete("{taskId}")]
+    public async Task<IActionResult> DeleteTask(int taskId)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
+
+            if (task.Project.OverseenByUserId != userId && !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can delete tasks."));
+            }
+
+            task.IsDeleted = true;
+            task.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(ApiResponse.Ok("Task deleted (soft-delete)"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    #endregion
+
+    #region SubTask Endpoints
+
+    [HttpPost("subtask/{taskId}")]
+    public async Task<IActionResult> CreateSubTask(int taskId, SubTaskDto subTaskDto)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null) return NotFound(ApiResponse.Fail("Parent task not found"));
+
+            // Restricted to Task Assignees and Project Overseer
+            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!) && !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to create sub-tasks here."));
+            }
+
+            var subTask = new SubTask
+            {
+                Title = subTaskDto.Title,
+                Description = subTaskDto.Description,
+                StartDate = subTaskDto.StartDate,
+                EndDate = subTaskDto.EndDate,
+                ProjectTaskId = taskId,
+                AssigneeIds = subTaskDto.AssigneeIds,
+                IsCompleted = false
+            };
+
+            _context.SubTasks.Add(subTask);
+            await _context.SaveChangesAsync();
+
+            var response = new SubTaskDetailsDto
+            {
+                Id = subTask.Id,
+                Title = subTask.Title,
+                Description = subTask.Description,
+                StartDate = subTask.StartDate,
+                EndDate = subTask.EndDate,
+                IsCompleted = subTask.IsCompleted,
+                AssigneeIds = subTask.AssigneeIds,
+                ProjectTaskId = subTask.ProjectTaskId
+            };
+
+            return Ok(ApiResponse.Ok("Sub-task created", response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating sub-task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    [HttpPut("subtask/{subTaskId}")]
+    public async Task<IActionResult> UpdateSubTask(int subTaskId, SubTaskUpdateDto subTaskDto)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var subTask = await _context.SubTasks
+                .Include(st => st.ProjectTask)
+                    .ThenInclude(t => t.Project)
+                .FirstOrDefaultAsync(st => st.Id == subTaskId);
+
+            if (subTask == null) return NotFound(ApiResponse.Fail("Sub-task not found"));
+
+            if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
+                !subTask.ProjectTask.AssigneeIds.Contains(userId!) && 
+                !subTask.AssigneeIds.Contains(userId!) && 
+                !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to update this sub-task."));
+            }
+
+            if (subTaskDto.Title != null) subTask.Title = subTaskDto.Title;
+            if (subTaskDto.Description != null) subTask.Description = subTaskDto.Description;
+            if (subTaskDto.StartDate != null) subTask.StartDate = subTaskDto.StartDate;
+            if (subTaskDto.EndDate != null) subTask.EndDate = subTaskDto.EndDate;
+            if (subTaskDto.IsCompleted != null) subTask.IsCompleted = subTaskDto.IsCompleted.Value;
+            if (subTaskDto.AssigneeIds != null) subTask.AssigneeIds = subTaskDto.AssigneeIds;
+
+            await _context.SaveChangesAsync();
+            return Ok(ApiResponse.Ok("Sub-task updated"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating sub-task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    [HttpDelete("subtask/{subTaskId}")]
+    public async Task<IActionResult> DeleteSubTask(int subTaskId)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var subTask = await _context.SubTasks
+                .Include(st => st.ProjectTask)
+                    .ThenInclude(t => t.Project)
+                .FirstOrDefaultAsync(st => st.Id == subTaskId);
+
+            if (subTask == null) return NotFound(ApiResponse.Fail("Sub-task not found"));
+
+            if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
+                !subTask.ProjectTask.AssigneeIds.Contains(userId!) && 
+                !User.IsInRole("CommitteeMember"))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to delete this sub-task."));
+            }
+
+            _context.SubTasks.Remove(subTask);
+            await _context.SaveChangesAsync();
+
+            return Ok(ApiResponse.Ok("Sub-task deleted permanently"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting sub-task");
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
+    #endregion
+}

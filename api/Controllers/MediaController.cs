@@ -31,7 +31,7 @@ public class MediaController : ControllerBase
 
     // Upload media
     [HttpPost("upload-media")]
-    public async Task<IActionResult> UploadMedia([FromForm] MediaDto mediaDto, int? ideaId = null, int? commentId = null, int? projectId = null)
+    public async Task<IActionResult> UploadMedia([FromForm] MediaDto mediaDto, int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null)
     {
         string? savedFilePath = null;
         try
@@ -73,7 +73,9 @@ public class MediaController : ControllerBase
                 UserId = userId,
                 IdeaId = ideaId,       
                 CommentId = commentId,
-                ProjectId = projectId
+                ProjectId = projectId,
+                ProjectTaskId = projectTaskId,
+                SubTaskId = subTaskId
             };
 
             _context.Media.Add(media);
@@ -95,13 +97,15 @@ public class MediaController : ControllerBase
 
     // View media (all for a specific idea/comment/project)
     [HttpGet("view-media")]
-    public async Task<IActionResult> ViewMedia(int? ideaId = null, int? commentId = null, int? projectId = null)
+    public async Task<IActionResult> ViewMedia(int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null)
     {
         var query = _context.Media.AsQueryable();
 
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
         if (commentId.HasValue) query = query.Where(m => m.CommentId == commentId.Value);
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
+        if (projectTaskId.HasValue) query = query.Where(m => m.ProjectTaskId == projectTaskId.Value);
+        if (subTaskId.HasValue) query = query.Where(m => m.SubTaskId == subTaskId.Value);
 
         var mediaList = await query
             .Select(m => new { m.Id, m.FilePath, m.MediaType, m.CreatedAt })

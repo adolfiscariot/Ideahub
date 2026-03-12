@@ -723,6 +723,16 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasForeignKey(m => m.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            m.HasOne(m => m.ProjectTask)
+                .WithMany(pt => pt.Media)
+                .HasForeignKey(m => m.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.SubTask)
+                .WithMany(st => st.Media)
+                .HasForeignKey(m => m.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
             m.HasIndex(m => m.IdeaId);
             m.HasIndex(m => m.UserId);
