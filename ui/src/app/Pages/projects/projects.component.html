@@ -22,8 +22,7 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let project of projects; trackBy: trackByProjectId"
-                        (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
-                        [class.clickable-row]="true">
+                        (click)="navigateToTasks(project.id)" [class.clickable-row]="true">
                         <td class="cell-project">
                             <div class="project-info">
                                 <span class="project-title-text">{{ project.title }}</span>
