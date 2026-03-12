@@ -593,7 +593,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            pr.HasQueryFilter(pr => !pr.User.IsDeleted);
+            pr.HasQueryFilter(pr => !pr.User!.IsDeleted);
 
             // pr.Property(pr => pr.RequestIp)
             //     .HasMaxLength(45);
@@ -738,6 +738,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         builder.Entity<ProjectTask>(pt =>
         {
             pt.HasKey(pt => pt.Id);
+            pt.HasQueryFilter(pt => !pt.IsDeleted && !pt.Project.IsDeleted);
 
             pt.Property(pt => pt.Title)
                 .IsRequired()
@@ -786,6 +787,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
         builder.Entity<SubTask>(st =>
         {
             st.HasKey(st => st.Id);
+            st.HasQueryFilter(st => !st.ProjectTask.IsDeleted && !st.ProjectTask.Project.IsDeleted);
 
             st.Property(st => st.Title)
                 .IsRequired()

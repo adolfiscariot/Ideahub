@@ -172,7 +172,7 @@ public class ScoringController : ControllerBase
             .FirstOrDefaultAsync(sd => sd.IdeaId == ideaId);
 
         bool isNew = existingDimensions == null;
-        var dimensions = isNew ? new ScoringDimensions { IdeaId = idea.Id } : existingDimensions;
+        var dimensions = (isNew ? new ScoringDimensions { IdeaId = idea.Id } : existingDimensions)!;
 
         // Map DTO
         dimensions.StrategicAlignment = dto.StrategicAlignment;
