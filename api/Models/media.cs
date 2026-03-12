@@ -29,6 +29,12 @@ public class Media
     [ForeignKey("Comment")]
     public int? CommentId { get; set; }
 
+    [ForeignKey("ProjectTask")]
+    public int? ProjectTaskId { get; set; }
+
+    [ForeignKey("SubTask")]
+    public int? SubTaskId { get; set; }
+
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
