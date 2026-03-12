@@ -320,8 +320,8 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
 
-            //check if user created or is overseeing project
-            if (project.CreatedByUserId != userId && project.OverseenByUserId != userId)
+            //check if user is overseeing project
+            if (project.OverseenByUserId != userId)
             {
                 _logger.LogError("Update Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
                 return StatusCode(403, ApiResponse.Fail("User not authorized to update project"));
@@ -421,11 +421,11 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
 
-            //check if user created project
-            if (project.CreatedByUserId != userId)
+            //check if user is overseeing project
+            if (project.OverseenByUserId != userId)
             {
-                _logger.LogWarning("Delete Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
-                return StatusCode(403, ApiResponse.Fail("User not authorized to update project"));
+                _logger.LogWarning("Delete Project: User {userEmail} has no permission to delete project {projectName}", userEmail, project.Title);
+                return StatusCode(403, ApiResponse.Fail("User not authorized to delete project"));
             }
 
             //delete project

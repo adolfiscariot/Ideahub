@@ -1,15 +1,15 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
-import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
 import { firstValueFrom } from 'rxjs';
 
@@ -29,7 +29,7 @@ type ProjectWithMedia = Project & { media?: Media[] };
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatDialogModule, ModalComponent, ButtonsComponent, MediaComponent],
+    imports: [CommonModule, FormsModule, MatDialogModule, MatIconModule, ModalComponent, ButtonsComponent, MediaComponent],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
@@ -43,6 +43,7 @@ export class ProjectsComponent implements OnInit {
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
     currentUserId: string = '';
     selectedProject: Project | null = null;
     isEditModalOpen = false;
@@ -61,6 +62,15 @@ export class ProjectsComponent implements OnInit {
 
     isReloading = false;
 
+    activeActionMenuId: number | null = null;
+    activeMediaProjectId: number | null = null;
+
+    // Deletion Modal State
+    isDeleteModalOpen = false;
+    projectToDelete: Project | null = null;
+    deleteConfirmName = '';
+    isDeletingProject = false;
+
     private toastService = inject(ToastService);
 
     ngOnInit(): void {
@@ -74,7 +84,39 @@ export class ProjectsComponent implements OnInit {
                 }
             });
         });
+
     }
+
+
+    calculateProgress(status: ProjectStatus): number {
+        switch (status) {
+            case ProjectStatus.Planning: return 0;
+            case ProjectStatus.Active: return 50;
+            case ProjectStatus.Completed: return 100;
+            case ProjectStatus.Shelved: return 25;
+            case ProjectStatus.Cancelled: return 0;
+            default: return 0;
+        }
+    }
+
+    toggleActionMenu(event: Event, projectId: number): void {
+        event.stopPropagation();
+        this.activeActionMenuId = this.activeActionMenuId === projectId ? null : projectId;
+        this.activeMediaProjectId = null;
+    }
+
+    toggleMediaPopup(event: Event, projectId: number): void {
+        event.stopPropagation();
+        this.activeMediaProjectId = this.activeMediaProjectId === projectId ? null : projectId;
+        this.activeActionMenuId = null;
+    }
+
+    @HostListener('document:click')
+    closeMenus(): void {
+        this.activeActionMenuId = null;
+        this.activeMediaProjectId = null;
+    }
+
 
     canEdit(project: Project): boolean {
         // Strict check: Only overseer can edit
@@ -102,18 +144,6 @@ export class ProjectsComponent implements OnInit {
             })
         );
     }
-
-    // loadProjects(): void {
-    //     this.projectsService.getMyProjects().subscribe({
-    //         next: (data) => {
-    //             this.projects = data;
-    //         },
-    //         error: (err) => {
-    //             console.error('Failed to load projects', err);
-    //             // Optionally show error toast
-    //         }
-    //     });
-    // }
 
     getStatusLabel(status: ProjectStatus): string {
         return ProjectStatus[status];
@@ -205,6 +235,47 @@ export class ProjectsComponent implements OnInit {
         }
     }
 
+    openDeleteModal(project: Project): void {
+        this.projectToDelete = project;
+        this.deleteConfirmName = '';
+        this.isDeleteModalOpen = true;
+        this.activeActionMenuId = null;
+    }
+
+    closeDeleteModal(): void {
+        this.isDeleteModalOpen = false;
+        this.projectToDelete = null;
+        this.deleteConfirmName = '';
+        this.isDeletingProject = false;
+    }
+
+    get isDeleteNameMatch(): boolean {
+        return this.projectToDelete?.title === this.deleteConfirmName;
+    }
+
+    confirmDelete(): void {
+        if (!this.projectToDelete || !this.isDeleteNameMatch || this.isDeletingProject) return;
+
+        this.isDeletingProject = true;
+        this.projectsService.deleteProject(this.projectToDelete.id).subscribe({
+            next: () => {
+                this.toastService.show('Project deleted successfully', 'success');
+                this.isDeletingProject = false;
+                this.closeDeleteModal();
+                this.loadProjects().subscribe();
+            },
+            error: (err) => {
+                this.isDeletingProject = false;
+                this.toastService.show(err.message || 'Failed to delete project', 'error');
+            }
+        });
+    }
+
+    navigateToTasks(projectId: number): void {
+        this.router.navigate(['/projects', projectId, 'tasks']);
+        this.activeActionMenuId = null;
+    }
+
     closeModals() {
         this.isEditModalOpen = false;
         this.isViewModalOpen = false;
@@ -249,9 +320,6 @@ export class ProjectsComponent implements OnInit {
         return formatFileSize(bytes);
     }
 
-    detectProjectMediaType(file: File): MediaType {
-        return detectMediaType(file);
-    }
 
 
     // openEditModal(project: Project): void {

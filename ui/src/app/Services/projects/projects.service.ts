@@ -46,4 +46,18 @@ export class ProjectsService {
             })
         );
     }
+
+    deleteProject(id: number): Observable<any> {
+        return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`).pipe(
+            map(response => {
+                if (!response.status) {
+                    throw new Error(response.message || 'Failed to delete project');
+                }
+                return response.data;
+            }),
+            catchError(error => {
+                return throwError(() => new Error(error.message || 'Failed to delete project'));
+            })
+        );
+    }
 }

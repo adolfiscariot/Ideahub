@@ -86,5 +86,11 @@ export const routes: Routes = [
       import('./Pages/committeemembers/committeemembers.component').then(
         (m) => m.CommitteeMembersComponent
       ),
+  },
+  {
+    path: 'projects/:projectId/tasks',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/tasks/tasks.component').then((m) => m.TasksComponent),
   }
 ];
