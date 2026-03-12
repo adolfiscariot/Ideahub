@@ -1,238 +1,269 @@
+<div class="projects-page-container">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Projects</h1>
+            <p class="page-subtitle">Manage and oversee ongoing initiatives.</p>
+        </div>
+    </header>
 
-    <div class="projects-page-container">
-        <header class="page-header">
-            <div>
-                <h1 class="page-title">Projects</h1>
-                <p class="page-subtitle">Manage and oversee ongoing initiatives.</p>
-            </div>
-        </header>
+    <div class="card projects-card">
+        <div class="table-responsive" [class.reloading]="isReloading">
+            <table class="projects-table">
+                <thead>
+                    <tr>
+                        <th class="col-project">Project</th>
+                        <th class="col-overseer">Overseen By</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-timeline">Timeline</th>
+                        <th class="col-progress">Progress</th>
+                        <th class="col-media">Media</th>
+                        <th class="col-actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let project of projects; trackBy: trackByProjectId"
+                        (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
+                        [class.clickable-row]="true">
+                        <td class="cell-project">
+                            <div class="project-info">
+                                <span class="project-title-text">{{ project.title }}</span>
+                                <span class="project-desc-subtext">{{ project.description }}</span>
+                                <div class="metadata-badges">
+                                    <span class="meta-badge" *ngIf="project.groupName">
+                                        <mat-icon class="meta-icon">groups</mat-icon> {{ project.groupName }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="cell-overseer">
+                            <div class="user-info">
+                                <div class="avatar-circle">{{ project.overseenBy.charAt(0) }}</div>
+                                <span>{{ project.overseenBy }}</span>
+                            </div>
+                        </td>
+                        <td class="cell-status">
+                            <span class="badge" [ngClass]="getStatusClass(project.status)">
+                                {{ getStatusLabel(project.status) }}
+                            </span>
+                        </td>
+                        <td class="cell-timeline">
+                            <div class="timeline-wrapper">
+                                <ng-container *ngIf="project.status !== ProjectStatus.Planning; else unstarted">
+                                    <span class="date-main">{{ project.createdAt | date:'mediumDate' }}</span>
+                                    <span class="date-arrow"
+                                        *ngIf="project.endedAt || project.status !== ProjectStatus.Cancelled">→</span>
+                                    <span class="date-sub" *ngIf="project.endedAt">{{ project.endedAt |
+                                        date:'mediumDate'
+                                        }}</span>
+                                    <span class="date-sub ongoing"
+                                        *ngIf="!project.endedAt && project.status === ProjectStatus.Active">Ongoing</span>
+                                </ng-container>
+                                <ng-template #unstarted>
+                                    <span class="date-sub not-started">Not Started</span>
+                                </ng-template>
+                            </div>
+                        </td>
+                        <td class="cell-progress">
+                            <div class="progress-container">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" [style.width.%]="calculateProgress(project.status)"
+                                        [ngClass]="getStatusClass(project.status)"></div>
+                                </div>
+                                <span class="progress-percentage">{{ calculateProgress(project.status) }}%</span>
+                            </div>
+                        </td>
+                        <td class="cell-media">
+                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, project.id)">
+                                <mat-icon class="media-file-icon">description</mat-icon>
+                                <span class="media-count">{{ project.media?.length || 0 }}</span>
 
-        <div class="card projects-card">
-            <div class="table-responsive" [class.reloading]="isReloading">
-                <table class="projects-table">
-                    <thead>
-                        <tr>
-                            <th class="col-title">Title</th>
-                            <th class="col-desc">Description</th>
-                            <th class="col-overseer">Overseen By</th>
-                            <th class="col-status">Status</th>
-                            <th class="col-date">Created At</th>
-                            <th class="col-date">Ended At</th>
-                            <th class="col-media">Media</th>
-                            <th class="col-actions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let project of projects; trackBy: trackByProjectId" (click)="canEdit(project) ? openEditModal(project) : openViewModal(project)"
-                            [class.clickable-row]="canEdit(project)" [class.readonly-row]="!canEdit(project)">
-                            <td class="cell-title">
-                                <div class="title-wrapper">
-                                    <span class="project-title-text">{{ project.title }}</span>
-                                    <div class="metadata-badges">
-                                        <span class="meta-badge" *ngIf="project.groupName">
-                                            <i class="fas fa-users"></i> {{ project.groupName }}
-                                        </span>
-                                        <span class="meta-badge" *ngIf="project.ideaTitle">
-                                            <i class="fas fa-lightbulb"></i> Idea: {{ project.ideaTitle }}
-                                        </span>
+                                <!-- Media Popup -->
+                                <div class="media-popup" *ngIf="activeMediaProjectId === project.id"
+                                    (click)="$event.stopPropagation()">
+                                    <div class="popup-header">Attached Media</div>
+                                    <div class="popup-body">
+                                        <app-media *ngIf="project.media?.length" [projectId]="project.id"
+                                            [compactMode]="true"></app-media>
+                                        <div *ngIf="!project.media?.length" class="empty-media">No attached files</div>
                                     </div>
                                 </div>
-                            </td>
-                            <td class="cell-desc">
-                                <span class="desc-text" [title]="project.description">{{ project.description }}</span>
-                            </td>
-                            <td class="cell-overseer">
-                                <div class="user-info">
-                                    <div class="avatar-circle">{{ project.overseenBy.charAt(0) }}</div>
-                                    <span>{{ project.overseenBy }}</span>
-                                </div>
-                            </td>
-                            <td class="cell-status">
-                                <span class="badge" [ngClass]="getStatusClass(project.status)">
-                                    {{ getStatusLabel(project.status) }}
-                                </span>
-                            </td>
-                            <td class="cell-date">
-                                {{ project.createdAt | date:'mediumDate' }}
-                            </td>
-                            <td class="cell-date">
-                                <span *ngIf="project.endedAt">{{ project.endedAt | date:'mediumDate' }}</span>
-                                <span *ngIf="!project.endedAt" class="text-muted">-</span>
-                            </td>
-
-                            <td class="cell-media">
-                                <div class="media-vertical">
-                                    <app-media 
-                                    [media]="project.media"
-                                    [projectId]="project.id" 
-                                    [title]="'Project Media'" 
-                                    [compactMode]="true">
-                                    </app-media>
-                                </div>
-                            </td>
-                            <td class="cell-actions">
-                                <button *ngIf="canEdit(project)" class="btn-icon" title="Edit Project"
-                                    (click)="openEditModal(project); $event.stopPropagation()">
-                                    <i class="fas fa-edit"></i>
+                            </div>
+                        </td>
+                        <td class="cell-actions">
+                            <div class="action-menu-container" *ngIf="canEdit(project)">
+                                <button class="btn-icon dots-btn" (click)="toggleActionMenu($event, project.id)">
+                                    <mat-icon>more_vert</mat-icon>
                                 </button>
-                                <button class="btn-icon" title="View Details" (click)="$event.stopPropagation()">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr *ngIf="projects.length === 0" class="empty-state-row">
-                            <td colspan="8">
-                                <div class="empty-state">
-                                    <i class="fas fa-project-diagram"></i>
-                                    <p>No projects found yet.</p>
+                                <div class="action-dropdown" *ngIf="activeActionMenuId === project.id"
+                                    (click)="$event.stopPropagation()">
+                                    <button (click)="navigateToTasks(project.id)">
+                                        <mat-icon class="action-icon">add_task</mat-icon> Create Task
+                                    </button>
+                                    <button (click)="openEditModal(project); activeActionMenuId = null">
+                                        <mat-icon class="action-icon">edit</mat-icon> Edit
+                                    </button>
+                                    <button class="delete-action" (click)="openDeleteModal(project)">
+                                        <mat-icon class="action-icon">delete</mat-icon> Delete
+                                    </button>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="projects.length === 0" class="empty-state-row">
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <mat-icon>assignment</mat-icon>
+                                <p>No projects found yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-        <app-modal
-        [isOpen]="isViewModalOpen"
-        title="Project Details"
-        (closeModal)="closeModals()"
-        size="md"
-        >
+    </div>
+
+    <app-modal [isOpen]="isViewModalOpen" title="Project Details" (closeModal)="closeModals()" size="md">
         <div modal-body *ngIf="selectedProject as project">
 
-        <div class="description-row">
-            <span class="label">Description</span>
-            <p class="description-text">
-            {{ project.description }}
-            </p>
-        </div>
-
-        <div class="project-details-grid">
-
-            <div class="info-item">
-            <span class="label">Title</span>
-            <span class="value">{{ project.title }}</span>
+            <div class="description-row">
+                <span class="label">Description</span>
+                <p class="description-text">
+                    {{ project.description }}
+                </p>
             </div>
 
-            <div class="info-item">
-            <span class="label">Status</span>
-            <span class="value">{{ getStatusLabel(project.status) }}</span>
+            <div class="project-details-grid">
+
+                <div class="info-item">
+                    <span class="label">Title</span>
+                    <span class="value">{{ project.title }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">Status</span>
+                    <span class="value">{{ getStatusLabel(project.status) }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">Ended At</span>
+                    <span class="value">
+                        <ng-container *ngIf="selectedProject?.endedAt; else dash">
+                            {{ project.endedAt | date:'mediumDate' }}
+                        </ng-container>
+                        <ng-template #dash>-</ng-template>
+                    </span>
+                </div>
+
+                <div class="info-item">
+                    <span class="label">Overseen By</span>
+                    <span class="value">{{ project.overseenBy }}</span>
+                </div>
+
             </div>
 
-            <div class="info-item">
-            <span class="label">Ended At</span>
-            <span class="value">
-                <ng-container *ngIf="selectedProject?.endedAt; else dash">
-                {{ project.endedAt | date:'mediumDate' }}
-                </ng-container>
-                <ng-template #dash>-</ng-template>
-            </span>
+        </div>
+    </app-modal>
+
+    <!-- Project Deletion Modal -->
+    <app-modal [isOpen]="isDeleteModalOpen" title="Delete Project" (closeModal)="closeDeleteModal()" size="sm">
+        <div modal-body class="delete-confirmation-content">
+            <div class="warning-banner">
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <p>This action is <strong>irreversible</strong> and will delete all files and tasks associated with this
+                    project.</p>
             </div>
 
-            <div class="info-item">
-            <span class="label">Overseen By</span>
-            <span class="value">{{ project.overseenBy }}</span>
-            </div>
-
-        </div>
-
-        </div>
-        </app-modal>
-
-        <app-modal
-            [isOpen]="isEditModalOpen"
-            title="Edit Project"
-            (closeModal)="closeModals()"
-            size="md"
-            >
-            <div modal-body class="edit-project-form">
-
-        <div class="form-group">
-            <label>Project Title</label>
-            <input [(ngModel)]="editForm.title" type="text" maxlength="20"/>
-            <span class="limit-warning" *ngIf="editForm.title.length >= 20">Title cannot exceed 20 characters</span>
-            <span class="char-counter">{{ editForm.title.length }}/20</span>
-        </div>
-
-        <div class="form-group">
-            <label>Project Description</label>
-            <textarea [(ngModel)]="editForm.description" maxlength="1000"></textarea>
-            <span class="limit-warning" *ngIf="editForm.description.length >= 1000">Description cannot exceed 1000 characters</span>
-            <span class="char-counter">{{ editForm.description.length }}/1000</span>
-        </div>
-
-        <div class="edit-grid">
+            <p class="instruction-text">To confirm, please type the project name: <br><strong>{{ projectToDelete?.title
+                    }}</strong></p>
 
             <div class="form-group">
-            <label>Status</label>
-            <select [(ngModel)]="editForm.status">
-                <option value="Planning">Planning</option>
-                <option value="Active">Active</option>
-                <option value="Completed">Completed</option>
-                <option value="Shelved">Shelved</option>
-                <option value="Cancelled">Cancelled</option>
-            </select>
+                <input type="text" [(ngModel)]="deleteConfirmName" placeholder="Type project name here..."
+                    class="delete-confirm-input">
+            </div>
+
+            <div class="modal-actions">
+                <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+                    (click)="closeDeleteModal()"></app-buttons>
+                <button class="btn-confirm-delete" [disabled]="!isDeleteNameMatch" (click)="confirmDelete()">
+                    Permanently Delete Project
+                </button>
+            </div>
+        </div>
+    </app-modal>
+
+    <app-modal [isOpen]="isEditModalOpen" title="Edit Project" (closeModal)="closeModals()" size="md">
+        <div modal-body class="edit-project-form">
+
+            <div class="form-group">
+                <label>Project Title</label>
+                <input [(ngModel)]="editForm.title" type="text" maxlength="20" />
+                <span class="limit-warning" *ngIf="editForm.title.length >= 20">Title cannot exceed 20 characters</span>
+                <span class="char-counter">{{ editForm.title.length }}/20</span>
             </div>
 
             <div class="form-group">
-            <label>Ended At</label>
-            <input [(ngModel)]="editForm.endedAt" type="date" />
+                <label>Project Description</label>
+                <textarea [(ngModel)]="editForm.description" maxlength="1000"></textarea>
+                <span class="limit-warning" *ngIf="editForm.description.length >= 1000">Description cannot exceed 1000
+                    characters</span>
+                <span class="char-counter">{{ editForm.description.length }}/1000</span>
             </div>
 
-        <!-- Project MEDIA UPLOAD -->
-        <div class="form-group">
-            <label>Attach Supporting media (Max 20MB per file)</label>
-            
-            <!-- Selected files preview -->
-            <div *ngIf="selectedProjectFiles.length > 0" class="selected-files">
-            <div *ngFor="let file of selectedProjectFiles; let i = index" class="file-preview">
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">({{ formatProjectFileSize(file.size) }})</span>
-                <button type="button" (click)="removeProjectFile(i)" class="remove-file">×</button>
-            </div>
-            </div>
+            <div class="edit-grid">
 
-            <div class="file-input-row">
-            <input 
-                type="file" 
-                #projectFileInput
-                multiple
-                (change)="onProjectFileSelected($event)"
-                [accept]="allowedFileTypes"
-                style="display: none"
-            >
-            <app-buttons 
-                [buttonText]="'📎 Attach Media Files'"
-                (click)="projectFileInput.click()"
-                [buttonStyleClass]="'btn-promote'"
-            >
-            </app-buttons>
-            </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select [(ngModel)]="editForm.status">
+                        <option value="Planning">Planning</option>
+                        <option value="Active">Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Shelved">Shelved</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
 
-            <div *ngIf="ideaUploadStatus" class="upload-status">
-            {{ ideaUploadStatus }}
+                <div class="form-group">
+                    <label>Ended At</label>
+                    <input [(ngModel)]="editForm.endedAt" type="date" />
+                </div>
+
+                <!-- Project MEDIA UPLOAD -->
+                <div class="form-group">
+                    <label>Attach Supporting media (Max 20MB per file)</label>
+
+                    <!-- Selected files preview -->
+                    <div *ngIf="selectedProjectFiles.length > 0" class="selected-files">
+                        <div *ngFor="let file of selectedProjectFiles; let i = index" class="file-preview">
+                            <span class="file-name">{{ file.name }}</span>
+                            <span class="file-size">({{ formatProjectFileSize(file.size) }})</span>
+                            <button type="button" (click)="removeProjectFile(i)" class="remove-file">×</button>
+                        </div>
+                    </div>
+
+                    <div class="file-input-row">
+                        <input type="file" #projectFileInput multiple (change)="onProjectFileSelected($event)"
+                            [accept]="allowedFileTypes" style="display: none">
+                        <app-buttons [buttonText]="'📎 Attach Media Files'" (click)="projectFileInput.click()"
+                            [buttonStyleClass]="'btn-promote'">
+                        </app-buttons>
+                    </div>
+
+                    <div *ngIf="ideaUploadStatus" class="upload-status">
+                        {{ ideaUploadStatus }}
+                    </div>
+                </div>
             </div>
-        </div> 
-        </div>
 
         </div>
 
         <div modal-footer class="edit-footer">
-        <app-buttons 
-                [buttonText]="'Cancel'"
-                [buttonStyleClass]="'btn-reject'"
-                [buttonType]="'button'"
-                (click)="closeModals()"
-                >
+            <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+                (click)="closeModals()">
             </app-buttons>
-            <app-buttons 
-                [buttonText]="'Save Changes'"
-                [buttonStyleClass]="'btn-promote'"
-                [buttonType]="'button'"
-                (click)="saveProject()"
-                >
+            <app-buttons [buttonText]="'Save Changes'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
+                (click)="saveProject()">
             </app-buttons>
         </div>
 
-        </app-modal>
+    </app-modal>
