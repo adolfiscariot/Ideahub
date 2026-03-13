@@ -73,6 +73,18 @@ export class ProjectsComponent implements OnInit {
     deleteConfirmName = '';
     isDeletingProject = false;
 
+    searchTerm: string = '';
+
+    get filteredProjects(): ProjectWithMedia[] {
+        if (!this.searchTerm.trim()) return this.projects;
+        const term = this.searchTerm.toLowerCase();
+        return this.projects.filter(p => 
+            p.title.toLowerCase().includes(term) || 
+            p.description.toLowerCase().includes(term) ||
+            p.overseenBy.toLowerCase().includes(term)
+        );
+    }
+
     private toastService = inject(ToastService);
 
     ngOnInit(): void {
