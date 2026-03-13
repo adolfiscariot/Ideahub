@@ -71,6 +71,7 @@ export class TaskManagementComponent implements OnInit {
   showSubTaskUserDropdown = false;
   showInlineSubTaskUserDropdown = false;
   isCreatingSubTask = false;
+  selectedSubTaskFiles: File[] = [];
 
   // Edit Task Modal
   isEditTaskModalOpen = false;
@@ -255,6 +256,16 @@ export class TaskManagementComponent implements OnInit {
     this.selectedFiles = removeFileAtIndex(this.selectedFiles, index);
   }
 
+  onSubTaskFilesSelected(event: Event): void {
+    const result = processSelectedFiles(event, this.selectedSubTaskFiles);
+    this.selectedSubTaskFiles = result.files;
+    result.errors.forEach(err => this.toastService.show(err, 'warning'));
+  }
+
+  removeSubTaskFile(index: number): void {
+    this.selectedSubTaskFiles = removeFileAtIndex(this.selectedSubTaskFiles, index);
+  }
+
   formatSize(bytes: number): string {
     return formatFileSize(bytes);
   }
@@ -302,6 +313,8 @@ export class TaskManagementComponent implements OnInit {
             file,
             detectMediaType(file),
             undefined,
+            undefined,
+            undefined,
             taskId,
             undefined
           ).pipe(
@@ -313,7 +326,7 @@ export class TaskManagementComponent implements OnInit {
         forkJoin(uploadRequests).subscribe((results) => {
           const anyFailed = results.some((r: any) => !r.ok);
           if (anyFailed) {
-            this.toastService.show('Task created with some media failed to upload', 'warning');
+            this.toastService.show('Task created, but some media failed to upload', 'warning');
           } else {
             this.toastService.show('Task created with media successfully', 'success');
           }
@@ -376,24 +389,62 @@ export class TaskManagementComponent implements OnInit {
     this.isCreatingSubTask = true;
     this.taskService.createSubTask(this.targetTaskId, this.newSubTask).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.toastService.show('Subtask created successfully', 'success');
-          this.closeSubTaskModal();
-          this.loadTasks(); // Refresh list
-
-          // Also update selectedTask if it's the one we're looking at
-          if (this.selectedTask?.id === this.targetTaskId) {
-            this.taskService.getProjectTasks(this.projectId).subscribe({
-              next: (tasksResponse) => {
-                const refreshedTask = tasksResponse.data?.find(t => t.id === this.targetTaskId);
-                if (refreshedTask) {
-                  this.selectedTask = refreshedTask;
-                }
-              }
-            });
-          }
+        if (!response.success || !response.data) {
+          this.toastService.show(response.message || 'Failed to create subtask', 'error');
+          this.isCreatingSubTask = false;
+          return;
         }
+
+        const subTaskId = response.data.id;
+
+        this.closeSubTaskModal();
+        this.resetSubTaskForm();
+        this.loadTasks(); // Refresh list
+
+        // Also update selectedTask if it's the one we're looking at
+        if (this.selectedTask?.id === this.targetTaskId) {
+          this.taskService.getProjectTasks(this.projectId).subscribe({
+            next: (tasksResponse) => {
+              const refreshedTask = tasksResponse.data?.find(t => t.id === this.targetTaskId);
+              if (refreshedTask) {
+                this.selectedTask = refreshedTask;
+              }
+            }
+          });
+        }
+
         this.isCreatingSubTask = false;
+
+        if (this.selectedSubTaskFiles.length === 0) {
+          this.toastService.show('Subtask created successfully', 'success');
+          return;
+        }
+
+        // Upload media
+        const uploadRequests = this.selectedSubTaskFiles.map(file =>
+          this.mediaService.uploadMedia(
+            file,
+            detectMediaType(file),
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            subTaskId
+          ).pipe(
+            switchMap(() => of({ ok: true })),
+            catchError((err) => of({ ok: false, error: err }))
+          )
+        );
+
+        forkJoin(uploadRequests).subscribe((results) => {
+          const anyFailed = results.some((r: any) => !r.ok);
+          if (anyFailed) {
+            this.toastService.show('Subtask created, but some media failed to upload', 'warning');
+          } else {
+            this.toastService.show('Subtask created with media successfully', 'success');
+          }
+          this.selectedSubTaskFiles = []; // Clear files after upload
+        });
       },
       error: (err) => {
         this.toastService.show(err.message || 'Failed to create subtask', 'error');
@@ -436,6 +487,7 @@ export class TaskManagementComponent implements OnInit {
       endDate: '',
       assigneeIds: []
     };
+    this.selectedSubTaskFiles = [];
   }
 
   // --- EDIT TASK METHODS ---
