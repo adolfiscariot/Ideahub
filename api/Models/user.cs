@@ -31,4 +31,5 @@ public class IdeahubUser : IdentityUser
     public ICollection<GroupMembershipRequest> GroupMembershipRequests {get; set;} = new List<GroupMembershipRequest>();
     public ICollection<PasswordReset> PasswordResets { get; set; } = new List<PasswordReset>();
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public ICollection<Timesheet> Timesheets { get; set; } = new List<Timesheet>();
 }

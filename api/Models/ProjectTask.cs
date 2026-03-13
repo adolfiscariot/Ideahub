@@ -48,4 +48,5 @@ public class ProjectTask
     public Project Project { get; set; } = null!;
     public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
+    public ICollection<Timesheet> Timesheets { get; set; } = new List<Timesheet>();
 }

@@ -23,6 +23,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
     public DbSet<ProjectTask> ProjectTasks { get; set; }
     public DbSet<SubTask> SubTasks { get; set; }
+    public DbSet<Timesheet> Timesheets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -816,6 +817,54 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithOne(m => m.SubTask)
                 .HasForeignKey(m => m.SubTaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Timesheet Configuration
+        builder.Entity<Timesheet>(ts =>
+        {
+            ts.HasKey(ts => ts.Id);
+            ts.HasQueryFilter(ts => !ts.IsDeleted && !ts.Task.IsDeleted);
+
+            ts.Property(ts => ts.Description)
+                .IsRequired()
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.WorkDate)
+                .IsRequired();
+
+            ts.Property(ts => ts.HoursSpent)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
+            ts.Property(ts => ts.Comments)
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.BlockerDescription)
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.BlockerSeverity)
+                .HasConversion<string>();
+
+            ts.Property(ts => ts.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            ts.Property(ts => ts.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            // Relationships
+            ts.HasOne(ts => ts.Task)
+                .WithMany(t => t.Timesheets)
+                .HasForeignKey(ts => ts.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            ts.HasOne(ts => ts.User)
+                .WithMany(u => u.Timesheets)
+                .HasForeignKey(ts => ts.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
     }
