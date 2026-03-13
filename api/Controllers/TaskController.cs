@@ -38,7 +38,7 @@ public class TaskController : ControllerBase
             if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
 
             // Access Control: Only Overseer or Committee Member/Admin can create tasks
-            if (project.OverseenByUserId != userId && !User.IsInRole("CommitteeMember") && !User.IsInRole("GroupAdmin"))
+            if (project.OverseenByUserId != userId)
             {
                 return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can create tasks."));
             }
@@ -47,8 +47,8 @@ public class TaskController : ControllerBase
             {
                 Title = taskDto.Title,
                 Description = taskDto.Description,
-                StartDate = taskDto.StartDate,
-                EndDate = taskDto.EndDate,
+                StartDate = taskDto.StartDate.HasValue ? DateTime.SpecifyKind(taskDto.StartDate.Value, DateTimeKind.Utc) : null,
+                EndDate = taskDto.EndDate.HasValue ? DateTime.SpecifyKind(taskDto.EndDate.Value, DateTimeKind.Utc) : null,
                 Labels = taskDto.Labels,
                 ProjectId = projectId,
                 AssigneeIds = taskDto.AssigneeIds,
@@ -72,6 +72,7 @@ public class TaskController : ControllerBase
                 ProjectId = task.ProjectId
             };
 
+            _logger.LogInformation("Task created successfully");
             return Ok(ApiResponse.Ok("Task created successfully", response));
         }
         catch (Exception ex)
@@ -158,8 +159,8 @@ public class TaskController : ControllerBase
 
             if (taskDto.Title != null) task.Title = taskDto.Title;
             if (taskDto.Description != null) task.Description = taskDto.Description;
-            if (taskDto.StartDate != null) task.StartDate = taskDto.StartDate;
-            if (taskDto.EndDate != null) task.EndDate = taskDto.EndDate;
+            if (taskDto.StartDate != null) task.StartDate = DateTime.SpecifyKind(taskDto.StartDate.Value, DateTimeKind.Utc);
+            if (taskDto.EndDate != null) task.EndDate = DateTime.SpecifyKind(taskDto.EndDate.Value, DateTimeKind.Utc);
             if (taskDto.Labels != null) task.Labels = taskDto.Labels;
             if (taskDto.IsCompleted != null) task.IsCompleted = taskDto.IsCompleted.Value;
             if (taskDto.AssigneeIds != null) task.AssigneeIds = taskDto.AssigneeIds;
@@ -219,7 +220,7 @@ public class TaskController : ControllerBase
             if (task == null) return NotFound(ApiResponse.Fail("Parent task not found"));
 
             // Restricted to Task Assignees and Project Overseer
-            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!) && !User.IsInRole("CommitteeMember"))
+            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to create sub-tasks here."));
             }

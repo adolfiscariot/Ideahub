@@ -22,44 +22,44 @@ export class TaskService {
 
   // TASK ENDPOINTS
   getProjectTasks(projectId: number): Observable<ApiResponse<TaskDetails[]>> {
-    return this.http.get<any>(`${this.apiUrl}/project/${projectId}`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/get-tasks/${projectId}`).pipe(
       map(response => this.convertResponse<TaskDetails[]>(response))
     );
   }
 
   createTask(projectId: number, taskDto: TaskDto): Observable<ApiResponse<TaskDetails>> {
-    return this.http.post<any>(`${this.apiUrl}/project/${projectId}`, taskDto).pipe(
+    return this.http.post<any>(`${this.apiUrl}/create/${projectId}`, taskDto).pipe(
       map(response => this.convertResponse<TaskDetails>(response))
     );
   }
 
   updateTask(taskId: number, taskDto: TaskUpdateDto): Observable<ApiResponse<any>> {
-    return this.http.put<any>(`${this.apiUrl}/${taskId}`, taskDto).pipe(
+    return this.http.put<any>(`${this.apiUrl}/update-task/${taskId}`, taskDto).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
   deleteTask(taskId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/${taskId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/delete-task/${taskId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
   // SUBTASK ENDPOINTS
   createSubTask(taskId: number, subTaskDto: SubTaskDto): Observable<ApiResponse<SubTaskDetails>> {
-    return this.http.post<any>(`${this.apiUrl}/subtask/${taskId}`, subTaskDto).pipe(
+    return this.http.post<any>(`${this.apiUrl}/create-subtask/${taskId}`, subTaskDto).pipe(
       map(response => this.convertResponse<SubTaskDetails>(response))
     );
   }
 
   updateSubTask(subTaskId: number, subTaskDto: SubTaskUpdateDto): Observable<ApiResponse<any>> {
-    return this.http.put<any>(`${this.apiUrl}/subtask/${subTaskId}`, subTaskDto).pipe(
+    return this.http.put<any>(`${this.apiUrl}/update-subtask/${subTaskId}`, subTaskDto).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
 
   deleteSubTask(subTaskId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/subtask/${subTaskId}`).pipe(
+    return this.http.delete<any>(`${this.apiUrl}/delete-subtask/${subTaskId}`).pipe(
       map(response => this.convertResponse<any>(response))
     );
   }
