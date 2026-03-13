@@ -4,14 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { TaskService } from '../../Services/task.service';
-import { TaskDetails, TaskDto, SubTaskDto, SubTaskUpdateDto, SubTaskDetails } from '../../Interfaces/Tasks/task-interface';
+import { TaskDetails, TaskDto, TaskUpdateDto, SubTaskDto, SubTaskUpdateDto, SubTaskDetails } from '../../Interfaces/Tasks/task-interface';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MediaService } from '../../Services/media.service';
 import { detectMediaType, processSelectedFiles, removeFileAtIndex, formatFileSize } from '../../Components/utils/media.utils';
-import { forkJoin, from } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { forkJoin, from, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
 
@@ -71,6 +71,36 @@ export class TaskManagementComponent implements OnInit {
   showSubTaskUserDropdown = false;
   showInlineSubTaskUserDropdown = false;
   isCreatingSubTask = false;
+
+  // Edit Task Modal
+  isEditTaskModalOpen = false;
+  editingTaskId: number = 0;
+  editTask: TaskUpdateDto = {};
+  editTaskLabels: string[] = [];
+  editLabelInput: string = '';
+  showEditUserDropdown = false;
+  editTaskAssigneeIds: string[] = [];
+  isUpdatingTask = false;
+
+  // Delete Task Confirmation
+  isPendingDeleteTask = false;
+  pendingDeleteTaskId: number = 0;
+  pendingDeleteTaskTitle: string = '';
+  isDeletingTask = false;
+
+  // Edit SubTask Modal
+  isEditSubTaskModalOpen = false;
+  editingSubTaskId: number = 0;
+  editSubTask: SubTaskUpdateDto = {};
+  showEditSubTaskUserDropdown = false;
+  editSubTaskAssigneeIds: string[] = [];
+  isUpdatingSubTask = false;
+
+  // Delete SubTask Confirmation
+  isPendingDeleteSubTask = false;
+  pendingDeleteSubTaskId: number = 0;
+  pendingDeleteSubTaskTitle: string = '';
+  isDeletingSubTask = false;
 
   activeInspectionTab: 'subtasks' | 'timesheets' = 'subtasks';
 
@@ -246,39 +276,48 @@ export class TaskManagementComponent implements OnInit {
 
     this.newTask.labels = this.taskLabels.join(',');
 
-    this.taskService.createTask(this.projectId, this.newTask).pipe(
-      switchMap((response) => {
-        if (response.success && response.data) {
-          const taskId = response.data.id;
-          if (this.selectedFiles.length > 0) {
-            const uploadRequests = this.selectedFiles.map(file =>
-              this.mediaService.uploadMedia(
-                file,
-                detectMediaType(file),
-                undefined,
-                taskId,
-                undefined
-              )
-            );
-            return forkJoin(uploadRequests).pipe(
-              switchMap(() => {
-                this.toastService.show('Task created with media successfully', 'success');
-                return from([response]);
-              })
-            );
-          } else {
-            this.toastService.show('Task created successfully', 'success');
-            return from([response]);
-          }
-        } else {
-          throw new Error(response.message || 'Failed to create task');
-        }
-      })
-    ).subscribe({
+    this.taskService.createTask(this.projectId, this.newTask).subscribe({
       next: (response) => {
+        if (!response.success || !response.data) {
+          this.toastService.show(response.message || 'Failed to create task', 'error');
+          this.isCreating = false;
+          return;
+        }
+
+        const taskId = response.data.id;
+
+        // Task is created — finalize UI immediately regardless of upload outcome
         this.resetForm();
         this.loadTasks();
         this.isCreating = false;
+
+        if (this.selectedFiles.length === 0) {
+          this.toastService.show('Task created successfully', 'success');
+          return;
+        }
+
+        // Run uploads in parallel; catch errors per-file so forkJoin never fails
+        const uploadRequests = this.selectedFiles.map(file =>
+          this.mediaService.uploadMedia(
+            file,
+            detectMediaType(file),
+            undefined,
+            taskId,
+            undefined
+          ).pipe(
+            switchMap(() => of({ ok: true })),
+            catchError((err) => of({ ok: false, error: err }))
+          )
+        );
+
+        forkJoin(uploadRequests).subscribe((results) => {
+          const anyFailed = results.some((r: any) => !r.ok);
+          if (anyFailed) {
+            this.toastService.show('Task created with some media failed to upload', 'warning');
+          } else {
+            this.toastService.show('Task created with media successfully', 'success');
+          }
+        });
       },
       error: (err) => {
         this.toastService.show(err.message || 'An error occurred', 'error');
@@ -341,7 +380,7 @@ export class TaskManagementComponent implements OnInit {
           this.toastService.show('Subtask created successfully', 'success');
           this.closeSubTaskModal();
           this.loadTasks(); // Refresh list
-          
+
           // Also update selectedTask if it's the one we're looking at
           if (this.selectedTask?.id === this.targetTaskId) {
             this.taskService.getProjectTasks(this.projectId).subscribe({
@@ -397,5 +436,221 @@ export class TaskManagementComponent implements OnInit {
       endDate: '',
       assigneeIds: []
     };
+  }
+
+  // --- EDIT TASK METHODS ---
+  openEditTask(task: TaskDetails, event: Event): void {
+    event.stopPropagation();
+    this.editingTaskId = task.id;
+    this.editTaskLabels = task.labels ? task.labels.split(',').filter(l => l.trim()) : [];
+    this.editLabelInput = '';
+    this.editTaskAssigneeIds = [...task.assigneeIds];
+    this.editTask = {
+      title: task.title,
+      description: task.description,
+      startDate: task.startDate ? task.startDate.substring(0, 10) : '',
+      endDate: task.endDate ? task.endDate.substring(0, 10) : '',
+      labels: task.labels,
+      assigneeIds: [...task.assigneeIds]
+    };
+    this.showEditUserDropdown = false;
+    this.isEditTaskModalOpen = true;
+  }
+
+  closeEditTaskModal(): void {
+    this.isEditTaskModalOpen = false;
+    this.showEditUserDropdown = false;
+  }
+
+  addEditLabel(event: Event): void {
+    event.preventDefault();
+    const value = this.editLabelInput.trim();
+    if (value && !this.editTaskLabels.includes(value)) {
+      this.editTaskLabels.push(value);
+      this.editLabelInput = '';
+    }
+  }
+
+  removeEditLabel(label: string): void {
+    this.editTaskLabels = this.editTaskLabels.filter(l => l !== label);
+  }
+
+  toggleEditTaskAssignee(userId: string): void {
+    const index = this.editTaskAssigneeIds.indexOf(userId);
+    if (index > -1) {
+      this.editTaskAssigneeIds.splice(index, 1);
+    } else {
+      this.editTaskAssigneeIds.push(userId);
+    }
+    this.showEditUserDropdown = false;
+  }
+
+  isEditTaskAssigneeSelected(userId: string): boolean {
+    return this.editTaskAssigneeIds.includes(userId);
+  }
+
+  saveTaskEdit(): void {
+    if (!this.editTask.title || !this.editTask.startDate || !this.editTask.endDate) {
+      this.toastService.show('Please fill in all required fields', 'warning');
+      return;
+    }
+    // Capture any pending label
+    const pending = this.editLabelInput.trim();
+    if (pending && !this.editTaskLabels.includes(pending)) {
+      this.editTaskLabels.push(pending);
+      this.editLabelInput = '';
+    }
+    this.editTask.labels = this.editTaskLabels.join(',');
+    this.editTask.assigneeIds = [...this.editTaskAssigneeIds];
+
+    this.isUpdatingTask = true;
+    this.taskService.updateTask(this.editingTaskId, this.editTask).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.show('Task updated successfully', 'success');
+          this.closeEditTaskModal();
+          this.loadTasks();
+        } else {
+          this.toastService.show(response.message || 'Failed to update task', 'error');
+        }
+        this.isUpdatingTask = false;
+      },
+      error: (err) => {
+        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.isUpdatingTask = false;
+      }
+    });
+  }
+
+  // --- DELETE TASK METHODS ---
+  confirmDeleteTask(task: TaskDetails, event: Event): void {
+    event.stopPropagation();
+    this.pendingDeleteTaskId = task.id;
+    this.pendingDeleteTaskTitle = task.title;
+    this.isPendingDeleteTask = true;
+  }
+
+  cancelDeleteTask(): void {
+    this.isPendingDeleteTask = false;
+    this.pendingDeleteTaskId = 0;
+    this.pendingDeleteTaskTitle = '';
+  }
+
+  executeDeleteTask(): void {
+    this.isDeletingTask = true;
+    this.taskService.deleteTask(this.pendingDeleteTaskId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.show('Task deleted successfully', 'success');
+          if (this.selectedTask?.id === this.pendingDeleteTaskId) {
+            this.selectedTask = null;
+          }
+          this.cancelDeleteTask();
+          this.loadTasks();
+        } else {
+          this.toastService.show(response.message || 'Failed to delete task', 'error');
+        }
+        this.isDeletingTask = false;
+      },
+      error: (err) => {
+        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.isDeletingTask = false;
+      }
+    });
+  }
+
+  // --- EDIT SUBTASK METHODS ---
+  openEditSubTask(st: SubTaskDetails, event: Event): void {
+    event.stopPropagation();
+    this.editingSubTaskId = st.id;
+    this.editSubTaskAssigneeIds = [...st.assigneeIds];
+    this.editSubTask = {
+      title: st.title,
+      description: st.description,
+      startDate: st.startDate ? st.startDate.substring(0, 10) : '',
+      endDate: st.endDate ? st.endDate.substring(0, 10) : '',
+      isCompleted: st.isCompleted,
+      assigneeIds: [...st.assigneeIds]
+    };
+    this.showEditSubTaskUserDropdown = false;
+    this.isEditSubTaskModalOpen = true;
+  }
+
+  closeEditSubTaskModal(): void {
+    this.isEditSubTaskModalOpen = false;
+    this.showEditSubTaskUserDropdown = false;
+  }
+
+  toggleEditSubTaskAssignee(userId: string): void {
+    const index = this.editSubTaskAssigneeIds.indexOf(userId);
+    if (index > -1) {
+      this.editSubTaskAssigneeIds.splice(index, 1);
+    } else {
+      this.editSubTaskAssigneeIds.push(userId);
+    }
+    this.showEditSubTaskUserDropdown = false;
+  }
+
+  isEditSubTaskAssigneeSelected(userId: string): boolean {
+    return this.editSubTaskAssigneeIds.includes(userId);
+  }
+
+  saveSubTaskEdit(): void {
+    if (!this.editSubTask.title || !this.editSubTask.startDate || !this.editSubTask.endDate) {
+      this.toastService.show('Please fill in all required fields', 'warning');
+      return;
+    }
+    this.editSubTask.assigneeIds = [...this.editSubTaskAssigneeIds];
+    this.isUpdatingSubTask = true;
+    this.taskService.updateSubTask(this.editingSubTaskId, this.editSubTask).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.show('Subtask updated successfully', 'success');
+          this.closeEditSubTaskModal();
+          this.loadTasks();
+        } else {
+          this.toastService.show(response.message || 'Failed to update subtask', 'error');
+        }
+        this.isUpdatingSubTask = false;
+      },
+      error: (err) => {
+        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.isUpdatingSubTask = false;
+      }
+    });
+  }
+
+  // --- DELETE SUBTASK METHODS ---
+  confirmDeleteSubTask(st: SubTaskDetails, event: Event): void {
+    event.stopPropagation();
+    this.pendingDeleteSubTaskId = st.id;
+    this.pendingDeleteSubTaskTitle = st.title;
+    this.isPendingDeleteSubTask = true;
+  }
+
+  cancelDeleteSubTask(): void {
+    this.isPendingDeleteSubTask = false;
+    this.pendingDeleteSubTaskId = 0;
+    this.pendingDeleteSubTaskTitle = '';
+  }
+
+  executeDeleteSubTask(): void {
+    this.isDeletingSubTask = true;
+    this.taskService.deleteSubTask(this.pendingDeleteSubTaskId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastService.show('Subtask deleted successfully', 'success');
+          this.cancelDeleteSubTask();
+          this.loadTasks();
+        } else {
+          this.toastService.show(response.message || 'Failed to delete subtask', 'error');
+        }
+        this.isDeletingSubTask = false;
+      },
+      error: (err) => {
+        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.isDeletingSubTask = false;
+      }
+    });
   }
 }

@@ -199,6 +199,30 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
 
+            // user info
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogError("GetProjectById: User Id is null. Can't fetch project");
+                return Unauthorized(ApiResponse.Fail("User Id is null"));
+            }
+
+            // group info
+            var group = project.Group;
+            if (group is null)
+            {
+                _logger.LogError("GetProjectById: Group not found for project {projectId}", projectId);
+                return NotFound(ApiResponse.Fail("Group not found"));
+            }
+
+            // check if user is in the group that the project is in
+            var groupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
+            if (!groupMember)
+            {
+                _logger.LogError("GetProjectById: User {userId} does not belong in group {groupId}", userId, project.GroupId);
+                return StatusCode(403, ApiResponse.Fail("User is not in group"));
+            }
+
             var projectData = new 
             {
                 project.Id,

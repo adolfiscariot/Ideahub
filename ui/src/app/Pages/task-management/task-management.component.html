@@ -187,10 +187,17 @@
                   <mat-icon>calendar_today</mat-icon>
                   <span>Due {{ task.endDate | date:'mediumDate' }}</span>
                 </div>
-                <button class="create-subtask-btn" (click)="openSubTaskModal(task.id); $event.stopPropagation()">
-                  <mat-icon>add_circle_outline</mat-icon>
-                  <span>Subtask</span>
-                </button>
+                <div class="card-actions">
+                  <button class="create-subtask-btn" title="Add subtask" (click)="openSubTaskModal(task.id); $event.stopPropagation()">
+                    <mat-icon>add_circle_outline</mat-icon>
+                  </button>
+                  <button *ngIf="canCreateTask" class="icon-action-btn edit-btn" title="Edit task" (click)="openEditTask(task, $event)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button *ngIf="canCreateTask" class="icon-action-btn delete-btn" title="Delete task" (click)="confirmDeleteTask(task, $event)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -403,4 +410,189 @@
       </div>
     </div>
   </div>
+
+  <!-- EDIT TASK MODAL -->
+  <div class="modal-overlay" *ngIf="isEditTaskModalOpen" (click)="closeEditTaskModal()">
+    <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Task</h3>
+        <button class="close-modal-btn" (click)="closeEditTaskModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title *</label>
+          <input type="text" [(ngModel)]="editTask.title" placeholder="e.g. Create New Workflow">
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Start Date *</label>
+            <input type="date" [(ngModel)]="editTask.startDate">
+          </div>
+          <div class="form-group flex-1">
+            <label>End Date *</label>
+            <input type="date" [(ngModel)]="editTask.endDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="editTask.description" placeholder="Task description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Labels</label>
+          <div class="labels-input-wrapper">
+            <div class="label-chips" *ngIf="editTaskLabels.length > 0">
+              <span *ngFor="let label of editTaskLabels" class="label-chip">
+                {{ label }}
+                <button (click)="removeEditLabel(label)" class="remove-chip">&times;</button>
+              </span>
+            </div>
+            <input type="text" [(ngModel)]="editLabelInput" (keydown.enter)="addEditLabel($event)" placeholder="Type and press Enter">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Assignees</label>
+          <div class="assignee-selector">
+            <div class="selected-assignees" *ngIf="editTaskAssigneeIds.length > 0">
+              <span *ngFor="let id of editTaskAssigneeIds" class="user-chip">
+                {{ getUserName(id) }}
+                <button (click)="toggleEditTaskAssignee(id)" class="remove-chip">&times;</button>
+              </span>
+            </div>
+            <div class="dropdown-wrapper">
+              <button class="add-assignee-btn" (click)="showEditUserDropdown = !showEditUserDropdown">
+                <mat-icon>person_add</mat-icon>
+                Add Assignees
+              </button>
+              <div class="user-dropdown card" *ngIf="showEditUserDropdown">
+                <div class="user-option" *ngFor="let user of availableUsers" (click)="toggleEditTaskAssignee(user.id)">
+                  <span class="checkbox" [class.selected]="isEditTaskAssigneeSelected(user.id)"></span>
+                  {{ user.fullName || user.email }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditTaskModal()">Cancel</button>
+        <app-buttons [buttonText]="isUpdatingTask ? 'Saving...' : 'Save Changes'" [buttonStyleClass]="'btn-promote'"
+          (click)="saveTaskEdit()" [isLoading]="isUpdatingTask" [disabled]="isUpdatingTask">
+          <mat-icon *ngIf="!isUpdatingTask">save</mat-icon>
+        </app-buttons>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT SUBTASK MODAL -->
+  <div class="modal-overlay" *ngIf="isEditSubTaskModalOpen" (click)="closeEditSubTaskModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Subtask</h3>
+        <button class="close-modal-btn" (click)="closeEditSubTaskModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Subtask Title *</label>
+          <input type="text" [(ngModel)]="editSubTask.title" placeholder="e.g. Research data sources">
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Start Date *</label>
+            <input type="date" [(ngModel)]="editSubTask.startDate">
+          </div>
+          <div class="form-group flex-1">
+            <label>End Date *</label>
+            <input type="date" [(ngModel)]="editSubTask.endDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="editSubTask.description" placeholder="Provide context about this subtask..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Assignees</label>
+          <div class="assignee-selector">
+            <div class="selected-assignees">
+              <span *ngFor="let userId of editSubTaskAssigneeIds" class="user-chip theme-chip">
+                {{ getUserName(userId) }}
+                <button class="remove-chip" (click)="toggleEditSubTaskAssignee(userId)">&times;</button>
+              </span>
+              <div class="dropdown-wrapper">
+                <button class="add-assignee-btn" (click)="showEditSubTaskUserDropdown = !showEditSubTaskUserDropdown">
+                  <mat-icon>person_add</mat-icon>
+                  <span>Add</span>
+                </button>
+                <div class="user-dropdown card" *ngIf="showEditSubTaskUserDropdown">
+                  <div *ngFor="let user of availableUsers" class="user-option" (click)="toggleEditSubTaskAssignee(user.id)">
+                    <div class="checkbox" [class.selected]="isEditSubTaskAssigneeSelected(user.id)"></div>
+                    {{ user.fullName || user.email }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditSubTaskModal()">Cancel</button>
+        <app-buttons [buttonText]="isUpdatingSubTask ? 'Saving...' : 'Save Changes'" [buttonStyleClass]="'btn-promote'"
+          (click)="saveSubTaskEdit()" [isLoading]="isUpdatingSubTask" [disabled]="isUpdatingSubTask">
+          <mat-icon *ngIf="!isUpdatingSubTask">save</mat-icon>
+        </app-buttons>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE TASK CONFIRMATION -->
+  <div class="modal-overlay" *ngIf="isPendingDeleteTask" (click)="cancelDeleteTask()">
+    <div class="modal-card confirm-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Task</h3>
+        <button class="close-modal-btn" (click)="cancelDeleteTask()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-content">
+          <mat-icon class="confirm-icon danger">warning</mat-icon>
+          <p>Are you sure you want to delete <strong>"{{ pendingDeleteTaskTitle }}"</strong>? This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cancelDeleteTask()">Cancel</button>
+        <button class="btn-danger" (click)="executeDeleteTask()" [disabled]="isDeletingTask">
+          {{ isDeletingTask ? 'Deleting...' : 'Delete Task' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE SUBTASK CONFIRMATION -->
+  <div class="modal-overlay" *ngIf="isPendingDeleteSubTask" (click)="cancelDeleteSubTask()">
+    <div class="modal-card confirm-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Subtask</h3>
+        <button class="close-modal-btn" (click)="cancelDeleteSubTask()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-content">
+          <mat-icon class="confirm-icon danger">warning</mat-icon>
+          <p>Are you sure you want to delete <strong>"{{ pendingDeleteSubTaskTitle }}"</strong>? This cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="cancelDeleteSubTask()">Cancel</button>
+        <button class="btn-danger" (click)="executeDeleteSubTask()" [disabled]="isDeletingSubTask">
+          {{ isDeletingSubTask ? 'Deleting...' : 'Delete Subtask' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
