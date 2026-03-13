@@ -1,0 +1,192 @@
+<div class="task-management-container">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Task Management</h1>
+      <p class="page-subtitle">Orchestrate team activities, monitor progress and manage workloads</p>
+    </div>
+  </header>
+
+  <div class="content-area">
+    <!-- SECTION 1: CREATE NEW TASK -->
+    <section class="creation-section">
+      <div class="card creation-card">
+        <div class="card-header">
+          <h3>Create New Task</h3>
+        </div>
+
+        <div class="card-body">
+          <!-- Row 1: Title and Dates -->
+          <div class="form-row title-row">
+            <div class="form-group title-group">
+              <label>Task Title</label>
+              <input type="text" [(ngModel)]="newTask.title" placeholder="e.g. Create New Workflow">
+            </div>
+            <div class="form-group date-group">
+              <label>Start Date</label>
+              <input type="date" [(ngModel)]="newTask.startDate">
+            </div>
+            <div class="form-group date-group">
+              <label>End Date</label>
+              <input type="date" [(ngModel)]="newTask.endDate">
+            </div>
+          </div>
+
+          <!-- Row 2: Description (Left) and Meta (Right) -->
+          <div class="form-row details-row">
+            <div class="form-group description-group">
+              <label>Description</label>
+              <textarea [(ngModel)]="newTask.description"
+                placeholder="e.g. Create workflow to outline daily processes"></textarea>
+            </div>
+
+            <div class="meta-column">
+              <div class="form-group assignees-group">
+                <label>Assignees</label>
+                <div class="assignee-selector">
+                  <div class="selected-assignees" *ngIf="newTask.assigneeIds.length > 0">
+                    <span *ngFor="let id of newTask.assigneeIds" class="user-chip">
+                      {{ getUserName(id) }}
+                      <button (click)="toggleAssignee(id)" class="remove-chip">&times;</button>
+                    </span>
+                  </div>
+                  <div class="dropdown-wrapper">
+                    <button class="add-assignee-btn" (click)="toggleUserDropdown()">
+                      <mat-icon>person_add</mat-icon>
+                      Add Assignees
+                    </button>
+                    <div class="user-dropdown card" *ngIf="showUserDropdown">
+                      <div class="user-option" *ngFor="let user of availableUsers" (click)="toggleAssignee(user.id)">
+                        <span class="checkbox" [class.selected]="isAssigneeSelected(user.id)"></span>
+                        {{ user.fullName || user.email }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group labels-group">
+                <label>Labels</label>
+                <div class="labels-input-wrapper">
+                  <div class="label-chips" *ngIf="taskLabels.length > 0">
+                    <span *ngFor="let label of taskLabels" class="label-chip">
+                      {{ label }}
+                      <button (click)="removeLabel(label)" class="remove-chip">&times;</button>
+                    </span>
+                  </div>
+                  <input type="text" [(ngModel)]="labelInput" (keydown.enter)="addLabel($event)"
+                    placeholder="e.g. 'Workflows', 'Admin' ">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-left">
+            <input type="file" #fileInput hidden multiple (change)="onFilesSelected($event)">
+            <app-buttons [buttonStyleClass]="'btn-promote'" (click)="fileInput.click()">
+              <mat-icon>attach_file</mat-icon>
+              Media Upload
+            </app-buttons>
+            <div class="selected-files-list" *ngIf="selectedFiles.length > 0">
+              <div *ngFor="let file of selectedFiles; let i = index" class="file-preview-chip">
+                <mat-icon [title]="file.name">insert_drive_file</mat-icon>
+                <span class="file-name">{{ file.name }}</span>
+                <button (click)="removeFile(i)" class="remove-chip">&times;</button>
+              </div>
+            </div>
+          </div>
+          <div class="footer-right">
+            <app-buttons [buttonText]="'Create Task'" [buttonStyleClass]="'btn-promote'" (click)="createTask()"
+              [isLoading]="isCreating">
+            </app-buttons>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="main-split">
+      <!-- SECTION 2: ACTIVE TASKS -->
+      <section class="active-tasks-section">
+        <div class="section-header">
+          <h2>Active Tasks</h2>
+        </div>
+
+        <div *ngIf="isLoading" class="loading-state">
+          <p>Loading tasks...</p>
+        </div>
+
+        <div *ngIf="!isLoading && tasks.length === 0" class="empty-state">
+          <p>No tasks found for this project.</p>
+        </div>
+
+        <div class="tasks-grid" *ngIf="!isLoading && tasks.length > 0">
+          <div *ngFor="let task of tasks" class="task-card card" [class.selected]="selectedTask?.id === task.id"
+            (click)="selectTask(task)">
+            <div class="task-info">
+              <h3>{{ task.title }}</h3>
+              <p class="description">{{ task.description }}</p>
+            </div>
+            <div class="task-footer">
+              <span class="status-badge" [class.completed]="task.isCompleted">
+                {{ task.isCompleted ? 'Completed' : 'In Progress' }}
+              </span>
+              <span class="dates">
+                {{ task.startDate | date:'shortDate' }} - {{ task.endDate | date:'shortDate' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: TASK INSPECTION -->
+      <section class="inspection-section">
+        <div class="section-header">
+          <h2>Task Inspection</h2>
+        </div>
+
+        <div class="card inspection-card">
+          <div *ngIf="!selectedTask" class="placeholder-content">
+            <mat-icon>task</mat-icon>
+            <p>Select a task to view its details, subtasks, and files.</p>
+          </div>
+
+          <div *ngIf="selectedTask" class="inspection-details">
+            <div class="inspection-header">
+              <h3>{{ selectedTask.title }}</h3>
+              <span class="status-badge" [class.completed]="selectedTask.isCompleted">
+                {{ selectedTask.isCompleted ? 'Completed' : 'In Progress' }}
+              </span>
+            </div>
+
+            <div class="inspection-body">
+              <div class="detail-group">
+                <label>Description</label>
+                <p>{{ selectedTask.description }}</p>
+              </div>
+
+              <div class="detail-row">
+                <div class="detail-group">
+                  <label>Labels</label>
+                  <div class="label-chips">
+                    <span *ngFor="let label of selectedTask.labels.split(',')" class="label-chip theme-chip">
+                      {{ label }}
+                    </span>
+                  </div>
+                </div>
+                <div class="detail-group">
+                  <label>Assignees</label>
+                  <div class="assignee-list">
+                    <span *ngFor="let id of selectedTask.assigneeIds" class="user-chip theme-chip">
+                      {{ getUserName(id) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
