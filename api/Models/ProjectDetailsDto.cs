@@ -14,6 +14,7 @@ public class ProjectDetailsDto
     public string Status { get; set; } = string.Empty; 
 
     public string OverseenByUserName { get; set; } = string.Empty;
+    public string OverseenByUserId { get; set; } = string.Empty;
 
     public string IdeaName { get; set; } = string.Empty;
 

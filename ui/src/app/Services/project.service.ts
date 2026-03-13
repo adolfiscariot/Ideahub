@@ -41,6 +41,13 @@ export class ProjectService {
     );
   }
 
+  // READ: Get project by ID only
+  getProjectById(projectId: number): Observable<ApiResponse<any>> {
+    return this.http.get<any>(`${this.apiUrl}/${projectId}`).pipe(
+      map(response => this.convertResponse<any>(response))
+    );
+  }
+
   // READ: Get a single project
   getProjectDetails(groupId: string, projectId: string): Observable<ApiResponse<ProjectDetails>> {
     const params = new HttpParams()

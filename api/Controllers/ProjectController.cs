@@ -182,6 +182,46 @@ public class ProjectController : ControllerBase
         }
     }
 
+    //Get project by ID
+    [HttpGet("{projectId}")]
+    public async Task<IActionResult> GetProjectById(int projectId)
+    {
+        try
+        {
+            var project = await _context.Projects
+                .Include(p => p.OverseenByUser)
+                .Include(p => p.Group)
+                .Include(p => p.Idea)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                return NotFound(ApiResponse.Fail("Project not found"));
+            }
+
+            var projectData = new 
+            {
+                project.Id,
+                project.Title,
+                project.Description,
+                project.OverseenByUserId,
+                OverseenByUserName = project.OverseenByUser?.DisplayName,
+                project.GroupId,
+                GroupName = project.Group?.Name,
+                project.IdeaId,
+                IdeaName = project.Idea?.Title,
+                Status = project.Status.ToString()
+            };
+
+            return Ok(ApiResponse.Ok("Project found", projectData));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "GetProjectById: Failed to fetch project {projectId}", projectId);
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
+        }
+    }
+
     //View all global projects (Public groups + User's private groups)
     [HttpGet("all")]
     public async Task<IActionResult> GetAllProjects()
@@ -281,6 +321,7 @@ public class ProjectController : ControllerBase
                 Description = project.Description,
                 Status = project.Status.ToString(),
                 OverseenByUserName = project.OverseenByUser.DisplayName,
+                OverseenByUserId = project.OverseenByUserId,
                 IdeaName = project.Idea.Title,
                 GroupName = project.Group.Name
             };
