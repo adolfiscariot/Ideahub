@@ -27,7 +27,7 @@ public class TaskController : ControllerBase
 
     #region Task Endpoints
 
-    [HttpPost("project/{projectId}")]
+    [HttpPost("create/{projectId}")]
     public async Task<IActionResult> CreateTask(int projectId, TaskDto taskDto)
     {
         try
@@ -81,7 +81,7 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpGet("project/{projectId}")]
+    [HttpGet("get-tasks/{projectId}")]
     public async Task<IActionResult> GetProjectTasks(int projectId)
     {
         try
@@ -141,7 +141,7 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpPut("{taskId}")]
+    [HttpPut("update-task/{taskId}")]
     public async Task<IActionResult> UpdateTask(int taskId, TaskUpdateDto taskDto)
     {
         try
@@ -176,7 +176,7 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpDelete("{taskId}")]
+    [HttpDelete("delete-task/{taskId}")]
     public async Task<IActionResult> DeleteTask(int taskId)
     {
         try
@@ -208,7 +208,7 @@ public class TaskController : ControllerBase
 
     #region SubTask Endpoints
 
-    [HttpPost("subtask/{taskId}")]
+    [HttpPost("create-subtask/{taskId}")]
     public async Task<IActionResult> CreateSubTask(int taskId, SubTaskDto subTaskDto)
     {
         try
@@ -259,7 +259,7 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpPut("subtask/{subTaskId}")]
+    [HttpPut("update-subtask/{subTaskId}")]
     public async Task<IActionResult> UpdateSubTask(int subTaskId, SubTaskUpdateDto subTaskDto)
     {
         try
@@ -297,7 +297,7 @@ public class TaskController : ControllerBase
         }
     }
 
-    [HttpDelete("subtask/{subTaskId}")]
+    [HttpDelete("delete-subtask/{subTaskId}")]
     public async Task<IActionResult> DeleteSubTask(int subTaskId)
     {
         try
