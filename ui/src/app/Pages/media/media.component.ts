@@ -16,6 +16,7 @@ export class MediaComponent implements OnInit {
   @Input() ideaId?: number;
   @Input() commentId?: number;
   @Input() projectId?: number;
+  @Input() timesheetId?: number;
   @Input() title: string = 'Media';
   @Input() compactMode: boolean = false;
   @Input() media?: Media[];
@@ -31,17 +32,17 @@ export class MediaComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ideaId'] || changes['commentId'] || changes['projectId']) {
+    if (changes['ideaId'] || changes['commentId'] || changes['projectId'] || changes['timesheetId']) {
       this.loadMedia();
     }
   }
 
   loadMedia(): void {
-    if (!this.ideaId && !this.commentId && !this.projectId) return;
+    if (!this.ideaId && !this.commentId && !this.projectId && !this.timesheetId) return;
 
     this.isLoading = true;
 
-    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId).subscribe({
+    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, this.timesheetId).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.success && response.data) {

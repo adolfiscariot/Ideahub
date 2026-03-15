@@ -13,6 +13,7 @@ export interface Media {
   ideaId?: number;
   commentId?: number;
   projectId?: number;
+  timesheetId?: number;
 }
 
 export interface MediaDto {
@@ -33,10 +34,12 @@ export interface UploadMediaRequest {
   ideaId?: number;
   commentId?: number;
   projectId?: number;
+  timesheetId?: number;
 }
 
 export interface ViewMediaRequest {
   ideaId?: number;
   commentId?: number;
   projectId?: number;
+  timesheetId?: number;
 }
