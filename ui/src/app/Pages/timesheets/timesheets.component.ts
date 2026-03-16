@@ -45,7 +45,7 @@ export class TimesheetsComponent implements OnInit {
   editingLogId: number | null = null;
   showDeleteModal: boolean = false;
   logToDeleteId: number | null = null;
-  workDate: string = new Date().toISOString().split('T')[0];
+  workDate: string = ''; // Initialized in ngOnInit
   availableTasks: RelevantTask[] = [];
   rows: TimesheetRow[] = [];
   recentLogs: TimesheetDto[] = [];
@@ -59,6 +59,18 @@ export class TimesheetsComponent implements OnInit {
   filterSeverity: string = '';
   projectMembers: { id: string, name: string }[] = [];
 
+  private formatDateToLocalISO(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseLocalISOToDate(dateStr: string): Date {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
   get filteredLogs(): TimesheetDto[] {
     return this.recentLogs.filter(log => {
       // User Filter
@@ -70,13 +82,13 @@ export class TimesheetsComponent implements OnInit {
         logDate.setHours(0, 0, 0, 0);
 
         if (this.filterStartDate) {
-          const start = new Date(this.filterStartDate);
+          const start = this.parseLocalISOToDate(this.filterStartDate);
           start.setHours(0, 0, 0, 0);
           if (logDate < start) return false;
         }
 
         if (this.filterEndDate) {
-          const end = new Date(this.filterEndDate);
+          const end = this.parseLocalISOToDate(this.filterEndDate);
           end.setHours(0, 0, 0, 0);
           if (logDate > end) return false;
         }
@@ -105,6 +117,7 @@ export class TimesheetsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.workDate = this.formatDateToLocalISO(new Date());
     const pId = this.route.snapshot.paramMap.get('projectId');
     if (pId) {
       this.projectId = +pId;
@@ -200,7 +213,7 @@ export class TimesheetsComponent implements OnInit {
         const row = validRows[0];
         const updateDto: TimesheetDto = {
           taskId: row.taskId,
-          workDate: new Date(this.workDate),
+          workDate: this.parseLocalISOToDate(this.workDate),
           description: row.description,
           hoursSpent: row.hoursSpent,
           comments: row.comments,
@@ -211,6 +224,14 @@ export class TimesheetsComponent implements OnInit {
 
         const res = await firstValueFrom(this.timesheetService.updateLog(this.editingLogId, updateDto));
         if (res.success) {
+          if (row.hasBlocker && row.tempFiles.length > 0) {
+            for (const file of row.tempFiles) {
+              const mediaType = this.mediaService.detectMediaType(file);
+              await firstValueFrom(
+                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, this.editingLogId)
+              );
+            }
+          }
           this.toastService.show('Timesheet updated successfully', 'success');
           this.cancelEdit();
           this.loadRecentLogs();
@@ -219,7 +240,7 @@ export class TimesheetsComponent implements OnInit {
         // Existing Bulk Log Logic
         const logsToSend: TimesheetDto[] = validRows.map(row => ({
           taskId: row.taskId,
-          workDate: new Date(this.workDate),
+          workDate: this.parseLocalISOToDate(this.workDate),
           description: row.description,
           hoursSpent: row.hoursSpent,
           comments: row.comments,
@@ -264,7 +285,7 @@ export class TimesheetsComponent implements OnInit {
 
     this.isEditing = true;
     this.editingLogId = log.id;
-    this.workDate = new Date(log.workDate).toISOString().split('T')[0];
+    this.workDate = this.formatDateToLocalISO(new Date(log.workDate));
 
     // Clear and set rows to the single log being edited
     this.rows = [{
@@ -322,7 +343,7 @@ export class TimesheetsComponent implements OnInit {
   getSeverityStyle(severity: number | string | undefined | null): { [key: string]: string } {
     const sev = severity ?? 0;
     const sevStr = typeof sev === 'string' ? sev.toLowerCase() : '';
-    if (sevStr === 'high' || sev === 2) return { 'background-color': '#fff1f2', 'color': '#9f1239' }; 
+    if (sevStr === 'high' || sev === 2) return { 'background-color': '#fff1f2', 'color': '#9f1239' };
     if (sevStr === 'medium' || sev === 1) return { 'background-color': '#fffbeb', 'color': '#92400e' };
     return { 'background-color': '#ecfdf5', 'color': '#065f46' };
   }

@@ -93,4 +93,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Pages/task-management/task-management.component').then((m) => m.TaskManagementComponent),
   },
+  {
+    path: 'projects/:projectId/timesheets',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/timesheets/timesheets.component').then((m) => m.TimesheetsComponent),
+  }
+
 ];
