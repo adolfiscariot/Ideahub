@@ -129,6 +129,7 @@ public class TaskController : ControllerBase
                     IsCompleted = st.IsCompleted,
                     AssigneeIds = st.AssigneeIds,
                     ProjectTaskId = st.ProjectTaskId,
+                    ParentSubTaskId = st.ParentSubTaskId,
                     MediaCount = st.Media?.Count ?? 0
                 }).ToList()
             }).ToList();
@@ -232,6 +233,7 @@ public class TaskController : ControllerBase
                 StartDate = subTaskDto.StartDate,
                 EndDate = subTaskDto.EndDate,
                 ProjectTaskId = taskId,
+                ParentSubTaskId = subTaskDto.ParentSubTaskId,
                 AssigneeIds = subTaskDto.AssigneeIds,
                 IsCompleted = false
             };
@@ -248,7 +250,8 @@ public class TaskController : ControllerBase
                 EndDate = subTask.EndDate,
                 IsCompleted = subTask.IsCompleted,
                 AssigneeIds = subTask.AssigneeIds,
-                ProjectTaskId = subTask.ProjectTaskId
+                ProjectTaskId = subTask.ProjectTaskId,
+                ParentSubTaskId = subTask.ParentSubTaskId
             };
 
             return Ok(ApiResponse.Ok("Sub-task created", response));

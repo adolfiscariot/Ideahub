@@ -21,6 +21,7 @@ export interface SubTaskDetails {
     isCompleted: boolean;
     assigneeIds: string[];
     projectTaskId: number;
+    parentSubTaskId?: number;
     mediaCount: number;
 }
 
@@ -49,6 +50,7 @@ export interface SubTaskDto {
     startDate: string;
     endDate: string;
     assigneeIds: string[];
+    parentSubTaskId?: number;
 }
 
 export interface SubTaskUpdateDto {

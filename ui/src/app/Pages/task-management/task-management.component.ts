@@ -72,6 +72,7 @@ export class TaskManagementComponent implements OnInit {
   showInlineSubTaskUserDropdown = false;
   isCreatingSubTask = false;
   selectedSubTaskFiles: File[] = [];
+  parentSubTaskId: number | null = null;
 
   // Edit Task Modal
   isEditTaskModalOpen = false;
@@ -172,6 +173,11 @@ export class TaskManagementComponent implements OnInit {
 
   setInspectionTab(tab: 'subtasks' | 'timesheets'): void {
     this.activeInspectionTab = tab;
+  }
+
+  getSubTasksByParent(parentId: number | null): SubTaskDetails[] {
+    if (!this.selectedTask?.subTasks) return [];
+    return this.selectedTask.subTasks.filter(st => (st.parentSubTaskId || null) === parentId);
   }
 
   nextTasks(): void {
@@ -355,8 +361,9 @@ export class TaskManagementComponent implements OnInit {
   }
 
   // --- SUBTASK MODAL METHODS ---
-  openSubTaskModal(taskId: number): void {
+  openSubTaskModal(taskId: number, parentId: number | null = null): void {
     this.targetTaskId = taskId;
+    this.parentSubTaskId = parentId;
     this.isSubTaskModalOpen = true;
     this.resetSubTaskForm();
   }
@@ -387,6 +394,9 @@ export class TaskManagementComponent implements OnInit {
     }
 
     this.isCreatingSubTask = true;
+    if (this.parentSubTaskId) {
+      this.newSubTask.parentSubTaskId = this.parentSubTaskId;
+    }
     this.taskService.createSubTask(this.targetTaskId, this.newSubTask).subscribe({
       next: (response) => {
         if (!response.success || !response.data) {
@@ -396,22 +406,16 @@ export class TaskManagementComponent implements OnInit {
         }
 
         const subTaskId = response.data.id;
+        const newSubTaskData = response.data;
 
         this.closeSubTaskModal();
         this.resetSubTaskForm();
-        this.loadTasks(); // Refresh list
 
-        // Also update selectedTask if it's the one we're looking at
-        if (this.selectedTask?.id === this.targetTaskId) {
-          this.taskService.getProjectTasks(this.projectId).subscribe({
-            next: (tasksResponse) => {
-              const refreshedTask = tasksResponse.data?.find(t => t.id === this.targetTaskId);
-              if (refreshedTask) {
-                this.selectedTask = refreshedTask;
-              }
-            }
-          });
+        // Optimistically update the list if we have a selected task
+        if (this.selectedTask && this.selectedTask.id === this.targetTaskId) {
+          this.selectedTask.subTasks.push(newSubTaskData);
         }
+        this.loadTasks(); // Full refresh in background
 
         this.isCreatingSubTask = false;
 
@@ -457,6 +461,16 @@ export class TaskManagementComponent implements OnInit {
     const taskId = this.selectedTask?.id;
     if (!taskId) return;
 
+    // RULE: Cannot complete a subtask if children are incomplete
+    if (!subTask.isCompleted) {
+      const children = this.selectedTask!.subTasks.filter(st => st.parentSubTaskId === subTask.id);
+      const incompleteChildren = children.filter(c => !c.isCompleted);
+      if (incompleteChildren.length > 0) {
+        this.toastService.show('Cannot complete subtask until all children are finished', 'warning');
+        return;
+      }
+    }
+
     const updateDto: SubTaskUpdateDto = {
       title: subTask.title,
       description: subTask.description || '',
@@ -472,11 +486,47 @@ export class TaskManagementComponent implements OnInit {
           // Update locally
           subTask.isCompleted = !subTask.isCompleted;
           this.toastService.show('Subtask updated', 'success');
+
+          // Check if parent should be updated (if we un-completed it, parent might need to be un-completed handles by next refresh ideally, 
+          // but for main task we do it explicitly)
+          this.checkAndSyncMainTaskCompletion();
+
           // Refresh list to update task-level progress bars
           this.loadTasks();
         }
       }
     });
+  }
+
+  private checkAndSyncMainTaskCompletion(): void {
+    if (!this.selectedTask) return;
+
+    const allSubTasksCompleted = this.selectedTask.subTasks.length > 0 &&
+      this.selectedTask.subTasks.every(st => st.isCompleted);
+
+    // Only update if state changed
+    if (this.selectedTask.isCompleted !== allSubTasksCompleted) {
+      const updateDto: TaskUpdateDto = {
+        title: this.selectedTask.title,
+        description: this.selectedTask.description,
+        startDate: this.selectedTask.startDate,
+        endDate: this.selectedTask.endDate,
+        isCompleted: allSubTasksCompleted,
+        labels: this.selectedTask.labels,
+        assigneeIds: this.selectedTask.assigneeIds
+      };
+
+      this.taskService.updateTask(this.selectedTask.id, updateDto).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.selectedTask!.isCompleted = allSubTasksCompleted;
+            if (allSubTasksCompleted) {
+              this.toastService.show('Main task marked as complete!', 'success');
+            }
+          }
+        }
+      });
+    }
   }
 
   resetSubTaskForm(): void {
@@ -692,6 +742,12 @@ export class TaskManagementComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.toastService.show('Subtask deleted successfully', 'success');
+
+          // Immediate UI update
+          if (this.selectedTask) {
+            this.selectedTask.subTasks = this.selectedTask.subTasks.filter(st => st.id !== this.pendingDeleteSubTaskId);
+          }
+
           this.cancelDeleteSubTask();
           this.loadTasks();
         } else {

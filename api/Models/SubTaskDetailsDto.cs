@@ -13,5 +13,6 @@ public class SubTaskDetailsDto
     public bool IsCompleted { get; set; }
     public List<string> AssigneeIds { get; set; } = new List<string>();
     public int ProjectTaskId { get; set; }
+    public int? ParentSubTaskId { get; set; }
     public int MediaCount { get; set; }
 }

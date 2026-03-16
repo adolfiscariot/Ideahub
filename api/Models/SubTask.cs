@@ -32,7 +32,14 @@ public class SubTask
     [ForeignKey("ProjectTask")]
     public int ProjectTaskId { get; set; }
 
+    public int? ParentSubTaskId { get; set; }
+
     // Navigation Properties
     public ProjectTask ProjectTask { get; set; } = null!;
+    
+    [ForeignKey("ParentSubTaskId")]
+    public SubTask? ParentSubTask { get; set; }
+    
+    public ICollection<SubTask> ChildSubTasks { get; set; } = new List<SubTask>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
 }
