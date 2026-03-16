@@ -362,15 +362,16 @@ export class TaskManagementComponent implements OnInit {
 
   // --- SUBTASK MODAL METHODS ---
   openSubTaskModal(taskId: number, parentId: number | null = null): void {
+    this.resetSubTaskForm();
     this.targetTaskId = taskId;
     this.parentSubTaskId = parentId;
     this.isSubTaskModalOpen = true;
-    this.resetSubTaskForm();
   }
 
   closeSubTaskModal(): void {
     this.isSubTaskModalOpen = false;
     this.showSubTaskUserDropdown = false;
+    this.parentSubTaskId = null;
   }
 
   toggleSubTaskAssignee(userId: string): void {
@@ -487,6 +488,11 @@ export class TaskManagementComponent implements OnInit {
           subTask.isCompleted = !subTask.isCompleted;
           this.toastService.show('Subtask updated', 'success');
 
+          // If we just un-completed a subtask, we must un-complete its ancestors
+          if (!subTask.isCompleted) {
+            this.uncompleteAncestorSubtasks(subTask);
+          }
+
           // Check if parent should be updated (if we un-completed it, parent might need to be un-completed handles by next refresh ideally, 
           // but for main task we do it explicitly)
           this.checkAndSyncMainTaskCompletion();
@@ -507,13 +513,7 @@ export class TaskManagementComponent implements OnInit {
     // Only update if state changed
     if (this.selectedTask.isCompleted !== allSubTasksCompleted) {
       const updateDto: TaskUpdateDto = {
-        title: this.selectedTask.title,
-        description: this.selectedTask.description,
-        startDate: this.selectedTask.startDate,
-        endDate: this.selectedTask.endDate,
-        isCompleted: allSubTasksCompleted,
-        labels: this.selectedTask.labels,
-        assigneeIds: this.selectedTask.assigneeIds
+        isCompleted: allSubTasksCompleted
       };
 
       this.taskService.updateTask(this.selectedTask.id, updateDto).subscribe({
@@ -529,6 +529,32 @@ export class TaskManagementComponent implements OnInit {
     }
   }
 
+  private uncompleteAncestorSubtasks(subTask: SubTaskDetails): void {
+    if (!this.selectedTask || !subTask.parentSubTaskId) return;
+
+    const parent = this.selectedTask.subTasks.find(st => st.id === subTask.parentSubTaskId);
+    if (parent && parent.isCompleted) {
+      const updateDto: SubTaskUpdateDto = {
+        title: parent.title,
+        description: parent.description || '',
+        startDate: parent.startDate,
+        endDate: parent.endDate,
+        isCompleted: false,
+        assigneeIds: parent.assigneeIds
+      };
+
+      this.taskService.updateSubTask(parent.id, updateDto).subscribe({
+        next: (response) => {
+          if (response.success) {
+            parent.isCompleted = false;
+            // Recursively walk up
+            this.uncompleteAncestorSubtasks(parent);
+          }
+        }
+      });
+    }
+  }
+
   resetSubTaskForm(): void {
     this.newSubTask = {
       title: '',
@@ -538,6 +564,7 @@ export class TaskManagementComponent implements OnInit {
       assigneeIds: []
     };
     this.selectedSubTaskFiles = [];
+    this.parentSubTaskId = null;
   }
 
   // --- EDIT TASK METHODS ---

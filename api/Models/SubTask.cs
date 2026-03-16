@@ -37,7 +37,6 @@ public class SubTask
     // Navigation Properties
     public ProjectTask ProjectTask { get; set; } = null!;
     
-    [ForeignKey("ParentSubTaskId")]
     public SubTask? ParentSubTask { get; set; }
     
     public ICollection<SubTask> ChildSubTasks { get; set; } = new List<SubTask>();
