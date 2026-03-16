@@ -33,6 +33,7 @@ public class Timesheet
 
     public bool HasBlocker { get; set; } = false;
 
+    [MaxLength(150)]
     [Column(TypeName = "text")]
     public string? BlockerDescription { get; set; }
 
@@ -51,6 +52,7 @@ public class Timesheet
     // Navigation Properties
     public ProjectTask Task { get; set; } = null!;
     public IdeahubUser User { get; set; } = null!;
+    public ICollection<Media>? Media { get; set; }
 }
 
 public enum BlockerSeverity

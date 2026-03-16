@@ -35,6 +35,9 @@ public class Media
     [ForeignKey("SubTask")]
     public int? SubTaskId { get; set; }
 
+    [ForeignKey("Timesheet")]
+    public int? TimesheetId { get; set; }
+
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -46,6 +49,7 @@ public class Media
     public Comment? Comment { get; set; }
     public ProjectTask? ProjectTask { get; set; } 
     public SubTask? SubTask { get; set; }
+    public Timesheet? Timesheet { get; set; }
 }
 
 public enum MediaType
