@@ -31,7 +31,7 @@ public class MediaController : ControllerBase
 
     // Upload media
     [HttpPost("upload-media")]
-    public async Task<IActionResult> UploadMedia([FromForm] MediaDto mediaDto, int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null)
+    public async Task<IActionResult> UploadMedia([FromForm] MediaDto mediaDto, int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null, int? timesheetId = null)
     {
         string? savedFilePath = null;
         try
@@ -75,7 +75,8 @@ public class MediaController : ControllerBase
                 CommentId = commentId,
                 ProjectId = projectId,
                 ProjectTaskId = projectTaskId,
-                SubTaskId = subTaskId
+                SubTaskId = subTaskId,
+                TimesheetId = timesheetId
             };
 
             _context.Media.Add(media);
@@ -97,7 +98,7 @@ public class MediaController : ControllerBase
 
     // View media (all for a specific idea/comment/project)
     [HttpGet("view-media")]
-    public async Task<IActionResult> ViewMedia(int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null)
+    public async Task<IActionResult> ViewMedia(int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null, int? timesheetId = null)
     {
         var query = _context.Media.AsQueryable();
 
@@ -106,6 +107,7 @@ public class MediaController : ControllerBase
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
         if (projectTaskId.HasValue) query = query.Where(m => m.ProjectTaskId == projectTaskId.Value);
         if (subTaskId.HasValue) query = query.Where(m => m.SubTaskId == subTaskId.Value);
+        if (timesheetId.HasValue) query = query.Where(m => m.TimesheetId == timesheetId.Value);
 
         var mediaList = await query
             .Select(m => new { m.Id, m.FilePath, m.MediaType, m.CreatedAt })
