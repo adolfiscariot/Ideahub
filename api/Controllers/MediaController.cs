@@ -43,6 +43,15 @@ public class MediaController : ControllerBase
                 return Unauthorized(ApiResponse.Fail("User not authenticated"));
             }
 
+            if (timesheetId.HasValue)
+            {
+                if (!await HasTimesheetAccess(timesheetId.Value, userId))
+                {
+                    _logger.LogWarning("User {userId} attempted to upload media to timesheet {timesheetId} without access", userId, timesheetId);
+                    return StatusCode(403, ApiResponse.Fail("Not authorized to access this timesheet"));
+                }
+            }
+
             // if file is null but MediaType provided block 
             if (mediaDto.File == null || mediaDto.File.Length == 0)
             {
@@ -100,6 +109,19 @@ public class MediaController : ControllerBase
     [HttpGet("view-media")]
     public async Task<IActionResult> ViewMedia(int? ideaId = null, int? commentId = null, int? projectId = null, int? projectTaskId = null, int? subTaskId = null, int? timesheetId = null)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+        if (timesheetId.HasValue)
+        {
+            if (!await HasTimesheetAccess(timesheetId.Value, userId))
+            {
+                _logger.LogWarning("User {userId} attempted to view media for timesheet {timesheetId} without access", userId, timesheetId);
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this timesheet"));
+            }
+        }
+
         var query = _context.Media.AsQueryable();
 
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
@@ -167,5 +189,25 @@ public class MediaController : ControllerBase
             default:
                 return false;
         }
+    }
+
+    private async Task<bool> HasTimesheetAccess(int timesheetId, string userId)
+    {
+        var timesheet = await _context.Timesheets
+            .Include(t => t.Task)
+            .ThenInclude(tk => tk.Project)
+            .FirstOrDefaultAsync(t => t.Id == timesheetId && !t.IsDeleted);
+
+        if (timesheet == null) return false;
+
+        // Owner check
+        if (timesheet.UserId == userId) return true;
+
+        // Project access check
+        var hasProjectAccess = await _context.UserGroups.AnyAsync(ug => 
+            ug.GroupId == timesheet.Task.Project.GroupId && 
+            ug.UserId == userId);
+
+        return hasProjectAccess;
     }
 }

@@ -90,7 +90,6 @@ public class TimesheetController : ControllerBase
                 return BadRequest(ApiResponse.Fail("No logs provided"));
             }
 
-            // Verify tasks belong to the project
             var taskIds = request.Logs.Select(l => l.TaskId).Where(id => id.HasValue).Select(id => id!.Value).ToList();
             var validTasks = await _context.ProjectTasks
                 .Where(t => t.ProjectId == projectId && taskIds.Contains(t.Id))
@@ -98,9 +97,25 @@ public class TimesheetController : ControllerBase
                 .ToListAsync();
 
             var timesheets = new List<Timesheet>();
-            foreach (var log in request.Logs)
+
+            // Add context for which logs are invalid and why
+            var invalidRows = new List<object>();
+
+            for (int i = 0; i < request.Logs.Count; i++)
             {
-                if (log.TaskId == null || !validTasks.Contains(log.TaskId.Value)) continue;
+                var log = request.Logs[i];
+
+                if (log.TaskId == null)
+                {
+                    invalidRows.Add(new { index = i, reason = "TaskId is required" });
+                    continue;
+                }
+
+                if (!validTasks.Contains(log.TaskId.Value))
+                {
+                    invalidRows.Add(new { index = i, reason = $"TaskId {log.TaskId.Value} is invalid or does not belong to project {projectId}" });
+                    continue;
+                }
 
                 timesheets.Add(new Timesheet
                 {
@@ -126,7 +141,11 @@ public class TimesheetController : ControllerBase
 
             var createdIds = timesheets.Select(t => t.Id).ToList();
 
-            return Ok(ApiResponse.Ok($"{timesheets.Count} work logs created successfully", createdIds));
+            return Ok(ApiResponse.Ok($"{timesheets.Count} work logs created successfully, {invalidRows.Count} skipped", new 
+            { 
+                createdIds, 
+                invalidRows 
+            }));
         }
         catch (Exception ex)
         {
@@ -218,6 +237,14 @@ public class TimesheetController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+            if (!await HasTaskAccess(taskId, userId))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this task"));
+            }
+
             var logs = await _context.Timesheets
                 .Include(ts => ts.User)
                 .Where(ts => ts.TaskId == taskId && !ts.IsDeleted)
@@ -306,6 +333,14 @@ public class TimesheetController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+            if (!await HasProjectAccess(projectId, userId))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this project"));
+            }
+
             var logs = await _context.Timesheets
                 .Include(ts => ts.Task)
                 .Include(ts => ts.User)
@@ -347,9 +382,18 @@ public class TimesheetController : ControllerBase
     public async Task<IActionResult> GetMyRelevantTasks([FromQuery] int projectId)
     {
         try {
-            // Fetch all active tasks for the project
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+            if (!await HasProjectAccess(projectId, userId))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this project"));
+            }
+
+            // Fetch all active tasks for the project assigned to the current user
             var tasks = await _context.ProjectTasks
                 .Where(t => t.ProjectId == projectId && !t.IsDeleted && !t.IsCompleted)
+                .Where(t => t.AssigneeIds.Contains(userId))
                 .Select(t => new { t.Id, t.Title })
                 .ToListAsync();
 
@@ -367,6 +411,14 @@ public class TimesheetController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+            if (!await HasProjectAccess(projectId, userId))
+            {
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this project"));
+            }
+
             var project = await _context.Projects
                 .Include(p => p.Tasks)
                 .ThenInclude(t => t.SubTasks)
@@ -404,5 +456,34 @@ public class TimesheetController : ControllerBase
             _logger.LogError(ex, "Failed to fetch project team for {ProjectId}", projectId);
             return StatusCode(500, ApiResponse.Fail("An error occurred while fetching the team roster"));
         }
+    }
+
+    // Ensure user is part of group w/ stated project
+    private async Task<bool> HasProjectAccess(int projectId, string userId)
+    {
+        var project = await _context.Projects
+            .Include(p => p.Group)
+            .FirstOrDefaultAsync(p => p.Id == projectId && !p.IsDeleted);
+
+        if (project == null) return false;
+
+        // Check if user is in the group
+        var isMember = await _context.UserGroups.AnyAsync(ug => 
+            ug.GroupId == project.GroupId && 
+            ug.UserId == userId);
+
+        return isMember;
+    }
+
+    // Ensure user owns task
+    private async Task<bool> HasTaskAccess(int taskId, string userId)
+    {
+        var task = await _context.ProjectTasks
+            .Include(t => t.Project)
+            .FirstOrDefaultAsync(t => t.Id == taskId && !t.IsDeleted);
+
+        if (task == null) return false;
+
+        return await HasProjectAccess(task.ProjectId, userId);
     }
 }
