@@ -52,7 +52,8 @@ export class MediaService {
     commentId?: number,
     projectId?: number,
     projectTaskId?: number,
-    subTaskId?: number
+    subTaskId?: number,
+    timesheetId?: number
   ): Observable<ApiResponse<Media>> {
     const formData = new FormData();
     formData.append('File', file);
@@ -64,6 +65,7 @@ export class MediaService {
     if (projectId) params = params.set('projectId', projectId.toString());
     if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
+    if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
     return this.http.post<any>(`${this.apiUrl}/upload-media`, formData, { params })
       .pipe(map(response => this.convertResponse<Media>(response)));
@@ -74,7 +76,8 @@ export class MediaService {
     commentId?: number,
     projectId?: number,
     projectTaskId?: number,
-    subTaskId?: number
+    subTaskId?: number,
+    timesheetId?: number
   ): Observable<ApiResponse<Media[]>> {
     let params = new HttpParams();
 
@@ -83,6 +86,7 @@ export class MediaService {
     if (projectId) params = params.set('projectId', projectId.toString());
     if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
+    if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
     return this.http.get<any>(`${this.apiUrl}/view-media`, { params })
       .pipe(map(response => this.convertResponse<Media[]>(response)));

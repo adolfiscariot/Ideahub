@@ -88,6 +88,9 @@
               <mat-icon>attach_file</mat-icon>
               Media Upload
             </app-buttons>
+            <app-buttons [buttonText]="'Create Task'" [buttonStyleClass]="'btn-promote'" (click)="createTask()"
+              [isLoading]="isCreating">
+            </app-buttons>
             <div class="selected-files-list" *ngIf="selectedFiles.length > 0">
               <div *ngFor="let file of selectedFiles; let i = index" class="file-preview-chip">
                 <mat-icon [title]="file.name">insert_drive_file</mat-icon>
@@ -95,11 +98,6 @@
                 <button (click)="removeFile(i)" class="remove-chip">&times;</button>
               </div>
             </div>
-          </div>
-          <div class="footer-right">
-            <app-buttons [buttonText]="'Create Task'" [buttonStyleClass]="'btn-promote'" (click)="createTask()"
-              [isLoading]="isCreating">
-            </app-buttons>
           </div>
 
           <div class="main-split">
