@@ -841,6 +841,12 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithOne(m => m.SubTask)
                 .HasForeignKey(m => m.SubTaskId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            st.HasOne(s => s.ParentSubTask)
+                .WithMany(p => p.ChildSubTasks)
+                .HasForeignKey(s => new { s.ParentSubTaskId, s.ProjectTaskId })
+                .HasPrincipalKey(p => new { p.Id, p.ProjectTaskId })
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Timesheet Configuration

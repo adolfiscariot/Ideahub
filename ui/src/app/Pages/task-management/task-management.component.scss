@@ -391,6 +391,10 @@ section {
 }
 
 // --- Inspection Subtask Row Layout ---
+.subtask-node {
+    transition: all 0.3s ease;
+}
+
 .subtask-item {
     .st-actions {
         display: flex;

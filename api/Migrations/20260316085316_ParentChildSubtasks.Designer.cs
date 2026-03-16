@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using api.Data;
@@ -11,9 +12,11 @@ using api.Data;
 namespace Ideahub.Migrations
 {
     [DbContext(typeof(IdeahubDbContext))]
-    partial class IdeahubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260316085316_ParentChildSubtasks")]
+    partial class ParentChildSubtasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -983,9 +986,9 @@ namespace Ideahub.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectTaskId");
+                    b.HasIndex("ParentSubTaskId");
 
-                    b.HasIndex("ParentSubTaskId", "ProjectTaskId");
+                    b.HasIndex("ProjectTaskId");
 
                     b.ToTable("SubTasks");
                 });
@@ -1391,17 +1394,15 @@ namespace Ideahub.Migrations
 
             modelBuilder.Entity("api.Models.SubTask", b =>
                 {
+                    b.HasOne("api.Models.SubTask", "ParentSubTask")
+                        .WithMany("ChildSubTasks")
+                        .HasForeignKey("ParentSubTaskId");
+
                     b.HasOne("api.Models.ProjectTask", "ProjectTask")
                         .WithMany("SubTasks")
                         .HasForeignKey("ProjectTaskId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("api.Models.SubTask", "ParentSubTask")
-                        .WithMany("ChildSubTasks")
-                        .HasForeignKey("ParentSubTaskId", "ProjectTaskId")
-                        .HasPrincipalKey("Id", "ProjectTaskId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentSubTask");
 

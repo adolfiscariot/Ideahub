@@ -129,6 +129,7 @@ public class TaskController : ControllerBase
                     IsCompleted = st.IsCompleted,
                     AssigneeIds = st.AssigneeIds,
                     ProjectTaskId = st.ProjectTaskId,
+                    ParentSubTaskId = st.ParentSubTaskId,
                     MediaCount = st.Media?.Count ?? 0
                 }).ToList()
             }).ToList();
@@ -162,7 +163,19 @@ public class TaskController : ControllerBase
             if (taskDto.StartDate != null) task.StartDate = DateTime.SpecifyKind(taskDto.StartDate.Value, DateTimeKind.Utc);
             if (taskDto.EndDate != null) task.EndDate = DateTime.SpecifyKind(taskDto.EndDate.Value, DateTimeKind.Utc);
             if (taskDto.Labels != null) task.Labels = taskDto.Labels;
-            if (taskDto.IsCompleted != null) task.IsCompleted = taskDto.IsCompleted.Value;
+            if (taskDto.IsCompleted != null)
+            {
+                if (taskDto.IsCompleted.Value)
+                {
+                    bool hasIncompleteSubTasks = await _context.SubTasks
+                        .AnyAsync(st => st.ProjectTaskId == taskId && !st.IsCompleted);
+                    if (hasIncompleteSubTasks)
+                    {
+                        return BadRequest(ApiResponse.Fail("Cannot complete task until all subtasks are finished."));
+                    }
+                }
+                task.IsCompleted = taskDto.IsCompleted.Value;
+            }
             if (taskDto.AssigneeIds != null) task.AssigneeIds = taskDto.AssigneeIds;
 
             task.UpdatedAt = DateTime.UtcNow;
@@ -225,6 +238,20 @@ public class TaskController : ControllerBase
                 return StatusCode(403, ApiResponse.Fail("Not authorized to create sub-tasks here."));
             }
 
+            // A subtask's parent must belong to the same task
+            if (subTaskDto.ParentSubTaskId.HasValue)
+            {
+                var parentSubTask = await _context.SubTasks.FindAsync(subTaskDto.ParentSubTaskId.Value);
+                if (parentSubTask == null)
+                {
+                    return NotFound(ApiResponse.Fail("Parent subtask not found."));
+                }
+                if (parentSubTask.ProjectTaskId != taskId)
+                {
+                    return BadRequest(ApiResponse.Fail("Parent subtask must belong to the same project task."));
+                }
+            }
+
             var subTask = new SubTask
             {
                 Title = subTaskDto.Title,
@@ -232,6 +259,7 @@ public class TaskController : ControllerBase
                 StartDate = subTaskDto.StartDate,
                 EndDate = subTaskDto.EndDate,
                 ProjectTaskId = taskId,
+                ParentSubTaskId = subTaskDto.ParentSubTaskId,
                 AssigneeIds = subTaskDto.AssigneeIds,
                 IsCompleted = false
             };
@@ -248,7 +276,8 @@ public class TaskController : ControllerBase
                 EndDate = subTask.EndDate,
                 IsCompleted = subTask.IsCompleted,
                 AssigneeIds = subTask.AssigneeIds,
-                ProjectTaskId = subTask.ProjectTaskId
+                ProjectTaskId = subTask.ProjectTaskId,
+                ParentSubTaskId = subTask.ParentSubTaskId
             };
 
             return Ok(ApiResponse.Ok("Sub-task created", response));
@@ -285,7 +314,19 @@ public class TaskController : ControllerBase
             if (subTaskDto.Description != null) subTask.Description = subTaskDto.Description;
             if (subTaskDto.StartDate != null) subTask.StartDate = subTaskDto.StartDate;
             if (subTaskDto.EndDate != null) subTask.EndDate = subTaskDto.EndDate;
-            if (subTaskDto.IsCompleted != null) subTask.IsCompleted = subTaskDto.IsCompleted.Value;
+            if (subTaskDto.IsCompleted != null)
+            {
+                if (subTaskDto.IsCompleted.Value)
+                {
+                    bool hasIncompleteChildren = await _context.SubTasks
+                        .AnyAsync(st => st.ParentSubTaskId == subTaskId && !st.IsCompleted);
+                    if (hasIncompleteChildren)
+                    {
+                        return BadRequest(ApiResponse.Fail("Cannot complete subtask until all its children are finished."));
+                    }
+                }
+                subTask.IsCompleted = subTaskDto.IsCompleted.Value;
+            }
             if (subTaskDto.AssigneeIds != null) subTask.AssigneeIds = subTaskDto.AssigneeIds;
 
             await _context.SaveChangesAsync();

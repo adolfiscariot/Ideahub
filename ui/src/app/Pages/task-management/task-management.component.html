@@ -335,32 +335,42 @@
 
                           <div class="tab-content">
                             <div *ngIf="activeInspectionTab === 'subtasks'" class="subtask-list">
-                              <div *ngFor="let st of selectedTask.subTasks" class="subtask-item interactive"
-                                (click)="toggleSubTaskStatus(st)">
-                                <div class="st-checkbox" [class.completed]="st.isCompleted">
-                                  <mat-icon *ngIf="st.isCompleted">check</mat-icon>
+                              <ng-template #subTaskTemplate let-parentId="parentId" let-level="level">
+                                <div *ngFor="let st of getSubTasksByParent(parentId)" class="subtask-node"
+                                  [style.padding-left.px]="level * 20">
+                                  <div class="subtask-item interactive" (click)="toggleSubTaskStatus(st)">
+                                    <div class="st-checkbox" [class.completed]="st.isCompleted">
+                                      <mat-icon *ngIf="st.isCompleted">check</mat-icon>
+                                    </div>
+                                    <div class="subtask-info">
+                                      <span class="st-title" [class.completed]="st.isCompleted">{{ st.title }}</span>
+                                      <span class="st-description">{{ st.description }}</span>
+                                      <span class="st-date" *ngIf="st.endDate">Due {{ st.endDate | date:'shortDate' }}</span>
+                                    </div>
+                                    <div class="st-actions" style="margin-left: auto;">
+                                      <button class="create-subtask-btn" title="Add nested subtask"
+                                        (click)="openSubTaskModal(selectedTask.id, st.id); $event.stopPropagation()">
+                                        <mat-icon>add_circle_outline</mat-icon>
+                                      </button>
+                                      <button class="icon-action-btn edit-btn" title="Edit subtask"
+                                        (click)="openEditSubTask(st, $event)">
+                                        <mat-icon>edit</mat-icon>
+                                      </button>
+                                      <button class="icon-action-btn delete-btn" title="Delete subtask"
+                                        (click)="confirmDeleteSubTask(st, $event)">
+                                        <mat-icon>delete_outline</mat-icon>
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <!-- Recursive call for children -->
+                                  <ng-container
+                                    *ngTemplateOutlet="subTaskTemplate; context: { parentId: st.id, level: level + 1 }"></ng-container>
                                 </div>
-                                <div class="subtask-info">
-                                  <span class="st-title" [class.completed]="st.isCompleted">{{ st.title }}</span>
-                                  <span class="st-description">{{ st.description }}</span>
-                                  <span class="st-date" *ngIf="st.endDate">Due {{ st.endDate | date:'shortDate'
-                                    }}</span>
-                                </div>
-                                <div class="st-actions" style="margin-left: auto;">
-                                  <button class="create-subtask-btn" title="Add subtask"
-                                    (click)="openSubTaskModal(selectedTask.id); $event.stopPropagation()">
-                                    <mat-icon>add_circle_outline</mat-icon>
-                                  </button>
-                                  <button class="icon-action-btn edit-btn" title="Edit subtask"
-                                    (click)="openEditSubTask(st, $event)">
-                                    <mat-icon>edit</mat-icon>
-                                  </button>
-                                  <button class="icon-action-btn delete-btn" title="Delete subtask"
-                                    (click)="confirmDeleteSubTask(st, $event)">
-                                    <mat-icon>delete_outline</mat-icon>
-                                  </button>
-                                </div>
-                              </div>
+                              </ng-template>
+
+                              <ng-container
+                                *ngTemplateOutlet="subTaskTemplate; context: { parentId: null, level: 0 }"></ng-container>
+
                               <div *ngIf="selectedTask.subTasks.length === 0" class="empty-tab-state">
                                 <p>No subtasks yet.</p>
                               </div>
@@ -437,6 +447,24 @@
                       {{ user.fullName || user.email }}
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group media-group" style="margin-top: 1rem;">
+            <label>Media Upload</label>
+            <div class="footer-left" style="margin-bottom: 0;">
+              <input type="file" #modalSubTaskFileInput hidden multiple (change)="onSubTaskFilesSelected($event)">
+              <app-buttons [buttonStyleClass]="'btn-promote'" (click)="modalSubTaskFileInput.click()">
+                <mat-icon>attach_file</mat-icon>
+                Attach Media
+              </app-buttons>
+              <div class="selected-files-list" *ngIf="selectedSubTaskFiles.length > 0">
+                <div *ngFor="let file of selectedSubTaskFiles; let i = index" class="file-preview-chip">
+                  <mat-icon [title]="file.name">insert_drive_file</mat-icon>
+                  <span class="file-name">{{ file.name }}</span>
+                  <button (click)="removeSubTaskFile(i)" class="remove-chip">&times;</button>
                 </div>
               </div>
             </div>
