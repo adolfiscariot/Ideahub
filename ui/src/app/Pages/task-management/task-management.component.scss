@@ -943,7 +943,6 @@ section {
                 /* accommodate scaling so it doesn't wrap prematurely */
                 display: flex;
                 flex-direction: row;
-                align-items: center;
                 gap: var(--spacing-lg);
 
                 .media-group {
