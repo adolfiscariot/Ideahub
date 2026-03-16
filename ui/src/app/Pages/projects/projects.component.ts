@@ -73,6 +73,39 @@ export class ProjectsComponent implements OnInit {
     deleteConfirmName = '';
     isDeletingProject = false;
 
+    searchTerm: string = '';
+
+    get filteredProjects(): ProjectWithMedia[] {
+        if (!this.searchTerm.trim()) return this.projects;
+        const term = this.searchTerm.toLowerCase();
+        return this.projects.filter(p => 
+            p.title.toLowerCase().includes(term) || 
+            p.description.toLowerCase().includes(term) ||
+            p.overseenBy.toLowerCase().includes(term)
+        );
+    }
+
+    get activeProjectsCount(): number {
+        return this.projects.filter(p => p.status === ProjectStatus.Active).length;
+    }
+
+    get dueThisWeekCount(): number {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        return this.projects.filter(p => {
+            if (!p.endedAt) return false;
+            const dueDate = new Date(p.endedAt);
+            return dueDate >= startOfWeek && dueDate <= endOfWeek;
+        }).length;
+    }
+
     private toastService = inject(ToastService);
 
     ngOnInit(): void {

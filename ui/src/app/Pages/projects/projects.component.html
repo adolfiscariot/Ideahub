@@ -6,7 +6,56 @@
         </div>
     </header>
 
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon-wrapper">
+                <mat-icon>layers</mat-icon>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">ACTIVE PROJECTS</span>
+                <span class="stat-value">{{ activeProjectsCount }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-wrapper success">
+                <mat-icon>info_outline</mat-icon>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">AVG. COMPLETION</span>
+                <span class="stat-value">74%</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-wrapper primary">
+                <mat-icon>calendar_today</mat-icon>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">DUE THIS WEEK</span>
+                <span class="stat-value">{{ dueThisWeekCount }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon-wrapper error">
+                <mat-icon>notifications_none</mat-icon>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">CRITICAL TASKS</span>
+                <span class="stat-value">08</span>
+            </div>
+        </div>
+    </div>
+
     <div class="card projects-card">
+        <div class="table-header-row">
+            <div class="table-title">
+                <mat-icon>grid_view</mat-icon>
+                <span>All Projects</span>
+            </div>
+            <div class="search-filter-wrapper">
+                <mat-icon class="search-icon">search</mat-icon>
+                <input type="text" [(ngModel)]="searchTerm" placeholder="Filter projects..." class="search-input">
+            </div>
+        </div>
         <div class="table-responsive" [class.reloading]="isReloading">
             <table class="projects-table">
                 <thead>
@@ -21,7 +70,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let project of projects; trackBy: trackByProjectId"
+                    <tr *ngFor="let project of filteredProjects; trackBy: trackByProjectId"
                         (click)="navigateToTasks(project.id)" [class.clickable-row]="true">
                         <td class="cell-project">
                             <div class="project-info">
