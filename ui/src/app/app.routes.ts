@@ -92,6 +92,5 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/task-management/task-management.component').then((m) => m.TaskManagementComponent),
-  }
-
+  },
 ];

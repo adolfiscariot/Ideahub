@@ -89,12 +89,10 @@ section {
     .card-footer {
         padding: var(--spacing-md) var(--spacing-lg);
         border-top: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         background: rgba(var(--text-muted), 0.02);
         flex-wrap: wrap;
         gap: var(--spacing-md);
+
     }
 }
 
@@ -103,6 +101,7 @@ section {
     align-items: center;
     gap: var(--spacing-md);
     flex-wrap: wrap;
+    margin-bottom: 4em;
 }
 
 .selected-files-list {
