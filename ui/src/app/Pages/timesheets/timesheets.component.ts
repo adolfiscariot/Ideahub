@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, HostListener } from '@angular/core';
+import { Component, OnInit, inject, HostListener, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +38,9 @@ export class TimesheetsComponent implements OnInit {
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+
+  @Input() isChildView: boolean = false;
+  @Input() parentProjectId: number | null = null;
 
   projectId: number = 0;
   currentUserId: string = '';
@@ -118,13 +121,24 @@ export class TimesheetsComponent implements OnInit {
 
   ngOnInit(): void {
     this.workDate = this.formatDateToLocalISO(new Date());
-    const pId = this.route.snapshot.paramMap.get('projectId');
-    if (pId) {
-      this.projectId = +pId;
+
+    if (this.isChildView && this.parentProjectId) {
+      this.projectId = this.parentProjectId;
+    } else {
+      const pId = this.route.snapshot.paramMap.get('projectId')
+        || this.route.parent?.snapshot.paramMap.get('projectId');
+      if (pId) {
+        this.projectId = +pId;
+      }
+    }
+
+    if (this.projectId) {
+      this.isLoading = true;
       this.loadTasks();
       this.loadRecentLogs();
       this.loadProjectTeam();
     }
+
     this.currentUserId = this.authService.getCurrentUserId();
     this.addRow(); // Start with one empty row
   }
@@ -145,6 +159,10 @@ export class TimesheetsComponent implements OnInit {
         if (res.success && res.data) {
           this.recentLogs = res.data;
         }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
       }
     });
   }

@@ -6,7 +6,19 @@
     </div>
   </header>
 
+  <div class="project-tabs">
+    <div class="tab-item" [class.active]="activeMainTab === 'tasks'" (click)="setMainTab('tasks')">
+      <mat-icon>assignment</mat-icon>
+      <span>Task Board</span>
+    </div>
+    <div class="tab-item" [class.active]="activeMainTab === 'timesheets'" (click)="setMainTab('timesheets')">
+      <mat-icon>access_time</mat-icon>
+      <span>Project Timesheets</span>
+    </div>
+  </div>
+
   <div class="content-area">
+    <ng-container *ngIf="activeMainTab === 'tasks'">
     <!-- SECTION 1: CREATE NEW TASK -->
     <section class="creation-section" *ngIf="canCreateTask">
       <div class="card creation-card">
@@ -345,7 +357,8 @@
                                     <div class="subtask-info">
                                       <span class="st-title" [class.completed]="st.isCompleted">{{ st.title }}</span>
                                       <span class="st-description">{{ st.description }}</span>
-                                      <span class="st-date" *ngIf="st.endDate">Due {{ st.endDate | date:'shortDate' }}</span>
+                                      <span class="st-date" *ngIf="st.endDate">Due {{ st.endDate | date:'shortDate'
+                                        }}</span>
                                     </div>
                                     <div class="st-actions" style="margin-left: auto;">
                                       <button class="create-subtask-btn" title="Add nested subtask"
@@ -393,6 +406,17 @@
         </div>
       </div>
     </section>
+    </ng-container>
+
+    <!-- TAB SWITCHING INDICATOR -->
+    <div class="tab-switch-loader" *ngIf="isTabSwitching">
+      <div class="tab-switch-spinner"></div>
+      <p>Switching view...</p>
+    </div>
+
+    <ng-container *ngIf="activeMainTab === 'timesheets' && !isTabSwitching">
+      <app-timesheets [isChildView]="true" [parentProjectId]="projectId"></app-timesheets>
+    </ng-container>
 
     <!-- SUBTASK CREATION MODAL -->
     <div class="modal-overlay" *ngIf="isSubTaskModalOpen" (click)="closeSubTaskModal()">
