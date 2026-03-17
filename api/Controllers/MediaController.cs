@@ -200,14 +200,24 @@ public class MediaController : ControllerBase
 
         if (timesheet == null) return false;
 
-        // Owner check
+        // 1. Owner check (The person who logged the work)
         if (timesheet.UserId == userId) return true;
 
-        // Project access check
-        var hasProjectAccess = await _context.UserGroups.AnyAsync(ug => 
+        // 2. Project Overseer check
+        if (timesheet.Task?.Project?.OverseenByUserId == userId) return true;
+
+        // 3. Group Membership check
+        var isMember = await _context.UserGroups.AnyAsync(ug => 
             ug.GroupId == timesheet.Task.Project.GroupId && 
             ug.UserId == userId);
+        if (isMember) return true;
 
-        return hasProjectAccess;
+        // 4. Task/SubTask Assignee check
+        // Check if user is assigned to the specific task or any subtask within the project
+        var isAssignee = await _context.ProjectTasks
+            .AnyAsync(t => t.ProjectId == timesheet.Task.ProjectId && !t.IsDeleted && 
+                (t.AssigneeIds.Contains(userId) || _context.SubTasks.Any(st => st.ProjectTaskId == t.Id && st.AssigneeIds.Contains(userId))));
+
+        return isAssignee;
     }
 }

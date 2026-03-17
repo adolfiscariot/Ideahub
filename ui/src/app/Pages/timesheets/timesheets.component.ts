@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, HostListener } from '@angular/core';
+import { Component, OnInit, inject, HostListener, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 
 interface TimesheetRow {
   taskId: number;
@@ -28,7 +29,7 @@ interface TimesheetRow {
 @Component({
   selector: 'app-timesheets',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MediaComponent, MatMenuModule, MatButtonModule, ModalComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MediaComponent, MatMenuModule, MatButtonModule, ModalComponent, ButtonsComponent],
   templateUrl: './timesheets.component.html',
   styleUrl: './timesheets.component.scss'
 })
@@ -38,6 +39,9 @@ export class TimesheetsComponent implements OnInit {
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+
+  @Input() isChildView: boolean = false;
+  @Input() parentProjectId: number | null = null;
 
   projectId: number = 0;
   currentUserId: string = '';
@@ -118,13 +122,24 @@ export class TimesheetsComponent implements OnInit {
 
   ngOnInit(): void {
     this.workDate = this.formatDateToLocalISO(new Date());
-    const pId = this.route.snapshot.paramMap.get('projectId');
-    if (pId) {
-      this.projectId = +pId;
+
+    if (this.isChildView && this.parentProjectId) {
+      this.projectId = this.parentProjectId;
+    } else {
+      const pId = this.route.snapshot.paramMap.get('projectId')
+        || this.route.parent?.snapshot.paramMap.get('projectId');
+      if (pId) {
+        this.projectId = +pId;
+      }
+    }
+
+    if (this.projectId) {
+      this.isLoading = true;
       this.loadTasks();
       this.loadRecentLogs();
       this.loadProjectTeam();
     }
+
     this.currentUserId = this.authService.getCurrentUserId();
     this.addRow(); // Start with one empty row
   }
@@ -145,6 +160,10 @@ export class TimesheetsComponent implements OnInit {
         if (res.success && res.data) {
           this.recentLogs = res.data;
         }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
       }
     });
   }
@@ -228,7 +247,7 @@ export class TimesheetsComponent implements OnInit {
             for (const file of row.tempFiles) {
               const mediaType = this.mediaService.detectMediaType(file);
               await firstValueFrom(
-                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, this.editingLogId)
+                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, this.editingLogId as number)
               );
             }
           }
@@ -251,8 +270,8 @@ export class TimesheetsComponent implements OnInit {
 
         const res = await firstValueFrom(this.timesheetService.bulkLogWork(this.projectId, logsToSend));
 
-        if (res.success && res.data) {
-          const createdIds: number[] = res.data;
+        if (res.success && res.data && res.data.createdIds) {
+          const createdIds: number[] = res.data.createdIds;
 
           // Match validRows to createdIds to upload files
           for (let i = 0; i < validRows.length; i++) {
@@ -262,7 +281,7 @@ export class TimesheetsComponent implements OnInit {
             if (row.hasBlocker && row.tempFiles.length > 0 && timesheetId) {
               for (const file of row.tempFiles) {
                 const mediaType = this.mediaService.detectMediaType(file);
-                await firstValueFrom(this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, timesheetId));
+                await firstValueFrom(this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, timesheetId));
               }
             }
           }

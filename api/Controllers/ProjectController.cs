@@ -215,12 +215,35 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Group not found"));
             }
 
-            // check if user is in the group that the project is in
-            var groupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
-            if (!groupMember)
+            // check if user has access: (Overseer or Task/SubTask Assignee)
+            var isOverseer = project.OverseenByUserId == userId;
+            var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
+            
+            bool isAssignee = false;
+            if (!isOverseer)
             {
-                _logger.LogError("GetProjectById: User {userId} does not belong in group {groupId}", userId, project.GroupId);
-                return StatusCode(403, ApiResponse.Fail("User is not in group"));
+                // Assignee check
+                var tasks = await _context.ProjectTasks
+                    .Where(t => t.ProjectId == projectId && !t.IsDeleted)
+                    .Select(t => new { t.AssigneeIds })
+                    .ToListAsync();
+                
+                isAssignee = tasks.Any(t => t.AssigneeIds.Contains(userId));
+
+                // If still not found, check subtasks
+                if (!isAssignee)
+                {
+                    isAssignee = await _context.SubTasks.AnyAsync(st =>
+                        !st.ProjectTask.IsDeleted &&
+                        st.ProjectTask.ProjectId == projectId &&
+                        st.AssigneeIds.Contains(userId));
+                }
+            }
+
+            if (!isOverseer && !isGroupMember && !isAssignee)
+            {
+                _logger.LogError("GetProjectById: User {userId} does not have access to project {projectId} (not overseer, member, or assignee)", userId, projectId);
+                return StatusCode(403, ApiResponse.Fail("You do not have permission to access this project workspace."));
             }
 
             var projectData = new 

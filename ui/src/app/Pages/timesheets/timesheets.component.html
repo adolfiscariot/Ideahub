@@ -1,5 +1,5 @@
-<div class="timesheet-page">
-    <div class="page-header">
+<div class="timesheet-page" [class.child-view]="isChildView">
+    <div class="page-header" *ngIf="!isChildView">
         <h1 class="page-title">Timesheet Entries</h1>
     </div>
 
@@ -44,25 +44,28 @@
                         <div class="form-group desc-input">
                             <div class="label-row" *ngIf="i === 0">
                                 <label>Work Description</label>
-                                <div class="char-count" *ngIf="row.description.length > 50" 
-                                     [class.near-limit]="row.description.length > 130"
-                                     [class.at-limit]="row.description.length === 150">
+                                <div class="char-count" *ngIf="row.description.length > 50"
+                                    [class.near-limit]="row.description.length > 130"
+                                    [class.at-limit]="row.description.length === 150">
                                     {{ row.description.length }}/150
                                 </div>
                             </div>
                             <div class="char-count floating" *ngIf="i !== 0 && row.description.length > 50"
-                                 [class.near-limit]="row.description.length > 130"
-                                 [class.at-limit]="row.description.length === 150">
+                                [class.near-limit]="row.description.length > 130"
+                                [class.at-limit]="row.description.length === 150">
                                 {{ row.description.length }}/150
                             </div>
-                            <input type="text" [(ngModel)]="row.description" placeholder="What did you work on?" maxlength="150">
+                            <input type="text" [(ngModel)]="row.description" placeholder="What did you work on?"
+                                maxlength="150">
                         </div>
                         <div class="row-actions" [class.with-labels]="i === 0">
-                            <button class="btn-blocker-toggle" (click)="row.hasBlocker = !row.hasBlocker" [class.active]="row.hasBlocker">
+                            <button class="btn-blocker-toggle" (click)="row.hasBlocker = !row.hasBlocker"
+                                [class.active]="row.hasBlocker">
                                 <mat-icon>{{ row.hasBlocker ? 'warning' : 'add_circle_outline' }}</mat-icon>
-                                {{ row.hasBlocker ? 'Blocker Reported' : 'Report a Blocker?' }}
+                                {{ row.hasBlocker ? 'Reporting Blocker' : 'Have a Blocker?' }}
                             </button>
-                            <button class="btn-icon-danger" (click)="removeRow(i)" *ngIf="rows.length > 1" title="Remove Row">
+                            <button class="btn-icon-danger" (click)="removeRow(i)" *ngIf="rows.length > 1"
+                                title="Remove Row">
                                 <mat-icon>delete_outline</mat-icon>
                             </button>
                         </div>
@@ -79,13 +82,15 @@
                             <div class="form-group flex-3">
                                 <div class="label-row">
                                     <label>Blocker Description</label>
-                                    <div class="char-count" *ngIf="row.blockerDescription && row.blockerDescription.length > 30"
-                                         [class.near-limit]="row.blockerDescription.length > 130"
-                                         [class.at-limit]="row.blockerDescription.length === 150">
+                                    <div class="char-count"
+                                        *ngIf="row.blockerDescription && row.blockerDescription.length > 30"
+                                        [class.near-limit]="row.blockerDescription.length > 130"
+                                        [class.at-limit]="row.blockerDescription.length === 150">
                                         {{ row.blockerDescription.length }}/150
                                     </div>
                                 </div>
-                                <input type="text" [(ngModel)]="row.blockerDescription" placeholder="What is preventing your progress?" maxlength="150">
+                                <input type="text" [(ngModel)]="row.blockerDescription"
+                                    placeholder="What is preventing your progress?" maxlength="150">
                             </div>
                             <div class="form-group flex-1">
                                 <label>Severity</label>
@@ -97,20 +102,22 @@
                             </div>
                         </div>
                         <div class="blocker-actions">
-                            <input type="file" #evidenceUpload multiple style="display: none" (change)="onFileSelected($event, i)">
-                            <button class="btn-outline-sm" (click)="evidenceUpload.click()">
+                            <input type="file" #evidenceUpload multiple style="display: none"
+                                (change)="onFileSelected($event, i)">
+                            <app-buttons [buttonStyleClass]="'btn-promote'" (click)="evidenceUpload.click()">
                                 <mat-icon>attach_file</mat-icon>
                                 Attach Blocker Evidence
-                            </button>
-                            
+                            </app-buttons>
+
                             <div class="selected-files" *ngIf="row.tempFiles.length > 0">
                                 <div class="file-item" *ngFor="let file of row.tempFiles; let fIndex = index">
                                     <span class="file-name">{{ file.name }}</span>
                                     <span class="file-size">({{ formatFileSize(file.size) }})</span>
-                                    <button type="button" class="btn-remove-file" (click)="removeTempFile(i, fIndex)">×</button>
+                                    <button type="button" class="btn-remove-file"
+                                        (click)="removeTempFile(i, fIndex)">×</button>
                                 </div>
                             </div>
-                            
+
                             <span class="file-info" *ngIf="row.tempFiles.length === 0">No files attached</span>
                         </div>
                     </div>
@@ -118,19 +125,18 @@
             </div>
 
             <div class="form-footer">
-                <button class="btn-add-row" (click)="addRow()" *ngIf="!isEditing" [disabled]="isLoading">
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="addRow()" *ngIf="!isEditing" [disabled]="isLoading">
                     <mat-icon>add</mat-icon>
                     Add Another Task
-                </button>
+                </app-buttons>
                 <div class="spacer"></div>
-                <button class="btn-cancel" (click)="cancelEdit()" *ngIf="isEditing" [disabled]="isLoading">
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="cancelEdit()" *ngIf="isEditing" [disabled]="isLoading">
                     Cancel Edit
-                </button>
-                <button class="btn-submit" (click)="submitLogs()" [disabled]="isLoading">
-                    <mat-icon>{{ isEditing ? 'save' : 'send' }}</mat-icon>
-                    <span *ngIf="!isLoading">{{ isEditing ? 'Update Timesheet' : 'Submit All Logs' }}</span>
-                    <span *ngIf="isLoading">Submitting...</span>
-                </button>
+                </app-buttons>
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="submitLogs()" [isLoading]="isLoading">
+                    <mat-icon *ngIf="!isLoading">{{ isEditing ? 'save' : 'send' }}</mat-icon>
+                    <span>{{ isEditing ? 'Update Timesheet' : 'Submit All Logs' }}</span>
+                </app-buttons>
             </div>
         </div>
     </div>
@@ -178,10 +184,10 @@
                 </div>
             </div>
             <div class="filter-actions" *ngIf="filterUserId || filterStartDate || filterEndDate || filterSeverity">
-                <button class="btn-clear-filters" (click)="clearFilters()">
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="clearFilters()">
                     <mat-icon>filter_list_off</mat-icon>
-                    Reset
-                </button>
+                    Reset Filters
+                </app-buttons>
             </div>
         </div>
 
@@ -230,7 +236,8 @@
                             </span>
                         </td>
                         <td class="col-evidence">
-                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, log.id)" *ngIf="log.hasBlocker">
+                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, log.id)"
+                                *ngIf="log.hasBlocker">
                                 <mat-icon class="media-file-icon">description</mat-icon>
                                 <span class="media-count">{{ log.mediaCount || 0 }}</span>
 
@@ -241,7 +248,8 @@
                                     <div class="popup-body">
                                         <app-media *ngIf="log.mediaCount && log.mediaCount > 0" [timesheetId]="log.id"
                                             [compactMode]="true"></app-media>
-                                        <div *ngIf="!log.mediaCount || log.mediaCount === 0" class="empty-media">No attached files</div>
+                                        <div *ngIf="!log.mediaCount || log.mediaCount === 0" class="empty-media">No
+                                            attached files</div>
                                     </div>
                                 </div>
                             </div>
@@ -276,19 +284,16 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<app-modal [isOpen]="showDeleteModal" 
-           title="Delete Work Log" 
-           size="sm"
-           [showFooter]="false"
-           (closeModal)="closeDeleteModal()">
+<app-modal [isOpen]="showDeleteModal" title="Delete Work Log" size="sm" [showFooter]="false"
+    (closeModal)="closeDeleteModal()">
     <div class="delete-confirmation" modal-body>
         <div class="confirm-icon">
             <mat-icon>warning</mat-icon>
         </div>
         <p>Are you sure you want to delete this work log? This action cannot be undone.</p>
         <div class="modal-actions">
-            <button class="btn-outline-pill" (click)="closeDeleteModal()">No, Keep it</button>
-            <button class="btn-danger-pill" (click)="confirmDelete()">Yes, Delete it</button>
+            <app-buttons [buttonStyleClass]="'btn-promote'" [buttonText]="'No, Keep it'" (click)="closeDeleteModal()"></app-buttons>
+            <app-buttons [buttonStyleClass]="'btn-promote'" [buttonText]="'Yes, Delete it'" (click)="confirmDelete()"></app-buttons>
         </div>
     </div>
 </app-modal>

@@ -263,7 +263,8 @@ public class TimesheetController : ControllerBase
                     HasBlocker = ts.HasBlocker,
                     BlockerDescription = ts.BlockerDescription,
                     BlockerSeverity = ts.BlockerSeverity,
-                    CreatedAt = ts.CreatedAt
+                    CreatedAt = ts.CreatedAt,
+                    MediaCount = ts.Media != null ? ts.Media.Count : 0
                 })
                 .ToListAsync();
 
@@ -390,12 +391,15 @@ public class TimesheetController : ControllerBase
                 return StatusCode(403, ApiResponse.Fail("Not authorized to access this project"));
             }
 
-            // Fetch all active tasks for the project assigned to the current user
-            var tasks = await _context.ProjectTasks
+            // Fetch all active tasks for the project
+            var allProjectTasks = await _context.ProjectTasks
                 .Where(t => t.ProjectId == projectId && !t.IsDeleted && !t.IsCompleted)
+                .ToListAsync();
+
+            var tasks = allProjectTasks
                 .Where(t => t.AssigneeIds.Contains(userId))
                 .Select(t => new { t.Id, t.Title })
-                .ToListAsync();
+                .ToList();
 
             return Ok(ApiResponse.Ok("Tasks retrieved", tasks)); }
         catch (Exception ex)
@@ -461,18 +465,32 @@ public class TimesheetController : ControllerBase
     // Ensure user is part of group w/ stated project
     private async Task<bool> HasProjectAccess(int projectId, string userId)
     {
-        var project = await _context.Projects
-            .Include(p => p.Group)
-            .FirstOrDefaultAsync(p => p.Id == projectId && !p.IsDeleted);
-
+        var project = await _context.Projects.FindAsync(projectId);
         if (project == null) return false;
 
-        // Check if user is in the group
-        var isMember = await _context.UserGroups.AnyAsync(ug => 
-            ug.GroupId == project.GroupId && 
-            ug.UserId == userId);
+        // Overseer check
+        if (project.OverseenByUserId == userId) return true;
 
-        return isMember;
+        // Group Membership check
+        var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
+        if (isGroupMember) return true;
+
+        var assignments = await _context.ProjectTasks
+            .Where(t => t.ProjectId == projectId && !t.IsDeleted)
+            .Select(t => new { t.AssigneeIds })
+            .ToListAsync();
+
+        if (assignments.Any(a => a.AssigneeIds.Contains(userId))) return true;
+
+        // SubTask Assignee check
+        var isSubTaskAssignee = await _context.SubTasks.AnyAsync(st =>
+            !st.ProjectTask.IsDeleted &&
+            st.ProjectTask.ProjectId == projectId &&
+            st.AssigneeIds.Contains(userId));
+
+        if (isSubTaskAssignee) return true;
+
+        return false;
     }
 
     // Ensure user owns task

@@ -9,8 +9,15 @@
     padding: 24px;
     max-width: 1600px;
     margin: 0 auto;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Century Gothic', 'AppleGothic', sans-serif;
     padding-bottom: 100px;
+    transition: all 0.3s ease;
+
+    &.child-view {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
 
     .page-header {
         display: flex;
@@ -277,6 +284,10 @@
                 align-items: flex-start;
                 gap: 12px;
 
+                app-buttons {
+                    width: auto;
+                }
+
                 .file-info {
                     font-size: 0.85rem;
                     color: #94a3b8;
@@ -328,12 +339,16 @@
         .form-footer {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             padding-top: 24px;
             border-top: 1px dotted #e2e8f0;
 
             .spacer {
                 flex: 1;
+            }
+
+            app-buttons {
+                display: block;
             }
         }
     }
@@ -350,8 +365,21 @@
                 align-items: center;
                 gap: 12px;
                 color: #4f46e5;
-                mat-icon { font-size: 24px; width: 24px; height: 24px; }
-                h3 { margin: 0; font-size: 0.9rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+                mat-icon {
+                    font-size: 24px;
+                    width: 24px;
+                    height: 24px;
+                }
+
+                h3 {
+                    margin: 0;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
             }
 
             .entry-count {
@@ -388,7 +416,8 @@
                     letter-spacing: 0.05em;
                 }
 
-                input[type="date"], select {
+                input[type="date"],
+                select {
                     height: 38px;
                     padding: 0 12px;
                     border: 1px solid #cbd5e1;
@@ -411,6 +440,7 @@
 
                 .select-wrapper {
                     position: relative;
+
                     mat-icon {
                         position: absolute;
                         left: 10px;
@@ -420,20 +450,37 @@
                         color: #94a3b8;
                         pointer-events: none;
                     }
-                    select { padding-left: 36px; width: 100%; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+
+                    select {
+                        padding-left: 36px;
+                        width: 100%;
+                        appearance: none;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 8px center;
+                    }
                 }
 
                 .date-range-inputs {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    .date-sep { color: #94a3b8; font-size: 0.85rem; font-weight: 500; }
-                    input { width: 135px; }
+
+                    .date-sep {
+                        color: #94a3b8;
+                        font-size: 0.85rem;
+                        font-weight: 500;
+                    }
+
+                    input {
+                        width: 135px;
+                    }
                 }
             }
 
             .filter-actions {
                 margin-left: auto;
+
                 .btn-clear-filters {
                     height: 38px;
                     background: white;
@@ -447,8 +494,18 @@
                     align-items: center;
                     gap: 8px;
                     transition: all 0.2s;
-                    &:hover { background: #fff1f2; border-color: #fecdd3; transform: translateY(-1px); }
-                    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+                    &:hover {
+                        background: #fff1f2;
+                        border-color: #fecdd3;
+                        transform: translateY(-1px);
+                    }
+
+                    mat-icon {
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                    }
                 }
             }
         }
@@ -719,7 +776,10 @@
             background: #fff1f2;
             border-color: #fecdd3;
             color: #e11d48;
-            mat-icon { color: #e11d48; }
+
+            mat-icon {
+                color: #e11d48;
+            }
         }
     }
 
@@ -864,53 +924,13 @@
         gap: 12px;
         justify-content: center;
 
-        button {
-            padding: 10px 24px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 8px;
+        app-buttons {
+            flex: 1;
+            max-width: 160px;
         }
     }
 }
 
-.btn-danger-pill {
-    background: #e11d48;
-    color: white;
-
-    &:hover {
-        background: #be123c;
-    }
-}
-
-.btn-outline-pill {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-
-    &:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-    }
-}
-
-.btn-cancel {
-    background: #f1f5f9;
-    color: #475569;
-    padding: 6px 14px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    border-radius: 8px;
-
-    mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-    }
-
-    &:hover {
-        background: #e2e8f0;
-    }
-}
 
 ::ng-deep .modern-menu {
     background: white !important;

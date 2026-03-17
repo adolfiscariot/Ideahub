@@ -14,11 +14,12 @@ import { forkJoin, from, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
+import { TimesheetsComponent } from '../timesheets/timesheets.component';
 
 @Component({
   selector: 'app-task-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, ButtonsComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, ButtonsComponent, TimesheetsComponent],
   templateUrl: './task-management.component.html',
   styleUrl: './task-management.component.scss',
 })
@@ -105,6 +106,8 @@ export class TaskManagementComponent implements OnInit {
   isDeletingSubTask = false;
 
   activeInspectionTab: 'subtasks' | 'timesheets' = 'subtasks';
+  activeMainTab: 'tasks' | 'timesheets' = 'tasks';
+  isTabSwitching = false;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -138,6 +141,13 @@ export class TaskManagementComponent implements OnInit {
         if (response.success) {
           this.tasks = response.data || [];
           this.sortTasks();
+
+          if (this.selectedTask) {
+            const updatedTask = this.tasks.find(t => t.id === this.selectedTask?.id);
+            if (updatedTask) {
+              this.selectedTask = updatedTask;
+            }
+          }
         }
         this.isLoading = false;
       },
@@ -173,6 +183,15 @@ export class TaskManagementComponent implements OnInit {
 
   setInspectionTab(tab: 'subtasks' | 'timesheets'): void {
     this.activeInspectionTab = tab;
+  }
+
+  setMainTab(tab: 'tasks' | 'timesheets'): void {
+    if (this.activeMainTab === tab) return;
+    this.isTabSwitching = true;
+    this.activeMainTab = tab;
+    setTimeout(() => {
+      this.isTabSwitching = false;
+    }, 150);
   }
 
   getSubTasksByParent(parentId: number | null): SubTaskDetails[] {
@@ -339,7 +358,7 @@ export class TaskManagementComponent implements OnInit {
         });
       },
       error: (err) => {
-        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.toastService.show(err.error.message || 'An error occurred', 'error');
         this.isCreating = false;
       }
     });

@@ -256,8 +256,8 @@ public class TaskController : ControllerBase
             {
                 Title = subTaskDto.Title,
                 Description = subTaskDto.Description,
-                StartDate = subTaskDto.StartDate,
-                EndDate = subTaskDto.EndDate,
+                StartDate = subTaskDto.StartDate.HasValue ? DateTime.SpecifyKind(subTaskDto.StartDate.Value, DateTimeKind.Utc) : null,
+                EndDate = subTaskDto.EndDate.HasValue ? DateTime.SpecifyKind(subTaskDto.EndDate.Value, DateTimeKind.Utc) : null,
                 ProjectTaskId = taskId,
                 ParentSubTaskId = subTaskDto.ParentSubTaskId,
                 AssigneeIds = subTaskDto.AssigneeIds,
@@ -312,8 +312,8 @@ public class TaskController : ControllerBase
 
             if (subTaskDto.Title != null) subTask.Title = subTaskDto.Title;
             if (subTaskDto.Description != null) subTask.Description = subTaskDto.Description;
-            if (subTaskDto.StartDate != null) subTask.StartDate = subTaskDto.StartDate;
-            if (subTaskDto.EndDate != null) subTask.EndDate = subTaskDto.EndDate;
+            if (subTaskDto.StartDate != null) subTask.StartDate = DateTime.SpecifyKind(subTaskDto.StartDate.Value, DateTimeKind.Utc);
+            if (subTaskDto.EndDate != null) subTask.EndDate = DateTime.SpecifyKind(subTaskDto.EndDate.Value, DateTimeKind.Utc);
             if (subTaskDto.IsCompleted != null)
             {
                 if (subTaskDto.IsCompleted.Value)

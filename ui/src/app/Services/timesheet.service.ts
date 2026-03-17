@@ -20,9 +20,9 @@ export class TimesheetService {
     };
   }
 
-  bulkLogWork(projectId: number, logs: TimesheetDto[]): Observable<ApiResponse<number[]>> {
+  bulkLogWork(projectId: number, logs: TimesheetDto[]): Observable<ApiResponse<{ createdIds: number[], invalidRows: any[] }>> {
     return this.http.post<any>(`${this.apiUrl}/bulk-timesheets?projectId=${projectId}`, { logs }).pipe(
-      map(response => this.convertResponse<number[]>(response))
+      map(response => this.convertResponse<{ createdIds: number[], invalidRows: any[] }>(response))
     );
   }
 
