@@ -42,7 +42,7 @@ export class MediaComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, this.timesheetId).subscribe({
+    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, undefined, undefined, this.timesheetId).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.success && response.data) {

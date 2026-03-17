@@ -246,7 +246,7 @@ export class TimesheetsComponent implements OnInit {
             for (const file of row.tempFiles) {
               const mediaType = this.mediaService.detectMediaType(file);
               await firstValueFrom(
-                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, this.editingLogId)
+                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, this.editingLogId as number)
               );
             }
           }
@@ -269,8 +269,8 @@ export class TimesheetsComponent implements OnInit {
 
         const res = await firstValueFrom(this.timesheetService.bulkLogWork(this.projectId, logsToSend));
 
-        if (res.success && res.data) {
-          const createdIds: number[] = res.data;
+        if (res.success && res.data && res.data.createdIds) {
+          const createdIds: number[] = res.data.createdIds;
 
           // Match validRows to createdIds to upload files
           for (let i = 0; i < validRows.length; i++) {
@@ -280,7 +280,7 @@ export class TimesheetsComponent implements OnInit {
             if (row.hasBlocker && row.tempFiles.length > 0 && timesheetId) {
               for (const file of row.tempFiles) {
                 const mediaType = this.mediaService.detectMediaType(file);
-                await firstValueFrom(this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, timesheetId));
+                await firstValueFrom(this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, timesheetId));
               }
             }
           }

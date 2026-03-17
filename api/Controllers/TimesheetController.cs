@@ -263,7 +263,8 @@ public class TimesheetController : ControllerBase
                     HasBlocker = ts.HasBlocker,
                     BlockerDescription = ts.BlockerDescription,
                     BlockerSeverity = ts.BlockerSeverity,
-                    CreatedAt = ts.CreatedAt
+                    CreatedAt = ts.CreatedAt,
+                    MediaCount = ts.Media != null ? ts.Media.Count : 0
                 })
                 .ToListAsync();
 
