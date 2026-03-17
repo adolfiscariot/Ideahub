@@ -62,7 +62,7 @@
                             <button class="btn-blocker-toggle" (click)="row.hasBlocker = !row.hasBlocker"
                                 [class.active]="row.hasBlocker">
                                 <mat-icon>{{ row.hasBlocker ? 'warning' : 'add_circle_outline' }}</mat-icon>
-                                {{ row.hasBlocker ? 'Blocker Reported' : 'Report a Blocker?' }}
+                                {{ row.hasBlocker ? 'Blocker Reported' : 'Have a Blocker?' }}
                             </button>
                             <button class="btn-icon-danger" (click)="removeRow(i)" *ngIf="rows.length > 1"
                                 title="Remove Row">

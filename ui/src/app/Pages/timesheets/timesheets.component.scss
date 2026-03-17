@@ -11,6 +11,13 @@
     margin: 0 auto;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     padding-bottom: 100px;
+    transition: all 0.3s ease;
+
+    &.child-view {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+    }
 
     .page-header {
         display: flex;
