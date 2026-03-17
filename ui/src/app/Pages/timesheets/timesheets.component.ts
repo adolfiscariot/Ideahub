@@ -13,6 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ModalComponent } from '../../Components/modal/modal.component';
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 
 interface TimesheetRow {
   taskId: number;
@@ -28,7 +29,7 @@ interface TimesheetRow {
 @Component({
   selector: 'app-timesheets',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MediaComponent, MatMenuModule, MatButtonModule, ModalComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MediaComponent, MatMenuModule, MatButtonModule, ModalComponent, ButtonsComponent],
   templateUrl: './timesheets.component.html',
   styleUrl: './timesheets.component.scss'
 })
