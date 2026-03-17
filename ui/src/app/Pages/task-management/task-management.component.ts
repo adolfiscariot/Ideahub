@@ -141,6 +141,13 @@ export class TaskManagementComponent implements OnInit {
         if (response.success) {
           this.tasks = response.data || [];
           this.sortTasks();
+          
+          if (this.selectedTask) {
+            const updatedTask = this.tasks.find(t => t.id === this.selectedTask?.id);
+            if (updatedTask) {
+              this.selectedTask = updatedTask;
+            }
+          }
         }
         this.isLoading = false;
       },
