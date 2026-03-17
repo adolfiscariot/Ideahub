@@ -483,12 +483,12 @@ public class TimesheetController : ControllerBase
         if (assignments.Any(a => a.AssigneeIds.Contains(userId))) return true;
 
         // SubTask Assignee check
-        var subAssignments = await _context.SubTasks
-            .Where(st => st.ProjectTask.ProjectId == projectId)
-            .Select(st => new { st.AssigneeIds })
-            .ToListAsync();
+        var isSubTaskAssignee = await _context.SubTasks.AnyAsync(st =>
+            !st.ProjectTask.IsDeleted &&
+            st.ProjectTask.ProjectId == projectId &&
+            st.AssigneeIds.Contains(userId));
 
-        if (subAssignments.Any(sa => sa.AssigneeIds.Contains(userId))) return true;
+        if (isSubTaskAssignee) return true;
 
         return false;
     }

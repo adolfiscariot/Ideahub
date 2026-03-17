@@ -233,11 +233,10 @@ public class ProjectController : ControllerBase
                 // If still not found, check subtasks
                 if (!isAssignee)
                 {
-                    var subTasks = await _context.SubTasks
-                        .Where(st => st.ProjectTask.ProjectId == projectId)
-                        .Select(st => new { st.AssigneeIds })
-                        .ToListAsync();
-                    isAssignee = subTasks.Any(st => st.AssigneeIds.Contains(userId));
+                    isAssignee = await _context.SubTasks.AnyAsync(st =>
+                        !st.ProjectTask.IsDeleted &&
+                        st.ProjectTask.ProjectId == projectId &&
+                        st.AssigneeIds.Contains(userId));
                 }
             }
 

@@ -141,7 +141,7 @@ export class TaskManagementComponent implements OnInit {
         if (response.success) {
           this.tasks = response.data || [];
           this.sortTasks();
-          
+
           if (this.selectedTask) {
             const updatedTask = this.tasks.find(t => t.id === this.selectedTask?.id);
             if (updatedTask) {
@@ -358,7 +358,7 @@ export class TaskManagementComponent implements OnInit {
         });
       },
       error: (err) => {
-        this.toastService.show(err.message || 'An error occurred', 'error');
+        this.toastService.show(err.error.message || 'An error occurred', 'error');
         this.isCreating = false;
       }
     });
