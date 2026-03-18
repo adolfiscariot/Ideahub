@@ -23,9 +23,8 @@ public class SubTask
     public DateTime? EndDate { get; set; }
 
     public bool IsCompleted { get; set; } = false;
-
-    // List of User IDs assigned to this subtask
-    public List<string> AssigneeIds { get; set; } = new List<string>();
+    
+    public bool IsDeleted { get; set; } = false;
 
     // Foreign Keys
     [Required]
@@ -41,4 +40,5 @@ public class SubTask
     
     public ICollection<SubTask> ChildSubTasks { get; set; } = new List<SubTask>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
+    public ICollection<SubTaskAssignee> SubTaskAssignees { get; set; } = new List<SubTaskAssignee>();
 }

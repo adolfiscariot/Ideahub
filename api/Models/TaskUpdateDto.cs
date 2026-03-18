@@ -22,5 +22,5 @@ public class TaskUpdateDto
 
     public bool? IsCompleted { get; set; }
 
-    public List<string>? AssigneeIds { get; set; }
+    public List<string>? TaskAssignees { get; set; }
 }

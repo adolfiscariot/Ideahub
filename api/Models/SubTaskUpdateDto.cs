@@ -19,5 +19,5 @@ public class SubTaskUpdateDto
 
     public bool? IsCompleted { get; set; }
 
-    public List<string>? AssigneeIds { get; set; }
+    public List<string>? SubTaskAssignees { get; set; }
 }

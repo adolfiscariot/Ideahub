@@ -23,6 +23,8 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
     public DbSet<ProjectTask> ProjectTasks { get; set; }
     public DbSet<SubTask> SubTasks { get; set; }
+    public DbSet<TaskAssignee> TaskAssignees { get; set; }
+    public DbSet<SubTaskAssignee> SubTaskAssignees { get; set; }
     public DbSet<Timesheet> Timesheets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -782,12 +784,6 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             pt.Property(pt => pt.Description)
                 .HasColumnType("text");
 
-            pt.Property(pt => pt.AssigneeIds)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
-                .HasColumnType("text");
-
             pt.Property(pt => pt.Labels)
                 .HasMaxLength(512);
 
@@ -831,12 +827,6 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             st.Property(st => st.Description)
                 .HasColumnType("text");
 
-            st.Property(st => st.AssigneeIds)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
-                .HasColumnType("text");
-
             st.HasMany(st => st.Media)
                 .WithOne(m => m.SubTask)
                 .HasForeignKey(m => m.SubTaskId)
@@ -847,6 +837,48 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasForeignKey(s => new { s.ParentSubTaskId, s.ProjectTaskId })
                 .HasPrincipalKey(p => new { p.Id, p.ProjectTaskId })
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Task Assignee Configuration
+        builder.Entity<TaskAssignee>(ta =>
+        {
+            ta.HasKey(ta => ta.Id);
+
+            // Relationships
+            ta.HasOne(ta => ta.ProjectTask)
+                .WithMany(pt => pt.TaskAssignees)
+                .HasForeignKey(ta => ta.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            ta.HasOne(ta => ta.User)
+                .WithMany(u => u.TaskAssignees)
+                .HasForeignKey(ta => ta.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            // Index
+            ta.HasIndex(ta => new {ta.ProjectTaskId, ta.UserId})
+                .IsUnique();
+        });
+
+        // Sub Task Assignee Configuration
+        builder.Entity<SubTaskAssignee>(sta =>
+        {
+            sta.HasKey(sta => sta.Id);
+
+            // Relationships
+            sta.HasOne(sta => sta.SubTask)
+                .WithMany(st => st.SubTaskAssignees)
+                .HasForeignKey(sta => sta.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            sta.HasOne(sta => sta.User)
+                .WithMany(u => u.SubTaskAssignees)
+                .HasForeignKey(sta => sta.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            sta.HasIndex(sta => new {sta.SubTaskId, sta.UserId})
+                .IsUnique();
         });
 
         // Timesheet Configuration

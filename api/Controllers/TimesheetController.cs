@@ -393,15 +393,16 @@ public class TimesheetController : ControllerBase
 
             // Fetch all active tasks for the project
             var allProjectTasks = await _context.ProjectTasks
-                .Where(t => t.ProjectId == projectId && !t.IsDeleted && !t.IsCompleted)
+                .Where(
+                    t => t.ProjectId == projectId && 
+                    !t.IsDeleted && 
+                    !t.IsCompleted &&
+                    (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId)
+                    )
+                .Select(t => new { t.Id, t.Title })
                 .ToListAsync();
 
-            var tasks = allProjectTasks
-                .Where(t => t.AssigneeIds.Contains(userId))
-                .Select(t => new { t.Id, t.Title })
-                .ToList();
-
-            return Ok(ApiResponse.Ok("Tasks retrieved", tasks)); }
+            return Ok(ApiResponse.Ok("Tasks retrieved", allProjectTasks)); }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to fetch relevant tasks for project {ProjectId}", projectId);
@@ -425,27 +426,27 @@ public class TimesheetController : ControllerBase
 
             var project = await _context.Projects
                 .Include(p => p.Tasks)
-                .ThenInclude(t => t.SubTasks)
+                    .ThenInclude(t => t.TaskAssignees)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
+                        .ThenInclude(st => st.SubTaskAssignees)
                 .FirstOrDefaultAsync(p => p.Id == projectId && !p.IsDeleted);
 
             if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
 
             var teamIds = new HashSet<string> { project.OverseenByUserId };
 
+            // Loop through tasks and subtasks
             foreach (var task in project.Tasks.Where(t => !t.IsDeleted))
             {
-                if (task.AssigneeIds != null)
-                {
-                    foreach (var id in task.AssigneeIds) teamIds.Add(id);
-                }
+                // Task assignees
+                foreach (var ta in task.TaskAssignees ?? new List<TaskAssignee>())
+                    teamIds.Add(ta.UserId);
 
-                foreach (var subtask in task.SubTasks)
-                {
-                    if (subtask.AssigneeIds != null)
-                    {
-                        foreach (var id in subtask.AssigneeIds) teamIds.Add(id);
-                    }
-                }
+                // SubTask assignees
+                foreach (var subtask in task.SubTasks.Where(st => !st.IsDeleted))
+                    foreach (var sa in subtask.SubTaskAssignees ?? new List<SubTaskAssignee>())
+                        teamIds.Add(sa.UserId);
             }
 
             var teamMembers = await _context.Users
@@ -476,17 +477,17 @@ public class TimesheetController : ControllerBase
         if (isGroupMember) return true;
 
         var assignments = await _context.ProjectTasks
+            .Include(t => t.TaskAssignees)
             .Where(t => t.ProjectId == projectId && !t.IsDeleted)
-            .Select(t => new { t.AssigneeIds })
             .ToListAsync();
 
-        if (assignments.Any(a => a.AssigneeIds.Contains(userId))) return true;
+        if (assignments.Any(a => (a.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId))) return true;
 
         // SubTask Assignee check
         var isSubTaskAssignee = await _context.SubTasks.AnyAsync(st =>
             !st.ProjectTask.IsDeleted &&
             st.ProjectTask.ProjectId == projectId &&
-            st.AssigneeIds.Contains(userId));
+            (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId));
 
         if (isSubTaskAssignee) return true;
 

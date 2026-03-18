@@ -21,5 +21,5 @@ public class TaskDto
     [MaxLength(512)]
     public string Labels { get; set; } = string.Empty;
 
-    public List<string> AssigneeIds { get; set; } = new List<string>();
+    public List<string> TaskAssignees { get; set; } = new List<string>();
 }

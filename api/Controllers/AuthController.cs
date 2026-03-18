@@ -333,7 +333,7 @@ public class AuthController : ControllerBase
 
         if (storedRefreshToken is null)
         {
-            _logger.LogError("There are no vaild stored refresh tokens");
+            _logger.LogError("There are no valid stored refresh tokens");
             return BadRequest(ApiResponse.Fail("Invalid access or refresh token"));
         }
 
