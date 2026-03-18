@@ -397,9 +397,20 @@ public class TimesheetController : ControllerBase
                     t => t.ProjectId == projectId && 
                     !t.IsDeleted && 
                     !t.IsCompleted &&
-                    (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId)
+                    (t.TaskAssignees ?? new List<TaskAssignee>())
+                        .Any(ta => ta.UserId == userId)
                     )
                 .Select(t => new { t.Id, t.Title })
+                .ToListAsync();
+
+            var allProjectTasks = await _context.TaskAssignees
+                .Where(
+                    ta => ta.UserId == userId &&
+                    ta.ProjectTask.ProjectId == projectId &&
+                    !ta.ProjectTask.IsDeleted &&
+                    !ta.ProjectTask.IsCompleted
+                )
+                .Select(ta => new {ta.ProjectTask.Id, ta.ProjectTask.Title})
                 .ToListAsync();
 
             return Ok(ApiResponse.Ok("Tasks retrieved", allProjectTasks)); }
