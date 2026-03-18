@@ -233,22 +233,27 @@ export class ProjectsComponent implements OnInit {
             );
 
             if (this.selectedProjectFiles?.length > 0) {
-                const mediaUploadPromises = this.selectedProjectFiles.map(file =>
-                    firstValueFrom(
-                        this.mediaService.uploadMedia(
-                            file,
-                            detectMediaType(file),
-                            undefined,
-                            undefined,
-                            Number(this.selectedProject!.id)
+                try {
+                    const mediaUploadPromises = this.selectedProjectFiles.map(file =>
+                        firstValueFrom(
+                            this.mediaService.uploadMedia(
+                                file,
+                                detectMediaType(file),
+                                undefined,
+                                undefined,
+                                Number(this.selectedProject!.id)
+                            )
                         )
-                    )
-                );
+                    );
 
-                await Promise.all(mediaUploadPromises);
-                this.toastService.show('Project updated with media successfully', 'success');
+                    await Promise.all(mediaUploadPromises);
+                    this.toastService.show('Project updated with media successfully', 'success');
+                } catch (mediaError) {
+                    console.error('Error uploading media:', mediaError);
+                    this.toastService.show('Project updated, but media upload failed. Please resume and try again.', 'error');
+                }
             } else {
-                this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
+                this.toastService.show('Project updated successfully', 'success');
             }
 
             this.isReloading = true;
