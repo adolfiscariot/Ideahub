@@ -49,4 +49,5 @@ public class ProjectTask
     public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
     public ICollection<Timesheet> Timesheets { get; set; } = new List<Timesheet>();
+    public ICollection<TaskAssignee> TaskAssignees { get; set; }
 }
