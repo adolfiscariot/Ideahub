@@ -11,7 +11,7 @@ public class SubTaskDetailsDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public bool IsCompleted { get; set; }
-    public List<string> AssigneeIds { get; set; } = new List<string>();
+    public List<string> SubTaskAssignees { get; set; } = new List<string>();
     public int ProjectTaskId { get; set; }
     public int? ParentSubTaskId { get; set; }
     public int MediaCount { get; set; }

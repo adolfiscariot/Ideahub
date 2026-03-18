@@ -6,7 +6,7 @@ export interface TaskDetails {
     endDate: string;
     labels: string;
     isCompleted: boolean;
-    assigneeIds: string[];
+    taskAssignees: string[];
     projectId: number;
     mediaCount: number;
     subTasks: SubTaskDetails[];
@@ -19,7 +19,7 @@ export interface SubTaskDetails {
     startDate: string;
     endDate: string;
     isCompleted: boolean;
-    assigneeIds: string[];
+    subTaskAssignees: string[];
     projectTaskId: number;
     parentSubTaskId?: number;
     mediaCount: number;
@@ -31,7 +31,7 @@ export interface TaskDto {
     startDate: string;
     endDate: string;
     labels: string;
-    assigneeIds: string[];
+    taskAssignees: string[];
 }
 
 export interface TaskUpdateDto {
@@ -41,7 +41,7 @@ export interface TaskUpdateDto {
     endDate?: string;
     labels?: string;
     isCompleted?: boolean;
-    assigneeIds?: string[];
+    taskAssignees?: string[];
 }
 
 export interface SubTaskDto {
@@ -49,7 +49,7 @@ export interface SubTaskDto {
     description: string;
     startDate: string;
     endDate: string;
-    assigneeIds: string[];
+    subTaskAssignees: string[];
     parentSubTaskId?: number;
 }
 
@@ -59,5 +59,5 @@ export interface SubTaskUpdateDto {
     startDate?: string;
     endDate?: string;
     isCompleted?: boolean;
-    assigneeIds?: string[];
+    subTaskAssignees?: string[];
 }

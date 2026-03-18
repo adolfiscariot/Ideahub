@@ -18,7 +18,7 @@ public class SubTaskDto
     [DataType(DataType.DateTime)]
     public DateTime? EndDate { get; set; }
 
-    public List<string> AssigneeIds { get; set; } = new List<string>();
+    public List<string> SubTaskAssignees { get; set; } = new List<string>();
 
     public int? ParentSubTaskId { get; set; }
 }

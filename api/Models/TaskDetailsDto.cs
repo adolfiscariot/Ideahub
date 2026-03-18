@@ -12,7 +12,7 @@ public class TaskDetailsDto
     public DateTime? EndDate { get; set; }
     public string Labels { get; set; } = string.Empty;
     public bool IsCompleted { get; set; }
-    public List<string> AssigneeIds { get; set; } = new List<string>();
+    public List<string> TaskAssignees { get; set; } = new List<string>();
     public int ProjectId { get; set; }
     public List<SubTaskDetailsDto> SubTasks { get; set; } = new List<SubTaskDetailsDto>();
     public int MediaCount { get; set; }

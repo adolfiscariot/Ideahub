@@ -224,25 +224,26 @@ public class ProjectController : ControllerBase
             {
                 // Assignee check
                 var tasks = await _context.ProjectTasks
+                    .Include(t => t.TaskAssignees)
                     .Where(t => t.ProjectId == projectId && !t.IsDeleted)
-                    .Select(t => new { t.AssigneeIds })
                     .ToListAsync();
                 
-                isAssignee = tasks.Any(t => t.AssigneeIds.Contains(userId));
+                isAssignee = tasks.Any(t => (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId));
 
                 // If still not found, check subtasks
                 if (!isAssignee)
                 {
-                    isAssignee = await _context.SubTasks.AnyAsync(st =>
-                        !st.ProjectTask.IsDeleted &&
-                        st.ProjectTask.ProjectId == projectId &&
-                        st.AssigneeIds.Contains(userId));
+                    isAssignee = await _context.SubTaskAssignees
+                        .AnyAsync(sta => sta.UserId == userId &&
+                                sta.SubTask.ProjectTask.ProjectId == projectId &&
+                                !sta.SubTask.ProjectTask.IsDeleted &&
+                                !sta.SubTask.IsDeleted);
                 }
             }
 
             if (!isOverseer && !isGroupMember && !isAssignee)
             {
-                _logger.LogError("GetProjectById: User {userId} does not have access to project {projectId} (not overseer, member, or assignee)", userId, projectId);
+                _logger.LogError("GetProjectById: User does not have access to project {projectId} (not overseer, member, or assignee)", projectId);
                 return StatusCode(403, ApiResponse.Fail("You do not have permission to access this project workspace."));
             }
 

@@ -37,8 +37,6 @@ public class ProjectTask
     [DataType(DataType.DateTime)]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public List<string> AssigneeIds { get; set; } = new List<string>();
-
     // Foreign Keys
     [Required]
     [ForeignKey("Project")]
@@ -49,5 +47,5 @@ public class ProjectTask
     public ICollection<SubTask> SubTasks { get; set; } = new List<SubTask>();
     public ICollection<Media> Media { get; set; } = new List<Media>();
     public ICollection<Timesheet> Timesheets { get; set; } = new List<Timesheet>();
-    public ICollection<TaskAssignee> TaskAssignees { get; set; }
+    public ICollection<TaskAssignee>? TaskAssignees { get; set; } = new List<TaskAssignee>();
 }

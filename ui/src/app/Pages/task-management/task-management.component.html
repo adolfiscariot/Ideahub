@@ -55,8 +55,8 @@
                 <div class="form-group assignees-group">
                   <label>Assignees</label>
                   <div class="assignee-selector">
-                    <div class="selected-assignees" *ngIf="newTask.assigneeIds.length > 0">
-                      <span *ngFor="let id of newTask.assigneeIds" class="user-chip">
+                    <div class="selected-assignees" *ngIf="newTask.taskAssignees.length > 0">
+                      <span *ngFor="let id of newTask.taskAssignees" class="user-chip">
                         {{ getUserName(id) }}
                         <button (click)="toggleAssignee(id)" class="remove-chip">&times;</button>
                       </span>
@@ -122,6 +122,7 @@
             <h2>Active Tasks <span class="header-count">{{ tasks.length }}</span></h2>
             <div class="header-actions">
               <select class="sort-select" [(ngModel)]="sortOption" (change)="sortTasks()">
+                <option value="taskNumber">Sort by Task Number</option>
                 <option value="dueDate">Sort by Due Date</option>
               </select>
             </div>
@@ -174,7 +175,7 @@
                 <div class="card-meta">
                   <div class="assignee-main">
                     <div class="assignee-icon-circle"
-                      [title]="task.assigneeIds.length > 0 ? getUserName(task.assigneeIds[0]) : 'Unassigned'">
+                      [title]="task.taskAssignees.length > 0 ? getUserName(task.taskAssignees[0]) : 'Unassigned'">
                       <mat-icon>person</mat-icon>
                     </div>
                   </div>
@@ -198,15 +199,15 @@
                     <span>Due {{ task.endDate | date:'mediumDate' }}</span>
                   </div>
                   <div class="card-actions">
-                    <button class="create-subtask-btn" title="Add subtask"
+                    <button *ngIf="canManageTask(task)" class="create-subtask-btn" title="Add subtask"
                       (click)="openSubTaskModal(task.id); $event.stopPropagation()">
                       <mat-icon>add_circle_outline</mat-icon>
                     </button>
-                    <button *ngIf="canCreateTask" class="icon-action-btn edit-btn" title="Edit task"
+                    <button *ngIf="canManageTask(task)" class="icon-action-btn edit-btn" title="Edit task"
                       (click)="openEditTask(task, $event)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button *ngIf="canCreateTask" class="icon-action-btn delete-btn" title="Delete task"
+                    <button *ngIf="canManageTask(task)" class="icon-action-btn delete-btn" title="Delete task"
                       (click)="confirmDeleteTask(task, $event)">
                       <mat-icon>delete_outline</mat-icon>
                     </button>
@@ -260,9 +261,10 @@
               <div class="inspection-body">
                 <div class="inspection-layout-grid">
                   <!-- Left Column: Create Subtask Form -->
-                  <div class="inspection-column creation-column card">
+                  <div class="inspection-column creation-column card" *ngIf="canManageTask(selectedTask)">
                     <h4>Create Subtask</h4>
                     <div class="inline-creation-form">
+                      <!-- ... form content ... -->
                       <div class="form-group">
                         <label>Title</label>
                         <input type="text" [(ngModel)]="newSubTask.title" placeholder="e.g. Draft proposal">
@@ -285,7 +287,7 @@
                         <label>Assignees</label>
                         <div class="assignee-selector inline">
                           <div class="selected-assignees">
-                            <span *ngFor="let userId of newSubTask.assigneeIds" class="user-chip theme-chip">
+                            <span *ngFor="let userId of newSubTask.subTaskAssignees" class="user-chip theme-chip">
                               {{ getUserName(userId) }}
                               <button class="remove-chip" (click)="toggleSubTaskAssignee(userId)">&times;</button>
                             </span>
@@ -363,15 +365,15 @@
                                     }}</span>
                                 </div>
                                 <div class="st-actions" style="margin-left: auto;">
-                                  <button class="create-subtask-btn" title="Add nested subtask"
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="create-subtask-btn" title="Add nested subtask"
                                     (click)="openSubTaskModal(selectedTask.id, st.id); $event.stopPropagation()">
                                     <mat-icon>add_circle_outline</mat-icon>
                                   </button>
-                                  <button class="icon-action-btn edit-btn" title="Edit subtask"
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn edit-btn" title="Edit subtask"
                                     (click)="openEditSubTask(st, $event)">
                                     <mat-icon>edit</mat-icon>
                                   </button>
-                                  <button class="icon-action-btn delete-btn" title="Delete subtask"
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn delete-btn" title="Delete subtask"
                                     (click)="confirmDeleteSubTask(st, $event)">
                                     <mat-icon>delete_outline</mat-icon>
                                   </button>
@@ -454,7 +456,7 @@
             <label>Assignees</label>
             <div class="assignee-selector">
               <div class="selected-assignees">
-                <span *ngFor="let userId of newSubTask.assigneeIds" class="user-chip theme-chip">
+                <span *ngFor="let userId of newSubTask.subTaskAssignees" class="user-chip theme-chip">
                   {{ getUserName(userId) }}
                   <button class="remove-chip" (click)="toggleSubTaskAssignee(userId)">&times;</button>
                 </span>

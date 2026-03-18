@@ -44,7 +44,7 @@ export class TaskManagementComponent implements OnInit {
     startDate: '',
     endDate: '',
     labels: '',
-    assigneeIds: []
+    taskAssignees: []
   };
 
   labelInput: string = '';
@@ -57,7 +57,7 @@ export class TaskManagementComponent implements OnInit {
 
   selectedFiles: File[] = [];
   carouselIndex: number = 0;
-  sortOption: string = 'dueDate';
+  sortOption: string = 'taskNumber';
 
   // Subtask Modal
   isSubTaskModalOpen = false;
@@ -67,7 +67,7 @@ export class TaskManagementComponent implements OnInit {
     description: '',
     startDate: '',
     endDate: '',
-    assigneeIds: []
+    subTaskAssignees: []
   };
   showSubTaskUserDropdown = false;
   showInlineSubTaskUserDropdown = false;
@@ -113,20 +113,51 @@ export class TaskManagementComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.projectId = +params['projectId'];
       if (this.projectId) {
-        this.loadProjectInfo();
-        this.loadTasks();
-        this.loadUsers();
+        this.loadInitialData();
       }
     });
   }
 
-  loadProjectInfo(): void {
-    this.projectService.getProjectById(this.projectId).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.projectOverseerId = response.data.overseenByUserId;
+  loadInitialData(): void {
+    this.isLoading = true;
+
+    forkJoin({
+      project: this.projectService.getProjectById(this.projectId),
+      tasks: this.taskService.getProjectTasks(this.projectId),
+      users: this.committeeService.getAllUsers()
+    }).pipe(
+      catchError(err => {
+        this.isLoading = false;
+        const errorMessage = err.error?.message || 'You do not have permission to access this project workspace.';
+        this.toastService.show(errorMessage, 'error');
+        return of(null);
+      })
+    ).subscribe(result => {
+      if (!result) return;
+
+      const { project, tasks, users } = result;
+
+      if (project.success) {
+        this.projectOverseerId = project.data.overseenByUserId;
+      }
+
+      if (tasks.success) {
+        this.tasks = tasks.data || [];
+        this.sortTasks();
+
+        if (this.selectedTask) {
+          const updatedTask = this.tasks.find(t => t.id === this.selectedTask?.id);
+          if (updatedTask) {
+            this.selectedTask = updatedTask;
+          }
         }
       }
+
+      if (users.success) {
+        this.availableUsers = users.data || [];
+      }
+
+      this.isLoading = false;
     });
   }
 
@@ -134,8 +165,28 @@ export class TaskManagementComponent implements OnInit {
     return this.authService.getUserId() === this.projectOverseerId;
   }
 
+  canManageTask(task: TaskDetails): boolean {
+    const userId = this.authService.getUserId();
+    return userId === this.projectOverseerId || (task.taskAssignees && task.taskAssignees.includes(userId));
+  }
+
+  canManageSubTask(st: SubTaskDetails, task: TaskDetails | null = null): boolean {
+    const userId = this.authService.getUserId();
+    // Allow if Overseer
+    if (userId === this.projectOverseerId) return true;
+
+    // Allow if SubTask Assignee
+    if (st.subTaskAssignees && st.subTaskAssignees.includes(userId)) return true;
+
+    // Allow if Task Assignee (parent of the subtask)
+    const effectiveTask = task || this.selectedTask;
+    if (effectiveTask && effectiveTask.taskAssignees && effectiveTask.taskAssignees.includes(userId)) return true;
+
+    return false;
+  }
+
+  // Note: loadTasks is now part of loadInitialData for ngOnInit but kept as a helper for updates
   loadTasks(): void {
-    this.isLoading = true;
     this.taskService.getProjectTasks(this.projectId).subscribe({
       next: (response: any) => {
         if (response.success) {
@@ -149,10 +200,13 @@ export class TaskManagementComponent implements OnInit {
             }
           }
         }
-        this.isLoading = false;
       },
-      error: () => {
-        this.isLoading = false;
+      error: (err) => {
+        // Only show individual error if not during initial load
+        if (!this.isLoading) {
+          const errorMessage = err.error?.message || 'Failed to load tasks.';
+          this.toastService.show(errorMessage, 'error');
+        }
       }
     });
   }
@@ -160,6 +214,8 @@ export class TaskManagementComponent implements OnInit {
   sortTasks(): void {
     if (this.sortOption === 'dueDate') {
       this.tasks.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+    } else if (this.sortOption === 'taskNumber') {
+      this.tasks.sort((a, b) => a.id - b.id);
     }
   }
 
@@ -215,12 +271,17 @@ export class TaskManagementComponent implements OnInit {
     return this.tasks.slice(this.carouselIndex, this.carouselIndex + 4);
   }
 
+  // Note: loadUsers is now part of loadInitialData for ngOnInit but kept as a helper if needed
   loadUsers(): void {
     this.committeeService.getAllUsers().subscribe({
       next: (response) => {
         if (response.success) {
           this.availableUsers = response.data || [];
         }
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Failed to load users.';
+        this.toastService.show(errorMessage, 'error');
       }
     });
   }
@@ -254,17 +315,17 @@ export class TaskManagementComponent implements OnInit {
   }
 
   toggleAssignee(userId: string): void {
-    const index = this.newTask.assigneeIds.indexOf(userId);
+    const index = this.newTask.taskAssignees.indexOf(userId);
     if (index > -1) {
-      this.newTask.assigneeIds.splice(index, 1);
+      this.newTask.taskAssignees.splice(index, 1);
     } else {
-      this.newTask.assigneeIds.push(userId);
+      this.newTask.taskAssignees.push(userId);
     }
     this.showUserDropdown = false;
   }
 
   isAssigneeSelected(userId: string): boolean {
-    return this.newTask.assigneeIds.includes(userId);
+    return this.newTask.taskAssignees.includes(userId);
   }
 
   selectTask(task: TaskDetails): void {
@@ -371,7 +432,7 @@ export class TaskManagementComponent implements OnInit {
       startDate: '',
       endDate: '',
       labels: '',
-      assigneeIds: []
+      taskAssignees: []
     };
     this.taskLabels = [];
     this.labelInput = '';
@@ -394,17 +455,17 @@ export class TaskManagementComponent implements OnInit {
   }
 
   toggleSubTaskAssignee(userId: string): void {
-    const index = this.newSubTask.assigneeIds.indexOf(userId);
+    const index = this.newSubTask.subTaskAssignees.indexOf(userId);
     if (index > -1) {
-      this.newSubTask.assigneeIds.splice(index, 1);
+      this.newSubTask.subTaskAssignees.splice(index, 1);
     } else {
-      this.newSubTask.assigneeIds.push(userId);
+      this.newSubTask.subTaskAssignees.push(userId);
     }
     this.showSubTaskUserDropdown = false;
   }
 
   isSubTaskAssigneeSelected(userId: string): boolean {
-    return this.newSubTask.assigneeIds.includes(userId);
+    return this.newSubTask.subTaskAssignees.includes(userId);
   }
 
   createSubTask(): void {
@@ -497,7 +558,7 @@ export class TaskManagementComponent implements OnInit {
       startDate: subTask.startDate,
       endDate: subTask.endDate,
       isCompleted: !subTask.isCompleted,
-      assigneeIds: subTask.assigneeIds
+      subTaskAssignees: subTask.subTaskAssignees
     };
 
     this.taskService.updateSubTask(subTask.id, updateDto).subscribe({
@@ -512,13 +573,16 @@ export class TaskManagementComponent implements OnInit {
             this.uncompleteAncestorSubtasks(subTask);
           }
 
-          // Check if parent should be updated (if we un-completed it, parent might need to be un-completed handles by next refresh ideally, 
-          // but for main task we do it explicitly)
+          // Check if parent should be updated
           this.checkAndSyncMainTaskCompletion();
 
           // Refresh list to update task-level progress bars
           this.loadTasks();
         }
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Failed to update subtask status.';
+        this.toastService.show(errorMessage, 'error');
       }
     });
   }
@@ -543,6 +607,10 @@ export class TaskManagementComponent implements OnInit {
               this.toastService.show('Main task marked as complete!', 'success');
             }
           }
+        },
+        error: (err) => {
+          const errorMessage = err.error?.message || 'Failed to sync task completion.';
+          this.toastService.show(errorMessage, 'error');
         }
       });
     }
@@ -559,7 +627,7 @@ export class TaskManagementComponent implements OnInit {
         startDate: parent.startDate,
         endDate: parent.endDate,
         isCompleted: false,
-        assigneeIds: parent.assigneeIds
+        subTaskAssignees: parent.subTaskAssignees
       };
 
       this.taskService.updateSubTask(parent.id, updateDto).subscribe({
@@ -569,6 +637,10 @@ export class TaskManagementComponent implements OnInit {
             // Recursively walk up
             this.uncompleteAncestorSubtasks(parent);
           }
+        },
+        error: (err) => {
+          const errorMessage = err.error?.message || 'Failed to update ancestor subtasks.';
+          this.toastService.show(errorMessage, 'error');
         }
       });
     }
@@ -580,7 +652,7 @@ export class TaskManagementComponent implements OnInit {
       description: '',
       startDate: '',
       endDate: '',
-      assigneeIds: []
+      subTaskAssignees: []
     };
     this.selectedSubTaskFiles = [];
     this.parentSubTaskId = null;
@@ -592,14 +664,14 @@ export class TaskManagementComponent implements OnInit {
     this.editingTaskId = task.id;
     this.editTaskLabels = task.labels ? task.labels.split(',').filter(l => l.trim()) : [];
     this.editLabelInput = '';
-    this.editTaskAssigneeIds = [...task.assigneeIds];
+    this.editTaskAssigneeIds = [...task.taskAssignees];
     this.editTask = {
       title: task.title,
       description: task.description,
       startDate: task.startDate ? task.startDate.substring(0, 10) : '',
       endDate: task.endDate ? task.endDate.substring(0, 10) : '',
       labels: task.labels,
-      assigneeIds: [...task.assigneeIds]
+      taskAssignees: [...task.taskAssignees]
     };
     this.showEditUserDropdown = false;
     this.isEditTaskModalOpen = true;
@@ -649,7 +721,7 @@ export class TaskManagementComponent implements OnInit {
       this.editLabelInput = '';
     }
     this.editTask.labels = this.editTaskLabels.join(',');
-    this.editTask.assigneeIds = [...this.editTaskAssigneeIds];
+    this.editTask.taskAssignees = [...this.editTaskAssigneeIds];
 
     this.isUpdatingTask = true;
     this.taskService.updateTask(this.editingTaskId, this.editTask).subscribe({
@@ -711,14 +783,14 @@ export class TaskManagementComponent implements OnInit {
   openEditSubTask(st: SubTaskDetails, event: Event): void {
     event.stopPropagation();
     this.editingSubTaskId = st.id;
-    this.editSubTaskAssigneeIds = [...st.assigneeIds];
+    this.editSubTaskAssigneeIds = [...st.subTaskAssignees];
     this.editSubTask = {
       title: st.title,
       description: st.description,
       startDate: st.startDate ? st.startDate.substring(0, 10) : '',
       endDate: st.endDate ? st.endDate.substring(0, 10) : '',
       isCompleted: st.isCompleted,
-      assigneeIds: [...st.assigneeIds]
+      subTaskAssignees: [...st.subTaskAssignees]
     };
     this.showEditSubTaskUserDropdown = false;
     this.isEditSubTaskModalOpen = true;
@@ -748,7 +820,7 @@ export class TaskManagementComponent implements OnInit {
       this.toastService.show('Please fill in all required fields', 'warning');
       return;
     }
-    this.editSubTask.assigneeIds = [...this.editSubTaskAssigneeIds];
+    this.editSubTask.subTaskAssignees = [...this.editSubTaskAssigneeIds];
     this.isUpdatingSubTask = true;
     this.taskService.updateSubTask(this.editingSubTaskId, this.editSubTask).subscribe({
       next: (response) => {

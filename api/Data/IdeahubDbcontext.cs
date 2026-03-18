@@ -784,12 +784,6 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
             pt.Property(pt => pt.Description)
                 .HasColumnType("text");
 
-            pt.Property(pt => pt.AssigneeIds)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
-                .HasColumnType("text");
-
             pt.Property(pt => pt.Labels)
                 .HasMaxLength(512);
 
@@ -831,12 +825,6 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasMaxLength(256);
 
             st.Property(st => st.Description)
-                .HasColumnType("text");
-
-            st.Property(st => st.AssigneeIds)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>())
                 .HasColumnType("text");
 
             st.HasMany(st => st.Media)
