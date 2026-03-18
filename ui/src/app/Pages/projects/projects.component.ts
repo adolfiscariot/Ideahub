@@ -250,7 +250,7 @@ export class ProjectsComponent implements OnInit {
                     this.toastService.show('Project updated with media successfully', 'success');
                 } catch (mediaError) {
                     console.error('Error uploading media:', mediaError);
-                    this.toastService.show('Project updated, but media upload failed. Please resume and try again.', 'error');
+                    this.toastService.show('Project updated, but media upload failed. Please try again.', 'error');
                 }
             } else {
                 this.toastService.show('Project updated successfully', 'success');
