@@ -29,7 +29,8 @@ export class ProjectsService {
                     overseenBy: item.overseenByUserName,
                     overseenById: item.overseenByUserId,
                     groupName: item.groupName,
-                    ideaTitle: item.ideaName
+                    ideaTitle: item.ideaName,
+                    progress: item.progress
                 } as Project));
             }),
             catchError(error => {

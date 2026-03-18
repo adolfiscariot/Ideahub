@@ -22,7 +22,7 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">AVG. COMPLETION</span>
-                <span class="stat-value">74%</span>
+                <span class="stat-value">{{ overallAverageProgress }}%</span>
             </div>
         </div>
         <div class="stat-card">
@@ -37,10 +37,6 @@
         <div class="stat-card">
             <div class="stat-icon-wrapper error">
                 <mat-icon>notifications_none</mat-icon>
-            </div>
-            <div class="stat-info">
-                <span class="stat-label">CRITICAL TASKS</span>
-                <span class="stat-value">08</span>
             </div>
         </div>
     </div>
@@ -114,10 +110,10 @@
                         <td class="cell-progress">
                             <div class="progress-container">
                                 <div class="progress-bar-bg">
-                                    <div class="progress-bar-fill" [style.width.%]="calculateProgress(project.status)"
+                                    <div class="progress-bar-fill" [style.width.%]="project.progress || 0"
                                         [ngClass]="getStatusClass(project.status)"></div>
                                 </div>
-                                <span class="progress-percentage">{{ calculateProgress(project.status) }}%</span>
+                                <span class="progress-percentage">{{ project.progress || 0 }}%</span>
                             </div>
                         </td>
                         <td class="cell-media">
