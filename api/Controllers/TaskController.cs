@@ -35,11 +35,15 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var project = await _context.Projects.FindAsync(projectId);
 
-            if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
+            if (project == null) 
+            {
+                return NotFound(ApiResponse.Fail("Project not found"));
+            }
 
             // Access Control: Only Overseer can create tasks
             if (project.OverseenByUserId != userId)
             {
+                _logger.LogError("Only the project overseer can create tasks");
                 return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can create tasks."));
             }
 
@@ -96,7 +100,10 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.Media)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
 
-            if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
+            if (project == null) 
+            {
+                return NotFound(ApiResponse.Fail("Project not found"));
+            }
 
             // Check if user has access to workspace (Overseer, Task Assignee, or Subtask Assignee)
             var isTaskAssignee = project.Tasks.Any(t => t.AssigneeIds.Contains(userId!));
@@ -151,7 +158,10 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
+            if (task == null) 
+            {
+                return NotFound(ApiResponse.Fail("Task not found"));
+            }
 
             if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!))
             {
@@ -198,7 +208,10 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
+            if (task == null) 
+            {
+                return NotFound(ApiResponse.Fail("Task not found"));
+            }
 
             if (task.Project.OverseenByUserId != userId)
             {
@@ -230,7 +243,10 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) return NotFound(ApiResponse.Fail("Parent task not found"));
+            if (task == null) 
+            {
+                return NotFound(ApiResponse.Fail("Parent task not found"));
+            }
 
             // Restricted to Task Assignees and Project Overseer
             if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!))
@@ -300,7 +316,10 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.Project)
                 .FirstOrDefaultAsync(st => st.Id == subTaskId);
 
-            if (subTask == null) return NotFound(ApiResponse.Fail("Sub-task not found"));
+            if (subTask == null) 
+            {
+                return NotFound(ApiResponse.Fail("Sub-task not found"));
+            }
 
             if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
                 !subTask.ProjectTask.AssigneeIds.Contains(userId!) && 
