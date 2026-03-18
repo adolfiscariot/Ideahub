@@ -153,6 +153,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.Group)
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .Where(p => p.GroupId == groupId)
                 .ToListAsync();
             if (projects.Count == 0)
@@ -169,7 +171,8 @@ public class ProjectController : ControllerBase
                 OverseenByUserName = project.OverseenByUser?.DisplayName,
                 Status = project.Status.ToString(),
                 IdeaName = project.Idea?.Title,
-                GroupName = project.Group?.Name
+                GroupName = project.Group?.Name,
+                Progress = CalculateProjectProgress(project)
             }).ToList();
 
             _logger.LogInformation("View Project: {projectsCount} projects from {groupName} found", projects.Count, group.Name);
@@ -192,6 +195,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Group)
                 .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
 
             if (project == null)
@@ -257,7 +262,8 @@ public class ProjectController : ControllerBase
                 GroupName = project.Group?.Name,
                 project.IdeaId,
                 IdeaName = project.Idea?.Title,
-                Status = project.Status.ToString()
+                Status = project.Status.ToString(),
+                Progress = CalculateProjectProgress(project)
             };
 
             return Ok(ApiResponse.Ok("Project found", projectData));
@@ -288,6 +294,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.Group)
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .Where(p => 
                     !p.IsDeleted && 
                     (p.Group.IsPublic || p.Group.UserGroups.Any(ug => ug.UserId == userId)))
@@ -306,7 +314,8 @@ public class ProjectController : ControllerBase
                 Status = (int)project.Status,
                 IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name,
-                IsPublic = project.Group?.IsPublic
+                IsPublic = project.Group?.IsPublic,
+                Progress = CalculateProjectProgress(project)
             }).ToList();
 
             return Ok(ApiResponse.Ok($"{projects.Count} projects found", projectList));
@@ -354,6 +363,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
                 .Include(p => p.Group)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
             if (project is null)
             {
@@ -370,7 +381,8 @@ public class ProjectController : ControllerBase
                 OverseenByUserName = project.OverseenByUser.DisplayName,
                 OverseenByUserId = project.OverseenByUserId,
                 IdeaName = project.Idea.Title,
-                GroupName = project.Group.Name
+                GroupName = project.Group.Name,
+                Progress = CalculateProjectProgress(project)
             };
 
             _logger.LogInformation("Open Project: Project {projectTitle} found", project.Title);
@@ -529,4 +541,34 @@ public class ProjectController : ControllerBase
             return StatusCode(500, ApiResponse.Fail("An internal server error occurred while deleting the project. Please try again"));
         }
     }
-}
+
+    private double CalculateProjectProgress(Project project)
+    {
+        if (project.Tasks == null || !project.Tasks.Any(t => !t.IsDeleted))
+        {
+            return 0;
+        }
+
+        var activeTasks = project.Tasks.Where(t => !t.IsDeleted).ToList();
+        if (activeTasks.Count == 0) return 0;
+
+        double totalTaskProgress = 0;
+
+        foreach (var task in activeTasks)
+        {
+            var activeSubTasks = task.SubTasks?.ToList() ?? new List<SubTask>();
+            
+            if (activeSubTasks.Count > 0)
+            {
+                int completedSubTasks = activeSubTasks.Count(st => st.IsCompleted);
+                totalTaskProgress += ((double)completedSubTasks / activeSubTasks.Count) * 100;
+            }
+            else
+            {
+                totalTaskProgress += task.IsCompleted ? 100 : 0;
+            }
+        }
+
+        return Math.Round(totalTaskProgress / activeTasks.Count, 2);
+    }
+}
