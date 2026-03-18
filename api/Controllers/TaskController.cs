@@ -37,7 +37,7 @@ public class TaskController : ControllerBase
 
             if (project == null) return NotFound(ApiResponse.Fail("Project not found"));
 
-            // Access Control: Only Overseer or Committee Member/Admin can create tasks
+            // Access Control: Only Overseer can create tasks
             if (project.OverseenByUserId != userId)
             {
                 return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can create tasks."));
@@ -102,7 +102,7 @@ public class TaskController : ControllerBase
             var isTaskAssignee = project.Tasks.Any(t => t.AssigneeIds.Contains(userId!));
             var isSubTaskAssignee = project.Tasks.Any(t => t.SubTasks.Any(st => st.AssigneeIds.Contains(userId!)));
 
-            if (project.OverseenByUserId != userId && !isTaskAssignee && !isSubTaskAssignee && !User.IsInRole("CommitteeMember"))
+            if (project.OverseenByUserId != userId && !isTaskAssignee && !isSubTaskAssignee)
             {
                 return StatusCode(403, ApiResponse.Fail("You do not have permissions to view this project workspace."));
             }
@@ -153,7 +153,7 @@ public class TaskController : ControllerBase
 
             if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
 
-            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!) && !User.IsInRole("CommitteeMember"))
+            if (task.Project.OverseenByUserId != userId && !task.AssigneeIds.Contains(userId!))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to update this task."));
             }
@@ -200,7 +200,7 @@ public class TaskController : ControllerBase
 
             if (task == null) return NotFound(ApiResponse.Fail("Task not found"));
 
-            if (task.Project.OverseenByUserId != userId && !User.IsInRole("CommitteeMember"))
+            if (task.Project.OverseenByUserId != userId)
             {
                 return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can delete tasks."));
             }
@@ -304,8 +304,7 @@ public class TaskController : ControllerBase
 
             if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
                 !subTask.ProjectTask.AssigneeIds.Contains(userId!) && 
-                !subTask.AssigneeIds.Contains(userId!) && 
-                !User.IsInRole("CommitteeMember"))
+                !subTask.AssigneeIds.Contains(userId!))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to update this sub-task."));
             }
@@ -350,11 +349,13 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.Project)
                 .FirstOrDefaultAsync(st => st.Id == subTaskId);
 
-            if (subTask == null) return NotFound(ApiResponse.Fail("Sub-task not found"));
+            if (subTask == null) 
+            {
+                return NotFound(ApiResponse.Fail("Sub-task not found"));
+            }
 
             if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
-                !subTask.ProjectTask.AssigneeIds.Contains(userId!) && 
-                !User.IsInRole("CommitteeMember"))
+                !subTask.ProjectTask.AssigneeIds.Contains(userId!))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to delete this sub-task."));
             }
