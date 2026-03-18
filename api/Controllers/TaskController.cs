@@ -47,6 +47,12 @@ public class TaskController : ControllerBase
                 return StatusCode(403, ApiResponse.Fail("Only the Project Overseer can create tasks."));
             }
 
+            if (project.Status == ProjectStatus.Planning)
+            {
+                project.Status = ProjectStatus.Active;
+                project.UpdatedAt = DateTime.UtcNow;
+            }
+
             var task = new ProjectTask
             {
                 Title = taskDto.Title,

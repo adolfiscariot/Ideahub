@@ -148,7 +148,7 @@ textarea {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 20px;
 }
@@ -468,6 +468,25 @@ textarea {
     .ongoing {
         color: var(--success-color);
         font-style: italic;
+    }
+
+    .clickable-warning {
+        color: #d32f2f;
+        background-color: #ffebee;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid #ffcdd2;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #ffcdd2;
+            color: #b71c1c;
+        }
     }
 
     .not-started {

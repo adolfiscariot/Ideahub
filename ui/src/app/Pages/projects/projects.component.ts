@@ -106,6 +106,12 @@ export class ProjectsComponent implements OnInit {
         }).length;
     }
 
+    get overallAverageProgress(): number {
+        if (this.projects.length === 0) return 0;
+        const totalProgress = this.projects.reduce((sum, project) => sum + (project.progress || 0), 0);
+        return Math.round(totalProgress / this.projects.length);
+    }
+
     private toastService = inject(ToastService);
 
     ngOnInit(): void {
@@ -123,16 +129,7 @@ export class ProjectsComponent implements OnInit {
     }
 
 
-    calculateProgress(status: ProjectStatus): number {
-        switch (status) {
-            case ProjectStatus.Planning: return 0;
-            case ProjectStatus.Active: return 50;
-            case ProjectStatus.Completed: return 100;
-            case ProjectStatus.Shelved: return 25;
-            case ProjectStatus.Cancelled: return 0;
-            default: return 0;
-        }
-    }
+
 
     toggleActionMenu(event: Event, projectId: number): void {
         event.stopPropagation();

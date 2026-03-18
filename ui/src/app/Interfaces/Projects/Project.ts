@@ -9,6 +9,7 @@ export interface Project {
     overseenById: string;
     groupName?: string;
     ideaTitle?: string;
+    progress: number;
 }
 
 export enum ProjectStatus {
