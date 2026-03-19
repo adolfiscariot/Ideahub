@@ -392,17 +392,6 @@ public class TimesheetController : ControllerBase
             }
 
             // Fetch all active tasks for the project
-            var allProjectTasks = await _context.ProjectTasks
-                .Where(
-                    t => t.ProjectId == projectId && 
-                    !t.IsDeleted && 
-                    !t.IsCompleted &&
-                    (t.TaskAssignees ?? new List<TaskAssignee>())
-                        .Any(ta => ta.UserId == userId)
-                    )
-                .Select(t => new { t.Id, t.Title })
-                .ToListAsync();
-
             var allProjectTasks = await _context.TaskAssignees
                 .Where(
                     ta => ta.UserId == userId &&
