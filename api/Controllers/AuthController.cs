@@ -253,10 +253,19 @@ public class AuthController : ControllerBase
         {
             //create jwt access and refresh tokens
             var accessToken = await _tokenService.CreateAccessTokenAsync(user);
-            var refreshToken = _tokenService.GenerateRefreshToken().ToString();
-
+            var refreshToken = _tokenService.GenerateRefreshToken();
             //store refresh token
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
+
+            // Set Refresh Token in a persistent, HttpOnly cookie
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // set to true in prod for HTTPS
+                SameSite = SameSiteMode.Lax, // set to Lax for local dev set to strict in prod
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
 
             //set login time
             user.LastLoginAt = DateTime.UtcNow;
@@ -270,7 +279,7 @@ public class AuthController : ControllerBase
             return Ok(ApiResponse.Ok("Successful login", new TokenResponse
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken,
+                RefreshToken = "cookie",
                 RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
             }));
         }
@@ -282,87 +291,125 @@ public class AuthController : ControllerBase
 
     //refresh the access token
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshAccessToken(TokenResponse token)
+    public async Task<IActionResult> RefreshAccessToken([FromBody] TokenResponse tokenRequest)
     {
-        if (token is null)
+        // Get refresh token from cookie first, fallback to body
+        var cookieToken = Request.Cookies["refreshToken"];
+        var rawRefreshToken = cookieToken ?? tokenRequest?.RefreshToken;
+
+        // _logger.LogInformation("Refresh attempt for user. Cookie present: {cookiePresent}, Body present: {bodyPresent}", 
+        //     !string.IsNullOrEmpty(cookieToken), !string.IsNullOrEmpty(tokenRequest?.RefreshToken));
+        _logger.LogError("Refreshing attempt for user"); 
+        if (string.IsNullOrEmpty(rawRefreshToken))
         {
-            _logger.LogError("The token provided in the method's argument is null");
-            return BadRequest(ApiResponse.Fail("Invalid Access Token or Refresh Token"));
+            //_logger.LogError("Refresh token is missing from cookie and request body");
+            _logger.LogError("Missing Refresh token"); 
+            return BadRequest(ApiResponse.Fail("Refresh token is required"));
         }
 
-        //get claims from expired token
-        var principal = _tokenService.GetPrincipalFromExpiredToken(token.AccessToken);
-        if (principal.Identity is null)
+        if (rawRefreshToken == "cookie")
         {
-            _logger.LogError("Couldn't get principal's identity from expired token");
-            return BadRequest(ApiResponse.Fail("Couldn't get principal's identity from expired token"));
+            //_logger.LogError("Browser failed to send the actual refreshToken cookie");
+            _logger.LogError("Auth cookie missing"); 
+            return BadRequest(ApiResponse.Fail("Authentication cookie missing. Please try logging in again."));
         }
 
-        //Find the user based on the user id in the access token's payload
+        // Get principal from expired access token
+        var principal = _tokenService.GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
+        if (principal?.Identity is null)
+        {
+            //_logger.LogError("Couldn't get principal's identity from expired token. Token might be malformed or tampered with.");
+            _logger.LogError("Invalid access token"); 
+            return BadRequest(ApiResponse.Fail("Invalid access token"));
+        }
+
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
         if (userId is null)
         {
-            _logger.LogError("User ID not found");
-            return BadRequest(ApiResponse.Fail("Couldn't get user's ID"));
+            //_logger.LogError("User ID not found in token claims"); 
+            _logger.LogError("User ID not found"); 
+            return BadRequest(ApiResponse.Fail("Invalid access token claims"));
         }
 
-        //Eager loading of the user's refresh tokens
-        var user = await _userManager.Users.Include(u => u.RefreshTokens).FirstOrDefaultAsync(u=>u.Id == userId);
-
+        // Fetch user with refresh tokens
+        var user = await _userManager.Users
+            .Include(u => u.RefreshTokens)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(u => u.Id == userId);
         if (user is null)
         {
-            _logger.LogError("User is null");
-            return BadRequest(ApiResponse.Fail("Invalid access or refresh token"));
+            _logger.LogError("User not found");
+            return BadRequest(ApiResponse.Fail("User not found"));
         }
 
-        /***
-            The refresh token is encoded and hashed before being stored so we have to do the same
-            to the refresh token provided at login before comparing it to the stored token
-        ***/
-
-        var rawRefreshToken = token.RefreshToken;
-        var encodedRefreshToken  = Encoding.UTF8.GetBytes(rawRefreshToken);
+        // Hash the incoming refresh token to compare with stored hash
+        var encodedRefreshToken = Encoding.UTF8.GetBytes(rawRefreshToken);
         var hashedRefreshToken = Convert.ToBase64String(SHA256.HashData(encodedRefreshToken));
+
+        //_logger.LogInformation("Comparing hashed token from request with {count} stored tokens for user {userId}", user.RefreshTokens.Count, user.Id);
 
         var storedRefreshToken = user.RefreshTokens.FirstOrDefault(
             rt => rt.Token == hashedRefreshToken
             && !rt.HasExpired
             && rt.RefreshTokenExpiry > DateTime.UtcNow);
 
-
         if (storedRefreshToken is null)
         {
-            _logger.LogError("There are no valid stored refresh tokens");
-            return BadRequest(ApiResponse.Fail("Invalid access or refresh token"));
+            var match = user.RefreshTokens.FirstOrDefault(rt => rt.Token == hashedRefreshToken);
+            if (match != null)
+            {
+                // _logger.LogError("Token matched but is invalid. HasExpired: {expired}, Expiry: {expiry}, CurrentTime: {now}", 
+                //     match.HasExpired, match.RefreshTokenExpiry, DateTime.UtcNow);
+                _logger.LogError("Token match found but invalid");
+            }
+            }
+            else
+            {
+                //_logger.LogError("No matching token found in database for the provided hash.");
+                _logger.LogError("No matching token found");
+            }
+            }
+            return BadRequest(ApiResponse.Fail("Invalid or expired refresh token"));
         }
 
-        //if refresh token exists and is valid, mark it as expired then create new one
+        // Mark old token as expired
         storedRefreshToken.HasExpired = true;
+
+        // Create new refresh token
+        var newRawRefreshToken = _tokenService.GenerateRefreshToken();
+        var encodedNewToken = Encoding.UTF8.GetBytes(newRawRefreshToken);
+        var hashedNewToken = Convert.ToBase64String(SHA256.HashData(encodedNewToken));
 
         var newRefreshToken = new RefreshToken
         {
-            Token = _tokenService.GenerateRefreshToken(),
+            Token = hashedNewToken, 
             TokenId = Guid.NewGuid().ToString(),
             HasExpired = false,
             RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
             UserId = user.Id
         };
 
-        _logger.LogInformation("New refresh token created");
-
-        //add new refresh token to the user's list of refresh tokens and save changes
         user.RefreshTokens.Add(newRefreshToken);
         await _userManager.UpdateAsync(user);
 
+        // Update cookie with new refresh token
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTime.UtcNow.AddDays(7)
+        };
+        Response.Cookies.Append("refreshToken", newRawRefreshToken, cookieOptions);
 
-        //create new access token then return it and the refresh token too
+        // Create new access token
         var newAccessToken = await _tokenService.CreateAccessTokenAsync(user);
 
         return Ok(new
         {
             AccessToken = newAccessToken,
-            RefreshToken = newRefreshToken.Token
+            RefreshToken = "cookie",
+            RefreshTokenExpiry = newRefreshToken.RefreshTokenExpiry
         });
     }
 
@@ -386,7 +433,8 @@ public class AuthController : ControllerBase
                 return NotFound(ApiResponse.Fail("Logout failed. User Id not found")); 
             }
             await _tokenService.RevokeRefreshTokenAsync(userId);
-            _logger.LogInformation("Revoked Refresh Token");
+            Response.Cookies.Delete("refreshToken"); // Clear rotation cookie
+            _logger.LogInformation("Revoked Refresh Token and cleared cookie");
 
             var user = await _userManager.FindByIdAsync(userId);
             var userEmail = user?.Email ?? $"User with ID {userId}'s email not found";

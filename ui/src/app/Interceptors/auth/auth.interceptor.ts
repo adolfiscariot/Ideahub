@@ -42,9 +42,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         }
 
         return authService.refreshToken().pipe(
-          switchMap(() => {
+          switchMap((newToken: string) => {
             // Refresh successful, retry original request with new token
-            const newToken = localStorage.getItem('accessToken');
             const retriedRequest = req.clone({
               headers: req.headers.set('Authorization', `Bearer ${newToken}`)
             });
