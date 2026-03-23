@@ -1,0 +1,299 @@
+<div class="timesheet-page" [class.child-view]="isChildView">
+    <div class="page-header" *ngIf="!isChildView">
+        <h1 class="page-title">Timesheet Entries</h1>
+    </div>
+
+    <!-- Log Work Card -->
+    <div class="card log-card">
+        <div class="card-header">
+            <div class="header-icon">
+                <mat-icon>access_time</mat-icon>
+            </div>
+            <div class="header-text">
+                <h2>Log Work Hours</h2>
+                <p>Record your daily progress and flag any blockers.</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="global-row">
+                <div class="form-group date-group">
+                    <label>Date</label>
+                    <div class="input-wrapper">
+                        <mat-icon>calendar_today</mat-icon>
+                        <input type="date" [(ngModel)]="workDate">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Rows -->
+            <div class="log-rows">
+                <div class="log-row-item" *ngFor="let row of rows; let i = index">
+                    <div class="row-main">
+                        <div class="form-group task-select">
+                            <label *ngIf="i === 0">Task</label>
+                            <select [(ngModel)]="row.taskId">
+                                <option [value]="0">Select a task...</option>
+                                <option *ngFor="let task of availableTasks" [value]="task.id">{{ task.title }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group hours-input">
+                            <label *ngIf="i === 0">Hours Spent</label>
+                            <input type="number" [(ngModel)]="row.hoursSpent" placeholder="0.0" step="0.5" min="0">
+                        </div>
+                        <div class="form-group desc-input">
+                            <div class="label-row" *ngIf="i === 0">
+                                <label>Work Description</label>
+                                <div class="char-count" *ngIf="row.description.length > 50"
+                                    [class.near-limit]="row.description.length > 130"
+                                    [class.at-limit]="row.description.length === 150">
+                                    {{ row.description.length }}/150
+                                </div>
+                            </div>
+                            <div class="char-count floating" *ngIf="i !== 0 && row.description.length > 50"
+                                [class.near-limit]="row.description.length > 130"
+                                [class.at-limit]="row.description.length === 150">
+                                {{ row.description.length }}/150
+                            </div>
+                            <input type="text" [(ngModel)]="row.description" placeholder="What did you work on?"
+                                maxlength="150">
+                        </div>
+                        <div class="row-actions" [class.with-labels]="i === 0">
+                            <button class="btn-blocker-toggle" (click)="row.hasBlocker = !row.hasBlocker"
+                                [class.active]="row.hasBlocker">
+                                <mat-icon>{{ row.hasBlocker ? 'warning' : 'add_circle_outline' }}</mat-icon>
+                                {{ row.hasBlocker ? 'Reporting Blocker' : 'Have a Blocker?' }}
+                            </button>
+                            <button class="btn-icon-danger" (click)="removeRow(i)" *ngIf="rows.length > 1"
+                                title="Remove Row">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Blocker Section -->
+                    <div class="blocker-section" *ngIf="row.hasBlocker">
+                        <div class="blocker-header">
+                            <mat-icon>report_problem</mat-icon>
+                            BLOCKER REPORTING
+                            <span class="header-subtitle">If you have a blocker, please provide details below:</span>
+                        </div>
+                        <div class="blocker-form">
+                            <div class="form-group flex-3">
+                                <div class="label-row">
+                                    <label>Blocker Description</label>
+                                    <div class="char-count"
+                                        *ngIf="row.blockerDescription && row.blockerDescription.length > 30"
+                                        [class.near-limit]="row.blockerDescription.length > 130"
+                                        [class.at-limit]="row.blockerDescription.length === 150">
+                                        {{ row.blockerDescription.length }}/150
+                                    </div>
+                                </div>
+                                <input type="text" [(ngModel)]="row.blockerDescription"
+                                    placeholder="What is preventing your progress?" maxlength="150">
+                            </div>
+                            <div class="form-group flex-1">
+                                <label>Severity</label>
+                                <select [(ngModel)]="row.blockerSeverity">
+                                    <option [value]="0">Low</option>
+                                    <option [value]="1">Medium</option>
+                                    <option [value]="2">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="blocker-actions">
+                            <input type="file" #evidenceUpload multiple style="display: none"
+                                (change)="onFileSelected($event, i)">
+                            <app-buttons [buttonStyleClass]="'btn-promote'" (click)="evidenceUpload.click()">
+                                <mat-icon>attach_file</mat-icon>
+                                Attach Blocker Evidence
+                            </app-buttons>
+
+                            <div class="selected-files" *ngIf="row.tempFiles.length > 0">
+                                <div class="file-item" *ngFor="let file of row.tempFiles; let fIndex = index">
+                                    <span class="file-name">{{ file.name }}</span>
+                                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                                    <button type="button" class="btn-remove-file"
+                                        (click)="removeTempFile(i, fIndex)">×</button>
+                                </div>
+                            </div>
+
+                            <span class="file-info" *ngIf="row.tempFiles.length === 0">No files attached</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="addRow()" *ngIf="!isEditing" [disabled]="isLoading">
+                    <mat-icon>add</mat-icon>
+                    Add Another Task
+                </app-buttons>
+                <div class="spacer"></div>
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="cancelEdit()" *ngIf="isEditing" [disabled]="isLoading">
+                    Cancel Edit
+                </app-buttons>
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="submitLogs()" [isLoading]="isLoading">
+                    <mat-icon *ngIf="!isLoading">{{ isEditing ? 'save' : 'send' }}</mat-icon>
+                    <span>{{ isEditing ? 'Update Timesheet' : 'Submit All Logs' }}</span>
+                </app-buttons>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Logs -->
+    <div class="logs-section">
+        <div class="section-header">
+            <div class="header-left">
+                <mat-icon>assignment</mat-icon>
+                <h3>RECENT WORK LOGS</h3>
+            </div>
+            <div class="entry-count">Showing {{ filteredLogs.length }} of {{ recentLogs.length }} logs</div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="table-filters">
+            <div class="filter-group">
+                <label>Date Range</label>
+                <div class="date-range-inputs">
+                    <input type="date" [(ngModel)]="filterStartDate" placeholder="Start Date">
+                    <span class="date-sep">to</span>
+                    <input type="date" [(ngModel)]="filterEndDate" placeholder="End Date">
+                </div>
+            </div>
+            <div class="filter-group select-filter">
+                <label>Team Member</label>
+                <div class="select-wrapper">
+                    <mat-icon>person_search</mat-icon>
+                    <select [(ngModel)]="filterUserId">
+                        <option value="">All Team Members</option>
+                        <option *ngFor="let member of projectMembers" [value]="member.id">{{ member.name }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group select-filter">
+                <label>Blocker Severity</label>
+                <div class="select-wrapper">
+                    <mat-icon>report_problem</mat-icon>
+                    <select [(ngModel)]="filterSeverity">
+                        <option value="">All Severities</option>
+                        <option value="Low">Low Blocker</option>
+                        <option value="Medium">Medium Blocker</option>
+                        <option value="High">High Blocker</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions" *ngIf="filterUserId || filterStartDate || filterEndDate || filterSeverity">
+                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="clearFilters()">
+                    <mat-icon>filter_list_off</mat-icon>
+                    Reset Filters
+                </app-buttons>
+            </div>
+        </div>
+
+        <div class="logs-table-container">
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Team Member</th>
+                        <th>Task & Description</th>
+                        <th>Hours</th>
+                        <th>Blockers & Critical Issues</th>
+                        <th>Evidence</th>
+                        <th class="col-actions-header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of filteredLogs" class="log-entry-row">
+                        <td class="col-date">{{ log.workDate | date:'mediumDate' }}</td>
+                        <td class="col-user">
+                            <span class="user-badge">{{ log.userName }}</span>
+                        </td>
+                        <td class="col-main">
+                            <div class="description-content">
+                                <div class="task-info">
+                                    <span class="task-badge">{{ log.taskTitle }}</span>
+                                </div>
+                                <div class="log-desc">{{ log.description }}</div>
+                            </div>
+                        </td>
+                        <td class="col-hours">
+                            <span class="hours-pill">{{ log.hoursSpent }}h</span>
+                        </td>
+                        <td class="col-blockers">
+                            <div class="blocker-content" *ngIf="log.hasBlocker">
+                                <span class="blocker-pill" [ngStyle]="getSeverityStyle(log.blockerSeverity)">
+                                    {{ getSeverityLabel(log.blockerSeverity) }} Blocker
+                                </span>
+                                <div class="blocker-desc" *ngIf="log.blockerDescription">
+                                    {{ log.blockerDescription }}
+                                </div>
+                            </div>
+                            <span class="no-blockers" *ngIf="!log.hasBlocker">
+                                <mat-icon>check_circle_outline</mat-icon>
+                                No blockers reported
+                            </span>
+                        </td>
+                        <td class="col-evidence">
+                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, log.id)"
+                                *ngIf="log.hasBlocker">
+                                <mat-icon class="media-file-icon">description</mat-icon>
+                                <span class="media-count">{{ log.mediaCount || 0 }}</span>
+
+                                <!-- Media Popup -->
+                                <div class="media-popup" *ngIf="activeMediaTimesheetId === log.id"
+                                    (click)="$event.stopPropagation()">
+                                    <div class="popup-header">Attached Media</div>
+                                    <div class="popup-body">
+                                        <app-media *ngIf="log.mediaCount && log.mediaCount > 0" [timesheetId]="log.id"
+                                            [compactMode]="true"></app-media>
+                                        <div *ngIf="!log.mediaCount || log.mediaCount === 0" class="empty-media">No
+                                            attached files</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="no-files" *ngIf="!log.hasBlocker">-</span>
+                        </td>
+                        <td class="col-actions">
+                            <ng-container *ngIf="log.userId === currentUserId">
+                                <button mat-icon-button [matMenuTriggerFor]="menu" class="btn-icon-only">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                                <mat-menu #menu="matMenu" class="modern-menu">
+                                    <button mat-menu-item (click)="editLog(log)">
+                                        <mat-icon>edit</mat-icon>
+                                        <span>Edit Log</span>
+                                    </button>
+                                    <button mat-menu-item (click)="deleteLog(log.id!)" class="menu-item-danger">
+                                        <mat-icon>delete</mat-icon>
+                                        <span>Delete Log</span>
+                                    </button>
+                                </mat-menu>
+                            </ng-container>
+                            <span *ngIf="log.userId !== currentUserId" class="no-actions">-</span>
+                        </td>
+                    </tr>
+                    <tr *ngIf="recentLogs.length === 0">
+                        <td colspan="6" class="empty-row">No work logs found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<app-modal [isOpen]="showDeleteModal" title="Delete Work Log" size="sm" [showFooter]="false"
+    (closeModal)="closeDeleteModal()">
+    <div class="delete-confirmation" modal-body>
+        <div class="confirm-icon">
+            <mat-icon>warning</mat-icon>
+        </div>
+        <p>Are you sure you want to delete this work log? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <app-buttons [buttonStyleClass]="'btn-promote'" [buttonText]="'No, Keep it'" (click)="closeDeleteModal()"></app-buttons>
+            <app-buttons [buttonStyleClass]="'btn-promote'" [buttonText]="'Yes, Delete it'" (click)="confirmDelete()"></app-buttons>
+        </div>
+    </div>
+</app-modal>

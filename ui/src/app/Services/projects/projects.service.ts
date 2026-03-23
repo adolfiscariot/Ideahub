@@ -29,7 +29,8 @@ export class ProjectsService {
                     overseenBy: item.overseenByUserName,
                     overseenById: item.overseenByUserId,
                     groupName: item.groupName,
-                    ideaTitle: item.ideaName
+                    ideaTitle: item.ideaName,
+                    progress: item.progress
                 } as Project));
             }),
             catchError(error => {
@@ -43,6 +44,20 @@ export class ProjectsService {
             map(response => response.data),
             catchError(error => {
                 return throwError(() => new Error(error.message || 'Failed to update project'));
+            })
+        );
+    }
+
+    deleteProject(id: number): Observable<any> {
+        return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`).pipe(
+            map(response => {
+                if (!response.status) {
+                    throw new Error(response.message || 'Failed to delete project');
+                }
+                return response.data;
+            }),
+            catchError(error => {
+                return throwError(() => new Error(error.message || 'Failed to delete project'));
             })
         );
     }

@@ -36,7 +36,13 @@ public class EmailSender : IEmailSender
         var response = await Client.SendEmailAsync(Message);
         if ((int)response.StatusCode >= 400)
         {
-            _logger.LogWarning($"Failed to send email: {response.StatusCode}");
+            var body = await response.Body.ReadAsStringAsync();
+            _logger.LogError($"Failed to send email to {toEmail}. Status Code: {response.StatusCode}. Error: {body}");
+        }
+        else
+        {
+            _logger.LogInformation($"Email successfully sent to {toEmail}. Status: {response.StatusCode}");
+          // _logger.LogInformation($"Email successfully sent");
         }
     }
 }

@@ -21,10 +21,39 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<BusinessCase> BusinessCases { get; set; }
     public DbSet<ScoringDimensions> ScoringDimensions { get; set; }
+    public DbSet<ProjectTask> ProjectTasks { get; set; }
+    public DbSet<SubTask> SubTasks { get; set; }
+    public DbSet<TaskAssignee> TaskAssignees { get; set; }
+    public DbSet<SubTaskAssignee> SubTaskAssignees { get; set; }
+    public DbSet<Timesheet> Timesheets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder); //ensure Identity's configurations are added before our own
+
+        // PostgreSQL DateTime Fix: Ensure all DateTime properties are UTC
+        var utcConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+            v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+            v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+        var utcNullableConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+            v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)) : v,
+            v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)) : v);
+
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetValueConverter(utcConverter);
+                }
+                else if (property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(utcNullableConverter);
+                }
+            }
+        }
 
         //Group configurations
         builder.Entity<Group>(g =>
@@ -591,7 +620,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            pr.HasQueryFilter(pr => !pr.User.IsDeleted);
+            pr.HasQueryFilter(pr => !pr.User!.IsDeleted);
 
             // pr.Property(pr => pr.RequestIp)
             //     .HasMaxLength(45);
@@ -721,13 +750,183 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .HasForeignKey(m => m.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            m.HasOne(m => m.ProjectTask)
+                .WithMany(pt => pt.Media)
+                .HasForeignKey(m => m.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasOne(m => m.SubTask)
+                .WithMany(st => st.Media)
+                .HasForeignKey(m => m.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
             m.HasIndex(m => m.IdeaId);
             m.HasIndex(m => m.UserId);
             m.HasIndex(m => m.ProjectId);
             m.HasIndex(m => m.CommentId);
+            m.HasIndex(m => m.ProjectTaskId);
+            m.HasIndex(m => m.SubTaskId);
             m.HasIndex(m => m.MediaType);
 
+        });
+
+        // ProjectTask Configuration
+        builder.Entity<ProjectTask>(pt =>
+        {
+            pt.HasKey(pt => pt.Id);
+            pt.HasQueryFilter(pt => !pt.IsDeleted && !pt.Project.IsDeleted);
+
+            pt.Property(pt => pt.Title)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            pt.Property(pt => pt.Description)
+                .HasColumnType("text");
+
+            pt.Property(pt => pt.Labels)
+                .HasMaxLength(512);
+
+            pt.Property(pt => pt.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            pt.Property(pt => pt.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            // Relationships
+            pt.HasOne(pt => pt.Project)
+                .WithMany(p => p.Tasks)
+                .HasForeignKey(pt => pt.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            pt.HasMany(pt => pt.SubTasks)
+                .WithOne(st => st.ProjectTask)
+                .HasForeignKey(st => st.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            pt.HasMany(pt => pt.Media)
+                .WithOne(m => m.ProjectTask)
+                .HasForeignKey(m => m.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // SubTask Configuration
+        builder.Entity<SubTask>(st =>
+        {
+            st.HasKey(st => st.Id);
+            st.HasQueryFilter(st => !st.ProjectTask.IsDeleted && !st.ProjectTask.Project.IsDeleted);
+
+            st.Property(st => st.Title)
+                .IsRequired()
+                .HasMaxLength(256);
+
+            st.Property(st => st.Description)
+                .HasColumnType("text");
+
+            st.HasMany(st => st.Media)
+                .WithOne(m => m.SubTask)
+                .HasForeignKey(m => m.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            st.HasOne(s => s.ParentSubTask)
+                .WithMany(p => p.ChildSubTasks)
+                .HasForeignKey(s => new { s.ParentSubTaskId, s.ProjectTaskId })
+                .HasPrincipalKey(p => new { p.Id, p.ProjectTaskId })
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Task Assignee Configuration
+        builder.Entity<TaskAssignee>(ta =>
+        {
+            ta.HasKey(ta => ta.Id);
+
+            // Relationships
+            ta.HasOne(ta => ta.ProjectTask)
+                .WithMany(pt => pt.TaskAssignees)
+                .HasForeignKey(ta => ta.ProjectTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            ta.HasOne(ta => ta.User)
+                .WithMany(u => u.TaskAssignees)
+                .HasForeignKey(ta => ta.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            // Index
+            ta.HasIndex(ta => new {ta.ProjectTaskId, ta.UserId})
+                .IsUnique();
+        });
+
+        // Sub Task Assignee Configuration
+        builder.Entity<SubTaskAssignee>(sta =>
+        {
+            sta.HasKey(sta => sta.Id);
+
+            // Relationships
+            sta.HasOne(sta => sta.SubTask)
+                .WithMany(st => st.SubTaskAssignees)
+                .HasForeignKey(sta => sta.SubTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            sta.HasOne(sta => sta.User)
+                .WithMany(u => u.SubTaskAssignees)
+                .HasForeignKey(sta => sta.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+            sta.HasIndex(sta => new {sta.SubTaskId, sta.UserId})
+                .IsUnique();
+        });
+
+        // Timesheet Configuration
+        builder.Entity<Timesheet>(ts =>
+        {
+            ts.HasKey(ts => ts.Id);
+            ts.HasQueryFilter(ts => !ts.IsDeleted && !ts.Task.IsDeleted);
+
+            ts.Property(ts => ts.Description)
+                .IsRequired()
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.WorkDate)
+                .IsRequired();
+
+            ts.Property(ts => ts.HoursSpent)
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
+
+            ts.Property(ts => ts.Comments)
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.BlockerDescription)
+                .HasColumnType("text");
+
+            ts.Property(ts => ts.BlockerSeverity)
+                .HasConversion<string>();
+
+            ts.Property(ts => ts.CreatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
+
+            ts.Property(ts => ts.UpdatedAt)
+                .IsRequired()
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAddOrUpdate();
+
+            // Relationships
+            ts.HasOne(ts => ts.Task)
+                .WithMany(t => t.Timesheets)
+                .HasForeignKey(ts => ts.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            ts.HasOne(ts => ts.User)
+                .WithMany(u => u.Timesheets)
+                .HasForeignKey(ts => ts.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
     }

@@ -153,6 +153,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.Group)
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .Where(p => p.GroupId == groupId)
                 .ToListAsync();
             if (projects.Count == 0)
@@ -169,7 +171,8 @@ public class ProjectController : ControllerBase
                 OverseenByUserName = project.OverseenByUser?.DisplayName,
                 Status = project.Status.ToString(),
                 IdeaName = project.Idea?.Title,
-                GroupName = project.Group?.Name
+                GroupName = project.Group?.Name,
+                Progress = CalculateProjectProgress(project)
             }).ToList();
 
             _logger.LogInformation("View Project: {projectsCount} projects from {groupName} found", projects.Count, group.Name);
@@ -179,6 +182,97 @@ public class ProjectController : ControllerBase
         {
             _logger.LogError(e, "View Projects: Can't view projects in group {groupId}", groupId);
             return StatusCode(500, ApiResponse.Fail("An internal server error occurred while fetching projects. Please try again"));
+        }
+    }
+
+    //Get project by ID
+    [HttpGet("{projectId}")]
+    public async Task<IActionResult> GetProjectById(int projectId)
+    {
+        try
+        {
+            var project = await _context.Projects
+                .Include(p => p.OverseenByUser)
+                .Include(p => p.Group)
+                .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                return NotFound(ApiResponse.Fail("Project not found"));
+            }
+
+            // user info
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                _logger.LogError("GetProjectById: User Id is null. Can't fetch project");
+                return Unauthorized(ApiResponse.Fail("User Id is null"));
+            }
+
+            // group info
+            var group = project.Group;
+            if (group is null)
+            {
+                _logger.LogError("GetProjectById: Group not found for project {projectId}", projectId);
+                return NotFound(ApiResponse.Fail("Group not found"));
+            }
+
+            // check if user has access: (Overseer or Task/SubTask Assignee)
+            var isOverseer = project.OverseenByUserId == userId;
+            var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
+            
+            bool isAssignee = false;
+            if (!isOverseer)
+            {
+                // Assignee check
+                var tasks = await _context.ProjectTasks
+                    .Include(t => t.TaskAssignees)
+                    .Where(t => t.ProjectId == projectId && !t.IsDeleted)
+                    .ToListAsync();
+                
+                isAssignee = tasks.Any(t => (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId));
+
+                // If still not found, check subtasks
+                if (!isAssignee)
+                {
+                    isAssignee = await _context.SubTaskAssignees
+                        .AnyAsync(sta => sta.UserId == userId &&
+                                sta.SubTask.ProjectTask.ProjectId == projectId &&
+                                !sta.SubTask.ProjectTask.IsDeleted &&
+                                !sta.SubTask.IsDeleted);
+                }
+            }
+
+            if (!isOverseer && !isGroupMember && !isAssignee)
+            {
+                _logger.LogError("GetProjectById: User does not have access to project {projectId} (not overseer, member, or assignee)", projectId);
+                return StatusCode(403, ApiResponse.Fail("You do not have permission to access this project workspace."));
+            }
+
+            var projectData = new 
+            {
+                project.Id,
+                project.Title,
+                project.Description,
+                project.OverseenByUserId,
+                OverseenByUserName = project.OverseenByUser?.DisplayName,
+                project.GroupId,
+                GroupName = project.Group?.Name,
+                project.IdeaId,
+                IdeaName = project.Idea?.Title,
+                Status = project.Status.ToString(),
+                Progress = CalculateProjectProgress(project)
+            };
+
+            return Ok(ApiResponse.Ok("Project found", projectData));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "GetProjectById: Failed to fetch project {projectId}", projectId);
+            return StatusCode(500, ApiResponse.Fail("Internal server error"));
         }
     }
 
@@ -201,6 +295,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.Group)
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .Where(p => 
                     !p.IsDeleted && 
                     (p.Group.IsPublic || p.Group.UserGroups.Any(ug => ug.UserId == userId)))
@@ -219,7 +315,8 @@ public class ProjectController : ControllerBase
                 Status = (int)project.Status,
                 IdeaName = project.Idea?.Title,
                 GroupName = project.Group?.Name,
-                IsPublic = project.Group?.IsPublic
+                IsPublic = project.Group?.IsPublic,
+                Progress = CalculateProjectProgress(project)
             }).ToList();
 
             return Ok(ApiResponse.Ok($"{projects.Count} projects found", projectList));
@@ -267,6 +364,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.OverseenByUser)
                 .Include(p => p.Idea)
                 .Include(p => p.Group)
+                .Include(p => p.Tasks)
+                    .ThenInclude(t => t.SubTasks)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
             if (project is null)
             {
@@ -281,8 +380,10 @@ public class ProjectController : ControllerBase
                 Description = project.Description,
                 Status = project.Status.ToString(),
                 OverseenByUserName = project.OverseenByUser.DisplayName,
+                OverseenByUserId = project.OverseenByUserId,
                 IdeaName = project.Idea.Title,
-                GroupName = project.Group.Name
+                GroupName = project.Group.Name,
+                Progress = CalculateProjectProgress(project)
             };
 
             _logger.LogInformation("Open Project: Project {projectTitle} found", project.Title);
@@ -320,8 +421,8 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
 
-            //check if user created or is overseeing project
-            if (project.CreatedByUserId != userId && project.OverseenByUserId != userId)
+            //check if user is overseeing project
+            if (project.OverseenByUserId != userId)
             {
                 _logger.LogError("Update Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
                 return StatusCode(403, ApiResponse.Fail("User not authorized to update project"));
@@ -421,11 +522,11 @@ public class ProjectController : ControllerBase
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
 
-            //check if user created project
-            if (project.CreatedByUserId != userId)
+            //check if user is overseeing project
+            if (project.OverseenByUserId != userId)
             {
-                _logger.LogWarning("Delete Project: User {userEmail} has no permission to update project {projectName}", userEmail, project.Title);
-                return StatusCode(403, ApiResponse.Fail("User not authorized to update project"));
+                _logger.LogWarning("Delete Project: User {userEmail} has no permission to delete project {projectName}", userEmail, project.Title);
+                return StatusCode(403, ApiResponse.Fail("User not authorized to delete project"));
             }
 
             //delete project
@@ -440,5 +541,35 @@ public class ProjectController : ControllerBase
             _logger.LogError(e, "Delete Project: Project {projectId} failed to delete", projectId);
             return StatusCode(500, ApiResponse.Fail("An internal server error occurred while deleting the project. Please try again"));
         }
+    }
+
+    private double CalculateProjectProgress(Project project)
+    {
+        if (project.Tasks == null || !project.Tasks.Any(t => !t.IsDeleted))
+        {
+            return 0;
+        }
+
+        var activeTasks = project.Tasks.Where(t => !t.IsDeleted).ToList();
+        if (activeTasks.Count == 0) return 0;
+
+        double totalTaskProgress = 0;
+
+        foreach (var task in activeTasks)
+        {
+            var activeSubTasks = task.SubTasks?.ToList() ?? new List<SubTask>();
+            
+            if (activeSubTasks.Count > 0)
+            {
+                int completedSubTasks = activeSubTasks.Count(st => st.IsCompleted);
+                totalTaskProgress += ((double)completedSubTasks / activeSubTasks.Count) * 100;
+            }
+            else
+            {
+                totalTaskProgress += task.IsCompleted ? 100 : 0;
+            }
+        }
+
+        return Math.Round(totalTaskProgress / activeTasks.Count, 2);
     }
 }

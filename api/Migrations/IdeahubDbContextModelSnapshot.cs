@@ -588,6 +588,15 @@ namespace Ideahub.Migrations
                     b.Property<int?>("ProjectId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ProjectTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SubTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TimesheetId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -601,6 +610,12 @@ namespace Ideahub.Migrations
                     b.HasIndex("MediaType");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectTaskId");
+
+                    b.HasIndex("SubTaskId");
+
+                    b.HasIndex("TimesheetId");
 
                     b.HasIndex("UserId");
 
@@ -757,6 +772,60 @@ namespace Ideahub.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("api.Models.ProjectTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Labels")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectTasks");
+                });
+
             modelBuilder.Entity("api.Models.RefreshToken", b =>
                 {
                     b.Property<string>("TokenId")
@@ -870,6 +939,166 @@ namespace Ideahub.Migrations
                         .IsUnique();
 
                     b.ToTable("ScoringDimensions");
+                });
+
+            modelBuilder.Entity("api.Models.SubTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("ParentSubTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProjectTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectTaskId");
+
+                    b.HasIndex("ParentSubTaskId", "ProjectTaskId");
+
+                    b.ToTable("SubTasks");
+                });
+
+            modelBuilder.Entity("api.Models.SubTaskAssignee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SubTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("SubTaskId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("SubTaskAssignees");
+                });
+
+            modelBuilder.Entity("api.Models.TaskAssignee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProjectTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ProjectTaskId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("TaskAssignees");
+                });
+
+            modelBuilder.Entity("api.Models.Timesheet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlockerDescription")
+                        .HasMaxLength(150)
+                        .HasColumnType("text");
+
+                    b.Property<string>("BlockerSeverity")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("HasBlocker")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("HoursSpent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("WorkDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Timesheets");
                 });
 
             modelBuilder.Entity("api.Models.UserGroup", b =>
@@ -1078,6 +1307,20 @@ namespace Ideahub.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("api.Models.ProjectTask", "ProjectTask")
+                        .WithMany("Media")
+                        .HasForeignKey("ProjectTaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("api.Models.SubTask", "SubTask")
+                        .WithMany("Media")
+                        .HasForeignKey("SubTaskId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("api.Models.Timesheet", "Timesheet")
+                        .WithMany("Media")
+                        .HasForeignKey("TimesheetId");
+
                     b.HasOne("api.Models.IdeahubUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1089,6 +1332,12 @@ namespace Ideahub.Migrations
                     b.Navigation("Idea");
 
                     b.Navigation("Project");
+
+                    b.Navigation("ProjectTask");
+
+                    b.Navigation("SubTask");
+
+                    b.Navigation("Timesheet");
 
                     b.Navigation("User");
                 });
@@ -1158,6 +1407,17 @@ namespace Ideahub.Migrations
                     b.Navigation("OverseenByUser");
                 });
 
+            modelBuilder.Entity("api.Models.ProjectTask", b =>
+                {
+                    b.HasOne("api.Models.Project", "Project")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
             modelBuilder.Entity("api.Models.RefreshToken", b =>
                 {
                     b.HasOne("api.Models.IdeahubUser", "User")
@@ -1178,6 +1438,82 @@ namespace Ideahub.Migrations
                         .IsRequired();
 
                     b.Navigation("Idea");
+                });
+
+            modelBuilder.Entity("api.Models.SubTask", b =>
+                {
+                    b.HasOne("api.Models.ProjectTask", "ProjectTask")
+                        .WithMany("SubTasks")
+                        .HasForeignKey("ProjectTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.SubTask", "ParentSubTask")
+                        .WithMany("ChildSubTasks")
+                        .HasForeignKey("ParentSubTaskId", "ProjectTaskId")
+                        .HasPrincipalKey("Id", "ProjectTaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentSubTask");
+
+                    b.Navigation("ProjectTask");
+                });
+
+            modelBuilder.Entity("api.Models.SubTaskAssignee", b =>
+                {
+                    b.HasOne("api.Models.SubTask", "SubTask")
+                        .WithMany("SubTaskAssignees")
+                        .HasForeignKey("SubTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany("SubTaskAssignees")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubTask");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("api.Models.TaskAssignee", b =>
+                {
+                    b.HasOne("api.Models.ProjectTask", "ProjectTask")
+                        .WithMany("TaskAssignees")
+                        .HasForeignKey("ProjectTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany("TaskAssignees")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProjectTask");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("api.Models.Timesheet", b =>
+                {
+                    b.HasOne("api.Models.ProjectTask", "Task")
+                        .WithMany("Timesheets")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("api.Models.IdeahubUser", "User")
+                        .WithMany("Timesheets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("api.Models.UserGroup", b =>
@@ -1267,12 +1603,45 @@ namespace Ideahub.Migrations
 
                     b.Navigation("RefreshTokens");
 
+                    b.Navigation("SubTaskAssignees");
+
+                    b.Navigation("TaskAssignees");
+
+                    b.Navigation("Timesheets");
+
                     b.Navigation("UserGroups");
 
                     b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("api.Models.Project", b =>
+                {
+                    b.Navigation("Media");
+
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("api.Models.ProjectTask", b =>
+                {
+                    b.Navigation("Media");
+
+                    b.Navigation("SubTasks");
+
+                    b.Navigation("TaskAssignees");
+
+                    b.Navigation("Timesheets");
+                });
+
+            modelBuilder.Entity("api.Models.SubTask", b =>
+                {
+                    b.Navigation("ChildSubTasks");
+
+                    b.Navigation("Media");
+
+                    b.Navigation("SubTaskAssignees");
+                });
+
+            modelBuilder.Entity("api.Models.Timesheet", b =>
                 {
                     b.Navigation("Media");
                 });

@@ -5,7 +5,13 @@
 .media-grid {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 4px;
+
+  &.vertical {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .media-item {
@@ -53,6 +59,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
+
+  .full-filename & {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-all;
+  }
 }
 
 .media-placeholder:hover,

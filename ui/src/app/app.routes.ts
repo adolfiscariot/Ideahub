@@ -86,5 +86,18 @@ export const routes: Routes = [
       import('./Pages/committeemembers/committeemembers.component').then(
         (m) => m.CommitteeMembersComponent
       ),
+  },
+  {
+    path: 'projects/:projectId/tasks',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/task-management/task-management.component').then((m) => m.TaskManagementComponent),
+  },
+  {
+    path: 'projects/:projectId/timesheets',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./Pages/timesheets/timesheets.component').then((m) => m.TimesheetsComponent),
   }
+
 ];

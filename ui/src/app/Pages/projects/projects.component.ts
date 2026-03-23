@@ -1,16 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { ProjectsService } from '../../Services/projects/projects.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
-import { MediaType } from '../../Interfaces/Media/media-interface';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
+import { TaskService } from '../../Services/task.service';
 import { firstValueFrom } from 'rxjs';
 
 type EditProjectForm = {
@@ -29,7 +30,7 @@ type ProjectWithMedia = Project & { media?: Media[] };
 @Component({
     selector: 'app-projects',
     standalone: true,
-    imports: [CommonModule, FormsModule, MatDialogModule, ModalComponent, ButtonsComponent, MediaComponent],
+    imports: [CommonModule, FormsModule, MatDialogModule, MatIconModule, ModalComponent, ButtonsComponent, MediaComponent],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.scss'
 })
@@ -40,9 +41,11 @@ export class ProjectsComponent implements OnInit {
 
     private projectsService = inject(ProjectsService);
     private mediaService = inject(MediaService);
+    private taskService = inject(TaskService);
     private dialog = inject(MatDialog);
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
+    private router = inject(Router);
     currentUserId: string = '';
     selectedProject: Project | null = null;
     isEditModalOpen = false;
@@ -61,6 +64,54 @@ export class ProjectsComponent implements OnInit {
 
     isReloading = false;
 
+    activeActionMenuId: number | null = null;
+    activeMediaProjectId: number | null = null;
+
+    // Deletion Modal State
+    isDeleteModalOpen = false;
+    projectToDelete: Project | null = null;
+    deleteConfirmName = '';
+    isDeletingProject = false;
+
+    searchTerm: string = '';
+
+    get filteredProjects(): ProjectWithMedia[] {
+        if (!this.searchTerm.trim()) return this.projects;
+        const term = this.searchTerm.toLowerCase();
+        return this.projects.filter(p => 
+            p.title.toLowerCase().includes(term) || 
+            p.description.toLowerCase().includes(term) ||
+            p.overseenBy.toLowerCase().includes(term)
+        );
+    }
+
+    get activeProjectsCount(): number {
+        return this.projects.filter(p => p.status === ProjectStatus.Active).length;
+    }
+
+    get dueThisWeekCount(): number {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        return this.projects.filter(p => {
+            if (!p.endedAt) return false;
+            const dueDate = new Date(p.endedAt);
+            return dueDate >= startOfWeek && dueDate <= endOfWeek;
+        }).length;
+    }
+
+    get overallAverageProgress(): number {
+        if (this.projects.length === 0) return 0;
+        const totalProgress = this.projects.reduce((sum, project) => sum + (project.progress || 0), 0);
+        return Math.round(totalProgress / this.projects.length);
+    }
+
     private toastService = inject(ToastService);
 
     ngOnInit(): void {
@@ -74,7 +125,30 @@ export class ProjectsComponent implements OnInit {
                 }
             });
         });
+
     }
+
+
+
+
+    toggleActionMenu(event: Event, projectId: number): void {
+        event.stopPropagation();
+        this.activeActionMenuId = this.activeActionMenuId === projectId ? null : projectId;
+        this.activeMediaProjectId = null;
+    }
+
+    toggleMediaPopup(event: Event, projectId: number): void {
+        event.stopPropagation();
+        this.activeMediaProjectId = this.activeMediaProjectId === projectId ? null : projectId;
+        this.activeActionMenuId = null;
+    }
+
+    @HostListener('document:click')
+    closeMenus(): void {
+        this.activeActionMenuId = null;
+        this.activeMediaProjectId = null;
+    }
+
 
     canEdit(project: Project): boolean {
         // Strict check: Only overseer can edit
@@ -102,18 +176,6 @@ export class ProjectsComponent implements OnInit {
             })
         );
     }
-
-    // loadProjects(): void {
-    //     this.projectsService.getMyProjects().subscribe({
-    //         next: (data) => {
-    //             this.projects = data;
-    //         },
-    //         error: (err) => {
-    //             console.error('Failed to load projects', err);
-    //             // Optionally show error toast
-    //         }
-    //     });
-    // }
 
     getStatusLabel(status: ProjectStatus): string {
         return ProjectStatus[status];
@@ -168,22 +230,27 @@ export class ProjectsComponent implements OnInit {
             );
 
             if (this.selectedProjectFiles?.length > 0) {
-                const mediaUploadPromises = this.selectedProjectFiles.map(file =>
-                    firstValueFrom(
-                        this.mediaService.uploadMedia(
-                            file,
-                            detectMediaType(file),
-                            undefined,
-                            undefined,
-                            Number(this.selectedProject!.id)
+                try {
+                    const mediaUploadPromises = this.selectedProjectFiles.map(file =>
+                        firstValueFrom(
+                            this.mediaService.uploadMedia(
+                                file,
+                                detectMediaType(file),
+                                undefined,
+                                undefined,
+                                Number(this.selectedProject!.id)
+                            )
                         )
-                    )
-                );
+                    );
 
-                await Promise.all(mediaUploadPromises);
-                this.toastService.show('Project updated with media successfully', 'success');
+                    await Promise.all(mediaUploadPromises);
+                    this.toastService.show('Project updated with media successfully', 'success');
+                } catch (mediaError) {
+                    console.error('Error uploading media:', mediaError);
+                    this.toastService.show('Project updated, but media upload failed. Please try again.', 'error');
+                }
             } else {
-                this.toastService.show('Project updated without media. Click the project and try uploading the media again.', 'info');
+                this.toastService.show('Project updated successfully', 'success');
             }
 
             this.isReloading = true;
@@ -203,6 +270,47 @@ export class ProjectsComponent implements OnInit {
         } catch (error: any) {
             this.toastService.show('Failed to save project', 'error');
         }
+    }
+
+    openDeleteModal(project: Project): void {
+        this.projectToDelete = project;
+        this.deleteConfirmName = '';
+        this.isDeleteModalOpen = true;
+        this.activeActionMenuId = null;
+    }
+
+    closeDeleteModal(): void {
+        this.isDeleteModalOpen = false;
+        this.projectToDelete = null;
+        this.deleteConfirmName = '';
+        this.isDeletingProject = false;
+    }
+
+    get isDeleteNameMatch(): boolean {
+        return this.projectToDelete?.title === this.deleteConfirmName;
+    }
+
+    confirmDelete(): void {
+        if (!this.projectToDelete || !this.isDeleteNameMatch || this.isDeletingProject) return;
+
+        this.isDeletingProject = true;
+        this.projectsService.deleteProject(this.projectToDelete.id).subscribe({
+            next: () => {
+                this.toastService.show('Project deleted successfully', 'success');
+                this.isDeletingProject = false;
+                this.closeDeleteModal();
+                this.loadProjects().subscribe();
+            },
+            error: (err) => {
+                this.isDeletingProject = false;
+                this.toastService.show(err.message || 'Failed to delete project', 'error');
+            }
+        });
+    }
+
+    navigateToTasks(projectId: number): void {
+        this.router.navigate(['/projects', projectId, 'tasks']);
+        this.activeActionMenuId = null;
     }
 
     closeModals() {
@@ -249,9 +357,6 @@ export class ProjectsComponent implements OnInit {
         return formatFileSize(bytes);
     }
 
-    detectProjectMediaType(file: File): MediaType {
-        return detectMediaType(file);
-    }
 
 
     // openEditModal(project: Project): void {

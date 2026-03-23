@@ -112,7 +112,8 @@ public class LlmService : ILlmService
                 PropertyNameCaseInsensitive = true
             });
 
-            _logger.LogInformation("LlmService: Evaluation successful. Score: {Score}, Reasoning: {Reasoning}", evaluation?.Score, evaluation?.Reasoning);
+            //_logger.LogInformation("LlmService: Evaluation successful. Score: {Score}, Reasoning: {Reasoning}", evaluation?.Score, evaluation?.Reasoning);
+            _logger.LogInformation("AI Evaluation successful");
 
             return (evaluation?.Score ?? 0, evaluation?.Reasoning ?? "No reasoning provided.");
         }
