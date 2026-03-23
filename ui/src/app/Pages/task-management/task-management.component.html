@@ -339,14 +339,14 @@
                   <div class="inspection-column list-column card">
                     <div class="inspection-tabs">
                       <div class="tab-header">
-                        <button type="button" [class.active]="activeInspectionTab === 'subtasks'"
-                          (click)="activeInspectionTab = 'subtasks'">
-                          Subtasks ({{ selectedTask.subTasks.length }})
-                        </button>
-                        <button type="button" [class.active]="activeInspectionTab === 'media'"
-                          (click)="activeInspectionTab = 'media'">
-                          Media ({{ selectedTaskMediaCount }})
-                        </button>
+                        <div class="tab-item" [class.active]="activeInspectionTab === 'subtasks'" (click)="activeInspectionTab = 'subtasks'">
+                          <mat-icon>assignment</mat-icon>
+                          <span>Subtasks ({{ selectedTask.subTasks.length }})</span>
+                        </div>
+                        <div class="tab-item" [class.active]="activeInspectionTab === 'media'" (click)="activeInspectionTab = 'media'">
+                          <mat-icon>attach_file</mat-icon>
+                          <span>Media ({{ selectedTaskMediaCount }})</span>
+                        </div>
                       </div>
 
                       <div class="tab-content">
