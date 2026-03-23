@@ -127,8 +127,62 @@ public class MediaController : ControllerBase
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
         if (commentId.HasValue) query = query.Where(m => m.CommentId == commentId.Value);
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
-        if (projectTaskId.HasValue) query = query.Where(m => m.ProjectTaskId == projectTaskId.Value);
-        if (subTaskId.HasValue) query = query.Where(m => m.SubTaskId == subTaskId.Value);
+
+        // Validate caller access for task/subtask-scoped media requests
+        if (projectTaskId.HasValue || subTaskId.HasValue)
+        {
+            var taskScope = await _context.SubTasks
+                .Where(st => subTaskId.HasValue && st.Id == subTaskId.Value)
+                .Select(st => st.ProjectTaskId)
+                .FirstOrDefaultAsync();
+
+            var effectiveTaskId = projectTaskId ?? (taskScope == 0 ? null : taskScope);
+            if (!effectiveTaskId.HasValue)
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this media scope."));
+
+            var projectTask = await _context.ProjectTasks
+                .Include(t => t.Project)
+                .Include(t => t.TaskAssignees)
+                .Include(t => t.SubTasks)
+                    .ThenInclude(st => st.SubTaskAssignees)
+                .FirstOrDefaultAsync(t => t.Id == effectiveTaskId.Value && !t.IsDeleted);
+
+            var canAccess = projectTask != null &&
+                (projectTask.Project.OverseenByUserId == userId ||
+                (projectTask.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
+                projectTask.SubTasks.Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId)));
+            if (!canAccess)
+                return StatusCode(403, ApiResponse.Fail("Not authorized to access this media scope."));
+        }
+        
+        // Ensure the sub task belongs to the correct project task
+        if (projectTaskId.HasValue && subTaskId.HasValue)
+        {
+            query = query.Where(m => 
+                m.SubTaskId == subTaskId.Value && 
+                _context.SubTasks.Any(st => 
+                    st.Id == subTaskId.Value && 
+                    st.ProjectTaskId == projectTaskId.Value
+                )
+            );
+        }
+        else if (projectTaskId.HasValue)
+        {
+            query = query.Where(m =>
+                m.ProjectTaskId == projectTaskId.Value || 
+                (m.SubTaskId.HasValue &&
+                    _context.SubTasks.Any(st =>
+                        st.Id == m.SubTaskId.Value &&
+                        st.ProjectTaskId == projectTaskId.Value
+                    )
+                )
+            );
+        }
+        else if (subTaskId.HasValue)
+        {
+            query = query.Where(m => m.SubTaskId == subTaskId.Value);
+        }
+
         if (timesheetId.HasValue) query = query.Where(m => m.TimesheetId == timesheetId.Value);
 
         var mediaList = await query

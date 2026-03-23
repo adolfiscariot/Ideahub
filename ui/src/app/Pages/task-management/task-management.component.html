@@ -339,14 +339,14 @@
                   <div class="inspection-column list-column card">
                     <div class="inspection-tabs">
                       <div class="tab-header">
-                        <div class="tab-title" [class.active]="activeInspectionTab === 'subtasks'"
+                        <button type="button" [class.active]="activeInspectionTab === 'subtasks'"
                           (click)="activeInspectionTab = 'subtasks'">
                           Subtasks ({{ selectedTask.subTasks.length }})
-                        </div>
-                        <div class="tab-title" [class.active]="activeInspectionTab === 'timesheets'"
-                          (click)="activeInspectionTab = 'timesheets'">
-                          Timesheets
-                        </div>
+                        </button>
+                        <button type="button" [class.active]="activeInspectionTab === 'media'"
+                          (click)="activeInspectionTab = 'media'">
+                          Media ({{ selectedTaskMediaCount }})
+                        </button>
                       </div>
 
                       <div class="tab-content">
@@ -365,16 +365,17 @@
                                     }}</span>
                                 </div>
                                 <div class="st-actions" style="margin-left: auto;">
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="create-subtask-btn" title="Add nested subtask"
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="create-subtask-btn"
+                                    title="Add nested subtask"
                                     (click)="openSubTaskModal(selectedTask.id, st.id); $event.stopPropagation()">
                                     <mat-icon>add_circle_outline</mat-icon>
                                   </button>
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn edit-btn" title="Edit subtask"
-                                    (click)="openEditSubTask(st, $event)">
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn edit-btn"
+                                    title="Edit subtask" (click)="openEditSubTask(st, $event)">
                                     <mat-icon>edit</mat-icon>
                                   </button>
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn delete-btn" title="Delete subtask"
-                                    (click)="confirmDeleteSubTask(st, $event)">
+                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn delete-btn"
+                                    title="Delete subtask" (click)="confirmDeleteSubTask(st, $event)">
                                     <mat-icon>delete_outline</mat-icon>
                                   </button>
                                 </div>
@@ -393,10 +394,9 @@
                           </div>
                         </div>
 
-                        <div *ngIf="activeInspectionTab === 'timesheets'" class="timesheet-list">
-                          <div class="empty-tab-state">
-                            <p>No timesheet logs found.</p>
-                          </div>
+                        <div *ngIf="activeInspectionTab === 'media'" class="media-list">
+                          <app-media [projectTaskId]="selectedTask.id" [compactMode]="true" [verticalLayout]="true"
+                            [fullFileName]="true"></app-media>
                         </div>
                       </div>
                     </div>

@@ -145,7 +145,7 @@ public class TaskController : ControllerBase
                 IsCompleted = t.IsCompleted,
                 TaskAssignees = (t.TaskAssignees ?? new List<TaskAssignee>()).Select(ta => ta.UserId).ToList(),
                 ProjectId = t.ProjectId,
-                MediaCount = t.Media.Count,
+                MediaCount = t.Media.Count + t.SubTasks.Sum(st => st.Media?.Count ?? 0),
                 SubTasks = t.SubTasks.Select(st => new SubTaskDetailsDto
                 {
                     Id = st.Id,

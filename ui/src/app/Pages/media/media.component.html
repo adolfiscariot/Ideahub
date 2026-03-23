@@ -18,6 +18,8 @@
     <!-- Attachments list -->
     <div
       class="media-grid"
+      [class.vertical]="verticalLayout"
+      [class.full-filename]="fullFileName"
       *ngIf="!isLoading && mediaList.length > 0">
 
       <div *ngFor="let media of mediaList" class="media-item">
