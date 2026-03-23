@@ -134,15 +134,12 @@ export class AuthService {
         }
       }),
       catchError((error) => {
-        this.refreshTokenSubject.error(error);
+        this.refreshTokenSubject.next(null); //Signal failure without breaking subject
         this.logoutLocal();
         return throwError(() => error);
       }),
       finalize(() => {
         this.isRefreshing = false;
-        if (this.refreshTokenSubject.closed || this.refreshTokenSubject.hasError) {
-          this.refreshTokenSubject = new BehaviorSubject<any>(null);
-        }
       })
     );
   }

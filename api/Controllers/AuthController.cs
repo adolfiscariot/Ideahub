@@ -299,7 +299,7 @@ public class AuthController : ControllerBase
 
         // _logger.LogInformation("Refresh attempt for user. Cookie present: {cookiePresent}, Body present: {bodyPresent}", 
         //     !string.IsNullOrEmpty(cookieToken), !string.IsNullOrEmpty(tokenRequest?.RefreshToken));
-        _logger.LogError("Refreshing attempt for user"); 
+        _logger.LogInformation("Refreshing attempt for user"); 
         if (string.IsNullOrEmpty(rawRefreshToken))
         {
             //_logger.LogError("Refresh token is missing from cookie and request body");
@@ -313,6 +313,15 @@ public class AuthController : ControllerBase
             _logger.LogError("Auth cookie missing"); 
             return BadRequest(ApiResponse.Fail("Authentication cookie missing. Please try logging in again."));
         }
+
+        if (tokenRequest?.AccessToken is null)
+        {
+            _logger.LogError("Access token is required");
+            return BadRequest(ApiResponse.Fail("Access token is required"));
+        }
+
+         // Get principal from expired access token
+         var principal = _tokenService.GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
 
         // Get principal from expired access token
         var principal = _tokenService.GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
@@ -362,12 +371,10 @@ public class AuthController : ControllerBase
                 //     match.HasExpired, match.RefreshTokenExpiry, DateTime.UtcNow);
                 _logger.LogError("Token match found but invalid");
             }
-            }
             else
             {
                 //_logger.LogError("No matching token found in database for the provided hash.");
                 _logger.LogError("No matching token found");
-            }
             }
             return BadRequest(ApiResponse.Fail("Invalid or expired refresh token"));
         }
@@ -405,12 +412,12 @@ public class AuthController : ControllerBase
         // Create new access token
         var newAccessToken = await _tokenService.CreateAccessTokenAsync(user);
 
-        return Ok(new
+        return Ok(ApiResponse.Ok("Token Refreshed", new
         {
             AccessToken = newAccessToken,
             RefreshToken = "cookie",
             RefreshTokenExpiry = newRefreshToken.RefreshTokenExpiry
-        });
+        }));
     }
 
     //logout route
