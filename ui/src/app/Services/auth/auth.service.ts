@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
-import { catchError, tap, finalize } from 'rxjs/operators';
+import { catchError, tap, finalize, filter, take, map } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
 import { Login } from '../../Interfaces/Login/login-interface';
@@ -20,6 +20,9 @@ export class AuthService {
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
+
+  private isRefreshing = false;
+  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
   private http = inject(HttpClient);
 
@@ -46,17 +49,12 @@ export class AuthService {
 
   login(loginData: Login): Observable<any> {
 
-    return this.http.post<ApiResponse>(`${this.authUrl}/login`, loginData).pipe(
+    return this.http.post<ApiResponse>(`${this.authUrl}/login`, loginData, { withCredentials: true }).pipe(
       tap((response) => {
         if (response.status && response.data?.accessToken) {
 
           localStorage.setItem('accessToken', response.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-          localStorage.setItem(
-            'refreshTokenExpiry',
-            response.data.refreshTokenExpiry
-          );
-
+          // Refresh token is now in a Secure, HttpOnly cookie managed by the browser
           this._isLoggedIn.next(true);
         } else {
           throw new Error(response.message || 'Login failed');
@@ -78,7 +76,7 @@ export class AuthService {
     }
 
     // 2. Attempt server-side logout
-    return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}).pipe(
+    return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}, { withCredentials: true }).pipe(
       tap(() => {
       }),
       catchError((error: HttpErrorResponse) => {
@@ -97,37 +95,54 @@ export class AuthService {
    * If failed, logs the user out locally.
    * @returns Observable of the refresh response
    */
+  /**
+   * Refreshes the JWT access token using the refresh token (from cookie).
+   * Handles concurrent refreshes by queuing subsequent requests.
+   */
   refreshToken(): Observable<any> {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    if (!accessToken || !refreshToken) {
-      this.logoutLocal();
-      return throwError(() => new Error('No tokens found'));
+    if (this.isRefreshing) {
+      // If a refresh is already in progress, wait for it to complete
+      return this.refreshTokenSubject.pipe(
+        filter(token => token != null),
+        take(1)
+      );
     }
 
-    const payload = {
-      accessToken,
-      refreshToken
-    };
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
 
-    return this.http.post<any>(`${this.authUrl}/refresh-token`, payload).pipe(
-      tap((response) => {
-        // Handle backend returning { AccessToken: ..., RefreshToken: ... } directly
-        // usually ASP.NET Core serializes to camelCase, check both just in case
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      this.isRefreshing = false;
+      this.logoutLocal();
+      return throwError(() => new Error('No access token found'));
+    }
+
+    const payload = { accessToken, refreshToken: 'cookie' };
+
+    return this.http.post<any>(`${this.authUrl}/refresh-token`, payload, { withCredentials: true }).pipe(
+      map((response) => {
         const newAccessToken = response.accessToken || response.AccessToken;
-        const newRefreshToken = response.refreshToken || response.RefreshToken;
-
-        if (newAccessToken && newRefreshToken) {
+        if (newAccessToken) {
           localStorage.setItem('accessToken', newAccessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-          // Backend might not return expiry in refresh, calculate or assume valid
           this._isLoggedIn.next(true);
-        } else { }
+          this.refreshTokenSubject.next(newAccessToken);
+          return newAccessToken;
+        } else {
+          this.logoutLocal();
+          throw new Error('No access token in response');
+        }
       }),
       catchError((error) => {
+        this.refreshTokenSubject.error(error);
         this.logoutLocal();
         return throwError(() => error);
+      }),
+      finalize(() => {
+        this.isRefreshing = false;
+        if (this.refreshTokenSubject.closed || this.refreshTokenSubject.hasError) {
+          this.refreshTokenSubject = new BehaviorSubject<any>(null);
+        }
       })
     );
   }
@@ -141,7 +156,8 @@ export class AuthService {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('refreshTokenExpiry');
     this._isLoggedIn.next(false);
-    this.router.navigate(['/']);
+    // Note: HttpOnly cookie can only be cleared by the server during /logout
+    this.router.navigate(['/login']);
   }
 
   // ===== PERMISSION CHECKING METHODS =====
