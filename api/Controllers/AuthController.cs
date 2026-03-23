@@ -320,9 +320,6 @@ public class AuthController : ControllerBase
             return BadRequest(ApiResponse.Fail("Access token is required"));
         }
 
-         // Get principal from expired access token
-         var principal = _tokenService.GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
-
         // Get principal from expired access token
         var principal = _tokenService.GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
         if (principal?.Identity is null)
