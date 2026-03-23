@@ -127,8 +127,21 @@ public class MediaController : ControllerBase
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
         if (commentId.HasValue) query = query.Where(m => m.CommentId == commentId.Value);
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
-        if (projectTaskId.HasValue) query = query.Where(m => m.ProjectTaskId == projectTaskId.Value);
-        if (subTaskId.HasValue) query = query.Where(m => m.SubTaskId == subTaskId.Value);
+        
+        if (projectTaskId.HasValue && !subTaskId.HasValue)
+        {
+            query = query.Where(m => m.ProjectTaskId == projectTaskId.Value || 
+                                    (m.SubTaskId.HasValue && _context.SubTasks.Any(st => st.Id == m.SubTaskId.Value && st.ProjectTaskId == projectTaskId.Value)));
+        }
+        else if (subTaskId.HasValue)
+        {
+            query = query.Where(m => m.SubTaskId == subTaskId.Value);
+        }
+        else if (projectTaskId.HasValue)
+        {
+            query = query.Where(m => m.ProjectTaskId == projectTaskId.Value);
+        }
+
         if (timesheetId.HasValue) query = query.Where(m => m.TimesheetId == timesheetId.Value);
 
         var mediaList = await query

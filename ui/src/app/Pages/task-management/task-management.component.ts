@@ -15,11 +15,12 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { TimesheetsComponent } from '../timesheets/timesheets.component';
+import { MediaComponent } from '../media/media.component';
 
 @Component({
   selector: 'app-task-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, ButtonsComponent, TimesheetsComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, ButtonsComponent, TimesheetsComponent, MediaComponent],
   templateUrl: './task-management.component.html',
   styleUrl: './task-management.component.scss',
 })
@@ -105,7 +106,8 @@ export class TaskManagementComponent implements OnInit {
   pendingDeleteSubTaskTitle: string = '';
   isDeletingSubTask = false;
 
-  activeInspectionTab: 'subtasks' | 'timesheets' = 'subtasks';
+  activeInspectionTab: 'subtasks' | 'media' = 'subtasks';
+  selectedTaskMediaCount: number = 0;
   activeMainTab: 'tasks' | 'timesheets' = 'tasks';
   isTabSwitching = false;
 
@@ -237,7 +239,7 @@ export class TaskManagementComponent implements OnInit {
     return 'green';
   }
 
-  setInspectionTab(tab: 'subtasks' | 'timesheets'): void {
+  setInspectionTab(tab: 'subtasks' | 'media'): void {
     this.activeInspectionTab = tab;
   }
 
@@ -330,6 +332,21 @@ export class TaskManagementComponent implements OnInit {
 
   selectTask(task: TaskDetails): void {
     this.selectedTask = task;
+    this.loadSelectedTaskMediaCount();
+  }
+
+  loadSelectedTaskMediaCount(): void {
+    if (!this.selectedTask) return;
+    this.mediaService.viewMedia(undefined, undefined, undefined, this.selectedTask.id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.selectedTaskMediaCount = response.data.length;
+        }
+      },
+      error: () => {
+        this.selectedTaskMediaCount = 0;
+      }
+    });
   }
 
   onFilesSelected(event: Event): void {
@@ -382,19 +399,20 @@ export class TaskManagementComponent implements OnInit {
         }
 
         const taskId = response.data.id;
+        const filesToUpload = [...this.selectedFiles]; // Take snapshot before reset
 
         // Task is created — finalize UI immediately regardless of upload outcome
         this.resetForm();
         this.loadTasks();
         this.isCreating = false;
 
-        if (this.selectedFiles.length === 0) {
+        if (filesToUpload.length === 0) {
           this.toastService.show('Task created successfully', 'success');
           return;
         }
 
         // Run uploads in parallel; catch errors per-file so forkJoin never fails
-        const uploadRequests = this.selectedFiles.map(file =>
+        const uploadRequests = filesToUpload.map(file =>
           this.mediaService.uploadMedia(
             file,
             detectMediaType(file),
@@ -416,6 +434,7 @@ export class TaskManagementComponent implements OnInit {
           } else {
             this.toastService.show('Task created with media successfully', 'success');
           }
+          this.loadSelectedTaskMediaCount();
         });
       },
       error: (err) => {
@@ -488,6 +507,7 @@ export class TaskManagementComponent implements OnInit {
 
         const subTaskId = response.data.id;
         const newSubTaskData = response.data;
+        const filesToUpload = [...this.selectedSubTaskFiles]; // Take snapshot before reset
 
         this.closeSubTaskModal();
         this.resetSubTaskForm();
@@ -500,13 +520,13 @@ export class TaskManagementComponent implements OnInit {
 
         this.isCreatingSubTask = false;
 
-        if (this.selectedSubTaskFiles.length === 0) {
+        if (filesToUpload.length === 0) {
           this.toastService.show('Subtask created successfully', 'success');
           return;
         }
 
         // Upload media
-        const uploadRequests = this.selectedSubTaskFiles.map(file =>
+        const uploadRequests = filesToUpload.map(file =>
           this.mediaService.uploadMedia(
             file,
             detectMediaType(file),
@@ -528,7 +548,7 @@ export class TaskManagementComponent implements OnInit {
           } else {
             this.toastService.show('Subtask created with media successfully', 'success');
           }
-          this.selectedSubTaskFiles = []; // Clear files after upload
+          this.loadSelectedTaskMediaCount();
         });
       },
       error: (err) => {

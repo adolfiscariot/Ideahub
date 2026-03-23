@@ -343,9 +343,9 @@
                           (click)="activeInspectionTab = 'subtasks'">
                           Subtasks ({{ selectedTask.subTasks.length }})
                         </div>
-                        <div class="tab-title" [class.active]="activeInspectionTab === 'timesheets'"
-                          (click)="activeInspectionTab = 'timesheets'">
-                          Timesheets
+                        <div class="tab-title" [class.active]="activeInspectionTab === 'media'"
+                          (click)="activeInspectionTab = 'media'">
+                          Media ({{ selectedTaskMediaCount }})
                         </div>
                       </div>
 
@@ -393,10 +393,8 @@
                           </div>
                         </div>
 
-                        <div *ngIf="activeInspectionTab === 'timesheets'" class="timesheet-list">
-                          <div class="empty-tab-state">
-                            <p>No timesheet logs found.</p>
-                          </div>
+                        <div *ngIf="activeInspectionTab === 'media'" class="media-list">
+                          <app-media [projectTaskId]="selectedTask.id" [compactMode]="true" [verticalLayout]="true" [fullFileName]="true"></app-media>
                         </div>
                       </div>
                     </div>

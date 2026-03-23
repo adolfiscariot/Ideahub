@@ -17,8 +17,12 @@ export class MediaComponent implements OnInit {
   @Input() commentId?: number;
   @Input() projectId?: number;
   @Input() timesheetId?: number;
+  @Input() projectTaskId?: number;
+  @Input() subTaskId?: number;
   @Input() title: string = 'Media';
   @Input() compactMode: boolean = false;
+  @Input() verticalLayout: boolean = false;
+  @Input() fullFileName: boolean = false;
   @Input() media?: Media[];
 
   mediaList: Media[] = [];
@@ -32,17 +36,17 @@ export class MediaComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ideaId'] || changes['commentId'] || changes['projectId'] || changes['timesheetId']) {
+    if (changes['ideaId'] || changes['commentId'] || changes['projectId'] || changes['timesheetId'] || changes['projectTaskId'] || changes['subTaskId']) {
       this.loadMedia();
     }
   }
 
   loadMedia(): void {
-    if (!this.ideaId && !this.commentId && !this.projectId && !this.timesheetId) return;
+    if (!this.ideaId && !this.commentId && !this.projectId && !this.timesheetId && !this.projectTaskId && !this.subTaskId) return;
 
     this.isLoading = true;
 
-    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, undefined, undefined, this.timesheetId).subscribe({
+    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, this.projectTaskId, this.subTaskId, this.timesheetId).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.success && response.data) {
@@ -56,10 +60,10 @@ export class MediaComponent implements OnInit {
   }
 
   getMediaUrl(filePath: string): string {
-  const cleanFileName = filePath.replace(/^media\//, '');
-  const baseUrl = environment.apiUrl.replace(/\/api$/, ''); 
-  return `${baseUrl}/uploads/${cleanFileName}`;
-}
+    const cleanFileName = filePath.replace(/^media\//, '');
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}/uploads/${cleanFileName}`;
+  }
 
   getFileExtension(filePath: string): string {
     return filePath.split('.').pop()?.toUpperCase() || 'FILE';
