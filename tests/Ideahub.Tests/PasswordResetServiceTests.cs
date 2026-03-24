@@ -129,19 +129,20 @@ namespace Ideahub.Tests
             string userId = "user1";
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
             _context.Users.Add(user);
+            await _context.SaveChangesAsync();
             
-            var resetRecord = new PasswordReset
-            {
-                UserId = userId,
-                Code = "some_hash",
-                ExpiresAt = DateTime.UtcNow.AddMinutes(-1),
-                Used = false
-            };
-            _context.PasswordResets.Add(resetRecord);
+            _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            // Generate a real code/hash pair using the service
+            var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
+            
+            // Manually expire the record in the database
+            var record = await _context.PasswordResets.FirstAsync();
+            record.ExpiresAt = DateTime.UtcNow.AddMinutes(-5);
             await _context.SaveChangesAsync();
 
             // Act
-            var (success, error) = await _service.ValidateCodeAndResetPasswordAsync("any_code", "NewPass123!");
+            var (success, error) = await _service.ValidateCodeAndResetPasswordAsync(code, "NewPass123!");
 
             // Assert
             Assert.False(success);
