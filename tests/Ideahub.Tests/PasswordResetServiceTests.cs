@@ -175,5 +175,33 @@ namespace Ideahub.Tests
             Assert.False(success);
             Assert.Contains("Passwords must be at least 8 characters", error);
         }
+
+        [Fact]
+        public async Task ValidateCodeAndResetPasswordAsync_ShouldFail_WhenCodeIsAlreadyUsed()
+        {
+            // Arrange
+            string userId = "user1";
+            var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            
+            _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
+
+            // Generate a real code/hash pair using the service
+            var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
+            
+            // Manually mark the record as USED in the database
+            var record = await _context.PasswordResets.FirstAsync();
+            record.Used = true;
+            record.UsedAt = DateTime.UtcNow.AddMinutes(-5);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var (success, error) = await _service.ValidateCodeAndResetPasswordAsync(code, "NewPass123!");
+
+            // Assert
+            Assert.False(success);
+            Assert.Equal("Invalid or expired reset code", error);
+        }
     }
 }
