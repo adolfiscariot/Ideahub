@@ -12,7 +12,7 @@ namespace api.Services
         public LocalMediaFileService()
         {
             // Base storage path outside wwwroot (more secure)
-            _rootPath = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "media");
+            _rootPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Storage", "media"));
 
             if (!Directory.Exists(_rootPath))
                 Directory.CreateDirectory(_rootPath);
@@ -60,7 +60,9 @@ namespace api.Services
             string cleanerPath = relativePath.Replace("media/", "").Replace("/", Path.DirectorySeparatorChar.ToString());
             string fullPath = Path.GetFullPath(Path.Combine(_rootPath, cleanerPath));
 
-            if (!fullPath.StartsWith(_rootPath, StringComparison.OrdinalIgnoreCase))
+            var relative = Path.GetRelativePath(_rootPath, fullPath);
+            
+            if (relative.StartsWith("..") || Path.IsPathRooted(relative))
                 throw new UnauthorizedAccessException("Attempted path traversal detected.");
 
             return fullPath;
