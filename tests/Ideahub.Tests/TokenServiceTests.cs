@@ -134,7 +134,7 @@ namespace Ideahub.Tests
         {
             // Arrange
             var options = new DbContextOptionsBuilder<api.Data.IdeahubDbContext>()
-                .UseInMemoryDatabase(databaseName: "RevokeTestDb")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             using var context = new api.Data.IdeahubDbContext(options);
