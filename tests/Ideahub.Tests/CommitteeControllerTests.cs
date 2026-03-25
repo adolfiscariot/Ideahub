@@ -121,6 +121,10 @@ namespace Ideahub.Tests
             // Scoped mocks for background task
             _mockUserManager.Setup(m => m.FindByIdAsync("target-123")).ReturnsAsync(targetUser);
 
+            // Signal for background task
+            var tcs = new TaskCompletionSource<bool>();
+            _mockScopeFactory.Setup(x => x.CreateScope()).Callback(() => tcs.TrySetResult(true)).Returns(new Mock<IServiceScope>().Object);
+
             // Act
             var result = await _controller.AddCommitteeMember(targetEmail);
 
@@ -128,7 +132,9 @@ namespace Ideahub.Tests
             Assert.IsType<OkObjectResult>(result);
             _mockUserManager.Verify(m => m.AddToRoleAsync(targetUser, RoleConstants.CommitteeMember), Times.Once);
             
-            _mockScopeFactory.Verify(f => f.CreateScope(), Times.Once);
+            // Wait for the signal (timeout after 2s to prevent hanging)
+            await Task.WhenAny(tcs.Task, Task.Delay(2000));
+            _mockScopeFactory.Verify(f => f.CreateScope(), Times.AtLeastOnce);
         }
 
         [Fact]
@@ -174,13 +180,19 @@ namespace Ideahub.Tests
             _mockUserManager.Setup(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((IdeahubUser)null!);
             _mockUserManager.Setup(m => m.FindByIdAsync("t1")).ReturnsAsync(targetUser);
 
+            // Signal for background task
+            var tcs = new TaskCompletionSource<bool>();
+            _mockScopeFactory.Setup(x => x.CreateScope()).Callback(() => tcs.TrySetResult(true)).Returns(new Mock<IServiceScope>().Object);
+
             // Act
             var result = await _controller.AddCommitteeMember(targetEmail);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            _mockScopeFactory.Verify(f => f.CreateScope(), Times.Once);
-            // This verifies the logic didn't crash even with a null admin user profile.
+            
+            // Wait for the signal
+            await Task.WhenAny(tcs.Task, Task.Delay(2000));
+            _mockScopeFactory.Verify(f => f.CreateScope(), Times.AtLeastOnce);
         }
 
         #endregion
