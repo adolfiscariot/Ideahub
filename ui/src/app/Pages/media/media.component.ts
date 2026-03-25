@@ -3,7 +3,7 @@ import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 @Component({
   selector: 'app-media',
