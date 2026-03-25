@@ -12,7 +12,7 @@ namespace api.Services
         public LocalMediaFileService()
         {
             // Base storage path outside wwwroot (more secure)
-            _rootPath = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "media");
+            _rootPath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "Storage", "media"));
 
             if (!Directory.Exists(_rootPath))
                 Directory.CreateDirectory(_rootPath);
@@ -47,19 +47,41 @@ namespace api.Services
                 await file.CopyToAsync(stream);
             }
 
-            // Return a **relative path** for DB storage
-            string relativePath = Path.Combine("media", subFolder, uniqueFileName).Replace("\\", "/");
+            // Return a relative path for DB storage
+            string relativePath = Path.Combine("media", safeSubFolder, uniqueFileName).Replace("\\", "/");
             return relativePath;
+        }
+
+        private string GetPhysicalPath(string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                return string.Empty;
+                
+            string cleanerPath = relativePath;
+            if (cleanerPath.StartsWith("media/", StringComparison.OrdinalIgnoreCase))
+            {
+                cleanerPath = cleanerPath.Substring(6);
+            }
+            
+            cleanerPath = cleanerPath.Replace("/", Path.DirectorySeparatorChar.ToString());
+            string fullPath = Path.GetFullPath(Path.Combine(_rootPath, cleanerPath));
+
+            var relative = Path.GetRelativePath(_rootPath, fullPath);
+            
+            if (relative.StartsWith("..") || Path.IsPathRooted(relative))
+                throw new UnauthorizedAccessException("Attempted path traversal detected.");
+
+            return fullPath;
         }
 
         public Task<bool> DeleteFileAsync(string relativePath)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(relativePath))
+                string fullPath = GetPhysicalPath(relativePath);
+                if (string.IsNullOrEmpty(fullPath))
                     return Task.FromResult(false);
 
-                string fullPath = Path.Combine(_rootPath, relativePath.Replace("media/", ""));
                 if (File.Exists(fullPath))
                     File.Delete(fullPath);
 
@@ -73,7 +95,7 @@ namespace api.Services
 
         public string GetFilePath(string relativePath)
         {
-            return Path.Combine(_rootPath, relativePath.Replace("media/", ""));
+            return GetPhysicalPath(relativePath);
         }
     }
 }
