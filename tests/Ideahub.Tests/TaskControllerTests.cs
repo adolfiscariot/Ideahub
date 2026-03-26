@@ -88,7 +88,8 @@ namespace Ideahub.Tests
             
             var createdTask = await _context.ProjectTasks.Include(t => t.TaskAssignees).FirstOrDefaultAsync(t => t.Title == "First Task");
             Assert.NotNull(createdTask);
-            Assert.Single(createdTask!.TaskAssignees);
+            Assert.NotNull(createdTask.TaskAssignees);
+            Assert.Single(createdTask.TaskAssignees);
             
             var updatedProject = await _context.Projects.FindAsync(1);
             Assert.Equal(ProjectStatus.Active, updatedProject!.Status); // Should transition from Planning to Active
