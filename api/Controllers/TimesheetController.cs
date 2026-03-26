@@ -485,6 +485,7 @@ public class TimesheetController : ControllerBase
 
         // SubTask Assignee check
         var isSubTaskAssignee = await _context.SubTasks.AnyAsync(st =>
+            !st.IsDeleted &&
             !st.ProjectTask.IsDeleted &&
             st.ProjectTask.ProjectId == projectId &&
             st.SubTaskAssignees.Any(sta => sta.UserId == userId));
