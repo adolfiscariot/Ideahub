@@ -89,6 +89,12 @@ namespace Ideahub.Tests
             Assert.Equal(2, data.Count());
             
             var list = data.ToList();
+            var firstId = list[0].GetType().GetProperty("Id")?.GetValue(list[0], null);
+            var secondId = list[1].GetType().GetProperty("Id")?.GetValue(list[1], null);
+            
+            // Verify ordering (n2 created -5m, n1 created -10m)
+            Assert.Equal(2, (int)firstId!);
+            Assert.Equal(1, (int)secondId!);
         }
 
         [Fact]
@@ -104,6 +110,11 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             Assert.NotNull(response.Data);
+            
+            // Expected count: 1 (n1 is unread, n2 is read)
+            var data = response.Data;
+            var count = data?.GetType().GetProperty("count")?.GetValue(data, null);
+            Assert.Equal(1, (int)count!);
         }
 
         [Fact]
