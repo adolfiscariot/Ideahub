@@ -334,7 +334,7 @@ namespace Ideahub.Tests
         #region Progress Calculation
 
         [Fact]
-        public async Task ViewProjects_ProgressCalculation_ShouldBeCorrect()
+        public async Task GetProjectById_ProgressCalculation_ShouldBeCorrect()
         {
             // Arrange
             await SeedBasicData();
@@ -342,19 +342,19 @@ namespace Ideahub.Tests
             
             var project = new Project { Id = 20, Title = "Progress Project", GroupId = 1, IdeaId = 1, OverseenByUserId = _testUserId, CreatedByUserId = _testUserId };
             
+            // Task 1: No subtasks, Completed -> 100%
+            var task1 = new ProjectTask { Id = 100, ProjectId = 20, Title = "T1", IsCompleted = true };
             
-            var task1 = new ProjectTask { ProjectId = 20, Title = "T1", IsCompleted = true };
-            
-            
-            var task2 = new ProjectTask { ProjectId = 20, Title = "T2", IsCompleted = false };
+            // Task 2: 2 subtasks, 1 completed -> 50%
+            var task2 = new ProjectTask { Id = 101, ProjectId = 20, Title = "T2", IsCompleted = false };
 
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task1);
             _context.ProjectTasks.Add(task2);
             await _context.SaveChangesAsync();
             
-            var st1 = new SubTask { ProjectTaskId = task2.Id, Title = "ST1", IsCompleted = true };
-            var st2 = new SubTask { ProjectTaskId = task2.Id, Title = "ST2", IsCompleted = false };
+            var st1 = new SubTask { Id = 200, ProjectTaskId = 101, Title = "ST1", IsCompleted = true };
+            var st2 = new SubTask { Id = 201, ProjectTaskId = 101, Title = "ST2", IsCompleted = false };
             _context.SubTasks.AddRange(st1, st2);
             await _context.SaveChangesAsync();
 
@@ -365,6 +365,11 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = okResult.Value as ApiResponse;
             Assert.NotNull(response);
+            
+            // Expected progress: (100 + 50) / 2 = 75.0%
+            var data = response.Data;
+            var progress = data?.GetType().GetProperty("Progress")?.GetValue(data, null);
+            Assert.Equal(75.0, (double)progress!);
         }
 
         #endregion
