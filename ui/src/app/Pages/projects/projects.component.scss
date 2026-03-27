@@ -98,6 +98,18 @@
     font-size: 14px;
 }
 
+.required-star {
+    color: #f44336;
+    margin-left: 2px;
+}
+
+.error-text {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: -4px;
+    font-weight: 500;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -292,7 +304,7 @@ textarea {
     overflow-x: auto;
     max-height: calc(100vh - 350px); // Limits height but allows shrinking
     padding-bottom: 20px; // Minimal breathing room
-    
+
     &::-webkit-scrollbar {
         width: 8px;
         height: 8px;
