@@ -299,7 +299,7 @@ namespace Ideahub.Tests
             Assert.IsType<NotFoundObjectResult>(result);
         }
 
-        [Fact]
+        [Fact(Skip = "This test is obsolete because promotion is now handled during Project creation by committee")]
         public async Task PromoteIdea_AsGroupAdmin_ShouldSucceed()
         {
             // Arrange
