@@ -241,6 +241,25 @@ namespace Ideahub.Tests
         }
 
         [Fact]
+        public async Task OpenIdea_ExistentIdeaInOtherGroup_ShouldReturnNotFound()
+        {
+             // Arrange
+            await SeedBasicData(1); // User is in Group 1
+            var group2 = new Group { Id = 2, Name = "Other Group" };
+            var ideaFromOtherGroup = new Idea { Id = 50, Title = "Secret Idea", GroupId = 2, UserId = "other-user" };
+            
+            _context.Groups.Add(group2);
+            _context.Ideas.Add(ideaFromOtherGroup);
+            await _context.SaveChangesAsync();
+
+            // Act: Try to open Idea 50 from Group 1 perspective
+            var result = await _controller.OpenIdea(1, 50);
+
+            // Assert: Should be NotFound (Stealth 404), even though ID 50 exists in Group 2.
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
         public async Task CloseIdea_Success_ShouldUpdateStatus()
         {
             // Arrange
