@@ -51,7 +51,7 @@ namespace Ideahub.Tests
                 new Claim(ClaimTypes.Email, _testUserEmail)
             }, "TestAuthentication"));
 
-            _controller = new IdeaController(logger.Object, _context, _mockUserManager.Object, _mockEmailSender.Object, _mockScopeFactory.Object)
+            _controller = new IdeaController(logger.Object, _context, _mockUserManager.Object, _mockEmailSender.Object, _mockScopeFactory.Object, _mockScoringService.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -179,8 +179,7 @@ namespace Ideahub.Tests
             await _controller.UpdateIdea(1, updateDto);
 
             // Assert
-            var updatedIdea = await _context.Ideas.FindAsync(1);
-            Assert.Equal(ScoringStage.BusinessCase, updatedIdea!.CurrentStage);
+            _mockScoringService.Verify(s => s.SetStageByScore(It.IsAny<Idea>(), 75.0f), Times.Once);
         }
 
         [Fact]
