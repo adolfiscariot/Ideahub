@@ -289,9 +289,15 @@ namespace Ideahub.Tests
             Assert.NotEmpty(groupList);
             
             var firstItem = groupList[0];
-            var prop = firstItem.GetType().GetProperty("IsMember");
-            bool isMember = (bool)prop.GetValue(firstItem);
+            Assert.NotNull(firstItem);
             
+            var prop = firstItem.GetType().GetProperty("IsMember");
+            Assert.NotNull(prop);
+            
+            var value = prop.GetValue(firstItem);
+            Assert.NotNull(value);
+            
+            bool isMember = (bool)value;
             Assert.True(isMember);
         }
     }
