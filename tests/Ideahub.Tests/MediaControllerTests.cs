@@ -52,8 +52,15 @@ namespace Ideahub.Tests
 
         public void Dispose()
         {
-            _context.Database.EnsureDeleted();
-            _context.Dispose();
+            try
+            {
+                _context.Database.EnsureDeleted();
+                _context.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+            
+            }
         }
 
         private async Task SeedBasicData()
@@ -125,13 +132,72 @@ namespace Ideahub.Tests
             var fileMock = CreateMockFile("proof.pdf", 1024);
             var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Document };
             
-            // Seed a timesheet owned by someone else
-            var ts = new Timesheet { Id = 1, UserId = "someone-else", Description = "Work", WorkDate = DateTime.Now };
+            var group2 = new Group { Id = 2, Name = "Forbidden Group" };
+            var project = new Project { Id = 1, GroupId = 2, Title = "Private Project" };
+            var task = new ProjectTask 
+            { 
+                Id = 10, 
+                ProjectId = 1, 
+                Project = project, 
+                Title = "Secret Task",
+                TaskAssignees = new List<TaskAssignee>(),
+                SubTasks = new List<SubTask>()
+            };
+            var ts = new Timesheet { Id = 1, UserId = "someone-else", TaskId = 10, Task = task, Description = "Work", WorkDate = DateTime.Now };
+            
+            _context.Groups.Add(group2);
+            _context.Projects.Add(project);
+            _context.ProjectTasks.Add(task);
             _context.Timesheets.Add(ts);
             await _context.SaveChangesAsync();
 
             // Act
             var result = await _controller.UploadMedia(dto, timesheetId: 1);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(403, statusCodeResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task UploadMedia_ToOrphanedTimesheet_ShouldReturnForbiddenSafely()
+        {
+            // Arrange
+            await SeedBasicData();
+            var fileMock = CreateMockFile("test.pdf", 1024);
+            var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Document };
+
+            var ts = new Timesheet { Id = 500, UserId = "someone-else", Description = "Orphaned", WorkDate = DateTime.Now };
+            _context.Timesheets.Add(ts);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.UploadMedia(dto, timesheetId: 500);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(403, statusCodeResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task UploadMedia_ToUnauthorizedTask_ShouldReturnForbidden()
+        {
+            // Arrange
+            await SeedBasicData();
+            var fileMock = CreateMockFile("virus.pdf", 1024);
+            var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Document };
+
+            var otherGroup = new Group { Id = 88, Name = "Secret Group" };
+            var otherProject = new Project { Id = 88, GroupId = 88, Title = "Secret Project" };
+            var otherTask = new ProjectTask { Id = 888, ProjectId = 88, Title = "Secret Task" };
+            
+            _context.Groups.Add(otherGroup);
+            _context.Projects.Add(otherProject);
+            _context.ProjectTasks.Add(otherTask);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _controller.UploadMedia(dto, projectTaskId: 888);
 
             // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result);
@@ -146,6 +212,8 @@ namespace Ideahub.Tests
             var idea10 = new Idea { Id = 10, Title = "Idea 10", UserId = "u1", GroupId = 1 };
             var idea20 = new Idea { Id = 20, Title = "Idea 20", UserId = "u1", GroupId = 1 };
             _context.Ideas.AddRange(idea10, idea20);
+            
+            _context.UserGroups.Add(new UserGroup { UserId = _testUserId, GroupId = 1 });
             
             _context.Media.Add(new Media { FilePath = "f1", IdeaId = 10, UserId = _testUserId, MediaType = MediaType.Image });
             _context.Media.Add(new Media { FilePath = "f2", IdeaId = 10, UserId = _testUserId, MediaType = MediaType.Image });
@@ -244,11 +312,24 @@ namespace Ideahub.Tests
             // Arrange
             await SeedBasicData();
             var fileMock = CreateMockFile("fail.jpg", 1024);
-            _mockMediaService.Setup(s => s.SaveFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>())).ReturnsAsync("uploads/temp.jpg");
+            var savedPath = "uploads/fail.jpg";
+
+            _mockMediaService.Setup(s => s.SaveFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>())).ReturnsAsync(savedPath);
             _mockMediaService.Setup(s => s.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(true);
 
+            // simulate a DB failure by disposing the context
+            _context.Dispose();
 
             var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Image };
+
+            // Act
+            var result = await _controller.UploadMedia(dto);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            
+            // verify that DeleteFileAsync was called for the orphaned file
+            _mockMediaService.Verify(s => s.DeleteFileAsync(savedPath), Times.Once);
         }
     }
 }
