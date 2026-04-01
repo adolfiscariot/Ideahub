@@ -45,9 +45,9 @@ public class MediaController : ControllerBase
 
             // STRICT ONE-SCOPE RULE
             var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
-            if (scopeCount > 1)
+            if (scopeCount != 1)
             {
-                return BadRequest(ApiResponse.Fail("Only one parent scope (Idea, Project, Task, etc.) is allowed per request."));
+                return BadRequest(ApiResponse.Fail("Exactly one parent scope (Idea, Project, Task, etc.) is required per request."));
             }
 
             if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
@@ -119,9 +119,9 @@ public class MediaController : ControllerBase
 
         // STRICT ONE-SCOPE RULE
         var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
-        if (scopeCount > 1)
+        if (scopeCount != 1)
         {
-            return BadRequest(ApiResponse.Fail("Only one search scope (Idea, Project, Task, etc.) is allowed per request."));
+            return BadRequest(ApiResponse.Fail("Exactly one search scope (Idea, Project, Task, etc.) is required per request."));
         }
 
         if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
