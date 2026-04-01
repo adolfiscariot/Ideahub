@@ -43,6 +43,13 @@ public class MediaController : ControllerBase
                 return Unauthorized(ApiResponse.Fail("User not authenticated"));
             }
 
+            // STRICT ONE-SCOPE RULE
+            var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
+            if (scopeCount > 1)
+            {
+                return BadRequest(ApiResponse.Fail("Only one parent scope (Idea, Project, Task, etc.) is allowed per request."));
+            }
+
             if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
             {
                 _logger.LogWarning("User {userId} attempted unauthorized media upload to current scope", userId);
@@ -109,6 +116,13 @@ public class MediaController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized(ApiResponse.Fail("User not authenticated"));
+
+        // STRICT ONE-SCOPE RULE
+        var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
+        if (scopeCount > 1)
+        {
+            return BadRequest(ApiResponse.Fail("Only one search scope (Idea, Project, Task, etc.) is allowed per request."));
+        }
 
         if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
         {
@@ -214,6 +228,23 @@ public class MediaController : ControllerBase
 
     private async Task<bool> HasAccessToScope(int? ideaId, int? commentId, int? projectId, int? projectTaskId, int? subTaskId, int? timesheetId, string userId)
     {
+        // Resolve Comment to its parent Idea or Task
+        if (commentId.HasValue)
+        {
+            var comment = await _context.Comments
+                .Include(c => c.Idea)
+                .FirstOrDefaultAsync(c => c.Id == commentId.Value);
+
+            if (comment == null) return false;
+
+            // If it's an idea comment, authorize against the idea
+            var idea = comment.Idea;
+            if (idea == null) return false;
+
+            if (idea.UserId == userId) return true;
+            return await _context.UserGroups.AnyAsync(ug => ug.GroupId == idea.GroupId && ug.UserId == userId);
+        }
+
         // Timesheet access check 
         if (timesheetId.HasValue)
         {
@@ -223,20 +254,25 @@ public class MediaController : ControllerBase
         // Project Task / SubTask Access check
         if (projectTaskId.HasValue || subTaskId.HasValue)
         {
-            var taskScope = await _context.SubTasks
-                .Where(st => subTaskId.HasValue && st.Id == subTaskId.Value)
-                .Select(st => st.ProjectTaskId)
-                .FirstOrDefaultAsync();
+            var targetTaskId = projectTaskId;
 
-            var effectiveTaskId = projectTaskId ?? (taskScope == 0 ? null : taskScope);
-            if (!effectiveTaskId.HasValue) return false;
+            // If only subTaskId is provided, find the parent ProjectTask
+            if (!targetTaskId.HasValue && subTaskId.HasValue)
+            {
+                targetTaskId = await _context.SubTasks
+                    .Where(st => st.Id == subTaskId.Value)
+                    .Select(st => st.ProjectTaskId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (!targetTaskId.HasValue || targetTaskId == 0) return false;
 
             var projectTask = await _context.ProjectTasks
                 .Include(t => t.Project)
                 .Include(t => t.TaskAssignees)
                 .Include(t => t.SubTasks)
                     .ThenInclude(st => st.SubTaskAssignees)
-                .FirstOrDefaultAsync(t => t.Id == effectiveTaskId.Value && !t.IsDeleted);
+                .FirstOrDefaultAsync(t => t.Id == targetTaskId.Value && !t.IsDeleted);
 
             if (projectTask == null) return false;
 
@@ -249,12 +285,10 @@ public class MediaController : ControllerBase
 
             // Group Member
             var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == projectTask.Project.GroupId && ug.UserId == userId);
-            if (isGroupMember) return true;
-
-            return false;
+            return isGroupMember;
         }
 
-        // Project-only access check
+        // 4. Project-only access check
         if (projectId.HasValue)
         {
             var project = await _context.Projects.FindAsync(projectId.Value);
