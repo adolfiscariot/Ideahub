@@ -97,6 +97,21 @@ namespace Ideahub.Tests
         }
 
         [Fact]
+        public async Task UploadMedia_MultiScope_ShouldReturnBadRequest()
+        {
+            // Arrange: Attempting to bypass security by providing two IDs (The Trojan Horse)
+            await SeedBasicData();
+            var fileMock = CreateMockFile("virus.exe", 1024);
+            var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Document };
+
+            // Act: Providing both a valid Project and a valid Timesheet
+            var result = await _controller.UploadMedia(dto, projectId: 1, timesheetId: 1);
+
+            // Assert: Should fail because strictly only one parent scope is allowed
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
         public async Task UploadMedia_InvalidExtension_ShouldReturnBadRequest()
         {
             // Arrange
@@ -251,6 +266,19 @@ namespace Ideahub.Tests
             // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(403, statusCodeResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task ViewMedia_MultiScope_ShouldReturnBadRequest()
+        {
+            // Arrange
+            await SeedBasicData();
+
+            // Act: Attempting to search across both Project and Idea at once
+            var result = await _controller.ViewMedia(projectId: 1, ideaId: 1);
+
+            // Assert: Strictly only one scope allowed per view request
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
         [Fact]
