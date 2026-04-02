@@ -285,7 +285,8 @@ public class MediaController : ControllerBase
             if (canAccessTask) return true;
 
             // Group Member
-            var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == projectTask.Project.GroupId && ug.UserId == userId);
+            var groupId = projectTask.Project?.GroupId ?? 0;
+            var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
             return isGroupMember;
         }
 
@@ -330,8 +331,9 @@ public class MediaController : ControllerBase
         if (timesheet.Task?.Project == null) return false;
 
         // 3. Group Membership check
+        var timesheetGroupId = timesheet.Task?.Project?.GroupId ?? 0;
         var isMember = await _context.UserGroups.AnyAsync(ug => 
-            ug.GroupId == timesheet.Task!.Project.GroupId && 
+            ug.GroupId == timesheetGroupId && 
             ug.UserId == userId);
         if (isMember) return true;
 
@@ -339,7 +341,7 @@ public class MediaController : ControllerBase
         // Check if user is assigned to the specific task or any subtask within the project
         var isAssignee = await _context.ProjectTasks
             .AnyAsync(t => 
-                t.ProjectId == timesheet.Task!.ProjectId && 
+                t.ProjectId == (timesheet.Task!.ProjectId) && 
                 !t.IsDeleted && 
                 (
                     (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
