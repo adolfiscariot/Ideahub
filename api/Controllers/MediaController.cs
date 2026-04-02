@@ -342,8 +342,8 @@ public class MediaController : ControllerBase
                 t.ProjectId == timesheet.Task!.ProjectId && 
                 !t.IsDeleted && 
                 (
-                    (t.TaskAssignees?.Any(ta => ta.UserId == userId) ?? false) ||
-                    (t.SubTasks?.Any(st => st.SubTaskAssignees?.Any(sta => sta.UserId == userId) ?? false) ?? false)
+                    (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
+                    (t.SubTasks ?? new List<SubTask>()).Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId))
                 )
             );
 
