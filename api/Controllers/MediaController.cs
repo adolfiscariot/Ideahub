@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Claims;
 using api.Data;
 using api.Helpers;
@@ -277,9 +278,9 @@ public class MediaController : ControllerBase
             if (projectTask == null) return false;
 
             // Overseer, Assignee, or SubTask Assignee
-            var canAccessTask = projectTask.Project.OverseenByUserId == userId ||
-                                projectTask.TaskAssignees.Any(ta => ta.UserId == userId) ||
-                                projectTask.SubTasks.Any(st => st.SubTaskAssignees.Any(sta => sta.UserId == userId));
+            var canAccessTask = (projectTask.Project?.OverseenByUserId == userId) ||
+                                (projectTask.TaskAssignees?.Any(ta => ta.UserId == userId) ?? false) ||
+                                (projectTask.SubTasks?.Any(st => st.SubTaskAssignees?.Any(sta => sta.UserId == userId) ?? false) ?? false);
             
             if (canAccessTask) return true;
 
@@ -341,8 +342,8 @@ public class MediaController : ControllerBase
                 t.ProjectId == timesheet.Task!.ProjectId && 
                 !t.IsDeleted && 
                 (
-                    t.TaskAssignees.Any(ta => ta.UserId == userId) ||
-                    t.SubTasks.Any(st => st.SubTaskAssignees.Any(sta => sta.UserId == userId))
+                    (t.TaskAssignees?.Any(ta => ta.UserId == userId) ?? false) ||
+                    (t.SubTasks?.Any(st => st.SubTaskAssignees?.Any(sta => sta.UserId == userId) ?? false) ?? false)
                 )
             );
 
