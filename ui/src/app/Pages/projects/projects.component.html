@@ -239,15 +239,17 @@
         <div modal-body class="edit-project-form">
 
             <div class="form-group">
-                <label>Project Title</label>
-                <input [(ngModel)]="editForm.title" type="text" maxlength="20" />
+                <label>Project Title <span class="required-star">*</span></label>
+                <input [(ngModel)]="editForm.title" type="text" maxlength="20" placeholder="Title is mandatory" />
+                <span class="error-text" *ngIf="!editForm.title.trim()">Project title is required</span>
                 <span class="limit-warning" *ngIf="editForm.title.length >= 20">Title cannot exceed 20 characters</span>
                 <span class="char-counter">{{ editForm.title.length }}/20</span>
             </div>
 
             <div class="form-group">
-                <label>Project Description</label>
-                <textarea [(ngModel)]="editForm.description" maxlength="1000"></textarea>
+                <label>Project Description <span class="required-star">*</span></label>
+                <textarea [(ngModel)]="editForm.description" maxlength="1000" placeholder="Description is mandatory"></textarea>
+                <span class="error-text" *ngIf="!editForm.description.trim()">Project description is required</span>
                 <span class="limit-warning" *ngIf="editForm.description.length >= 1000">Description cannot exceed 1000
                     characters</span>
                 <span class="char-counter">{{ editForm.description.length }}/1000</span>
@@ -305,7 +307,7 @@
                 (click)="closeModals()">
             </app-buttons>
             <app-buttons [buttonText]="'Save Changes'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
-                (click)="saveProject()">
+                (click)="saveProject()" [disabled]="!editForm.title.trim() || !editForm.description.trim()">
             </app-buttons>
         </div>
 

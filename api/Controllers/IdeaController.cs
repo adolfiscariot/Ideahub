@@ -20,15 +20,16 @@ public class IdeaController : ControllerBase
     private readonly IdeahubDbContext _context;
     private readonly IEmailSender _emailSender;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly float SCORING_THRESHOLD = 70.0f;
+    private readonly IScoringService _scoringService;
 
-    public IdeaController(ILogger<IdeaController> logger, IdeahubDbContext context, UserManager<IdeahubUser> userManager, IEmailSender emailSender, IServiceScopeFactory scopeFactory)
+    public IdeaController(ILogger<IdeaController> logger, IdeahubDbContext context, UserManager<IdeahubUser> userManager, IEmailSender emailSender, IServiceScopeFactory scopeFactory, IScoringService scoringService)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _emailSender = emailSender;
         _scopeFactory = scopeFactory;
+        _scoringService = scoringService;
     }
 
     //Create Ideas
@@ -88,8 +89,7 @@ public class IdeaController : ControllerBase
             _logger.LogInformation("AI Scoring beginning...");
             try
             {
-                var scoringService = HttpContext.RequestServices.GetRequiredService<IScoringService>();
-                await scoringService.EvaluateAndStageIdeaAsync(idea);
+                await _scoringService.EvaluateAndStageIdeaAsync(idea);
                 _logger.LogInformation("AI Evaluation Successful!");
             }
             catch (Exception ex)
@@ -403,16 +403,7 @@ public class IdeaController : ControllerBase
         //apply changes to the idea
         if (ideaUpdateDto.Score != null)
         {
-            // Reviewers can increase or decrease the score.            // Update status based on score
-            if (ideaUpdateDto.Score.Value >= SCORING_THRESHOLD)
-            {
-                idea.CurrentStage = ScoringStage.BusinessCase;
-            }
-            else
-            {
-                idea.CurrentStage = ScoringStage.Evaluation;
-            }
-            idea.Score = ideaUpdateDto.Score.Value;
+            _scoringService.SetStageByScore(idea, ideaUpdateDto.Score.Value);
         }
         if (ideaUpdateDto.Title != null)
         {

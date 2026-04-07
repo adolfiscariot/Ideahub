@@ -155,7 +155,7 @@ var allowedOrigins = builder.Configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AllowedOrigins, policy =>
-        policy.WithOrigins("http://44.211.34.131:5065")
+        policy.WithOrigins("http://44.211.117.129:5065")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()

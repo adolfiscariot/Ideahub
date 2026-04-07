@@ -430,12 +430,12 @@ public class ProjectController : ControllerBase
 
             //make changes to project
             string newOverseerDisplayName =  null!;
-            if (projectUpdateDto.Title is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Title))
             {
                 project.Title = projectUpdateDto.Title;
             }
 
-            if (projectUpdateDto.Description is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Description))
             {
                 project.Description = projectUpdateDto.Description;
             }
@@ -454,7 +454,7 @@ public class ProjectController : ControllerBase
                 newOverseerDisplayName = newUser.DisplayName;
             }
 
-            if (projectUpdateDto.Status is not null)
+            if (!string.IsNullOrWhiteSpace(projectUpdateDto.Status))
             {
                 ProjectStatus newStatus;
 
