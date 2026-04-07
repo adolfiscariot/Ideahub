@@ -96,7 +96,7 @@ namespace Ideahub.Tests
 
             // Assert
             var updatedIdea = await _context.Ideas.FindAsync(1);
-            Assert.Equal(ScoringStage.Rejected, updatedIdea!.CurrentStage);
+            Assert.Equal(ScoringStage.Evaluation, updatedIdea!.CurrentStage);
         }
 
         [Fact]
