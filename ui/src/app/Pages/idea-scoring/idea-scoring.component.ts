@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IdeasService } from '../../Services/ideas.services';
-import { Idea, PromoteRequest } from '../../Interfaces/Ideas/idea-interfaces';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../Services/toast.service';
 import { ScoringService } from '../../Services/scoring.services';
-import { ActionStep, BusinessCaseDto, BusinessCaseResult, EvaluationStatus, ImpactScope, ResponsibleDepartment, RiskLevel, Verdict, StrategicAlignmentScore, CustomerImpactScore, FinancialBenefitScore, FeasibilityScore, TimeToValueScore, CostScore, EffortScore, RiskScore, ScalabilityScore, DifferentiationScore, SustainabilityScore, ConfidenceScore, ScoringDimensionsDto, ScoringStage } from '../../Interfaces/Ideas/idea-interfaces';
+import { Idea, ActionStep, BusinessCaseDto, BusinessCaseResult, EvaluationStatus, ImpactScope, ResponsibleDepartment, RiskLevel, Verdict, StrategicAlignmentScore, CustomerImpactScore, FinancialBenefitScore, FeasibilityScore, TimeToValueScore, CostScore, EffortScore, RiskScore, ScalabilityScore, DifferentiationScore, SustainabilityScore, ConfidenceScore, ScoringDimensionsDto, ScoringStage } from '../../Interfaces/Ideas/idea-interfaces';
 import { ProjectService } from '../../Services/project.service';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
@@ -166,7 +165,7 @@ export class IdeaScoringComponent implements OnInit {
     { label: 'High', value: ConfidenceScore.High, tip: 'Very high certainty based on detailed research and data' },
   ];
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.groupId = this.route.snapshot.paramMap.get('groupId') || '';
     this.ideaId = this.route.snapshot.paramMap.get('ideaId') || '';
 
@@ -175,7 +174,7 @@ export class IdeaScoringComponent implements OnInit {
     this.loadAllUsers();
   }
 
-  initForm(): void {
+  initForm() {
     this.scoringForm = this.fb.group({
       // Phase 1: Idea Evaluation
       Phase1: this.fb.group({
@@ -214,7 +213,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  clampScore(event: Event): void {
+  clampScore(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = parseFloat(input.value);
     if (!isNaN(value)) {
@@ -226,7 +225,7 @@ export class IdeaScoringComponent implements OnInit {
     this.scoringForm.get('Phase1.Score')?.markAsTouched();
   }
 
-  updatePhase1Score(): void {
+  updatePhase1Score() {
     if (!this.ideaId) return;
 
     const score = this.scoringForm.get('Phase1.Score')?.value;
@@ -253,7 +252,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  loadIdea(): void {
+  loadIdea() {
     this.isLoading = true;
     this.ideasService.getIdea(this.groupId, this.ideaId).subscribe({
       next: (res) => {
@@ -278,7 +277,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  loadScoringData(): void {
+  loadScoringData() {
     if (!this.ideaId) return;
 
     // Load Phase 2: Business Case
@@ -291,10 +290,6 @@ export class IdeaScoringComponent implements OnInit {
           const mapEnum = (val: any, enumObj: any) => {
             if (typeof val === 'number') {
               const keys = Object.keys(enumObj);
-              // In TS enums with string values, Object.keys returns the keys.
-              // We need to find the key whose index matches the value if it was an int enum.
-              // However, it's safer to just map explicitly or use the fact that backend ints
-              // usually correspond to the order of definition.
               return keys[val] || keys[0];
             }
             return val;
@@ -362,7 +357,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  private initializeProjectData(): void {
+  private initializeProjectData() {
     if (!this.idea) {
       console.warn('InitializeProjectData called with null idea');
       return;
@@ -378,11 +373,9 @@ export class IdeaScoringComponent implements OnInit {
       description: finalDescription,
       overseenByEmail: this.projectData.overseenByEmail || ''
     };
-
-    console.log('Project data initialized:', this.projectData);
   }
 
-  toggleSection(section: 'phase1' | 'phase2' | 'phase3' | 'phase4'): void {
+  toggleSection(section: 'phase1' | 'phase2' | 'phase3' | 'phase4') {
     if (this.isSectionLocked(section)) return;
     this.expandedSection = this.expandedSection === section ? null : section;
 
@@ -456,7 +449,7 @@ export class IdeaScoringComponent implements OnInit {
       getMetricScore(p3.ProjectConfidence, 'ProjectConfidence');
   }
 
-  onSubmitPhase2(): void {
+  onSubmitPhase2() {
     const phase2Group = this.scoringForm.get('Phase2');
     if (phase2Group?.invalid) {
       this.toastService.show('Please complete all required Phase 2 fields', 'info');
@@ -483,7 +476,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  onSubmitPhase3(): void {
+  onSubmitPhase3() {
     const phase3Group = this.scoringForm.get('Phase3');
     if (phase3Group?.invalid) {
       this.toastService.show('Please complete all Scoring Dimensions', 'info');
@@ -501,7 +494,6 @@ export class IdeaScoringComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.toastService.show('Final Scoring Dimensions submitted successfully', 'success');
-
           this.loadIdea();
 
           // Auto-expand Phase 4 if accepted
@@ -521,7 +513,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  goBack(): void {
+  goBack() {
     this.router.navigate([`/groups/${this.groupId}/ideas`]);
   }
 
@@ -558,7 +550,7 @@ export class IdeaScoringComponent implements OnInit {
     return result;
   }
 
-  loadAllUsers(): void {
+  loadAllUsers() {
     this.committeeService.getAllUsers().subscribe({
       next: (res) => {
         if (res.success && res.data) {
@@ -571,7 +563,7 @@ export class IdeaScoringComponent implements OnInit {
     });
   }
 
-  createProjectFromIdea(): void {
+  createProjectFromIdea() {
     if (!this.idea || !this.projectData.overseenByEmail || !this.projectData.title) {
       this.toastService.show('Please complete all required fields', 'error');
       return;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
@@ -55,6 +55,11 @@ import {
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
+  private analyticsService = inject(AnalyticsService);
+  private projectService = inject(ProjectService);
+  private router = inject(Router);
+  private toastService = inject(ToastService);
+
   mostVotedIdeas: MostVotedIdea[] = [];
   topContributors: TopContributor[] = [];
   promotedIdeas: PromotedIdea[] = [];
@@ -68,15 +73,7 @@ export class HomeComponent implements OnInit {
   selectedGroupId: string | null = null;
   currentProject: any = null;
 
-
-  constructor(
-    private analyticsService: AnalyticsService,
-    private projectService: ProjectService,
-    private router: Router,
-    private toastService: ToastService
-  ) { }
-
-  ngOnInit(): void {
+  ngOnInit() {
     this.fetchAnalytics();
     const hasSeenWelcome = localStorage.getItem('seenWelcomeGuide');
 
@@ -87,9 +84,9 @@ export class HomeComponent implements OnInit {
 
   closeWelcomeInfo() {
     this.showWelcomeInfoModal = false;
-
     localStorage.setItem('seenWelcomeGuide', 'true');
   }
+
   displayWelcomeInfo() {
     this.showWelcomeInfoModal = true;
   }
@@ -110,8 +107,7 @@ export class HomeComponent implements OnInit {
         if (results.stats.status) this.ideaStats = results.stats.data;
         if (results.engagement.status) this.groupEngagement = results.engagement.data;
         if (results.personal.status) this.personalStats = results.personal.data;
-      },
-      // error: (err) => console.error('Error fetching analytics', err)
+      }
     });
   }
 
