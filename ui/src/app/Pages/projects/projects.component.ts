@@ -14,18 +14,20 @@ import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFile
 import { TaskService } from '../../Services/task.service';
 import { firstValueFrom } from 'rxjs';
 
-type EditProjectForm = {
+interface EditProjectForm {
     title: string;
     description: string;
     status: ProjectStatus | string;
     endedAt: string | null;
-};
+}
 import { MediaService } from '../../Services/media.service';
 import { forkJoin, Observable, EMPTY, catchError, map, tap, switchMap } from 'rxjs';
 import { Media } from '../../Interfaces/Media/media-interface';
 import { MediaComponent } from '../media/media.component';
 
-type ProjectWithMedia = Project & { media?: Media[] };
+interface ProjectWithMedia extends Project {
+    media?: Media[];
+}
 
 @Component({
     selector: 'app-projects',
@@ -46,7 +48,7 @@ export class ProjectsComponent implements OnInit {
     private authService = inject(AuthService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    currentUserId: string = '';
+    currentUserId = '';
     selectedProject: Project | null = null;
     isEditModalOpen = false;
     isViewModalOpen = false;
@@ -73,7 +75,7 @@ export class ProjectsComponent implements OnInit {
     deleteConfirmName = '';
     isDeletingProject = false;
 
-    searchTerm: string = '';
+    searchTerm = '';
 
     get filteredProjects(): ProjectWithMedia[] {
         if (!this.searchTerm.trim()) return this.projects;
@@ -170,7 +172,7 @@ export class ProjectsComponent implements OnInit {
                 });
             }),
             map(() => void 0),  // Return void
-            catchError((err) => {
+            catchError(() => {
                 this.toastService.show('Failed to load projects', 'error');
                 return EMPTY;
             })
@@ -273,7 +275,7 @@ export class ProjectsComponent implements OnInit {
             this.closeModals();
             this.selectedProjectFiles = [];
 
-        } catch (error: any) {
+        } catch {
             this.toastService.show('Failed to save project', 'error');
         }
     }
