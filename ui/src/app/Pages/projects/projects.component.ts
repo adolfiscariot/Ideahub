@@ -78,8 +78,8 @@ export class ProjectsComponent implements OnInit {
     get filteredProjects(): ProjectWithMedia[] {
         if (!this.searchTerm.trim()) return this.projects;
         const term = this.searchTerm.toLowerCase();
-        return this.projects.filter(p => 
-            p.title.toLowerCase().includes(term) || 
+        return this.projects.filter(p =>
+            p.title.toLowerCase().includes(term) ||
             p.description.toLowerCase().includes(term) ||
             p.overseenBy.toLowerCase().includes(term)
         );
@@ -214,6 +214,12 @@ export class ProjectsComponent implements OnInit {
 
     async saveProject() {
         if (!this.selectedProject) return;
+
+        // Validation guard
+        if (!this.editForm.title?.trim() || !this.editForm.description?.trim()) {
+            this.toastService.show('Title and Description are mandatory', 'warning');
+            return;
+        }
 
         const updateDto = {
             title: this.editForm.title,
