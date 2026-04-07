@@ -29,7 +29,9 @@
             </app-buttons>
 
             <!-- Members Section -->
-            <div class="members-section" tabindex="0" role="button" (click)="openMembersModal(); closeMobileMenu()" (keydown.enter)="openMembersModal(); closeMobileMenu()" (keydown.space)="openMembersModal(); closeMobileMenu()">
+            <div class="members-section" tabindex="0" role="button" (click)="openMembersModal(); closeMobileMenu()"
+              (keydown.enter)="openMembersModal(); closeMobileMenu()"
+              (keydown.space)="openMembersModal(); closeMobileMenu()">
               <div class="members-icon">👥</div>
               <div class="members-info">
                 <div class="members-count">{{ membersCount || 0 }} member (s)</div>
@@ -59,8 +61,10 @@
 
           <!-- Requests Modal -->
           @if (showRequestsModal) {
-          <div class="modal-backdrop" (click)="closeRequestsModal()" tabindex="0" role="button" (keydown.enter)="closeRequestsModal()">
-            <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
+          <div class="modal-backdrop" (click)="closeRequestsModal()" tabindex="0" role="button"
+            (keydown.enter)="closeRequestsModal()">
+            <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
+              role="dialog" aria-modal="true" tabindex="-1">
               <h3>Pending Requests ({{ pendingRequests.length }})</h3>
               @if (loadingRequests) {
               <div>Loading...</div>
@@ -133,13 +137,15 @@
 
         <div class="filter-container" #dropdown>
           <div class="filter-dropdown">
-            <div class="dropdown-header" tabindex="0" role="button" (click)="toggleDropdown()" (keydown.enter)="toggleDropdown()" (keydown.space)="toggleDropdown()">
+            <div class="dropdown-header" tabindex="0" role="button" (click)="toggleDropdown()"
+              (keydown.enter)="toggleDropdown()" (keydown.space)="toggleDropdown()">
               <span>{{ selectedOptionLabel || 'All Categories' }}</span>
               <span class="dropdown-arrow">▼</span>
             </div>
 
             @if (isDropdownOpen) {
-            <div class="dropdown-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="menu" tabindex="-1">
+            <div class="dropdown-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
+              role="menu" tabindex="-1">
               <!-- All Categories -->
               <div class="filter-option">
                 <input type="radio" id="all_categories" name="all"
@@ -155,8 +161,8 @@
                   <label for="type-new">New Ideas</label>
                 </div>
                 <div class="filter-option">
-                  <input type="radio" id="type-prod-improvement" name="type" value="current_process_improvement" [(ngModel)]="selectedType"
-                    (change)="selectCategory('type', 'current_process_improvement')">
+                  <input type="radio" id="type-prod-improvement" name="type" value="current_process_improvement"
+                    [(ngModel)]="selectedType" (change)="selectCategory('type', 'current_process_improvement')">
                   <label for="type-prod-improvement">Process Improvement</label>
                 </div>
               </div>
@@ -618,8 +624,8 @@
           <!-- Problem Statement -->
           <div class="form-group full-width">
             <label for="problem-statement">Problem Statement <span class="required">*</span></label>
-            <textarea id="problem-statement" class="form-control-description" formControlName="ProblemStatement" rows="3"
-              placeholder="What is the problem you are trying to solve?"></textarea>
+            <textarea id="problem-statement" class="form-control-description" formControlName="ProblemStatement"
+              rows="3" placeholder="What is the problem you are trying to solve?"></textarea>
             <div class="char-count">{{ shareProblemCount }}/250</div>
             @if (shareIdeaForm.get('ProblemStatement')?.touched) {
             @if (shareIdeaForm.get('ProblemStatement')?.errors?.['required']) {
@@ -634,8 +640,8 @@
           <!-- Proposed Solution -->
           <div class="form-group full-width">
             <label for="proposed-solution">Proposed Solution <span class="required">*</span></label>
-            <textarea id="proposed-solution" class="form-control-description" formControlName="ProposedSolution" rows="3"
-              placeholder="Describe your proposed solution in detail..."></textarea>
+            <textarea id="proposed-solution" class="form-control-description" formControlName="ProposedSolution"
+              rows="3" placeholder="Describe your proposed solution in detail..."></textarea>
             <div class="char-count">{{ shareDescCount }}/1000</div>
             @if (shareIdeaForm.get('ProposedSolution')?.touched) {
             @if (shareIdeaForm.get('ProposedSolution')?.errors?.['required']) {
@@ -828,8 +834,10 @@
 
   <!-- Admin Leave Group Modal -->
   @if (showAdminLeaveModal) {
-  <div class="modal-backdrop" (click)="showAdminLeaveModal=false" tabindex="0" role="button" (keydown.enter)="showAdminLeaveModal=false">
-    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="modal-backdrop" (click)="showAdminLeaveModal=false" tabindex="0" role="button"
+    (keydown.enter)="showAdminLeaveModal=false">
+    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog"
+      aria-modal="true" tabindex="-1">
       <h2>You are the group admin</h2>
       <p>You must either delete the group or transfer ownership before leaving.</p>
       <div class="modal-actions">
@@ -849,8 +857,10 @@
 
   <!-- Transfer Ownership Modal -->
   @if (showTransferOwnershipModal) {
-  <div class="modal-backdrop" (click)="showTransferOwnershipModal = false" tabindex="0" role="button" (keydown.enter)="showTransferOwnershipModal = false">
-    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="modal-backdrop" (click)="showTransferOwnershipModal = false" tabindex="0" role="button"
+    (keydown.enter)="showTransferOwnershipModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog"
+      aria-modal="true" tabindex="-1">
       <h2>Transfer Group Ownership</h2>
       <p>Select a member to promote as the new admin.</p>
       <select [(ngModel)]="newOwnerEmail" class="form-control">
