@@ -2,98 +2,149 @@
 <div class="tab-toggle">
   <button class="tab-btn" [class.active]="activeTab === 'requests'" (click)="setTab('requests')">
     Requests
-    <span class="tab-badge" *ngIf="totalRequests > 0">{{ totalRequests > 9 ? '9+' : totalRequests }}</span>
+    @if (totalRequests > 0) {
+      <span class="tab-badge">{{ totalRequests > 9 ? '9+' : totalRequests }}</span>
+    }
   </button>
   <button class="tab-btn" [class.active]="activeTab === 'comments'" (click)="setTab('comments')">
     Comments
-    <span class="tab-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    @if (unreadCount > 0) {
+      <span class="tab-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    }
   </button>
 </div>
 
-<ng-container *ngIf="activeTab === 'requests'">
-  <div *ngIf="loadingRequests" class="loading">Loading pending requests...</div>
-  <div *ngIf="errorRequests" class="error">{{ errorRequests }}</div>
-  <div *ngIf="!loadingRequests && groupedRequests.length === 0" class="no-requests">
-    No pending requests
-  </div>
-
-  <div *ngIf="!loadingRequests && groupedRequests.length > 0" class="group-requests-container">
-    <div class="requests-header">
-      <div class="header-title">
-        <h2>Group Requests</h2>
-        <span class="total-count">{{ totalRequests }} pending request(s) across {{ groupedRequests.length }}
-          group(s)</span>
-      </div>
+@if (activeTab === 'requests') {
+  @if (loadingRequests) {
+    <div class="loading">Loading pending requests...</div>
+  }
+  @if (errorRequests) {
+    <div class="error">{{ errorRequests }}</div>
+  }
+  @if (!loadingRequests && groupedRequests.length === 0) {
+    <div class="no-requests">
+      No pending requests
     </div>
+  }
 
-    <div *ngFor="let group of groupedRequests" class="group-panel">
-      <div class="group-header" (click)="toggleGroup(group)">
-        <div class="group-title-section">
-          <span class="group-name">{{ group.groupName }}</span>
-        </div>
-        <div class="group-header-right">
-          <span class="badge">{{ group.requests.length }}</span>
-          <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
+  @if (!loadingRequests && groupedRequests.length > 0) {
+    <div class="group-requests-container">
+      <div class="requests-header">
+        <div class="header-title">
+          <h2>Group Requests</h2>
+          <span class="total-count">{{ totalRequests }} pending request(s) across {{ groupedRequests.length }}
+            group(s)</span>
         </div>
       </div>
 
-      <div *ngIf="group.open" class="requests-container">
-        <div *ngFor="let req of group.requests" class="request-item">
-          <span class="request-email">{{ req.userEmail }}</span>
-          <div class="action-buttons">
-            <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
-              (click)="acceptRequest(req)">
-            </app-buttons>
-            <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
-              (click)="rejectRequest(req)">
-            </app-buttons>
+      @for (group of groupedRequests; track group.groupId) {
+        <div class="group-panel">
+          <div
+            class="group-header"
+            (click)="toggleGroup(group)"
+            (keydown.enter)="toggleGroup(group)"
+            (keydown.space)="toggleGroup(group); $event.preventDefault()"
+            tabindex="0"
+            role="button"
+          >
+            <div class="group-title-section">
+              <span class="group-name">{{ group.groupName }}</span>
+            </div>
+            <div class="group-header-right">
+              <span class="badge">{{ group.requests.length }}</span>
+              <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
+            </div>
           </div>
+
+          @if (group.open) {
+            <div class="requests-container">
+              @for (req of group.requests; track req.userEmail) {
+                <div class="request-item">
+                  <span class="request-email">{{ req.userEmail }}</span>
+                  <div class="action-buttons">
+                    <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
+                      (click)="acceptRequest(req)">
+                    </app-buttons>
+                    <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
+                      (click)="rejectRequest(req)">
+                    </app-buttons>
+                  </div>
+                </div>
+              }
+
+              <div class="group-action-buttons">
+                @if (group.requests.length > 1) {
+                  <app-buttons [buttonText]="'Reject All'" [buttonStyleClass]="'btn-reject'"
+                    [buttonType]="'button'" (click)="rejectAll(group)">
+                  </app-buttons>
+                }
+                @if (group.requests.length > 1) {
+                  <app-buttons [buttonText]="'Accept All'" [buttonStyleClass]="'btn-accept'"
+                    [buttonType]="'button'" (click)="acceptAll(group)">
+                  </app-buttons>
+                }
+              </div>
+            </div>
+          }
         </div>
+      }
+    </div>
+  }
+}
 
-        <div class="group-action-buttons">
-          <app-buttons *ngIf="group.requests.length > 1" [buttonText]="'Reject All'" [buttonStyleClass]="'btn-reject'"
-            [buttonType]="'button'" (click)="rejectAll(group)">
-          </app-buttons>
-          <app-buttons *ngIf="group.requests.length > 1" [buttonText]="'Accept All'" [buttonStyleClass]="'btn-accept'"
-            [buttonType]="'button'" (click)="acceptAll(group)">
-          </app-buttons>
+@if (activeTab === 'comments') {
+  @if (loadingNotifications) {
+    <div class="loading">Loading notifications...</div>
+  }
+  @if (errorNotifications) {
+    <div class="error">{{ errorNotifications }}</div>
+  }
+
+  @if (!loadingNotifications && commentNotifications.length === 0) {
+    <div class="no-requests">
+      No comment notifications
+    </div>
+  }
+
+  @if (!loadingNotifications && commentNotifications.length > 0) {
+    <div class="comment-notifications-container">
+      <div class="requests-header">
+        <div class="header-title">
+          <h2>Comment Notifications</h2>
+          <span class="total-count">{{ commentNotifications.length }} notification(s), {{ unreadCount }} unread</span>
         </div>
+        @if (unreadCount > 0) {
+          <button class="mark-all-btn" (click)="$event.stopPropagation(); markAllAsRead()">
+            Mark all as read
+          </button>
+        }
       </div>
-    </div>
-  </div>
-</ng-container>
 
-<ng-container *ngIf="activeTab === 'comments'">
-  <div *ngIf="loadingNotifications" class="loading">Loading notifications...</div>
-  <div *ngIf="errorNotifications" class="error">{{ errorNotifications }}</div>
-
-  <div *ngIf="!loadingNotifications && commentNotifications.length === 0" class="no-requests">
-    No comment notifications
-  </div>
-
-  <div *ngIf="!loadingNotifications && commentNotifications.length > 0" class="comment-notifications-container">
-    <div class="requests-header">
-      <div class="header-title">
-        <h2>Comment Notifications</h2>
-        <span class="total-count">{{ commentNotifications.length }} notification(s), {{ unreadCount }} unread</span>
-      </div>
-      <button class="mark-all-btn" *ngIf="unreadCount > 0" (click)="$event.stopPropagation(); markAllAsRead()">
-        Mark all as read
-      </button>
-    </div>
-
-    <div *ngFor="let notif of commentNotifications" class="notif-card" [class.unread]="!notif.isRead"
-      (click)="onNotificationClick(notif)" style="cursor: pointer;">
-      <div class="notif-body">
-        <div class="notif-meta">
-          <span class="notif-commenter">{{ notif.comment.commenterName }}</span>
-          <span class="notif-idea">commented on <strong>{{ notif.comment.ideaTitle }}</strong></span>
+      @for (notif of commentNotifications; track notif.id) {
+        <div
+          class="notif-card"
+          [class.unread]="!notif.isRead"
+          (click)="onNotificationClick(notif)"
+          (keydown.enter)="onNotificationClick(notif)"
+          (keydown.space)="onNotificationClick(notif); $event.preventDefault()"
+          tabindex="0"
+          role="button"
+          style="cursor: pointer;"
+        >
+          <div class="notif-body">
+            <div class="notif-meta">
+              <span class="notif-commenter">{{ notif.comment.commenterName }}</span>
+              <span class="notif-idea">commented on <strong>{{ notif.comment.ideaTitle }}</strong></span>
+            </div>
+            <p class="notif-content">"{{ notif.comment.content }}"</p>
+          </div>
+          @if (!notif.isRead) {
+            <button class="mark-read-btn" (click)="$event.stopPropagation(); markAsRead(notif)">
+              Mark as read
+            </button>
+          }
         </div>
-        <p class="notif-content">"{{ notif.comment.content }}"</p>
-      </div>
-      <button *ngIf="!notif.isRead" class="mark-read-btn" (click)="$event.stopPropagation(); markAsRead(notif)">
-        Mark as read
-      </button>
+      }
     </div>
-  </div>
-</ng-container>
+  }
+}
