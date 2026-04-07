@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Claims;
 using api.Data;
 using api.Helpers;
@@ -43,13 +44,17 @@ public class MediaController : ControllerBase
                 return Unauthorized(ApiResponse.Fail("User not authenticated"));
             }
 
-            if (timesheetId.HasValue)
+            // STRICT ONE-SCOPE RULE
+            var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
+            if (scopeCount != 1)
             {
-                if (!await HasTimesheetAccess(timesheetId.Value, userId))
-                {
-                    _logger.LogWarning("User {userId} attempted to upload media to timesheet {timesheetId} without access", userId, timesheetId);
-                    return StatusCode(403, ApiResponse.Fail("Not authorized to access this timesheet"));
-                }
+                return BadRequest(ApiResponse.Fail("Exactly one parent scope (Idea, Project, Task, etc.) is required per request."));
+            }
+
+            if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
+            {
+                _logger.LogWarning("User {userId} attempted unauthorized media upload to current scope", userId);
+                return StatusCode(403, ApiResponse.Fail("You do not have permission to upload media to this resource."));
             }
 
             // if file is null but MediaType provided block 
@@ -113,13 +118,17 @@ public class MediaController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
-        if (timesheetId.HasValue)
+        // STRICT ONE-SCOPE RULE
+        var scopeCount = new[] { ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId }.Count(id => id.HasValue);
+        if (scopeCount != 1)
         {
-            if (!await HasTimesheetAccess(timesheetId.Value, userId))
-            {
-                _logger.LogWarning("User {userId} attempted to view media for timesheet {timesheetId} without access", userId, timesheetId);
-                return StatusCode(403, ApiResponse.Fail("Not authorized to access this timesheet"));
-            }
+            return BadRequest(ApiResponse.Fail("Exactly one search scope (Idea, Project, Task, etc.) is required per request."));
+        }
+
+        if (!await HasAccessToScope(ideaId, commentId, projectId, projectTaskId, subTaskId, timesheetId, userId))
+        {
+            _logger.LogWarning("User {userId} attempted unauthorized media view for current scope", userId);
+            return StatusCode(403, ApiResponse.Fail("You do not have permission to view media for this resource."));
         }
 
         var query = _context.Media.AsQueryable();
@@ -127,33 +136,6 @@ public class MediaController : ControllerBase
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
         if (commentId.HasValue) query = query.Where(m => m.CommentId == commentId.Value);
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
-
-        // Validate caller access for task/subtask-scoped media requests
-        if (projectTaskId.HasValue || subTaskId.HasValue)
-        {
-            var taskScope = await _context.SubTasks
-                .Where(st => subTaskId.HasValue && st.Id == subTaskId.Value)
-                .Select(st => st.ProjectTaskId)
-                .FirstOrDefaultAsync();
-
-            var effectiveTaskId = projectTaskId ?? (taskScope == 0 ? null : taskScope);
-            if (!effectiveTaskId.HasValue)
-                return StatusCode(403, ApiResponse.Fail("Not authorized to access this media scope."));
-
-            var projectTask = await _context.ProjectTasks
-                .Include(t => t.Project)
-                .Include(t => t.TaskAssignees)
-                .Include(t => t.SubTasks)
-                    .ThenInclude(st => st.SubTaskAssignees)
-                .FirstOrDefaultAsync(t => t.Id == effectiveTaskId.Value && !t.IsDeleted);
-
-            var canAccess = projectTask != null &&
-                (projectTask.Project.OverseenByUserId == userId ||
-                (projectTask.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
-                projectTask.SubTasks.Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId)));
-            if (!canAccess)
-                return StatusCode(403, ApiResponse.Fail("Not authorized to access this media scope."));
-        }
         
         // Ensure the sub task belongs to the correct project task
         if (projectTaskId.HasValue && subTaskId.HasValue)
@@ -245,6 +227,91 @@ public class MediaController : ControllerBase
         }
     }
 
+    private async Task<bool> HasAccessToScope(int? ideaId, int? commentId, int? projectId, int? projectTaskId, int? subTaskId, int? timesheetId, string userId)
+    {
+        // Resolve Comment to its parent Idea or Task
+        if (commentId.HasValue)
+        {
+            var comment = await _context.Comments
+                .Include(c => c.Idea)
+                .FirstOrDefaultAsync(c => c.Id == commentId.Value);
+
+            if (comment == null) return false;
+
+            // If it's an idea comment, authorize against the idea
+            var idea = comment.Idea;
+            if (idea == null) return false;
+
+            if (idea.UserId == userId) return true;
+            return await _context.UserGroups.AnyAsync(ug => ug.GroupId == idea.GroupId && ug.UserId == userId);
+        }
+
+        // Timesheet access check 
+        if (timesheetId.HasValue)
+        {
+            return await HasTimesheetAccess(timesheetId.Value, userId);
+        }
+
+        // Project Task / SubTask Access check
+        if (projectTaskId.HasValue || subTaskId.HasValue)
+        {
+            var targetTaskId = projectTaskId;
+
+            // If only subTaskId is provided, find the parent ProjectTask
+            if (!targetTaskId.HasValue && subTaskId.HasValue)
+            {
+                targetTaskId = await _context.SubTasks
+                    .Where(st => st.Id == subTaskId.Value)
+                    .Select(st => st.ProjectTaskId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (!targetTaskId.HasValue || targetTaskId == 0) return false;
+
+            var projectTask = await _context.ProjectTasks
+                .Include(t => t.Project)
+                .Include(t => t.TaskAssignees)
+                .Include(t => t.SubTasks)
+                    .ThenInclude(st => st.SubTaskAssignees)
+                .FirstOrDefaultAsync(t => t.Id == targetTaskId.Value && !t.IsDeleted);
+
+            if (projectTask == null) return false;
+
+            // Overseer, Assignee, or SubTask Assignee
+            var canAccessTask = (projectTask.Project?.OverseenByUserId == userId) ||
+                                (projectTask.TaskAssignees?.Any(ta => ta.UserId == userId) ?? false) ||
+                                (projectTask.SubTasks?.Any(st => st.SubTaskAssignees?.Any(sta => sta.UserId == userId) ?? false) ?? false);
+            
+            if (canAccessTask) return true;
+
+            // Group Member
+            var groupId = projectTask.Project?.GroupId ?? 0;
+            var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
+            return isGroupMember;
+        }
+
+        // 4. Project-only access check
+        if (projectId.HasValue)
+        {
+            var project = await _context.Projects.FindAsync(projectId.Value);
+            if (project == null || project.IsDeleted) return false;
+
+            if (project.OverseenByUserId == userId) return true;
+            return await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
+        }
+
+        // Idea-only access check
+        if (ideaId.HasValue)
+        {
+            var idea = await _context.Ideas.FindAsync(ideaId.Value);
+            if (idea == null) return false;
+
+            if (idea.UserId == userId) return true;
+            return await _context.UserGroups.AnyAsync(ug => ug.GroupId == idea.GroupId && ug.UserId == userId);
+        }
+        return true;
+    }
+
     private async Task<bool> HasTimesheetAccess(int timesheetId, string userId)
     {
         var timesheet = await _context.Timesheets
@@ -260,9 +327,13 @@ public class MediaController : ControllerBase
         // 2. Project Overseer check
         if (timesheet.Task?.Project?.OverseenByUserId == userId) return true;
 
+        // Safety check: if task hierarchy is incomplete, deny access safely instead of crashing
+        if (timesheet.Task?.Project == null) return false;
+
         // 3. Group Membership check
+        var timesheetGroupId = timesheet.Task?.Project?.GroupId ?? 0;
         var isMember = await _context.UserGroups.AnyAsync(ug => 
-            ug.GroupId == timesheet.Task!.Project.GroupId && 
+            ug.GroupId == timesheetGroupId && 
             ug.UserId == userId);
         if (isMember) return true;
 
@@ -270,11 +341,11 @@ public class MediaController : ControllerBase
         // Check if user is assigned to the specific task or any subtask within the project
         var isAssignee = await _context.ProjectTasks
             .AnyAsync(t => 
-                t.ProjectId == timesheet.Task!.ProjectId && 
+                t.ProjectId == (timesheet.Task!.ProjectId) && 
                 !t.IsDeleted && 
                 (
                     (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
-                    t.SubTasks.Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId))
+                    (t.SubTasks ?? new List<SubTask>()).Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId))
                 )
             );
 
