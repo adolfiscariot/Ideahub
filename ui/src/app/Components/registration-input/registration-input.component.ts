@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -28,7 +28,7 @@ const PASSWORD_REQUIREMENTS = [
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',
 })
-export class RegistrationInputComponent implements OnInit {
+export class RegistrationInputComponent {
   authService = inject(AuthService);
   router = inject(Router);
   toastService = inject(ToastService);
@@ -72,8 +72,6 @@ export class RegistrationInputComponent implements OnInit {
     { validators: confirmPasswordValidator }
   );
 
-  ngOnInit(): void {}
-
   onPasswordInput() {
     const pwd = this.registrationForm.get('password')?.value || '';
     this.passwordValue = pwd;
@@ -84,7 +82,7 @@ export class RegistrationInputComponent implements OnInit {
     }));
   }
 
-  get allPasswordMet(): boolean {
+  get allPasswordMet() {
   return this.passwordChecks.every(r => r.met);
 }
 
