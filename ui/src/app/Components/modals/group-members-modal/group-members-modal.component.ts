@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,25 +16,23 @@ import { AuthService } from '../../../Services/auth/auth.service';
 })
 export class GroupMembersModalComponent implements OnInit {
   members: any[] = [];
-  isLoading: boolean = true;
-  joining: boolean = false;
-  isOwner: boolean = false;
-  currentUserEmail: string = '';
+  isLoading = true;
+  joining = false;
+  isOwner = false;
+  currentUserEmail = '';
 
-  constructor(
-    public dialogRef: MatDialogRef<GroupMembersModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { group: any },
-    private groupsService: GroupsService,
-    private toastService: ToastService,
-    private authService: AuthService
-  ) { }
+  public dialogRef = inject(MatDialogRef<GroupMembersModalComponent>);
+  public data: { group: any } = inject(MAT_DIALOG_DATA);
+  private groupsService = inject(GroupsService);
+  private toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.checkOwnership();
     this.loadMembers();
   }
 
-  checkOwnership(): void {
+  checkOwnership() {
     this.currentUserEmail = this.authService.getEmail() || '';
     // Assuming backend data.group has createdByUserId or createdByUser.email. 
     // We might need to check against userId or email depending on what data we have.
@@ -50,7 +48,7 @@ export class GroupMembersModalComponent implements OnInit {
     }
   }
 
-  loadMembers(): void {
+  loadMembers() {
     this.isLoading = true;
     this.groupsService.getGroupMembers(this.data.group.id).subscribe({
       next: (response: any) => {
@@ -60,14 +58,14 @@ export class GroupMembersModalComponent implements OnInit {
           this.members = response.data;
         }
       },
-      error: (error: any) => {
+      error: () => {
         this.isLoading = false;
         this.toastService.show('Failed to load group members.', 'error');
       }
     });
   }
 
-  joinGroup(): void {
+  joinGroup() {
     this.joining = true;
     this.groupsService.joinGroup(this.data.group.id).subscribe({
       next: (response: any) => {
@@ -78,14 +76,14 @@ export class GroupMembersModalComponent implements OnInit {
           this.dialogRef.close({ joined: true });
         }
       },
-      error: (error: any) => {
+      error: () => {
         this.joining = false;
         this.toastService.show('Failed to join group.', 'error');
       }
     });
   }
 
-  transferOwnership(member: any): void {
+  transferOwnership(member: any) {
     const memberEmail = member.email || member.userEmail; // Adjust based on API response
     if (!memberEmail) {
       this.toastService.show('Cannot transfer to user without email.', 'error');
@@ -105,13 +103,13 @@ export class GroupMembersModalComponent implements OnInit {
           this.toastService.show(response.message || 'Failed to transfer ownership.', 'error');
         }
       },
-      error: (error: any) => {
+      error: () => {
         this.toastService.show('Failed to transfer ownership.', 'error');
       }
     });
   }
 
-  getInitials(name: string): string {
+  getInitials(name: string) {
     if (!name) return '?';
     return name.split(' ')
       .map(part => part[0])
@@ -120,7 +118,7 @@ export class GroupMembersModalComponent implements OnInit {
       .substring(0, 2);
   }
 
-  close(): void {
+  close() {
     this.dialogRef.close();
   }
 }
