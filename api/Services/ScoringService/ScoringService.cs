@@ -9,6 +9,7 @@ public class ScoringService : IScoringService
     private readonly IdeahubDbContext _context;
     private readonly ILlmService _llmService;
     private readonly ILogger<ScoringService> _logger;
+    public const float SCORING_THRESHOLD = 70.0f;
 
     public ScoringService(IdeahubDbContext context, ILlmService llmService, ILogger<ScoringService> logger)
     {
@@ -40,21 +41,29 @@ public class ScoringService : IScoringService
         trackedIdea.Score = score;
         trackedIdea.AiReasoning = reasoning;
 
-        // Stage transition logic
-        if (score >= 70)
-        {
-            trackedIdea.CurrentStage = ScoringStage.BusinessCase;
-            _logger.LogInformation("Idea {IdeaId} passed Phase 1 with score {score}. Moving to Business Case stage.", idea.Id, score);
-        }
-        else
-        {
-            trackedIdea.CurrentStage = ScoringStage.Rejected;
-            _logger.LogInformation("Idea {IdeaId} failed Phase 1 with score {score}. Moving to Rejected stage.", idea.Id, score);
-        }
+        // Stage transition logic delegated to shared helper
+        SetStageByScore(trackedIdea, score);
 
         trackedIdea.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         return (score, reasoning);
+    }
+
+    public void SetStageByScore(Idea idea, float score)
+    {
+        idea.Score = score;
+        if (score >= SCORING_THRESHOLD)
+        {
+            idea.CurrentStage = ScoringStage.BusinessCase;
+            //_logger.LogInformation("Idea {IdeaId} staged as Business Case with score {score}.", idea.Id, score);
+            _logger.LogInformation("Idea staged as Business Case");
+        }
+        else
+        {
+            idea.CurrentStage = ScoringStage.Evaluation; 
+            //_logger.LogInformation("Idea {IdeaId} staged as Evaluation with score {score}.", idea.Id, score);
+            _logger.LogInformation("Idea staged as Evaluation");
+        }
     }
 }
