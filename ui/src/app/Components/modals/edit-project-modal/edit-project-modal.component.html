@@ -17,9 +17,11 @@
             <mat-form-field appearance="outline" class="half-width">
                 <mat-label>Status</mat-label>
                 <mat-select [(ngModel)]="editedProject.status">
-                    <mat-option *ngFor="let status of statusOptions" [value]="status">
-                        {{ getStatusLabel(status) }}
-                    </mat-option>
+                    @for (status of statusOptions; track status) {
+                        <mat-option [value]="status">
+                            {{ getStatusLabel(status) }}
+                        </mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
 

@@ -10,7 +10,7 @@ import { Component, Input, Output, EventEmitter, HostListener } from '@angular/c
 })
 export class ModalComponent {
   @Input() isOpen = false;
-  @Input() title: string = '';
+  @Input() title = '';
   @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
   @Input() showCloseButton = true;
   @Input() showFooter = true;
@@ -21,8 +21,8 @@ export class ModalComponent {
 
   @Output() closeModal = new EventEmitter<void>();
 
-  @HostListener('document:keydown.escape', ['$event'])
-  onKeydownHandler(event: KeyboardEvent) {
+  @HostListener('document:keydown.escape')
+  onKeydownHandler() {
     if (this.closeOnEsc && this.isOpen) {
       this.close();
     }

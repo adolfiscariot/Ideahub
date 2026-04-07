@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -32,12 +32,10 @@ export class EditProjectModalComponent implements OnInit {
     ProjectStatus = ProjectStatus;
     statusOptions = Object.values(ProjectStatus).filter(value => typeof value === 'number') as number[];
 
-    constructor(
-        public dialogRef: MatDialogRef<EditProjectModalComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { project: Project }
-    ) { }
+    private dialogRef = inject(MatDialogRef<EditProjectModalComponent>);
+    public data: { project: Project } = inject(MAT_DIALOG_DATA);
 
-    ngOnInit(): void {
+    ngOnInit() {
         // Clone the data to avoid mutating the source directly until saved
         this.editedProject = { ...this.data.project };
     }
@@ -46,11 +44,11 @@ export class EditProjectModalComponent implements OnInit {
         return ProjectStatus[status];
     }
 
-    onSave(): void {
+    onSave() {
         this.dialogRef.close(this.editedProject);
     }
 
-    onCancel(): void {
+    onCancel() {
         this.dialogRef.close();
     }
 }
