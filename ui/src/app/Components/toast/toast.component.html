@@ -1,6 +1,7 @@
 <div class="toast-container">
     @for (toast of toasts$ | async; track toast.id) {
-    <div class="toast" [ngClass]="toast.type" [@toastAnimation] (click)="remove(toast.id)">
+    <div class="toast" [ngClass]="toast.type" [@toastAnimation] (click)="remove(toast.id)"
+        (keydown.enter)="remove(toast.id)" tabindex="0" role="button" aria-label="Dismiss toast">
         <div class="icon">
             @if (toast.type === 'success') { <span>✓</span> }
             @else if (toast.type === 'error') { <span>✕</span> }

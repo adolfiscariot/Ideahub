@@ -12,7 +12,7 @@ export class AnalyticsService {
 
     private http = inject(HttpClient);
 
-    constructor() { }
+
 
     getMostVotedIdeas(): Observable<ApiResponse> {
         return this.http.get<ApiResponse>(`${this.baseUrl}/most-voted`);

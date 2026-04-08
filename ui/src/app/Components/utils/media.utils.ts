@@ -36,9 +36,7 @@ export function processSelectedFiles(
   const errors: string[] = [];
   const updatedFiles = [...existingFiles];
 
-  for (let i = 0; i < input.files.length; i++) {
-    const file = input.files[i];
-
+  for (const file of Array.from(input.files)) {
     if (file.size > maxSizeMB * 1024 * 1024) {
       errors.push(`${file.name} exceeds ${maxSizeMB}MB limit`);
       continue;

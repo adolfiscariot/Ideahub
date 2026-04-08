@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -11,7 +11,7 @@ export class SignalrService {
     private hubConnection: signalR.HubConnection | undefined;
     public notificationSubject = new BehaviorSubject<string | null>(null);
 
-    constructor(private notificationService: NotificationService) { }
+    private notificationService = inject(NotificationService);
 
     public startConnection = () => {
         if (this.hubConnection) {
