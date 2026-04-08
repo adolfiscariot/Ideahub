@@ -34,7 +34,7 @@ export class AuthService {
   register(registrationData: Registration): Observable<any> {
 
     return this.http.post(`${this.authUrl}/register`, registrationData).pipe(
-      tap((response) => {
+      tap(() => {
         // console.log(
         //   `${registrationData.email} has registered successfully: `,
         //   response
@@ -77,8 +77,6 @@ export class AuthService {
 
     // 2. Attempt server-side logout
     return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}, { withCredentials: true }).pipe(
-      tap(() => {
-      }),
       catchError((error: HttpErrorResponse) => {
         return throwError(() => error);
       }),
@@ -181,7 +179,7 @@ export class AuthService {
 
       const expiry = payload.exp * 1000;
       return Date.now() < expiry;
-    } catch (e) {
+    } catch {
       return false; // Invalid token format
     }
   }

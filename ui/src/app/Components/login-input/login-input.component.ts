@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { RouterLink } from '@angular/router';
@@ -21,7 +21,7 @@ import { SignalrService } from '../../Services/signalr.service';
   templateUrl: './login-input.component.html',
   styleUrl: './login-input.component.scss',
 })
-export class LoginInputComponent implements OnInit {
+export class LoginInputComponent {
   authService = inject(AuthService);
   toastService = inject(ToastService);
   notificationsService = inject(NotificationsService);
@@ -29,7 +29,7 @@ export class LoginInputComponent implements OnInit {
   isLoading = false;
   signalRService = inject(SignalrService);
 
-  ngOnInit(): void {this.notificationsService}
+
 
   loginForm = new FormGroup({
     email: new FormControl('', {

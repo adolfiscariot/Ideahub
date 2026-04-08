@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { CommonModule } from '@angular/common';
@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './media.component.html',
   styleUrls: ['./media.component.scss']
 })
-export class MediaComponent implements OnInit {
+export class MediaComponent implements OnInit, OnChanges {
   @Input() ideaId?: number;
   @Input() commentId?: number;
   @Input() projectId?: number;
