@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
     private readonly ITokenService _tokenService;
     private readonly IdeahubDbContext _context;
     private readonly IPasswordResetService _passwordResetService;
-    private readonly string homepageUrl = Environment.GetEnvironmentVariable("HOMEPAGE_URL") ?? "http://44.211.117.129:5065/home";
+    private readonly string homepageUrl = Environment.GetEnvironmentVariable("HOMEPAGE_URL") ?? "https://ideahub.adept-techno.co.ke/home";
 
     //constructor
     public AuthController(
