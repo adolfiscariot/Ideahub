@@ -361,7 +361,7 @@
                 }
               </app-buttons>
               <!-- View voters button prominent -->
-              @if (selectedIdea.status !== 'Closed' && isGroupCreator() && (selectedIdea?.voteCount || 0) > 0) {
+              @if (selectedIdea.status !== 'Closed' && isGroupCreator() && (selectedIdea.voteCount || 0) > 0) {
               <app-buttons buttonStyleClass="btn-view-voters"
                 (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
                 title="View voters">
@@ -561,7 +561,7 @@
         <div class="details-section">
           <h4 class="details-section-title">Author</h4>
           <div class="author-info">
-            <div class="author-avatar">{{ selectedIdea.userName?.charAt(0) || 'U' }}</div>
+            <div class="author-avatar">{{ selectedIdea.userName.charAt(0) || 'U' }}</div>
             <div class="author-details">
               <div class="author-name">{{ selectedIdea.userName || 'Unknown User' }}
                 @if (isUserIdeaOwner(selectedIdea)) {
