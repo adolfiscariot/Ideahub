@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { AddGroup } from '../../Interfaces/Groups/groups-interfaces';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
@@ -15,7 +14,12 @@ import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Group, GroupMember, AddGroup, RawBackendGroup, JoinGroupResponse } from '../../Interfaces/Groups/groups-interfaces';
+import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { FormControl } from '@angular/forms';
+
+
 
 @Component({
   selector: 'app-groups',
@@ -41,7 +45,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
 
   // Group data
-  groups: any[] = [];
+  groups: Group[] = [];
 
   // Page content
   title = 'Groups';
@@ -55,15 +59,15 @@ export class GroupsComponent implements OnInit, OnDestroy {
   showDetailsModal = false;
   showMembersModal = false;
   showDeleteModal = false;
-  selectedGroup: any = null;
-  groupMembers: any[] = [];
+  selectedGroup: Group | null = null;
+  groupMembers: GroupMember[] = [];
   isLoadingMembers = false;
   isDeleting = false;
   nameCount = 0;
   descCount = 0;
   nameLimitReached = false;
   descLimitReached = false;
-  deleteConfirmControl: any;
+  deleteConfirmControl: FormControl;
 
   // Current user ID
   currentUserId: string | null = null;
@@ -73,7 +77,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   pageSize = 8;
   currentPage = 0;
-  paginateGroups: any[] = [];
+  paginateGroups: Group[] = [];
   dontShowPages = false;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -87,8 +91,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       isPublic: [true, Validators.required]
     });
-    this.deleteConfirmControl = this.fb.control('');
+    this.deleteConfirmControl = this.fb.control('') as FormControl;
   }
+
 
   ngOnInit() {
     // Get current user ID first
@@ -123,8 +128,8 @@ export class GroupsComponent implements OnInit, OnDestroy {
       });
   }
 
-  autoGrow(event: any) {
-    const textarea = event.target;
+  autoGrow(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
     textarea.style.height = 'auto';
     textarea.style.height = textarea.scrollHeight + 'px';
   }
@@ -135,7 +140,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.paginateGroups = this.groups.slice(startIndex, endIndex);
   }
 
-  onPageChange(event: any) {
+  onPageChange(event: PageEvent) {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
     this.updatePaginatedGroups();
@@ -146,17 +151,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
   loadGroups() {
     this.isLoading = true;
     this.groupsService.getGroups().subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<Group[]>) => {
         this.isLoading = false;
 
         if (response.success && response.data) {
-          this.groups = response.data.map((group: any) => {
-
+          this.groups = response.data.map((raw: Group | Record<string, unknown>) => {
+            const group = raw as RawBackendGroup;
+            const mappedId = group.id || group.Id || '';
             return {
               ...group,
-              id: group.id,
+              id: mappedId,
               name: (group.name || group.Name || '').trim(),
-              description: group.description || group.Description,
+              description: group.description || group.Description || '',
               isMember: group.isMember || group.IsMember || false,
               hasPendingRequest: group.hasPendingRequest || group.HasPendingRequest || false,
               memberCount: group.memberCount || group.MemberCount || 0,
@@ -164,19 +170,19 @@ export class GroupsComponent implements OnInit, OnDestroy {
               isActive: group.isActive || group.IsActive !== false,
               isDeleted: group.isDeleted || group.IsDeleted || false,
               createdAt: group.createdAt || group.CreatedAt || new Date().toISOString(),
-              createdByUserId: group.createdByUserId || group.CreatedByUserId,
+              createdByUserId: group.createdByUserId || group.CreatedByUserId || '',
               createdByUser: group.createdByUser || group.CreatedByUser || {
                 displayName: 'Unknown',
                 email: ''
               },
               isPublic:
                 group.isPublic === true ||
-                  group.isPublic === 'true' ||
+                  (typeof group.isPublic === 'string' && group.isPublic.toLowerCase() === 'true') ||
                   group.IsPublic === true ||
-                  group.IsPublic === 'true'
+                  (typeof group.IsPublic === 'string' && group.IsPublic.toLowerCase() === 'true')
                   ? 'Public'
                   : 'Private',
-            };
+            } as Group;
           });
 
           this.groups.sort(
@@ -211,7 +217,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   // ===== MODAL METHODS =====
 
-  openDetailsModal(group: any) {
+  openDetailsModal(group: Group) {
     this.selectedGroup = group;
     this.showDetailsModal = true;
   }
@@ -221,7 +227,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.selectedGroup = null;
   }
 
-  openMembersModal(group: any) {
+  openMembersModal(group: Group) {
     this.dialog.open(GroupMembersModalComponent, {
       width: '600px',
       maxHeight: '90vh',
@@ -245,7 +251,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.createGroupForm.reset({ isPublic: true });
   }
 
-  openDeleteModal(group: any) {
+  openDeleteModal(group: Group) {
     this.selectedGroup = group;
     this.showDeleteModal = true;
 
@@ -271,9 +277,16 @@ export class GroupsComponent implements OnInit, OnDestroy {
   // ===== GROUP JOIN & VIEW IDEAS METHODS =====
 
   onViewIdeas(groupId: string) {
-    const group = this.groups.find(g => g.id === groupId);
+    if (!groupId) {
+      console.warn('Cannot view ideas: groupId is missing');
+      return;
+    }
 
-    if (!group?.isMember) {
+    const group = this.groups.find(g => String(g.id) === String(groupId));
+
+    if (!group) return;
+
+    if (!group.isMember) {
       this.toastService.show('You must be a member of this group to view ideas.', 'info');
       return;
     }
@@ -292,9 +305,11 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   onJoinGroup(groupId: string) {
-    const group = this.groups.find(g => g.id === groupId);
+    const group = this.groups.find(g => String(g.id) === String(groupId));
 
-    if (group?.isMember) {
+    if (!group) return;
+
+    if (group.isMember) {
       this.toastService.show('You are already a member of this group!', 'info');
       return;
     }
@@ -305,18 +320,27 @@ export class GroupsComponent implements OnInit, OnDestroy {
     }
 
     this.groupsService.joinGroup(groupId).subscribe({
-      next: (response: any) => {
-        const isSuccess = response.success || response.status;
-        const { isPublic } = response.data;
+      next: (response: ApiResponse<JoinGroupResponse>) => {
+        const isSuccess = response.success;
+        
+        // Handle both casing variants for isPublic from JoinGroupResponse
+        const isPublic = response.data?.isPublic ?? response.data?.IsPublic;
+
         if (isSuccess && isPublic === false) {
           this.toastService.show('Request sent! Waiting for admin approval.', 'success');
           group.isMember = false;
+          group.hasPendingRequest = true; // Mark as pending immediately
           this.loadGroups();
         }
         else if (isSuccess && isPublic === true) {
           this.toastService.show('Joined successfully', 'success');
           group.isMember = true;
           this.onViewIdeas(groupId);
+        }
+        else if (isSuccess) {
+          // Success but isPublic flag missing or unmapped
+          this.toastService.show('Join request successful', 'success');
+          this.loadGroups();
         }
         else {
           if (response.message?.includes('already a member')) {
@@ -356,9 +380,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
     const newGroup: AddGroup = this.createGroupForm.value;
 
     this.groupsService.createGroup(newGroup).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<Group>) => {
         this.isSubmitting = false;
-        const isSuccess = response.success || response.status;
+        const isSuccess = response.success;
         if (isSuccess) {
           this.toastService.show('Group created successfully!', 'success');
           this.currentPage = 0;
@@ -376,7 +400,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (error: any) => {
+      error: (error: { status: number }) => {
         this.isSubmitting = false;
 
         if (error.status === 401) {
@@ -395,18 +419,22 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.groupMembers = [];
 
     this.groupsService.getGroupMembers(groupId).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<GroupMember[]>) => {
         this.isLoadingMembers = false;
         if (response.success && response.data) {
-          this.groupMembers = response.data.map((member: any) => ({
-            id: member.userId ?? member.id,
-            userId: member.userId || member.id,
-            name: member.name,
-            displayName: member.displayName || member.name,
-            userName: member.userName,
-            email: member.email,
-            createdByUserId: member.createdByUserId
-          }));
+          this.groupMembers = response.data.map((member: GroupMember) => {
+            const m = member as unknown as Record<string, unknown>;
+            return {
+              ...member,
+              id: member.userId || (m['id'] as string),
+              userId: member.userId || (m['id'] as string),
+              name: m['name'] as string,
+              displayName: member.displayName || (m['name'] as string),
+              userName: m['userName'] as string,
+              email: member.email,
+              createdByUserId: m['createdByUserId'] as string
+            } as GroupMember;
+          });
         } else {
           this.groupMembers = [];
         }
@@ -428,13 +456,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.isDeleting = true;
 
     this.groupsService.deleteGroup(groupId).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<void>) => {
         this.isDeleting = false;
 
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
           this.loadGroups();
-          this.groups = this.groups.filter(group => group.id !== groupId);
+          this.groups = this.groups.filter(group => group.id.toString() !== groupId);
           this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
 
@@ -452,7 +480,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (error: any) => {
+      error: (error: { status: number }) => {
         this.isDeleting = false;
 
         if (error.status === 401) {
@@ -470,7 +498,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   // ===== HELPER METHODS =====
 
-  formatDate(date: any): string {
+  formatDate(date: string | Date | undefined): string {
     if (!date) return 'Unknown date';
     try {
       const d = new Date(date);
@@ -489,8 +517,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
     return count === 1 ? '1 member' : `${count} members`;
   }
 
-  trackById(index: number, item: any): string {
-    return item.id || index.toString();
+  trackById(index: number, item: Group): string {
+    if (!item || !item.id) return index.toString();
+    return item.id.toString();
   }
 
   getInitials(name: string): string {
@@ -504,7 +533,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   // ===== PERMISSION METHODS =====
 
-  isGroupCreator(group: any): boolean {
+  isGroupCreator(group: Group | null): boolean {
     if (!group || !group.createdByUserId || !this.currentUserId) return false;
 
     // Normalize both IDs (trim and lowercase)
@@ -514,7 +543,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     return groupCreatorId === currentId;
   }
 
-  canConfigureGroup(group: any): boolean {
+  canConfigureGroup(group: Group): boolean {
     return this.isGroupCreator(group);
   }
 
