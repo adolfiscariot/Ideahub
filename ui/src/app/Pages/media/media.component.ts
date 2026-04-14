@@ -13,8 +13,8 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./media.component.scss']
 })
 export class MediaComponent implements OnInit, OnChanges {
-  @Input() ideaId?: number;
-  @Input() commentId?: number;
+  @Input() ideaId?: string | number;
+  @Input() commentId?: string | number;
   @Input() projectId?: number;
   @Input() timesheetId?: number;
   @Input() projectTaskId?: number;

@@ -16,6 +16,8 @@ import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { TimesheetsComponent } from '../timesheets/timesheets.component';
 import { MediaComponent } from '../media/media.component';
+import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { UserRecord } from '../../Interfaces/Users/user-interface';
 
 @Component({
   selector: 'app-task-management',
@@ -51,7 +53,7 @@ export class TaskManagementComponent implements OnInit {
   labelInput = '';
   taskLabels: string[] = [];
 
-  availableUsers: any[] = [];
+  availableUsers: UserRecord[] = [];
   isCreating = false;
   showUserDropdown = false;
   selectedTask: TaskDetails | null = null;
@@ -139,8 +141,8 @@ export class TaskManagementComponent implements OnInit {
 
       const { project, tasks, users } = result;
 
-      if (project.success) {
-        this.projectOverseerId = project.data.overseenByUserId;
+      if (project.success && project.data) {
+        this.projectOverseerId = project.data.overseenByUserId || '';
       }
 
       if (tasks.success) {
@@ -190,7 +192,7 @@ export class TaskManagementComponent implements OnInit {
   // Note: loadTasks is now part of loadInitialData for ngOnInit but kept as a helper for updates
   loadTasks(): void {
     this.taskService.getProjectTasks(this.projectId).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<TaskDetails[]>) => {
         if (response.success) {
           this.tasks = response.data || [];
           this.sortTasks();
@@ -428,7 +430,7 @@ export class TaskManagementComponent implements OnInit {
         );
 
         forkJoin(uploadRequests).subscribe((results) => {
-          const anyFailed = results.some((r: any) => !r.ok);
+          const anyFailed = results.some(r => !r.ok);
           if (anyFailed) {
             this.toastService.show('Task created, but some media failed to upload', 'warning');
           } else {
@@ -542,7 +544,7 @@ export class TaskManagementComponent implements OnInit {
         );
 
         forkJoin(uploadRequests).subscribe((results) => {
-          const anyFailed = results.some((r: any) => !r.ok);
+          const anyFailed = results.some(r => !r.ok);
           if (anyFailed) {
             this.toastService.show('Subtask created, but some media failed to upload', 'warning');
           } else {
