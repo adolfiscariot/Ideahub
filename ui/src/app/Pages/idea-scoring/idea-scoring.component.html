@@ -46,7 +46,7 @@
                                       <span class="label-heading">Author</span>
                                   </div>
                                   <div class="meta-value">
-                                      <p>{{ idea.author || idea.author || idea.userName || 'Anonymous' }}</p>
+                                      <p>{{ idea.author || idea.userName || 'Anonymous' }}</p>
                                   </div>
                               </div>
                               <div class="meta-row">
@@ -647,7 +647,7 @@
                                         </option>
                                         @for (user of allUsers; track user.email) {
                                           <option [value]="user.email">
-                                              {{user.displayName || user.userName || 'Unnamed User'}} ({{user.email}})
+                                              {{user.displayName || user.fullName || 'Unnamed User'}} ({{user.email}})
                                           </option>
                                         }
                                     </select>
