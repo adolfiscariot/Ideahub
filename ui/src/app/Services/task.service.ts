@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { TaskDetails, TaskDto, TaskUpdateDto, SubTaskDto, SubTaskUpdateDto, SubTaskDetails } from '../Interfaces/Tasks/task-interface';
-import { ApiResponse } from '../Interfaces/Projects/project-interface';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,9 @@ export class TaskService {
   private readonly apiUrl = `${environment.apiUrl}/task`;
   private http = inject(HttpClient);
 
-  private convertResponse<T>(response: any): ApiResponse<T> {
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {
-      success: response.status || false,
+      success: response.status || response.success || false,
       message: response.message || '',
       data: response.data
     };
@@ -22,45 +22,45 @@ export class TaskService {
 
   // TASK ENDPOINTS
   getProjectTasks(projectId: number): Observable<ApiResponse<TaskDetails[]>> {
-    return this.http.get<any>(`${this.apiUrl}/get-tasks/${projectId}`).pipe(
+    return this.http.get<ApiResponse<TaskDetails[]>>(`${this.apiUrl}/get-tasks/${projectId}`).pipe(
       map(response => this.convertResponse<TaskDetails[]>(response))
     );
   }
 
   createTask(projectId: number, taskDto: TaskDto): Observable<ApiResponse<TaskDetails>> {
-    return this.http.post<any>(`${this.apiUrl}/create/${projectId}`, taskDto).pipe(
+    return this.http.post<ApiResponse<TaskDetails>>(`${this.apiUrl}/create/${projectId}`, taskDto).pipe(
       map(response => this.convertResponse<TaskDetails>(response))
     );
   }
 
-  updateTask(taskId: number, taskDto: TaskUpdateDto): Observable<ApiResponse<any>> {
-    return this.http.put<any>(`${this.apiUrl}/update-task/${taskId}`, taskDto).pipe(
-      map(response => this.convertResponse<any>(response))
+  updateTask(taskId: number, taskDto: TaskUpdateDto): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${this.apiUrl}/update-task/${taskId}`, taskDto).pipe(
+      map(response => this.convertResponse<void>(response))
     );
   }
 
-  deleteTask(taskId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/delete-task/${taskId}`).pipe(
-      map(response => this.convertResponse<any>(response))
+  deleteTask(taskId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/delete-task/${taskId}`).pipe(
+      map(response => this.convertResponse<void>(response))
     );
   }
 
   // SUBTASK ENDPOINTS
   createSubTask(taskId: number, subTaskDto: SubTaskDto): Observable<ApiResponse<SubTaskDetails>> {
-    return this.http.post<any>(`${this.apiUrl}/create-subtask/${taskId}`, subTaskDto).pipe(
+    return this.http.post<ApiResponse<SubTaskDetails>>(`${this.apiUrl}/create-subtask/${taskId}`, subTaskDto).pipe(
       map(response => this.convertResponse<SubTaskDetails>(response))
     );
   }
 
-  updateSubTask(subTaskId: number, subTaskDto: SubTaskUpdateDto): Observable<ApiResponse<any>> {
-    return this.http.put<any>(`${this.apiUrl}/update-subtask/${subTaskId}`, subTaskDto).pipe(
-      map(response => this.convertResponse<any>(response))
+  updateSubTask(subTaskId: number, subTaskDto: SubTaskUpdateDto): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${this.apiUrl}/update-subtask/${subTaskId}`, subTaskDto).pipe(
+      map(response => this.convertResponse<void>(response))
     );
   }
 
-  deleteSubTask(subTaskId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/delete-subtask/${subTaskId}`).pipe(
-      map(response => this.convertResponse<any>(response))
+  deleteSubTask(subTaskId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/delete-subtask/${subTaskId}`).pipe(
+      map(response => this.convertResponse<void>(response))
     );
   }
 }
