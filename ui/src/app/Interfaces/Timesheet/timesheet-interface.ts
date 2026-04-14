@@ -42,3 +42,9 @@ export interface RelevantTask {
   id: number;
   title: string;
 }
+
+export interface InvalidTimesheetRow {
+  row: number;
+  error: string;
+  data: TimesheetDto;
+}
