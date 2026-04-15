@@ -4,6 +4,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupsService } from '../../../Services/groups.service';
+import { Group, GroupMember, JoinGroupResponse } from '../../../Interfaces/Groups/groups-interfaces';
+import { ApiResponse } from '../../../Interfaces/Api-Response/api-response';
 import { ToastService } from '../../../Services/toast.service';
 import { AuthService } from '../../../Services/auth/auth.service';
 
@@ -15,14 +17,14 @@ import { AuthService } from '../../../Services/auth/auth.service';
   styleUrls: ['./group-members-modal.component.scss']
 })
 export class GroupMembersModalComponent implements OnInit {
-  members: any[] = [];
+  members: GroupMember[] = [];
   isLoading = true;
   joining = false;
   isOwner = false;
   currentUserEmail = '';
 
   public dialogRef = inject(MatDialogRef<GroupMembersModalComponent>);
-  public data: { group: any } = inject(MAT_DIALOG_DATA);
+  public data: { group: Group } = inject(MAT_DIALOG_DATA);
   private groupsService = inject(GroupsService);
   private toastService = inject(ToastService);
   private authService = inject(AuthService);
@@ -51,9 +53,9 @@ export class GroupMembersModalComponent implements OnInit {
   loadMembers() {
     this.isLoading = true;
     this.groupsService.getGroupMembers(this.data.group.id).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<GroupMember[]>) => {
         this.isLoading = false;
-        const isSuccess = response.success || response.status;
+        const isSuccess = response.success;
         if (isSuccess && response.data) {
           this.members = response.data;
         }
@@ -68,12 +70,22 @@ export class GroupMembersModalComponent implements OnInit {
   joinGroup() {
     this.joining = true;
     this.groupsService.joinGroup(this.data.group.id).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<JoinGroupResponse>) => {
         this.joining = false;
-        const isSuccess = response.success || response.status;
+        const isSuccess = response.success;
+        
+        // Handle both casing variants for isPublic from JoinGroupResponse
+        const isPublic = response.data?.isPublic ?? response.data?.IsPublic;
+
         if (isSuccess) {
-          this.toastService.show('Join request sent! Awaiting admin approval.', 'success');
+          if (isPublic === false) {
+            this.toastService.show('Join request sent! Awaiting admin approval.', 'success');
+          } else {
+            this.toastService.show('Joined successfully!', 'success');
+          }
           this.dialogRef.close({ joined: true });
+        } else {
+          this.toastService.show(response.message || 'Failed to join group.', 'error');
         }
       },
       error: () => {
@@ -83,8 +95,8 @@ export class GroupMembersModalComponent implements OnInit {
     });
   }
 
-  transferOwnership(member: any) {
-    const memberEmail = member.email || member.userEmail; // Adjust based on API response
+  transferOwnership(member: GroupMember) {
+    const memberEmail = member.email;
     if (!memberEmail) {
       this.toastService.show('Cannot transfer to user without email.', 'error');
       return;
@@ -95,7 +107,7 @@ export class GroupMembersModalComponent implements OnInit {
     }
 
     this.groupsService.transferOwnership(this.data.group.id, memberEmail).subscribe({
-      next: (response: any) => {
+      next: (response: ApiResponse<void>) => {
         if (response.success) {
           this.toastService.show('Ownership transferred successfully.', 'success');
           this.dialogRef.close({ ownershipTransferred: true });

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, switchMap, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 
@@ -31,27 +31,41 @@ export class NotificationService {
     private _fetchTrigger = new Subject<void>();
 
     private http = inject(HttpClient);
+
+    private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
+        return {
+            success: response.status || response.success || false,
+            message: response.message || '',
+            data: response.data
+        };
+    }
+
     constructor() {
         this._fetchTrigger.pipe(
             switchMap(() =>
-                this.http.get<ApiResponse<{ count: number }>>(`${this.baseUrl}/unread-count`)
+                this.http.get<ApiResponse<{ count: number }>>(`${this.baseUrl}/unread-count`).pipe(
+                    map((res: ApiResponse<{ count: number }>) => this.convertResponse<{ count: number }>(res))
+                )
             )
         ).subscribe({
-            next: (res) => this._unreadCount.next(res.data?.count ?? 0),
+            next: (res: ApiResponse<{ count: number }>) => this._unreadCount.next(res.data?.count ?? 0),
             error: () => this._unreadCount.next(0)
         });
     }
 
     getNotifications(): Observable<ApiResponse<CommentNotification[]>> {
-        return this.http.get<ApiResponse<CommentNotification[]>>(`${this.baseUrl}/my-notifications`);
+        return this.http.get<ApiResponse<CommentNotification[]>>(`${this.baseUrl}/my-notifications`).pipe(
+            map((res: ApiResponse<CommentNotification[]>) => this.convertResponse<CommentNotification[]>(res))
+        );
     }
 
     fetchUnreadCount(): void {
         this._fetchTrigger.next();
     }
 
-    markAsRead(id: number): Observable<any> {
-        return this.http.patch(`${this.baseUrl}/mark-read/${id}`, {}).pipe(
+    markAsRead(id: number): Observable<ApiResponse<void>> {
+        return this.http.patch<ApiResponse<void>>(`${this.baseUrl}/mark-read/${id}`, {}).pipe(
+            map((res: ApiResponse<void>) => this.convertResponse<void>(res)),
             tap(() => {
                 const current = this._unreadCount.value;
                 if (current > 0) this._unreadCount.next(current - 1);
@@ -59,8 +73,9 @@ export class NotificationService {
         );
     }
 
-    markAllAsRead(): Observable<any> {
-        return this.http.patch(`${this.baseUrl}/mark-all-read`, {}).pipe(
+    markAllAsRead(): Observable<ApiResponse<void>> {
+        return this.http.patch<ApiResponse<void>>(`${this.baseUrl}/mark-all-read`, {}).pipe(
+            map((res: ApiResponse<void>) => this.convertResponse<void>(res)),
             tap(() => this._unreadCount.next(0))
         );
     }

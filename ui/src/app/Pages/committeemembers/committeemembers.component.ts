@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ApiResponse } from '../../Interfaces/Ideas/idea-interfaces';
+import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
+import { UserRecord } from '../../Interfaces/Users/user-interface';
+
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 
 @Component({
@@ -15,8 +17,8 @@ import { ButtonsComponent } from '../../Components/buttons/buttons.component';
     styleUrl: './committeemembers.component.scss'
 })
 export class CommitteeMembersComponent implements OnInit {
-    committeeMembers: any[] = [];
-    allUsers: any[] = [];
+    committeeMembers: UserRecord[] = [];
+    allUsers: UserRecord[] = [];
     selectedUserEmail = '';
     isSuperAdmin = false;
     isCommitteeMember = false;
@@ -34,9 +36,9 @@ export class CommitteeMembersComponent implements OnInit {
 
     loadCommitteeMembers() {
         this.committeeService.getCommitteeMembers().subscribe({
-            next: (response: ApiResponse<any>) => {
+            next: (response: ApiResponse<UserRecord[]>) => {
                 if (response.success) {
-                    this.committeeMembers = response.data;
+                    this.committeeMembers = response.data ?? [];
                 }
             },
             error: () => {
@@ -47,9 +49,9 @@ export class CommitteeMembersComponent implements OnInit {
 
     loadAllUsers() {
         this.committeeService.getAllUsers().subscribe({
-            next: (response: ApiResponse<any>) => {
+            next: (response: ApiResponse<UserRecord[]>) => {
                 if (response.success) {
-                    this.allUsers = response.data;
+                    this.allUsers = response.data ?? [];
                 }
             },
             error: () => {
@@ -65,7 +67,7 @@ export class CommitteeMembersComponent implements OnInit {
         }
 
         this.committeeService.addCommitteeMember(this.selectedUserEmail).subscribe({
-            next: (response: ApiResponse<any>) => {
+            next: (response: ApiResponse<void>) => {
                 if (response.success) {
                     this.toastService.show('Committee member added successfully', 'success');
                     this.loadCommitteeMembers();

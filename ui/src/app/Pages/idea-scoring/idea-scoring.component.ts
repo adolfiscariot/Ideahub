@@ -12,6 +12,7 @@ import { ProjectService } from '../../Services/project.service';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
 import { AuthService } from '../../Services/auth/auth.service';
+import { UserRecord } from '../../Interfaces/Users/user-interface';
 
 @Component({
   selector: 'app-idea-scoring',
@@ -40,7 +41,7 @@ export class IdeaScoringComponent implements OnInit {
   // Promotion state
   showProjectModal = false;
   isPromoting = false;
-  allUsers: any[] = [];
+  allUsers: UserRecord[] = [];
   projectData: CreateProjectRequest = {
     title: '',
     description: '',
@@ -258,9 +259,8 @@ export class IdeaScoringComponent implements OnInit {
       next: (res) => {
         if (res.success && res.data) {
           this.idea = res.data;
-          const d: any = this.idea;
-          const score = d.score ?? d.Score ?? 0;
-          const reasoning = d.aiReasoning ?? d.AiReasoning ?? '';
+          const score = this.idea.score ?? this.idea.Score ?? 0;
+          const reasoning = this.idea.aiReasoning ?? this.idea.AiReasoning ?? '';
 
           this.parsedReasoning = this.formatReasoning(reasoning);
           this.scoringForm.get('Phase1.Score')?.patchValue(score);
@@ -284,32 +284,33 @@ export class IdeaScoringComponent implements OnInit {
     this.scoringService.getBusinessCase(this.ideaId).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const d: any = res.data;
+          const d = res.data;
 
           // Helper to map integer enums to strings
-          const mapEnum = (val: any, enumObj: any) => {
+          const mapEnum = <E extends Record<string, string | number>>(val: string | number | undefined, enumObj: E): string => {
+            if (val === undefined || val === null) return '';
             if (typeof val === 'number') {
               const keys = Object.keys(enumObj);
               return keys[val] || keys[0];
             }
-            return val;
+            return val as string;
           };
 
           this.scoringForm.get('Phase2')?.patchValue({
-            ExpectedBenefits: d.expectedBenefits ?? d.ExpectedBenefits ?? '',
-            ImpactScope: mapEnum(d.impactScope ?? d.ImpactScope, ImpactScope),
-            RiskLevel: mapEnum(d.riskLevel ?? d.RiskLevel, RiskLevel),
-            EvaluationStatus: mapEnum(d.evaluationStatus ?? d.EvaluationStatus, EvaluationStatus),
-            OwnerDepartment: mapEnum(d.ownerDepartment ?? d.OwnerDepartment, ResponsibleDepartment),
-            NextSteps: mapEnum(d.nextSteps ?? d.NextSteps, ActionStep),
-            DecisionDate: (d.decisionDate ?? d.DecisionDate ?? '').toString().substring(0, 10),
-            PlannedDurationWeeks: d.plannedDurationWeeks ?? d.PlannedDurationWeeks ?? '',
-            CurrentStage: mapEnum(d.currentStage ?? d.CurrentStage, BusinessCaseResult),
-            Verdict: mapEnum(d.verdict ?? d.Verdict, Verdict)
+            ExpectedBenefits: d.ExpectedBenefits ?? '',
+            ImpactScope: mapEnum(d.ImpactScope, ImpactScope),
+            RiskLevel: mapEnum(d.RiskLevel, RiskLevel),
+            EvaluationStatus: mapEnum(d.EvaluationStatus, EvaluationStatus),
+            OwnerDepartment: mapEnum(d.OwnerDepartment, ResponsibleDepartment),
+            NextSteps: mapEnum(d.NextSteps, ActionStep),
+            DecisionDate: (d.DecisionDate ?? '').toString().substring(0, 10),
+            PlannedDurationWeeks: d.PlannedDurationWeeks ?? '',
+            CurrentStage: mapEnum(d.CurrentStage, BusinessCaseResult),
+            Verdict: mapEnum(d.Verdict, Verdict)
           });
 
           // Auto-expand based on idea stage
-          const currentStage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
+          const currentStage = this.idea?.currentStage || '';
           if (currentStage === 'BusinessCase' || currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
             this.expandedSection = 'phase2';
           }
@@ -321,34 +322,35 @@ export class IdeaScoringComponent implements OnInit {
     this.scoringService.getScoringDimensions(this.ideaId).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const d: any = res.data;
+          const d = res.data;
 
-          const mapEnum = (val: any, enumObj: any) => {
+          const mapEnum = <E extends Record<string, string | number>>(val: string | number | undefined, enumObj: E): string => {
+            if (val === undefined || val === null) return '';
             if (typeof val === 'number') {
               const keys = Object.keys(enumObj);
               return keys[val] || keys[0];
             }
-            return val;
+            return val as string;
           };
 
           this.scoringForm.get('Phase3')?.patchValue({
-            StrategicAlignment: mapEnum(d.strategicAlignment ?? d.StrategicAlignment, StrategicAlignmentScore),
-            CustomerImpact: mapEnum(d.customerImpact ?? d.CustomerImpact, CustomerImpactScore),
-            FinancialBenefit: mapEnum(d.financialBenefit ?? d.FinancialBenefit, FinancialBenefitScore),
-            Feasibility: mapEnum(d.feasibility ?? d.Feasibility, FeasibilityScore),
-            TimeToValue: mapEnum(d.timeToValue ?? d.TimeToValue, TimeToValueScore),
-            Cost: mapEnum(d.cost ?? d.Cost, CostScore),
-            Effort: mapEnum(d.effort ?? d.Effort, EffortScore),
-            Risk: mapEnum(d.risk ?? d.Risk, RiskScore),
-            Scalability: mapEnum(d.scalability ?? d.Scalability, ScalabilityScore),
-            Differentiation: mapEnum(d.differentiation ?? d.Differentiation, DifferentiationScore),
-            SustainabilityImpact: mapEnum(d.sustainabilityImpact ?? d.SustainabilityImpact, SustainabilityScore),
-            ProjectConfidence: mapEnum(d.projectConfidence ?? d.ProjectConfidence, ConfidenceScore),
-            ReviewerComments: d.reviewerComments ?? d.ReviewerComments ?? ''
+            StrategicAlignment: mapEnum(d.StrategicAlignment, StrategicAlignmentScore),
+            CustomerImpact: mapEnum(d.CustomerImpact, CustomerImpactScore),
+            FinancialBenefit: mapEnum(d.FinancialBenefit, FinancialBenefitScore),
+            Feasibility: mapEnum(d.Feasibility, FeasibilityScore),
+            TimeToValue: mapEnum(d.TimeToValue, TimeToValueScore),
+            Cost: mapEnum(d.Cost, CostScore),
+            Effort: mapEnum(d.Effort, EffortScore),
+            Risk: mapEnum(d.Risk, RiskScore),
+            Scalability: mapEnum(d.Scalability, ScalabilityScore),
+            Differentiation: mapEnum(d.Differentiation, DifferentiationScore),
+            SustainabilityImpact: mapEnum(d.SustainabilityImpact, SustainabilityScore),
+            ProjectConfidence: mapEnum(d.ProjectConfidence, ConfidenceScore),
+            ReviewerComments: d.ReviewerComments ?? ''
           });
 
           // Auto-expand if in Phase 3 or Completed
-          const currentStage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
+          const currentStage = this.idea?.currentStage || '';
           if (currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
             this.expandedSection = 'phase3';
           }
@@ -363,10 +365,8 @@ export class IdeaScoringComponent implements OnInit {
       return;
     }
 
-    const ideaObj = this.idea as any;
-
-    const finalTitle = this.idea.Title || ideaObj.title || ideaObj.Title || '';
-    const finalDescription = this.idea.ProposedSolution || ideaObj.proposedSolution || ideaObj.ProposedSolution || '';
+    const finalTitle = this.idea.Title || this.idea.title || '';
+    const finalDescription = this.idea.ProposedSolution || this.idea.proposedSolution || '';
 
     this.projectData = {
       title: finalTitle,
@@ -394,8 +394,8 @@ export class IdeaScoringComponent implements OnInit {
 
     if (section === 'phase3') {
       if (this.isSectionLocked('phase2')) return true;
-      const verdict = this.scoringForm.get('Phase2.Verdict')?.value;
-      return (verdict as any) !== Verdict.Approved;
+      const verdict = this.scoringForm.get('Phase2.Verdict')?.value as Verdict;
+      return verdict !== Verdict.Approved;
     }
 
     if (section === 'phase4') {
@@ -595,7 +595,7 @@ export class IdeaScoringComponent implements OnInit {
   }
 
   get isAccepted(): boolean {
-    const stage = (this.idea as any)?.currentStage ?? (this.idea as any)?.CurrentStage;
-    return stage === 3 || stage === ScoringStage.Accepted || stage === 'Accepted' || (this.idea as any)?.status === 'Accepted';
+    const stage = this.idea?.currentStage;
+    return stage === 3 || stage === ScoringStage.Accepted || stage === 'Accepted' || this.idea?.status === 'Accepted';
   }
 }

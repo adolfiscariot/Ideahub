@@ -1,5 +1,6 @@
 export interface Group {
-  id: number;
+  id: string;
+  Id?: string; //backend mapping
   name: string;
   description: string;
   isActive: boolean;
@@ -19,10 +20,11 @@ export interface Group {
   };
   
   userRoleInGroup?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
+  isPublic?: 'Public' | 'Private' | boolean;
 }
 export interface UserGroup {
     userId: string; // Changed from number to string
-    groupId: number;
+    groupId: string;
     joinedAt: Date | string;
     roleId: string;
     roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
@@ -30,12 +32,16 @@ export interface UserGroup {
 
 export interface GroupMember {
   userId: string; // Changed from number to string
-  groupId: number;
+  groupId: string;
   joinedAt: Date | string;
   displayName: string;
   email: string;
   roleId: string;
   roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
+  id?: string;
+  name?: string;
+  userName?: string;
+  createdByUserId?: string;
 }
 
 export interface AddGroup {
@@ -51,19 +57,14 @@ export interface UserWithRoles {
     roles: string[]; // array of role names
 }
 
-export interface ApiResponse<T> {
-    success: boolean;
-    message: string;
-    data?: T;
-}
 
 // Group Membership Request - SINGLE DEFINITION
 export interface GroupMembershipRequest {
   id: number;
-  userId: string; // Changed from number to string to match your DB (UserId is GUID/string)
-  groupId: number;
+  userId: string;
+  groupId: string;
   status: 'Pending' | 'Approved' | 'Rejected';
-  requestedAt: string; // Changed to string only for simplicity
+  requestedAt: string; 
   acceptedOrRejectedAt?: string;
   
   // Additional info from joins (optional)
@@ -76,7 +77,7 @@ export interface GroupMembershipRequest {
 
 // For requesting to join a group
 export interface JoinGroupRequest {
-  groupId: number;
+  groupId: string;
   userId: string; // Changed to string to match above
 }
 
@@ -87,5 +88,25 @@ export interface ProcessMembershipRequest {
   processedByUserId: string; // Changed to string
 }
 
-// REMOVE THE DUPLICATE DEFINITION BELOW - THIS IS CAUSING THE ERROR
-// export interface GroupMembershipRequest { ... }
+// Interface for mapping raw backend responses (handles both camelCase and PascalCase)
+export interface RawBackendGroup extends Partial<Group> {
+  Id?: string;
+  Name?: string;
+  Description?: string;
+  IsMember?: boolean;
+  HasPendingRequest?: boolean;
+  MemberCount?: number;
+  IdeaCount?: number;
+  IsActive?: boolean;
+  IsDeleted?: boolean;
+  CreatedAt?: string;
+  CreatedByUserId?: string;
+  CreatedByUser?: { displayName?: string; email?: string } | null;
+  IsPublic?: boolean | string;
+}
+
+// Response from joining a group
+export interface JoinGroupResponse {
+  isPublic?: boolean;
+  IsPublic?: boolean;
+}

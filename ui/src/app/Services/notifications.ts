@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { GroupsService } from './groups.service';
-import { inject } from '@angular/core';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
+import { GroupMembershipRequest } from '../Interfaces/Groups/groups-interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class NotificationsService {
 
   refreshPendingRequests() {
     this.groupsService.viewGlobalRequests().subscribe({
-      next: (res: any) => {
+      next: (res: ApiResponse<GroupMembershipRequest[]>) => {
         const count = res.data?.length ?? 0;
         this.pendingRequestsSubject.next(count);
       },

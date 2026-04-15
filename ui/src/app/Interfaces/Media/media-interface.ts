@@ -21,13 +21,6 @@ export interface MediaDto {
   mediaType: MediaType;
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  errors?: string[];
-}
-
 export interface UploadMediaRequest {
   file: File;
   mediaType: MediaType;

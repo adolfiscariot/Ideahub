@@ -204,7 +204,7 @@
         
         <div class="detail-row">
           <strong>Members</strong>
-          <p>{{ formatMemberCount(selectedGroup.memberCount)}}</p>
+          <p>{{ formatMemberCount(selectedGroup.memberCount || 0)}}</p>
         </div>
         
         <div class="detail-row">
@@ -346,7 +346,7 @@
               [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched"
             />
 
-        @if (deleteConfirmControl.errors?.mismatch && deleteConfirmControl.touched) {
+        @if (deleteConfirmControl.errors?.['mismatch'] && deleteConfirmControl.touched) {
           <div class="error-message">
             Group name does not match.
           </div>
@@ -372,7 +372,7 @@
       [buttonStyleClass]="'btn-reject'"
       [buttonType]="'button'"
       [disabled]="deleteConfirmControl.invalid || isDeleting"
-      (click)="deleteGroup(selectedGroup.id)">
+      (click)="selectedGroup && deleteGroup(selectedGroup.id)">
     </app-buttons>
 
     </div>

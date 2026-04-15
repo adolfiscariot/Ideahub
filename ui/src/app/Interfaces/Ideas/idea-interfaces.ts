@@ -1,3 +1,5 @@
+import { Media } from '../Media/media-interface';
+
 export interface Idea {
   id: string;
   Title: string;
@@ -46,6 +48,7 @@ export interface Idea {
   notes?: string;
   score?: number;
   aiReasoning?: string;
+  currentStage?: ScoringStage | number | string;
 }
 
 export interface CreateIdeaRequest {
@@ -59,12 +62,6 @@ export interface CreateIdeaRequest {
   TechnologyInvolved?: string;
   Notes?: string;
   groupId: string;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data?: T;
 }
 
 export interface VoteRequest {
@@ -96,6 +93,7 @@ export interface PromoteRequest {
 }
 
 export interface IdeaUpdate {
+  id?: string;
   Title?: string;
   ProposedSolution?: string;
   ProblemStatement?: string;
@@ -107,6 +105,19 @@ export interface IdeaUpdate {
   TechnologyInvolved?: string;
   Notes?: string;
   Score?: number;
+
+  // backend mapping
+  title?: string;
+  proposedSolution?: string;
+  problemStatement?: string;
+  status?: string;
+  strategicAlignment?: string;
+  useCase?: string;
+  innovationCategory?: string;
+  subCategory?: string;
+  technologyInvolved?: string;
+  notes?: string;
+  score?: number;
 }
 
 export interface VoteResponse {
@@ -127,7 +138,7 @@ export interface viewComment {
   userId?: string,
   ideaId?: number,
   mediaCount?: number,
-  mediaItems?: any[];
+  mediaItems?: Media[];
 }
 
 export enum ImpactScope {

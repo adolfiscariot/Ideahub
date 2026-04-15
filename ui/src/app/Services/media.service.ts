@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Media, MediaType, ApiResponse } from '../Interfaces/Media/media-interface';
+import { Media, MediaType } from '../Interfaces/Media/media-interface';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 
@@ -12,9 +13,9 @@ export class MediaService {
   private readonly apiUrl = `${environment.apiUrl}/media`;
   private http = inject(HttpClient);
 
-  private convertResponse<T>(response: any): ApiResponse<T> {
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {
-      success: response.status || false,
+      success: response.status || response.success || false,
       message: response.message || '',
       data: response.data
     };
@@ -48,8 +49,8 @@ export class MediaService {
   uploadMedia(
     file: File,
     mediaType: MediaType,
-    ideaId?: number,
-    commentId?: number,
+    ideaId?: string | number,
+    commentId?: string | number,
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
@@ -67,13 +68,13 @@ export class MediaService {
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.post<any>(`${this.apiUrl}/upload-media`, formData, { params })
+    return this.http.post<ApiResponse<Media>>(`${this.apiUrl}/upload-media`, formData, { params })
       .pipe(map(response => this.convertResponse<Media>(response)));
   }
 
   viewMedia(
-    ideaId?: number,
-    commentId?: number,
+    ideaId?: string | number,
+    commentId?: string | number,
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
@@ -88,12 +89,12 @@ export class MediaService {
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.get<any>(`${this.apiUrl}/view-media`, { params })
+    return this.http.get<ApiResponse<Media[]>>(`${this.apiUrl}/view-media`, { params })
       .pipe(map(response => this.convertResponse<Media[]>(response)));
   }
 
-  deleteMedia(mediaId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/${mediaId}`)
-      .pipe(map(response => this.convertResponse<any>(response)));
+  deleteMedia(mediaId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${mediaId}`)
+      .pipe(map(response => this.convertResponse<void>(response)));
   }
 }
