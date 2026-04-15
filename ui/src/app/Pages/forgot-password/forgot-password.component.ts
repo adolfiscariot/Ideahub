@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../Services/auth/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { PasswordRequirementsComponent } from '../../Components/password-requirements/password-requirements.component';
 import { passwordMatchValidator } from '../../Components/utils/password-match.util';
 
@@ -121,8 +123,9 @@ export class ForgotPasswordComponent implements OnInit {
     });
   }
 
-  private handleBackendError(err: any) {
-  const backend = err.error;
+  private handleBackendError(err: HttpErrorResponse) {
+  const backend = err.error as { errors?: Record<string, string | string[]>, message?: string };
+
 
   // ModelState errors (ASP.NET Core)
   if (backend?.errors) {

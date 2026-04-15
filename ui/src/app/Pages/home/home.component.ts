@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { ToastService } from '../../Services/toast.service';
 import { PromotedIdea, IdeaStats, GroupEngagement, PersonalStats, MostVotedIdea, TopContributor } from '../../Models/analytics.models';
+import { Project } from '../../Interfaces/Projects/project-interface';
 
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -71,7 +72,7 @@ export class HomeComponent implements OnInit {
   isProjectModalOpen = false;
   selectedProjectId: number | null = null;
   selectedGroupId: string | null = null;
-  currentProject: any = null;
+  currentProject: Project | null = null;
 
   ngOnInit() {
     this.fetchAnalytics();
@@ -101,12 +102,12 @@ export class HomeComponent implements OnInit {
       personal: this.analyticsService.getPersonalStats()
     }).subscribe({
       next: (results) => {
-        if (results.mostVoted.status) this.mostVotedIdeas = results.mostVoted.data;
-        if (results.topContributors.status) this.topContributors = results.topContributors.data;
-        if (results.promoted.status) this.promotedIdeas = results.promoted.data;
-        if (results.stats.status) this.ideaStats = results.stats.data;
-        if (results.engagement.status) this.groupEngagement = results.engagement.data;
-        if (results.personal.status) this.personalStats = results.personal.data;
+        if (results.mostVoted.success || results.mostVoted.status) this.mostVotedIdeas = results.mostVoted.data ?? [];
+        if (results.topContributors.success || results.topContributors.status) this.topContributors = results.topContributors.data ?? [];
+        if (results.promoted.success || results.promoted.status) this.promotedIdeas = results.promoted.data ?? [];
+        if (results.stats.success || results.stats.status) this.ideaStats = results.stats.data ?? null;
+        if (results.engagement.success || results.engagement.status) this.groupEngagement = results.engagement.data ?? [];
+        if (results.personal.success || results.personal.status) this.personalStats = results.personal.data ?? null;
       }
     });
   }

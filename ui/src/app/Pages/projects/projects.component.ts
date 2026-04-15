@@ -1,13 +1,13 @@
 import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Project, ProjectStatus } from '../../Interfaces/Projects/Project';
+import { Project, ProjectStatus } from '../../Interfaces/Projects/project-interface';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ProjectsService } from '../../Services/projects/projects.service';
+import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { formatFileSize, detectMediaType, removeFileAtIndex, processSelectedFiles } from '../../Components/utils/media.utils';
@@ -41,7 +41,7 @@ export class ProjectsComponent implements OnInit {
     ProjectStatus = ProjectStatus;
 
 
-    private projectsService = inject(ProjectsService);
+    private projectService = inject(ProjectService);
     private mediaService = inject(MediaService);
     private taskService = inject(TaskService);
     private dialog = inject(MatDialog);
@@ -119,7 +119,7 @@ export class ProjectsComponent implements OnInit {
     ngOnInit(): void {
         this.currentUserId = this.authService.getUserId();
 
-        this.route.queryParams.subscribe((params: any) => {
+        this.route.queryParams.subscribe((params: Params) => {
             const projectId = params['openProject'];
             this.loadProjects().subscribe(() => {
                 if (projectId) {
@@ -158,11 +158,11 @@ export class ProjectsComponent implements OnInit {
     }
 
     loadProjects(): Observable<void> {
-        return this.projectsService.getMyProjects().pipe(
+        return this.projectService.getMyProjects().pipe(
             switchMap((projectsData) => {
                 this.projects = projectsData as ProjectWithMedia[];
                 const mediaRequests = this.projects.map(project =>
-                    this.mediaService.viewMedia(undefined, undefined, Number(project.id))
+                    this.mediaService.viewMedia(undefined, undefined, project.id)
                 );
                 return forkJoin(mediaRequests);
             }),
@@ -234,7 +234,7 @@ export class ProjectsComponent implements OnInit {
 
         try {
             await firstValueFrom(
-                this.projectsService.updateProject(this.selectedProject.id, updateDto)
+                this.projectService.updateProject(this.selectedProject.id, updateDto)
             );
 
             if (this.selectedProjectFiles?.length > 0) {
@@ -246,7 +246,7 @@ export class ProjectsComponent implements OnInit {
                                 detectMediaType(file),
                                 undefined,
                                 undefined,
-                                Number(this.selectedProject!.id)
+                                this.selectedProject!.id
                             )
                         )
                     );
@@ -302,7 +302,7 @@ export class ProjectsComponent implements OnInit {
         if (!this.projectToDelete || !this.isDeleteNameMatch || this.isDeletingProject) return;
 
         this.isDeletingProject = true;
-        this.projectsService.deleteProject(this.projectToDelete.id).subscribe({
+        this.projectService.deleteProject(this.projectToDelete.id).subscribe({
             next: () => {
                 this.toastService.show('Project deleted successfully', 'success');
                 this.isDeletingProject = false;
@@ -384,7 +384,7 @@ export class ProjectsComponent implements OnInit {
     //                 endedAt: result.endedAt ? new Date(result.endedAt).toISOString() : null
     //             };
 
-    //             this.projectsService.updateProject(project.id, updateDto).subscribe({
+    //             this.projectService.updateProject(project.id, updateDto).subscribe({
     //                 next: (updatedProject) => {
     //                     console.log('Project updated successfully');
     //                     this.toastService.show('Project updated successfuly', 'success');

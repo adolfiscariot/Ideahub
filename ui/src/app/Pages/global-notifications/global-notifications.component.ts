@@ -9,6 +9,7 @@ import { NotificationService, CommentNotification } from '../../Services/notific
 import { SignalrService } from '../../Services/signalr.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 
 @Component({
   selector: 'app-global-notifications',
@@ -30,7 +31,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
 
   // ── Group Requests (unchanged) ─────────────────────────────
   groupedRequests: {
-    groupId: number;
+    groupId: string;
     groupName: string;
     requests: GroupMembershipRequest[];
     open?: boolean;
@@ -70,13 +71,13 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     this.errorRequests = '';
 
     this.groupsService.viewGlobalRequests().subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<GroupMembershipRequest[]>) => {
         const allRequests = res.data ?? [];
-        const groupMap = new Map<number, { groupId: number; groupName: string; requests: GroupMembershipRequest[]; open?: boolean }>();
+        const groupMap = new Map<string, { groupId: string; groupName: string; requests: GroupMembershipRequest[]; open?: boolean }>();
 
-        allRequests.forEach((r: any) => {
+        allRequests.forEach((r: GroupMembershipRequest) => {
           if (!groupMap.has(r.groupId)) {
-            groupMap.set(r.groupId, { groupId: r.groupId, groupName: r.groupName, requests: [], open: false });
+            groupMap.set(r.groupId, { groupId: r.groupId, groupName: r.groupName ?? 'Unknown Group', requests: [], open: false });
           }
           groupMap.get(r.groupId)!.requests.push(r);
         });

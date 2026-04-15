@@ -197,9 +197,10 @@ export class TimesheetsComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: any, index: number): void {
-    const files = event.target.files;
-    if (files.length > 0) {
+  onFileSelected(event: Event, index: number): void {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+    if (files && files.length > 0) {
       this.rows[index].tempFiles.push(...Array.from(files) as File[]);
     }
   }

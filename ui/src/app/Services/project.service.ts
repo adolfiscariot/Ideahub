@@ -1,9 +1,8 @@
-// project.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Project, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ApiResponse } from '../Interfaces/Projects/project-interface';
-import { inject } from '@angular/core';
+import { Observable, catchError, map, throwError } from 'rxjs';
+import { Project, ProjectStatus, CreateProjectRequest, UpdateProjectRequest, ProjectDetails, ProjectSummary, ProjectBackendDto } from '../Interfaces/Projects/project-interface';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -13,12 +12,30 @@ export class ProjectService {
   private readonly apiUrl = `${environment.apiUrl}/project`;
   private http = inject(HttpClient);
 
-  private convertResponse<T>(response: any): ApiResponse<T> {
+  // Helper method to convert backend response
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {
-      success: response.status || false,
+      success: response.status || response.success || false,
       message: response.message || '',
       data: response.data
     };
+  }
+
+  // Consolidated Mapping logic
+  private mapDtoToProject(item: ProjectBackendDto): Project {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      status: item.status as unknown as ProjectStatus,
+      createdAt: item.createdAt,
+      endedAt: item.endedAt,
+      overseenBy: item.overseenByUserName,
+      overseenById: item.overseenByUserId,
+      groupName: item.groupName,
+      ideaTitle: item.ideaName,
+      progress: item.progress || 0
+    } as Project;
   }
 
   // CREATE: Create a new project from an idea
@@ -27,8 +44,22 @@ export class ProjectService {
       .set('groupId', groupId)
       .set('ideaId', ideaId);
 
-    return this.http.post<any>(`${this.apiUrl}/create-project`, request, { params }).pipe(
-      map(response => this.convertResponse<{ projectId: number }>(response))
+    return this.http.post<ApiResponse<{ projectId: number }>>(`${this.apiUrl}/create-project`, request, { params }).pipe(
+      map(response => this.convertResponse<{ projectId: number }>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to create project')))
+    );
+  }
+
+  getMyProjects(): Observable<Project[]> {
+    return this.http.get<ApiResponse<ProjectBackendDto[]>>(`${this.apiUrl}/all`).pipe(
+      map(response => this.convertResponse<ProjectBackendDto[]>(response)),
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Failed to fetch projects');
+        }
+        return response.data.map(item => this.mapDtoToProject(item));
+      }),
+      catchError(error => throwError(() => new Error(error.message || 'Failed to fetch projects')))
     );
   }
 
@@ -36,15 +67,17 @@ export class ProjectService {
   getProjectsByGroup(groupId: string): Observable<ApiResponse<ProjectSummary[]>> {
     const params = new HttpParams().set('groupId', groupId);
 
-    return this.http.get<any>(`${this.apiUrl}/view-projects`, { params }).pipe(
-      map(response => this.convertResponse<ProjectSummary[]>(response))
+    return this.http.get<ApiResponse<ProjectSummary[]>>(`${this.apiUrl}/view-projects`, { params }).pipe(
+      map(response => this.convertResponse<ProjectSummary[]>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to fetch group projects')))
     );
   }
 
   // READ: Get project by ID only
-  getProjectById(projectId: number): Observable<ApiResponse<any>> {
-    return this.http.get<any>(`${this.apiUrl}/${projectId}`).pipe(
-      map(response => this.convertResponse<any>(response))
+  getProjectById(projectId: number): Observable<ApiResponse<ProjectDetails>> {
+    return this.http.get<ApiResponse<ProjectDetails>>(`${this.apiUrl}/${projectId}`).pipe(
+      map(response => this.convertResponse<ProjectDetails>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to fetch project details')))
     );
   }
 
@@ -54,28 +87,31 @@ export class ProjectService {
       .set('groupId', groupId)
       .set('projectId', projectId);
 
-    return this.http.get<any>(`${this.apiUrl}/open-project`, { params }).pipe(
-      map(response => this.convertResponse<ProjectDetails>(response))
+    return this.http.get<ApiResponse<ProjectDetails>>(`${this.apiUrl}/open-project`, { params }).pipe(
+      map(response => this.convertResponse<ProjectDetails>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to open project')))
     );
   }
 
   // UPDATE: Update a project
-  updateProject(projectId: string, request: UpdateProjectRequest): Observable<ApiResponse<ProjectDetails>> {
-    return this.http.put<any>(`${this.apiUrl}/${projectId}`, request).pipe(
-      map(response => this.convertResponse<ProjectDetails>(response))
+  updateProject(projectId: number | string, request: UpdateProjectRequest | Partial<Project>): Observable<ApiResponse<ProjectDetails>> {
+    return this.http.put<ApiResponse<ProjectDetails>>(`${this.apiUrl}/${projectId}`, request).pipe(
+      map(response => this.convertResponse<ProjectDetails>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to update project')))
     );
   }
 
   // DELETE: Delete a project
-  deleteProject(projectId: string): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/${projectId}`).pipe(
-      map(response => this.convertResponse<any>(response))
+  deleteProject(projectId: number | string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${projectId}`).pipe(
+      map(response => this.convertResponse<void>(response)),
+      catchError(error => throwError(() => new Error(error.error?.message || 'Failed to delete project')))
     );
   }
 
   // HELPER: Check if user can update project
   canUserUpdateProject(project: Project, userId: string): boolean {
-    return project.createdByUserId === userId || project.overseenByUserId === userId;
+    return project.createdByUserId === userId || project.overseenByUserId === userId || project.overseenById === userId;
   }
 
   // HELPER: Check if user can delete project
