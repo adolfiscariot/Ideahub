@@ -61,16 +61,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let project of filteredProjects; trackBy: trackByProjectId"
-                        (click)="navigateToTasks(project.id)" [class.clickable-row]="true">
+                    @for (project of filteredProjects; track project.id) {
+                    <tr (click)="navigateToTasks(project.id)" [class.clickable-row]="true">
                         <td class="cell-project">
                             <div class="project-info">
                                 <span class="project-title-text">{{ project.title }}</span>
                                 <span class="project-desc-subtext">{{ project.description }}</span>
                                 <div class="metadata-badges">
-                                    <span class="meta-badge" *ngIf="project.groupName">
+                                @if (project.groupName) {
+                                    <span class="meta-badge">
                                         <mat-icon class="meta-icon">groups</mat-icon> {{ project.groupName }}
                                     </span>
+                                }
                                 </div>
                             </div>
                         </td>
@@ -87,22 +89,25 @@
                         </td>
                         <td class="cell-timeline">
                             <div class="timeline-wrapper">
-                                <ng-container *ngIf="project.status !== ProjectStatus.Planning; else unstarted">
+                                @if (project.status !== ProjectStatus.Planning) {
                                     <span class="date-main">{{ project.createdAt | date:'mediumDate' }}</span>
-                                    <span class="date-arrow"
-                                        *ngIf="project.endedAt || project.status !== ProjectStatus.Cancelled">→</span>
-                                    <span class="date-sub" *ngIf="project.endedAt">{{ project.endedAt |
-                                        date:'mediumDate'
-                                        }}</span>
-                                    <span class="date-sub clickable-warning"
-                                        *ngIf="!project.endedAt && project.status === ProjectStatus.Active"
-                                        (click)="$event.stopPropagation(); openEditModal(project)">
-                                        ⚠️ Set Deadline
-                                    </span>
-                                </ng-container>
-                                <ng-template #unstarted>
+                                    @if (project.endedAt || project.status !== ProjectStatus.Cancelled) {
+                                        <span class="date-arrow">→</span>
+                                    }
+                                    @if (project.endedAt) {
+                                        <span class="date-sub">{{ project.endedAt | date:'mediumDate' }}</span>
+                                    }
+                                    @if (!project.endedAt && project.status === ProjectStatus.Active) {
+                                        <span class="date-sub clickable-warning"
+                                            (click)="$event.stopPropagation(); openEditModal(project)"
+                                            (keydown.enter)="$event.stopPropagation(); openEditModal(project)"
+                                            tabindex="0" role="button">
+                                            ⚠️ Set Deadline
+                                        </span>
+                                    }
+                                } @else {
                                     <span class="date-sub not-started">Not Started</span>
-                                </ng-template>
+                                }
                             </div>
                         </td>
                         <td class="cell-progress">
@@ -115,50 +120,61 @@
                             </div>
                         </td>
                         <td class="cell-media">
-                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, project.id)">
+                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, project.id)"
+                                (keydown.enter)="toggleMediaPopup($event, project.id)" tabindex="0" role="button" aria-label="Toggle media popup">
                                 <mat-icon class="media-file-icon">description</mat-icon>
                                 <span class="media-count">{{ project.media?.length || 0 }}</span>
 
                                 <!-- Media Popup -->
-                                <div class="media-popup" *ngIf="activeMediaProjectId === project.id"
-                                    (click)="$event.stopPropagation()">
-                                    <div class="popup-header">Attached Media</div>
-                                    <div class="popup-body">
-                                        <app-media *ngIf="project.media?.length" [projectId]="project.id"
-                                            [compactMode]="true"></app-media>
-                                        <div *ngIf="!project.media?.length" class="empty-media">No attached files</div>
+                                @if (activeMediaProjectId === project.id) {
+                                    <div class="media-popup" (click)="$event.stopPropagation()"
+                                        (keydown.enter)="$event.stopPropagation()" tabindex="0">
+                                        <div class="popup-header">Attached Media</div>
+                                        <div class="popup-body">
+                                            @if (project.media?.length) {
+                                                <app-media [projectId]="project.id" [compactMode]="true"></app-media>
+                                            } @else {
+                                                <div class="empty-media">No attached files</div>
+                                            }
+                                        </div>
                                     </div>
-                                </div>
+                                }
                             </div>
                         </td>
                         <td class="cell-actions">
-                            <div class="action-menu-container" *ngIf="canEdit(project)">
-                                <button class="btn-icon dots-btn" (click)="toggleActionMenu($event, project.id)">
-                                    <mat-icon>more_vert</mat-icon>
-                                </button>
-                                <div class="action-dropdown" *ngIf="activeActionMenuId === project.id"
-                                    (click)="$event.stopPropagation()">
-                                    <button (click)="navigateToTasks(project.id)">
-                                        <mat-icon class="action-icon">add_task</mat-icon> Create Task
+                            @if (canEdit(project)) {
+                                <div class="action-menu-container">
+                                    <button class="btn-icon dots-btn" (click)="toggleActionMenu($event, project.id)" aria-label="Actions">
+                                        <mat-icon>more_vert</mat-icon>
                                     </button>
-                                    <button (click)="openEditModal(project); activeActionMenuId = null">
-                                        <mat-icon class="action-icon">edit</mat-icon> Edit
-                                    </button>
-                                    <button class="delete-action" (click)="openDeleteModal(project)">
-                                        <mat-icon class="action-icon">delete</mat-icon> Delete
-                                    </button>
+                                    @if (activeActionMenuId === project.id) {
+                                        <div class="action-dropdown" (click)="$event.stopPropagation()"
+                                            (keydown.enter)="$event.stopPropagation()" tabindex="0">
+                                            <button (click)="navigateToTasks(project.id)">
+                                                <mat-icon class="action-icon">add_task</mat-icon> Create Task
+                                            </button>
+                                            <button (click)="openEditModal(project); activeActionMenuId = null">
+                                                <mat-icon class="action-icon">edit</mat-icon> Edit
+                                            </button>
+                                            <button class="delete-action" (click)="openDeleteModal(project)">
+                                                <mat-icon class="action-icon">delete</mat-icon> Delete
+                                            </button>
+                                        </div>
+                                    }
                                 </div>
-                            </div>
+                            }
                         </td>
-                    </tr>
-                    <tr *ngIf="projects.length === 0" class="empty-state-row">
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <mat-icon>assignment</mat-icon>
-                                <p>No projects found yet.</p>
-                            </div>
-                        </td>
-                    </tr>
+                    }
+                    @if (projects.length === 0) {
+                        <tr class="empty-state-row">
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <mat-icon>assignment</mat-icon>
+                                    <p>No projects found yet.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -166,45 +182,44 @@
     </div>
 
     <app-modal [isOpen]="isViewModalOpen" title="Project Details" (closeModal)="closeModals()" size="md">
-        <div modal-body *ngIf="selectedProject as project">
+        @if (selectedProject; as project) {
+            <div modal-body>
+                <div class="description-row">
+                    <span class="label">Description</span>
+                    <p class="description-text">
+                        {{ project.description }}
+                    </p>
+                </div>
 
-            <div class="description-row">
-                <span class="label">Description</span>
-                <p class="description-text">
-                    {{ project.description }}
-                </p>
+                <div class="project-details-grid">
+                    <div class="info-item">
+                        <span class="label">Title</span>
+                        <span class="value">{{ project.title }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="label">Status</span>
+                        <span class="value">{{ getStatusLabel(project.status) }}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="label">Target End Date</span>
+                        <span class="value">
+                            @if (project.endedAt) {
+                                {{ project.endedAt | date:'mediumDate' }}
+                            } @else {
+                                -
+                            }
+                        </span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="label">Overseen By</span>
+                        <span class="value">{{ project.overseenBy }}</span>
+                    </div>
+                </div>
             </div>
-
-            <div class="project-details-grid">
-
-                <div class="info-item">
-                    <span class="label">Title</span>
-                    <span class="value">{{ project.title }}</span>
-                </div>
-
-                <div class="info-item">
-                    <span class="label">Status</span>
-                    <span class="value">{{ getStatusLabel(project.status) }}</span>
-                </div>
-
-                <div class="info-item">
-                    <span class="label">Target End Date</span>
-                    <span class="value">
-                        <ng-container *ngIf="selectedProject?.endedAt; else dash">
-                            {{ project.endedAt | date:'mediumDate' }}
-                        </ng-container>
-                        <ng-template #dash>-</ng-template>
-                    </span>
-                </div>
-
-                <div class="info-item">
-                    <span class="label">Overseen By</span>
-                    <span class="value">{{ project.overseenBy }}</span>
-                </div>
-
-            </div>
-
-        </div>
+        }
     </app-modal>
 
     <!-- Project Deletion Modal -->
@@ -239,27 +254,34 @@
         <div modal-body class="edit-project-form">
 
             <div class="form-group">
-                <label>Project Title <span class="required-star">*</span></label>
-                <input [(ngModel)]="editForm.title" type="text" maxlength="20" placeholder="Title is mandatory" />
-                <span class="error-text" *ngIf="!editForm.title.trim()">Project title is required</span>
-                <span class="limit-warning" *ngIf="editForm.title.length >= 20">Title cannot exceed 20 characters</span>
+                <label for="editTitle">Project Title <span class="required-star">*</span></label>
+                <input id="editTitle" [(ngModel)]="editForm.title" type="text" maxlength="20" placeholder="Title is mandatory" />
+                @if (!editForm.title.trim()) {
+                    <span class="error-text">Project title is required</span>
+                }
+                @if (editForm.title.length >= 20) {
+                    <span class="limit-warning">Title cannot exceed 20 characters</span>
+                }
                 <span class="char-counter">{{ editForm.title.length }}/20</span>
             </div>
 
             <div class="form-group">
-                <label>Project Description <span class="required-star">*</span></label>
-                <textarea [(ngModel)]="editForm.description" maxlength="1000" placeholder="Description is mandatory"></textarea>
-                <span class="error-text" *ngIf="!editForm.description.trim()">Project description is required</span>
-                <span class="limit-warning" *ngIf="editForm.description.length >= 1000">Description cannot exceed 1000
-                    characters</span>
+                <label for="editDescription">Project Description <span class="required-star">*</span></label>
+                <textarea id="editDescription" [(ngModel)]="editForm.description" maxlength="1000" placeholder="Description is mandatory"></textarea>
+                @if (!editForm.description.trim()) {
+                    <span class="error-text">Project description is required</span>
+                }
+                @if (editForm.description.length >= 1000) {
+                    <span class="limit-warning">Description cannot exceed 1000 characters</span>
+                }
                 <span class="char-counter">{{ editForm.description.length }}/1000</span>
             </div>
 
             <div class="edit-grid">
 
                 <div class="form-group">
-                    <label>Status</label>
-                    <select [(ngModel)]="editForm.status">
+                    <label for="editStatus">Status</label>
+                    <select id="editStatus" [(ngModel)]="editForm.status">
                         <option value="Planning">Planning</option>
                         <option value="Active">Active</option>
                         <option value="Completed">Completed</option>
@@ -269,34 +291,40 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Target End Date</label>
-                    <input [(ngModel)]="editForm.endedAt" type="date" />
+                    <label for="editEndDate">Target End Date</label>
+                    <input id="editEndDate" [(ngModel)]="editForm.endedAt" type="date" />
                 </div>
 
                 <!-- Project MEDIA UPLOAD -->
                 <div class="form-group">
-                    <label>Attach Supporting media (Max 20MB per file)</label>
+                    <label for="projectFiles">Attach Supporting media (Max 20MB per file)</label>
 
                     <!-- Selected files preview -->
-                    <div *ngIf="selectedProjectFiles.length > 0" class="selected-files">
-                        <div *ngFor="let file of selectedProjectFiles; let i = index" class="file-preview">
-                            <span class="file-name">{{ file.name }}</span>
-                            <span class="file-size">({{ formatProjectFileSize(file.size) }})</span>
-                            <button type="button" (click)="removeProjectFile(i)" class="remove-file">×</button>
+                    @if (selectedProjectFiles.length > 0) {
+                        <div class="selected-files">
+                            @for (file of selectedProjectFiles; track $index) {
+                                <div class="file-preview">
+                                    <span class="file-name">{{ file.name }}</span>
+                                    <span class="file-size">({{ formatProjectFileSize(file.size) }})</span>
+                                    <button type="button" (click)="removeProjectFile($index)" class="remove-file">×</button>
+                                </div>
+                            }
                         </div>
-                    </div>
+                    }
 
                     <div class="file-input-row">
-                        <input type="file" #projectFileInput multiple (change)="onProjectFileSelected($event)"
+                        <input type="file" id="projectFiles" #projectFileInput multiple (change)="onProjectFileSelected($event)"
                             [accept]="allowedFileTypes" style="display: none">
                         <app-buttons [buttonText]="'📎 Attach Media Files'" (click)="projectFileInput.click()"
                             [buttonStyleClass]="'btn-promote'">
                         </app-buttons>
                     </div>
 
-                    <div *ngIf="ideaUploadStatus" class="upload-status">
-                        {{ ideaUploadStatus }}
-                    </div>
+                    @if (ideaUploadStatus) {
+                        <div class="upload-status">
+                            {{ ideaUploadStatus }}
+                        </div>
+                    }
                 </div>
             </div>
 

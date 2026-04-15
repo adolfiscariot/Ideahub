@@ -10,7 +10,7 @@ import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MediaService } from '../../Services/media.service';
 import { detectMediaType, processSelectedFiles, removeFileAtIndex, formatFileSize } from '../../Components/utils/media.utils';
-import { forkJoin, from, of } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { ProjectService } from '../../Services/project.service';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -33,8 +33,8 @@ export class TaskManagementComponent implements OnInit {
   private projectService = inject(ProjectService);
   private authService = inject(AuthService);
 
-  projectId: number = 0;
-  projectOverseerId: string = '';
+  projectId = 0;
+  projectOverseerId = '';
   tasks: TaskDetails[] = [];
   isLoading = false;
 
@@ -48,7 +48,7 @@ export class TaskManagementComponent implements OnInit {
     taskAssignees: []
   };
 
-  labelInput: string = '';
+  labelInput = '';
   taskLabels: string[] = [];
 
   availableUsers: any[] = [];
@@ -57,12 +57,12 @@ export class TaskManagementComponent implements OnInit {
   selectedTask: TaskDetails | null = null;
 
   selectedFiles: File[] = [];
-  carouselIndex: number = 0;
-  sortOption: string = 'taskNumber';
+  carouselIndex = 0;
+  sortOption = 'taskNumber';
 
   // Subtask Modal
   isSubTaskModalOpen = false;
-  targetTaskId: number = 0;
+  targetTaskId = 0;
   newSubTask: SubTaskDto = {
     title: '',
     description: '',
@@ -78,23 +78,23 @@ export class TaskManagementComponent implements OnInit {
 
   // Edit Task Modal
   isEditTaskModalOpen = false;
-  editingTaskId: number = 0;
+  editingTaskId = 0;
   editTask: TaskUpdateDto = {};
   editTaskLabels: string[] = [];
-  editLabelInput: string = '';
+  editLabelInput = '';
   showEditUserDropdown = false;
   editTaskAssigneeIds: string[] = [];
   isUpdatingTask = false;
 
   // Delete Task Confirmation
   isPendingDeleteTask = false;
-  pendingDeleteTaskId: number = 0;
-  pendingDeleteTaskTitle: string = '';
+  pendingDeleteTaskId = 0;
+  pendingDeleteTaskTitle = '';
   isDeletingTask = false;
 
   // Edit SubTask Modal
   isEditSubTaskModalOpen = false;
-  editingSubTaskId: number = 0;
+  editingSubTaskId = 0;
   editSubTask: SubTaskUpdateDto = {};
   showEditSubTaskUserDropdown = false;
   editSubTaskAssigneeIds: string[] = [];
@@ -102,12 +102,12 @@ export class TaskManagementComponent implements OnInit {
 
   // Delete SubTask Confirmation
   isPendingDeleteSubTask = false;
-  pendingDeleteSubTaskId: number = 0;
-  pendingDeleteSubTaskTitle: string = '';
+  pendingDeleteSubTaskId = 0;
+  pendingDeleteSubTaskTitle = '';
   isDeletingSubTask = false;
 
   activeInspectionTab: 'subtasks' | 'media' = 'subtasks';
-  selectedTaskMediaCount: number = 0;
+  selectedTaskMediaCount = 0;
   activeMainTab: 'tasks' | 'timesheets' = 'tasks';
   isTabSwitching = false;
 

@@ -10,7 +10,7 @@ import { NgIcon } from '@ng-icons/core';
   styleUrl: './personal-stat-card.component.scss'
 })
 export class PersonalStatCardComponent {
-  @Input() label: string = '';
+  @Input() label = '';
   @Input() value: number | string = 0;
-  @Input() icon: string = '';
+  @Input() icon = '';
 }

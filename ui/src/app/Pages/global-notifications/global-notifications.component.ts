@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
 import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces';
 import { CommonModule } from '@angular/common';
@@ -18,6 +18,12 @@ import { Router } from '@angular/router';
   styleUrls: ['./global-notifications.component.scss'],
 })
 export class GlobalNotificationsComponent implements OnInit, OnDestroy {
+  private groupsService = inject(GroupsService);
+  private toastService = inject(ToastService);
+  private notificationsService = inject(NotificationsService);
+  private notificationService = inject(NotificationService);
+  private signalrService = inject(SignalrService);
+  private router = inject(Router);
 
   // ── Tab state ──────────────────────────────────────────────
   activeTab: 'requests' | 'comments' = 'requests';
@@ -39,31 +45,22 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
 
   private signalRSub?: Subscription;
 
-  constructor(
-    private groupsService: GroupsService,
-    private toastService: ToastService,
-    private notificationsService: NotificationsService,
-    private notificationService: NotificationService,
-    private signalRService: SignalrService,
-    private router: Router
-  ) { }
-
-  ngOnInit(): void {
+  ngOnInit() {
     this.viewRequests();
     this.loadCommentNotifications();
 
     // Re-fetch notifications list when a new one arrives via SignalR
-    this.signalRSub = this.signalRService.notificationSubject.subscribe((msg) => {
+    this.signalRSub = this.signalrService.notificationSubject.subscribe((msg) => {
       if (msg) this.loadCommentNotifications();
     });
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.signalRSub?.unsubscribe();
   }
 
   // ── Tab switching ──────────────────────────────────────────
-  setTab(tab: 'requests' | 'comments'): void {
+  setTab(tab: 'requests' | 'comments') {
     this.activeTab = tab;
   }
 
@@ -87,7 +84,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.groupedRequests = Array.from(groupMap.values());
         this.loadingRequests = false;
       },
-      error: (err) => {
+      error: () => {
         //this.errorRequests = 'Failed to load requests';
         this.loadingRequests = false;
       }
@@ -105,7 +102,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.removeRequestFromGroup(req);
         this.notificationsService.decrement(1);
       },
-      error: (err) => {
+      error: () => {
         this.toastService.show('Failed to accept request', 'error');
       }
     });
@@ -118,7 +115,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
         this.removeRequestFromGroup(req);
         this.notificationsService.decrement(1);
       },
-      error: (err) => {
+      error: () => {
         this.toastService.show('Failed to reject request', 'error');
       }
     });
@@ -139,7 +136,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
             this.notificationsService.decrement(requests.length);
           }
         },
-        error: (err) => {
+        error: () => {
           failed = true;
           this.toastService.show('Some requests failed to accept', 'error');
         }
@@ -161,7 +158,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
             this.toastService.show('All requests rejected', 'success');
           }
         },
-        error: (err) => {
+        error: () => {
           failed = true;
           this.toastService.show('Some requests failed to reject', 'error');
         }
@@ -188,7 +185,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   }
 
   // ── Comment Notifications ──────────────────────────────────
-  loadCommentNotifications(): void {
+  loadCommentNotifications() {
     this.loadingNotifications = true;
     this.errorNotifications = '';
 
@@ -204,7 +201,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  markAsRead(notification: CommentNotification): void {
+  markAsRead(notification: CommentNotification) {
     if (notification.isRead) return;
 
     this.notificationService.markAsRead(notification.id).subscribe({
@@ -217,7 +214,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  markAllAsRead(): void {
+  markAllAsRead() {
     this.notificationService.markAllAsRead().subscribe({
       next: () => {
         this.commentNotifications.forEach(n => n.isRead = true);
@@ -233,7 +230,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onNotificationClick(notification: CommentNotification): void {
+  onNotificationClick(notification: CommentNotification) {
     this.router.navigate(['/groups', notification.comment.groupId, 'ideas'], {
       queryParams: { ideaId: notification.comment.ideaId, commentId: notification.comment.id }
     });

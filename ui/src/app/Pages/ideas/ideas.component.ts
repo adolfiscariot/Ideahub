@@ -13,8 +13,6 @@ import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { ToastService } from '../../Services/toast.service';
-import { ProjectService } from '../../Services/project.service';
-import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
@@ -54,7 +52,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   groupCreatorId = '';
 
-  //showMembersModal = false;
   showAdminLeaveModal = false;
   showTransferOwnershipModal = false;
 
@@ -126,11 +123,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
   isUploadingIdeaMedia = false;
   ideaUploadStatus = '';
 
-  showClosedIdeas: boolean = false;
+  showClosedIdeas = false;
   closedIdeas: Idea[] = [];
 
-  showMobileMenu: boolean = false;
-  showIdeaActionsMenu: boolean = false;
+  showMobileMenu = false;
+  showIdeaActionsMenu = false;
 
   targetIdeaId: string | null = null;
   targetCommentId: number | null = null;
@@ -166,8 +163,6 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
 
   ngOnInit(): void {
-    // console.log('=== INITIALIZING IDEAS COMPONENT ===');
-
     // Get current user ID from auth service
     this.currentUserId = this.authService.getCurrentUserId();
     this.checkCommitteeMembership();
@@ -193,15 +188,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Check browser history state FIRST (in case of page refresh)
-    // console.log('Browser history state:', history.state);
-
     // Get router state (passed from Groups component)
     const navigation = this.router.getCurrentNavigation();
-    // console.log('=== NAVIGATION DEBUG ===');
-    // console.log('Navigation exists:', !!navigation);
-    // console.log('Navigation extras:', navigation?.extras);
-    // console.log('Navigation state:', navigation?.extras?.state);
 
     if (navigation?.extras?.state) {
       const state = navigation.extras.state as any;
@@ -209,19 +197,9 @@ export class IdeasComponent implements OnInit, OnDestroy {
       this.groupName = state.groupName || this.groupName;
       this.groupCreatorIdFromState = state.groupCreatorId || '';
       this.groupCreatorId = this.groupCreatorIdFromState; // Set main ID too
-
-      // console.log('RECEIVED ROUTE STATE:', {
-      //   isGroupCreator: this.isGroupCreatorFromState,
-      //   groupName: this.groupName,
-      //   groupCreatorId: this.groupCreatorIdFromState,
-      //   fullState: state
-      // });
     } else {
-      // console.log('NO ROUTE STATE from navigation');
-
       // Try to get from browser history (for page refreshes)
       if (history.state && history.state.groupCreatorId) {
-        // console.log('Found state in browser history:', history.state);
         this.isGroupCreatorFromState = history.state.isGroupCreator;
         this.groupName = history.state.groupName || this.groupName;
         this.groupCreatorIdFromState = history.state.groupCreatorId;
@@ -231,21 +209,10 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
     this.routeSub = this.route.params.subscribe(params => {
       this.groupId = params['groupId'];
-      // console.log('Group ID from route:', this.groupId);
-
-      // console.log('=== CURRENT STATE ===', {
-      //   groupCreatorId: this.groupCreatorId,
-      //   groupCreatorIdFromState: this.groupCreatorIdFromState,
-      //   isGroupCreatorFromState: this.isGroupCreatorFromState,
-      //   groupName: this.groupName
-      // });
 
       // If we don't have creator ID, load from API
       if (!this.groupCreatorId) {
-        // console.log('No groupCreatorId, loading from API...');
         this.loadGroupInfo();
-      } else {
-        // console.log('Using existing groupCreatorId:', this.groupCreatorId);
       }
       this.loadGroupMembers();
       const hideInfo = localStorage.getItem('hideIdeaInfo') === 'true';
@@ -393,7 +360,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
             }
           }
         },
-        error: (err) => {
+        error: () => {
           // console.error('Error filtering ideas:', err);
         }
       });
@@ -485,7 +452,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.closedIdeas = [];
         }
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         // console.error('❌ Error loading closed ideas:', error);
         this.ideas = [];
@@ -690,7 +657,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show('Failed to delete comment', 'error');
         }
       },
-      error: (err) => { /* console.error('Error deleting comment', err) */ }
+      error: () => { /* console.error('Error deleting comment', err) */ }
     });
   }
 
@@ -719,9 +686,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
   onCommentFileSelected(event: any): void {
     const files: FileList = event.target.files;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
+    for (const file of files) {
       // Validate file size (20MB limit)
       if (file.size > 20 * 1024 * 1024) {
         this.toastService.show(`${file.name} exceeds 20MB limit`, 'warning');
@@ -771,7 +736,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
         this.pendingRequests = res.data.map((email: string) => ({ email })) // res should be an array of { userId, ... }
         this.loadingRequests = false;
       },
-      error: (err) => {
+      error: () => {
         // console.error('Error fetching requests:', err);
         this.errorRequests = 'Failed to load requests';
         this.loadingRequests = false;
@@ -855,7 +820,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show(`Failed to close idea: ${response.message}`, 'error');
         }
       },
-      error: (error) => {
+      error: () => {
         //console.error('Error closing idea:', error);
         this.toastService.show('Failed to close idea. Idea has already been closed', 'error');
         this.ideaIdToClose = null;
@@ -880,11 +845,11 @@ export class IdeasComponent implements OnInit, OnDestroy {
     if (!this.groupId) return;
 
     this.groupsService.leaveGroup(this.groupId).subscribe({
-      next: (res) => {
+      next: () => {
         this.toastService.show('You have left the group', 'success');          // simple feedback for now
         this.router.navigate(['/groups']);         // redirect after leaving
       },
-      error: (err) => {
+      error: () => {
         //console.error('Failed to leave group:', err);
         this.toastService.show('Failed to leave the group', 'error');       // simple error feedback
       }
@@ -962,7 +927,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show(`Failed to update idea: ${response.message}`, 'error');
         }
       },
-      error: (error) => {
+      error: () => {
         //console.error('Error updating idea from modal:', error);
         this.toastService.show('An error occurred while updating the idea.', 'error');
       }
@@ -996,7 +961,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (error) => {
+      error: () => {
         // console.error('Error loading group info:', error);
       }
     });
@@ -1056,8 +1021,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.membersCount = "0";
         }
       },
-      error: (error) => {
-        // console.error("Error fetching members:", error);
+      error: () => {
+        // console.error('Error fetching members:', error);
         this.groupMembers = [];
         this.membersCount = "0";
       }
@@ -1153,9 +1118,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
 
           // Then fetch vote counts for all filtered ideas
-          if (this.ideas.length > 0) {
-            await this.fetchAndUpdateVoteCounts();
-          } else { }
+
 
           // Sort based on current mode
           if (this.showClosedIdeas) {
@@ -1192,7 +1155,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.ideas = [];
         }
       },
-      error: (error) => {
+      error: () => {
         this.isLoading = false;
         //console.error('❌ Error loading ideas:', error);
         this.ideas = [];
@@ -1427,13 +1390,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
           alert(`Idea Details:\n\nTitle: ${response.data.Title}\n\nDescription: ${response.data.ProposedSolution}\n\nCreated: ${new Date(response.data.createdAt).toLocaleDateString()}`);
         }
       },
-      error: (error) => {
+      error: () => {
         // console.error('Error loading idea:', error);
       }
     });
   }
 
-  trackById(index: number, idea: Idea): string {
+  trackById(_: number, idea: Idea): string {
     return idea.id;
   }
 
@@ -1468,7 +1431,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           this.toastService.show(`Failed to vote: ${response.message}`, 'error');
         }
       },
-      error: (error) => {
+      error: () => {
         this.isVoting = false;
         // console.error('Error voting:', error);
         this.toastService.show('An error occurred while voting.', 'error');
@@ -1544,7 +1507,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
         }
         this.isViewingVoters = false;
       },
-      error: (error) => {
+      error: () => {
         this.isViewingVoters = false;
         //console.error('Error fetching voters:', error);
         this.toastService.show('Failed to load voters', 'error');
@@ -1595,7 +1558,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
     }
 
     // Create an array of promises for parallel processing
-    const voteChecks = this.ideas.map(async (idea, index) => {
+    const voteChecks = this.ideas.map(async (idea) => {
 
       try {
         const voteInfo = await this.getUserVoteForIdea(idea.id);
@@ -1607,7 +1570,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           idea.userVoted = false;
           idea.userVoteId = undefined;
         }
-      } catch (error) {
+      } catch {
         //console.error(`Error checking votes for idea`, error);
         idea.userVoted = false;
         idea.userVoteId = undefined;
@@ -1668,7 +1631,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
    * Log current vote status for debugging
    */
   private logVoteStatus(): void {
-    this.ideas.forEach((idea, index) => {
+    this.ideas.forEach(() => {
       // console.log(`${index + 1}. "${idea.title}":`, {
       //   voted: idea.userVoted,
       //   voteId: idea.userVoteId,
@@ -1676,7 +1639,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
       // });
     });
 
-    const votedCount = this.ideas.filter(i => i.userVoted).length;
+    // const votedCount = this.ideas.filter(i => i.userVoted).length;
   }
 
   // Add this helper method for displaying voters
@@ -1769,7 +1732,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           idea.voteCount = 0;
           idea.isReadyForPromotion = false;
         }
-      } catch (error) {
+      } catch {
         //console.error(`Error fetching votes for idea`, error);
         idea.voteCount = 0;
         idea.isReadyForPromotion = false;
@@ -1823,7 +1786,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
         this.cancelDeleteIdea();
       },
 
-      error: (error) => {
+      error: () => {
         this.toastService.show('Failed to delete idea. Idea may have been promoted to a project', 'error');
         this.cancelDeleteIdea();
       }

@@ -10,24 +10,24 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, RouterModule, MatIconModule],
   template: `
-    <div class="tasks-container" *ngIf="!accessDenied; else restricted">
-      <div class="header">
-        <h1>Task Workspace</h1>
-        <p>Project ID: {{ projectId }}</p>
-      </div>
-      
-      <div class="content">
-        <!-- Task content will go here -->
-        <div style="padding: 50px; text-align: center;">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #6366f1;">construction</mat-icon>
-            <h2>Workspace Under Construction</h2>
-            <p>You have access! We are currently building the task management interface.</p>
-            <button routerLink="/projects" class="btn-back">Back to Projects</button>
+    @if (!accessDenied) {
+      <div class="tasks-container">
+        <div class="header">
+          <h1>Task Workspace</h1>
+          <p>Project ID: {{ projectId }}</p>
+        </div>
+        
+        <div class="content">
+          <!-- Task content will go here -->
+          <div style="padding: 50px; text-align: center;">
+              <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #6366f1;">construction</mat-icon>
+              <h2>Workspace Under Construction</h2>
+              <p>You have access! We are currently building the task management interface.</p>
+              <button routerLink="/projects" class="btn-back">Back to Projects</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <ng-template #restricted>
+    } @else {
       <div class="restricted-container">
         <mat-icon class="lock-icon">lock</mat-icon>
         <h1>Access Restricted</h1>
@@ -35,7 +35,7 @@ import { MatIconModule } from '@angular/material/icon';
            Only the Project Overseer and assigned members can enter.</p>
         <button routerLink="/projects" class="btn-back">Return to Projects</button>
       </div>
-    </ng-template>
+    }
 
     <style>
       .tasks-container, .restricted-container {

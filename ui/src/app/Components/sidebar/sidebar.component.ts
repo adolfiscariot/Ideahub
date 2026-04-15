@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
-  isSidebarExpanded: boolean = false;
+  isSidebarExpanded = false;
 
   toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;

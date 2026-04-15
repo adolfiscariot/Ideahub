@@ -40,8 +40,9 @@
           <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
         </button>
 
-        <span *ngIf="(totalBadge$ | async) as count" class="notif-badge" [innerText]="count > 9 ? '9+' : count">
-        </span>
+        @if (totalBadge$ | async; as count) {
+          <span class="notif-badge" [innerText]="count > 9 ? '9+' : count"></span>
+        }
       </div>
     </a>
 
@@ -63,45 +64,53 @@
   </div>
 
   <!-- Mobile Menu Overlay -->
-  <div class="mobile-menu-overlay" *ngIf="isMobileMenuOpen" (click)="closeMobileMenu()">
-    <div class="mobile-menu-content" (click)="$event.stopPropagation()">
-      <div class="mobile-menu-header">
-        <span class="mobile-menu-title">Menu</span>
-        <button class="close-menu-btn" (click)="closeMobileMenu()">
-          <mat-icon>close</mat-icon>
-        </button>
+  @if (isMobileMenuOpen) {
+    <div class="mobile-menu-overlay" 
+         (click)="closeMobileMenu()" 
+         (keydown.escape)="closeMobileMenu()"
+         tabindex="0">
+      <div class="mobile-menu-content" 
+           (click)="$event.stopPropagation()"
+           (keydown.enter)="$event.stopPropagation()"
+           tabindex="0">
+        <div class="mobile-menu-header">
+          <span class="mobile-menu-title">Menu</span>
+          <button class="close-menu-btn" (click)="closeMobileMenu()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <nav class="mobile-nav-items">
+          <a routerLink="/home" routerLinkActive="active" (click)="closeMobileMenu()">
+            <mat-icon>home</mat-icon> Home
+          </a>
+          <a routerLink="/groups" routerLinkActive="active" (click)="closeMobileMenu()">
+            <mat-icon>groups</mat-icon> Groups
+          </a>
+          <a routerLink="/projects" routerLinkActive="active" (click)="closeMobileMenu()">
+            <mat-icon>topic</mat-icon> Projects
+          </a>
+          <a routerLink="/committeemembers" routerLinkActive="active" (click)="closeMobileMenu()">
+            <mat-icon>verified_user</mat-icon> Committee
+          </a>
+
+          <a routerLink="/notifications" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-notif-link">
+            <div class="mobile-notif-content">
+              <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
+              <span>Notifications</span>
+            </div>
+            @if (notificationsService.pendingRequests$ | async; as count) {
+              <span class="mobile-notif-badge" [innerText]="count > 9 ? '9+' : count"></span>
+            }
+          </a>
+
+          <div class="mobile-menu-divider"></div>
+
+          <button class="mobile-logout-btn" (click)="onLogout(); closeMobileMenu()">
+            <mat-icon>logout</mat-icon> Log Out
+          </button>
+        </nav>
       </div>
-
-      <nav class="mobile-nav-items">
-        <a routerLink="/home" routerLinkActive="active" (click)="closeMobileMenu()">
-          <mat-icon>home</mat-icon> Home
-        </a>
-        <a routerLink="/groups" routerLinkActive="active" (click)="closeMobileMenu()">
-          <mat-icon>groups</mat-icon> Groups
-        </a>
-        <a routerLink="/projects" routerLinkActive="active" (click)="closeMobileMenu()">
-          <mat-icon>topic</mat-icon> Projects
-        </a>
-        <a routerLink="/committeemembers" routerLinkActive="active" (click)="closeMobileMenu()">
-          <mat-icon>verified_user</mat-icon> Committee
-        </a>
-
-        <a routerLink="/notifications" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-notif-link">
-          <div class="mobile-notif-content">
-            <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
-            <span>Notifications</span>
-          </div>
-          <span *ngIf="(notificationsService.pendingRequests$ | async) as count" class="mobile-notif-badge"
-            [innerText]="count > 9 ? '9+' : count">
-          </span>
-        </a>
-
-        <div class="mobile-menu-divider"></div>
-
-        <button class="mobile-logout-btn" (click)="onLogout(); closeMobileMenu()">
-          <mat-icon>logout</mat-icon> Log Out
-        </button>
-      </nav>
     </div>
-  </div>
+  }
 </div>

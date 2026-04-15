@@ -1,7 +1,9 @@
 <div class="timesheet-page" [class.child-view]="isChildView">
-    <div class="page-header" *ngIf="!isChildView">
-        <h1 class="page-title">Timesheet Entries</h1>
-    </div>
+    @if (!isChildView) {
+      <div class="page-header">
+          <h1 class="page-title">Timesheet Entries</h1>
+      </div>
+    }
 
     <!-- Log Work Card -->
     <div class="card log-card">
@@ -18,123 +20,153 @@
         <div class="form-container">
             <div class="global-row">
                 <div class="form-group date-group">
-                    <label>Date</label>
+                    <label for="timesheetDate">Date</label>
                     <div class="input-wrapper">
                         <mat-icon>calendar_today</mat-icon>
-                        <input type="date" [(ngModel)]="workDate">
+                        <input id="timesheetDate" type="date" [(ngModel)]="workDate">
                     </div>
                 </div>
             </div>
 
             <!-- Dynamic Rows -->
             <div class="log-rows">
-                <div class="log-row-item" *ngFor="let row of rows; let i = index">
-                    <div class="row-main">
-                        <div class="form-group task-select">
-                            <label *ngIf="i === 0">Task</label>
-                            <select [(ngModel)]="row.taskId">
-                                <option [value]="0">Select a task...</option>
-                                <option *ngFor="let task of availableTasks" [value]="task.id">{{ task.title }}</option>
-                            </select>
-                        </div>
-                        <div class="form-group hours-input">
-                            <label *ngIf="i === 0">Hours Spent</label>
-                            <input type="number" [(ngModel)]="row.hoursSpent" placeholder="0.0" step="0.5" min="0">
-                        </div>
-                        <div class="form-group desc-input">
-                            <div class="label-row" *ngIf="i === 0">
-                                <label>Work Description</label>
-                                <div class="char-count" *ngIf="row.description.length > 50"
-                                    [class.near-limit]="row.description.length > 130"
-                                    [class.at-limit]="row.description.length === 150">
-                                    {{ row.description.length }}/150
-                                </div>
+                @for (row of rows; track $index; let i = $index) {
+                    <div class="log-row-item">
+                        <div class="row-main">
+                            <div class="form-group task-select">
+                                @if (i === 0) {
+                                    <label [for]="'task-' + i">Task</label>
+                                }
+                                <select [id]="'task-' + i" [(ngModel)]="row.taskId">
+                                    <option [value]="0">Select a task...</option>
+                                    @for (task of availableTasks; track task.id) {
+                                        <option [value]="task.id">{{ task.title }}</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="char-count floating" *ngIf="i !== 0 && row.description.length > 50"
-                                [class.near-limit]="row.description.length > 130"
-                                [class.at-limit]="row.description.length === 150">
-                                {{ row.description.length }}/150
+                            <div class="form-group hours-input">
+                                @if (i === 0) {
+                                  <label [for]="'hours-' + i">Hours Spent</label>
+                                }
+                                <input [id]="'hours-' + i" type="number" [(ngModel)]="row.hoursSpent" placeholder="0.0" step="0.5" min="0">
                             </div>
-                            <input type="text" [(ngModel)]="row.description" placeholder="What did you work on?"
-                                maxlength="150">
-                        </div>
+                            <div class="form-group desc-input">
+                                @if (i === 0) {
+                                  <div class="label-row">
+                                      <label [for]="'desc-' + i">Work Description</label>
+                                      @if (row.description.length > 50) {
+                                        <div class="char-count"
+                                            [class.near-limit]="row.description.length > 130"
+                                            [class.at-limit]="row.description.length === 150">
+                                            {{ row.description.length }}/150
+                                        </div>
+                                      }
+                                  </div>
+                                }
+                                @if (i !== 0 && row.description.length > 50) {
+                                  <div class="char-count floating"
+                                      [class.near-limit]="row.description.length > 130"
+                                      [class.at-limit]="row.description.length === 150">
+                                      {{ row.description.length }}/150
+                                  </div>
+                                }
+                                <input [id]="'desc-' + i" type="text" [(ngModel)]="row.description" placeholder="What did you work on?"
+                                    maxlength="150">
+                            </div>
                         <div class="row-actions" [class.with-labels]="i === 0">
                             <button class="btn-blocker-toggle" (click)="row.hasBlocker = !row.hasBlocker"
                                 [class.active]="row.hasBlocker">
                                 <mat-icon>{{ row.hasBlocker ? 'warning' : 'add_circle_outline' }}</mat-icon>
                                 {{ row.hasBlocker ? 'Reporting Blocker' : 'Have a Blocker?' }}
                             </button>
-                            <button class="btn-icon-danger" (click)="removeRow(i)" *ngIf="rows.length > 1"
-                                title="Remove Row">
-                                <mat-icon>delete_outline</mat-icon>
-                            </button>
+                            @if (rows.length > 1) {
+                                <button class="btn-icon-danger" (click)="removeRow(i)" title="Remove Row">
+                                    <mat-icon>delete_outline</mat-icon>
+                                </button>
+                            }
                         </div>
                     </div>
 
                     <!-- Blocker Section -->
-                    <div class="blocker-section" *ngIf="row.hasBlocker">
-                        <div class="blocker-header">
-                            <mat-icon>report_problem</mat-icon>
-                            BLOCKER REPORTING
-                            <span class="header-subtitle">If you have a blocker, please provide details below:</span>
-                        </div>
-                        <div class="blocker-form">
-                            <div class="form-group flex-3">
-                                <div class="label-row">
-                                    <label>Blocker Description</label>
-                                    <div class="char-count"
-                                        *ngIf="row.blockerDescription && row.blockerDescription.length > 30"
-                                        [class.near-limit]="row.blockerDescription.length > 130"
-                                        [class.at-limit]="row.blockerDescription.length === 150">
-                                        {{ row.blockerDescription.length }}/150
+                    @if (row.hasBlocker) {
+                        <div class="blocker-section">
+                            <div class="blocker-header">
+                                <mat-icon>report_problem</mat-icon>
+                                BLOCKER REPORTING
+                                <span class="header-subtitle">If you have a blocker, please provide details below:</span>
+                            </div>
+                            <div class="blocker-form">
+                                <div class="form-group flex-3">
+                                    <div class="label-row">
+                                        <label [for]="'blocker-desc-' + i">Blocker Description</label>
+                                        @if (row.blockerDescription && row.blockerDescription.length > 30) {
+                                            <div class="char-count"
+                                                [class.near-limit]="row.blockerDescription.length > 130"
+                                                [class.at-limit]="row.blockerDescription.length === 150">
+                                                {{ row.blockerDescription.length }}/150
+                                            </div>
+                                        }
                                     </div>
+                                    <input [id]="'blocker-desc-' + i" type="text" [(ngModel)]="row.blockerDescription"
+                                        placeholder="What is preventing your progress?" maxlength="150">
                                 </div>
-                                <input type="text" [(ngModel)]="row.blockerDescription"
-                                    placeholder="What is preventing your progress?" maxlength="150">
-                            </div>
-                            <div class="form-group flex-1">
-                                <label>Severity</label>
-                                <select [(ngModel)]="row.blockerSeverity">
-                                    <option [value]="0">Low</option>
-                                    <option [value]="1">Medium</option>
-                                    <option [value]="2">High</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="blocker-actions">
-                            <input type="file" #evidenceUpload multiple style="display: none"
-                                (change)="onFileSelected($event, i)">
-                            <app-buttons [buttonStyleClass]="'btn-promote'" (click)="evidenceUpload.click()">
-                                <mat-icon>attach_file</mat-icon>
-                                Attach Blocker Evidence
-                            </app-buttons>
-
-                            <div class="selected-files" *ngIf="row.tempFiles.length > 0">
-                                <div class="file-item" *ngFor="let file of row.tempFiles; let fIndex = index">
-                                    <span class="file-name">{{ file.name }}</span>
-                                    <span class="file-size">({{ formatFileSize(file.size) }})</span>
-                                    <button type="button" class="btn-remove-file"
-                                        (click)="removeTempFile(i, fIndex)">×</button>
+                                <div class="form-group flex-1">
+                                    <label [for]="'severity-' + i">Severity</label>
+                                    <select [id]="'severity-' + i" [(ngModel)]="row.blockerSeverity">
+                                        <option [value]="0">Low</option>
+                                        <option [value]="1">Medium</option>
+                                        <option [value]="2">High</option>
+                                    </select>
                                 </div>
                             </div>
+                            <div class="blocker-actions">
+                                <input type="file" #evidenceUpload multiple style="display: none"
+                                    (change)="onFileSelected($event, i)">
+                                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="evidenceUpload.click()">
+                                    <mat-icon>attach_file</mat-icon>
+                                    Attach Blocker Evidence
+                                </app-buttons>
 
-                            <span class="file-info" *ngIf="row.tempFiles.length === 0">No files attached</span>
+                                @if (row.tempFiles.length > 0) {
+                                    <div class="selected-files">
+                                        @for (file of row.tempFiles; track $index; let fIndex = $index) {
+                                            <div class="file-item">
+                                                <span class="file-name">{{ file.name }}</span>
+                                                <span class="file-size">({{ formatFileSize(file.size) }})</span>
+                                                <button type="button" class="btn-remove-file"
+                                                    (click)="removeTempFile(i, fIndex)" aria-label="Remove file">×</button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                @if (row.tempFiles.length === 0) {
+                                  <span class="file-info">No files attached</span>
+                                }
+                            </div>
                         </div>
+                    }
                     </div>
-                </div>
+                }
             </div>
 
             <div class="form-footer">
-                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="addRow()" *ngIf="!isEditing" [disabled]="isLoading">
-                    <mat-icon>add</mat-icon>
-                    Add Another Task
-                </app-buttons>
+                @if (!isEditing) {
+                  <app-buttons [buttonStyleClass]="'btn-promote'" (click)="addRow()" [disabled]="isLoading">
+                      <mat-icon>add</mat-icon>
+                      Add Another Task
+                  </app-buttons>
+                }
                 <div class="spacer"></div>
-                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="cancelEdit()" *ngIf="isEditing" [disabled]="isLoading">
-                    Cancel Edit
-                </app-buttons>
+                @if (isEditing) {
+                  <app-buttons [buttonStyleClass]="'btn-promote'" (click)="cancelEdit()" [disabled]="isLoading">
+                      Cancel Edit
+                  </app-buttons>
+                }
                 <app-buttons [buttonStyleClass]="'btn-promote'" (click)="submitLogs()" [isLoading]="isLoading">
-                    <mat-icon *ngIf="!isLoading">{{ isEditing ? 'save' : 'send' }}</mat-icon>
+                    @if (!isLoading) {
+                      <mat-icon>{{ isEditing ? 'save' : 'send' }}</mat-icon>
+                    }
                     <span>{{ isEditing ? 'Update Timesheet' : 'Submit All Logs' }}</span>
                 </app-buttons>
             </div>
@@ -154,28 +186,30 @@
         <!-- Filters Section -->
         <div class="table-filters">
             <div class="filter-group">
-                <label>Date Range</label>
+                <label for="filterStartDate">Date Range</label>
                 <div class="date-range-inputs">
-                    <input type="date" [(ngModel)]="filterStartDate" placeholder="Start Date">
+                    <input id="filterStartDate" type="date" [(ngModel)]="filterStartDate" placeholder="Start Date">
                     <span class="date-sep">to</span>
-                    <input type="date" [(ngModel)]="filterEndDate" placeholder="End Date">
+                    <input id="filterEndDate" type="date" [(ngModel)]="filterEndDate" placeholder="End Date">
                 </div>
             </div>
             <div class="filter-group select-filter">
-                <label>Team Member</label>
+                <label for="filterTeamMember">Team Member</label>
                 <div class="select-wrapper">
                     <mat-icon>person_search</mat-icon>
-                    <select [(ngModel)]="filterUserId">
+                    <select id="filterTeamMember" [(ngModel)]="filterUserId">
                         <option value="">All Team Members</option>
-                        <option *ngFor="let member of projectMembers" [value]="member.id">{{ member.name }}</option>
+                        @for (member of projectMembers; track member.id) {
+                            <option [value]="member.id">{{ member.name }}</option>
+                        }
                     </select>
                 </div>
             </div>
             <div class="filter-group select-filter">
-                <label>Blocker Severity</label>
+                <label for="filterSeverity">Blocker Severity</label>
                 <div class="select-wrapper">
                     <mat-icon>report_problem</mat-icon>
-                    <select [(ngModel)]="filterSeverity">
+                    <select id="filterSeverity" [(ngModel)]="filterSeverity">
                         <option value="">All Severities</option>
                         <option value="Low">Low Blocker</option>
                         <option value="Medium">Medium Blocker</option>
@@ -183,12 +217,14 @@
                     </select>
                 </div>
             </div>
-            <div class="filter-actions" *ngIf="filterUserId || filterStartDate || filterEndDate || filterSeverity">
-                <app-buttons [buttonStyleClass]="'btn-promote'" (click)="clearFilters()">
-                    <mat-icon>filter_list_off</mat-icon>
-                    Reset Filters
-                </app-buttons>
-            </div>
+            @if (filterUserId || filterStartDate || filterEndDate || filterSeverity) {
+              <div class="filter-actions">
+                  <app-buttons [buttonStyleClass]="'btn-promote'" (click)="clearFilters()">
+                      <mat-icon>filter_list_off</mat-icon>
+                      Reset Filters
+                  </app-buttons>
+              </div>
+            }
         </div>
 
         <div class="logs-table-container">
@@ -205,59 +241,74 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let log of filteredLogs" class="log-entry-row">
-                        <td class="col-date">{{ log.workDate | date:'mediumDate' }}</td>
-                        <td class="col-user">
-                            <span class="user-badge">{{ log.userName }}</span>
-                        </td>
-                        <td class="col-main">
-                            <div class="description-content">
-                                <div class="task-info">
-                                    <span class="task-badge">{{ log.taskTitle }}</span>
+                    @for (log of filteredLogs; track log.id) {
+                      <tr class="log-entry-row">
+                          <td class="col-date">{{ log.workDate | date:'mediumDate' }}</td>
+                          <td class="col-user">
+                              <span class="user-badge">{{ log.userName }}</span>
+                          </td>
+                          <td class="col-main">
+                              <div class="description-content">
+                                  <div class="task-info">
+                                      <span class="task-badge">{{ log.taskTitle }}</span>
+                                  </div>
+                                  <div class="log-desc">{{ log.description }}</div>
+                              </div>
+                          </td>
+                          <td class="col-hours">
+                              <span class="hours-pill">{{ log.hoursSpent }}h</span>
+                          </td>
+                          <td class="col-blockers">
+                              @if (log.hasBlocker) {
+                                <div class="blocker-content">
+                                    <span class="blocker-pill" [ngStyle]="getSeverityStyle(log.blockerSeverity)">
+                                        {{ getSeverityLabel(log.blockerSeverity) }} Blocker
+                                    </span>
+                                    @if (log.blockerDescription) {
+                                      <div class="blocker-desc">
+                                          {{ log.blockerDescription }}
+                                      </div>
+                                    }
                                 </div>
-                                <div class="log-desc">{{ log.description }}</div>
-                            </div>
-                        </td>
-                        <td class="col-hours">
-                            <span class="hours-pill">{{ log.hoursSpent }}h</span>
-                        </td>
-                        <td class="col-blockers">
-                            <div class="blocker-content" *ngIf="log.hasBlocker">
-                                <span class="blocker-pill" [ngStyle]="getSeverityStyle(log.blockerSeverity)">
-                                    {{ getSeverityLabel(log.blockerSeverity) }} Blocker
+                              }
+                              @if (!log.hasBlocker) {
+                                <span class="no-blockers">
+                                    <mat-icon>check_circle_outline</mat-icon>
+                                    No blockers reported
                                 </span>
-                                <div class="blocker-desc" *ngIf="log.blockerDescription">
-                                    {{ log.blockerDescription }}
-                                </div>
-                            </div>
-                            <span class="no-blockers" *ngIf="!log.hasBlocker">
-                                <mat-icon>check_circle_outline</mat-icon>
-                                No blockers reported
-                            </span>
-                        </td>
-                        <td class="col-evidence">
-                            <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, log.id)"
-                                *ngIf="log.hasBlocker">
-                                <mat-icon class="media-file-icon">description</mat-icon>
-                                <span class="media-count">{{ log.mediaCount || 0 }}</span>
+                              }
+                          </td>
+                          <td class="col-evidence">
+                              @if (log.hasBlocker) {
+                                <div class="media-icon-wrapper" (click)="toggleMediaPopup($event, log.id)"
+                                    (keydown.enter)="toggleMediaPopup($event, log.id)" tabindex="0" role="button" aria-label="View evidence">
+                                    <mat-icon class="media-file-icon">description</mat-icon>
+                                    <span class="media-count">{{ log.mediaCount || 0 }}</span>
 
-                                <!-- Media Popup -->
-                                <div class="media-popup" *ngIf="activeMediaTimesheetId === log.id"
-                                    (click)="$event.stopPropagation()">
-                                    <div class="popup-header">Attached Media</div>
-                                    <div class="popup-body">
-                                        <app-media *ngIf="log.mediaCount && log.mediaCount > 0" [timesheetId]="log.id"
-                                            [compactMode]="true"></app-media>
-                                        <div *ngIf="!log.mediaCount || log.mediaCount === 0" class="empty-media">No
-                                            attached files</div>
-                                    </div>
+                                    <!-- Media Popup -->
+                                    @if (activeMediaTimesheetId === log.id) {
+                                      <div class="media-popup" (click)="$event.stopPropagation()"
+                                          (keydown.enter)="$event.stopPropagation()" tabindex="-1">
+                                          <div class="popup-header">Attached Media</div>
+                                          <div class="popup-body">
+                                              @if (log.mediaCount && log.mediaCount > 0) {
+                                                <app-media [timesheetId]="log.id" [compactMode]="true"></app-media>
+                                              }
+                                              @if (!log.mediaCount || log.mediaCount === 0) {
+                                                <div class="empty-media">No attached files</div>
+                                              }
+                                          </div>
+                                      </div>
+                                    }
                                 </div>
-                            </div>
-                            <span class="no-files" *ngIf="!log.hasBlocker">-</span>
-                        </td>
+                              }
+                              @if (!log.hasBlocker) {
+                                <span class="no-files">-</span>
+                              }
+                          </td>
                         <td class="col-actions">
-                            <ng-container *ngIf="log.userId === currentUserId">
-                                <button mat-icon-button [matMenuTriggerFor]="menu" class="btn-icon-only">
+                            @if (log.userId === currentUserId) {
+                                <button mat-icon-button [matMenuTriggerFor]="menu" class="btn-icon-only" aria-label="More actions">
                                     <mat-icon>more_vert</mat-icon>
                                 </button>
                                 <mat-menu #menu="matMenu" class="modern-menu">
@@ -270,13 +321,17 @@
                                         <span>Delete Log</span>
                                     </button>
                                 </mat-menu>
-                            </ng-container>
-                            <span *ngIf="log.userId !== currentUserId" class="no-actions">-</span>
+                            }
+                            @if (log.userId !== currentUserId) {
+                              <span class="no-actions">-</span>
+                            }
                         </td>
-                    </tr>
-                    <tr *ngIf="recentLogs.length === 0">
-                        <td colspan="6" class="empty-row">No work logs found.</td>
-                    </tr>
+                      </tr>
+                    } @empty {
+                      <tr>
+                          <td colspan="7" class="empty-row">No work logs found.</td>
+                      </tr>
+                    }
                 </tbody>
             </table>
         </div>

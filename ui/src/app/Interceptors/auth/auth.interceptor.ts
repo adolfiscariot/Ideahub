@@ -16,7 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
   }
 
   return next(newRequest).pipe(
-    tap((event) => {
+    tap(() => {
       // Log successful responses if needed
     }),
     catchError((error: HttpErrorResponse) => {

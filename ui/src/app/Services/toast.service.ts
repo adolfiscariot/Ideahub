@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface Toast {
@@ -11,11 +11,11 @@ export interface Toast {
 @Injectable({
     providedIn: 'root',
 })
-export class ToastService {
+export class ToastService implements OnDestroy {
     private toastsSubject = new BehaviorSubject<Toast[]>([]);
     public toasts$ = this.toastsSubject.asObservable();
     private counter = 0;
-    private timeouts: Map<number, ReturnType<typeof setTimeout>> = new Map();
+    private timeouts = new Map<number, ReturnType<typeof setTimeout>>();
 
     show(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', duration = 3000): number {
         const id = this.counter++;

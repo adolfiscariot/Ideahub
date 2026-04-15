@@ -1,19 +1,28 @@
 <div class="notifications-container">
   <h2>Pending Requests</h2>
 
-  <div *ngIf="loading">Loading requests...</div>
-  <div *ngIf="errorMessage">{{ errorMessage }}</div>
+  @if (loading) {
+    <div>Loading requests...</div>
+  }
 
-  <div *ngIf="!loading && requests.length === 0">
-    <p>No pending requests.</p>
-  </div>
+  @if (errorMessage) {
+    <div>{{ errorMessage }}</div>
+  }
 
-  <div *ngFor="let req of requests" class="request-card">
-    <span class="request-user">{{ req }}</span>
-
-    <div class="actions">
-      <button (click)="acceptRequest('9', req)" class="accept-btn">Accept</button>
-      <button (click)="rejectRequest('9', req)" class="reject-btn">Reject</button>
+  @if (!loading && requests.length === 0) {
+    <div>
+      <p>No pending requests.</p>
     </div>
-  </div>
+  }
+
+  @for (req of requests; track req) {
+    <div class="request-card">
+      <span class="request-user">{{ req }}</span>
+
+      <div class="actions">
+        <button (click)="acceptRequest('9', req)" class="accept-btn">Accept</button>
+        <button (click)="rejectRequest('9', req)" class="reject-btn">Reject</button>
+      </div>
+    </div>
+  }
 </div>

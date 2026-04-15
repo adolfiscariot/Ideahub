@@ -7,618 +7,690 @@
                 </app-buttons>
                 <h2>Idea Scoring & Review</h2>
             </div>
-            <div class="header-right" *ngIf="idea && idea.isPromotedToProject">
-            </div>
+            @if (idea && idea.isPromotedToProject) {
+              <div class="header-right">
+              </div>
+            }
         </div>
 
-        <div *ngIf="isLoading" class="loading-state">
-            <p>Loading idea details...</p>
-        </div>
+        @if (isLoading) {
+          <div class="loading-state">
+              <p>Loading idea details...</p>
+          </div>
+        }
 
-        <form *ngIf="!isLoading && idea" [formGroup]="scoringForm" (ngSubmit)="onSubmitPhase3()">
+        @if (!isLoading && idea) {
+          <form [formGroup]="scoringForm" (ngSubmit)="onSubmitPhase3()">
 
-            <!-- PHASE 1: IDEA EVALUATION -->
-            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase1'">
-                <div class="accordion-header" (click)="toggleSection('phase1')">
-                    <div class="header-main">
-                        <span class="step-number">1</span>
-                        <div class="header-text">
-                            <h3><mat-icon>assessment</mat-icon> Phase 1: Idea Evaluation</h3>
-                            <p class="phase-description">Outlines the idea details</p>
+              <!-- PHASE 1: IDEA EVALUATION -->
+              <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase1'">
+                  <div class="accordion-header" tabindex="0" role="button" (click)="toggleSection('phase1')" (keydown.enter)="toggleSection('phase1')" (keydown.space)="toggleSection('phase1')">
+                      <div class="header-main">
+                          <span class="step-number">1</span>
+                          <div class="header-text">
+                              <h3><mat-icon>assessment</mat-icon> Phase 1: Idea Evaluation</h3>
+                              <p class="phase-description">Outlines the idea details</p>
+                          </div>
+                      </div>
+                      <mat-icon>{{ expandedSection === 'phase1' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                  </div>
+
+                  <div class="accordion-content" formGroupName="Phase1">
+                      <div class="read-only-details">
+                          <!-- Sequential Information List (Metadata + Narratives) -->
+                          <div class="metadata-list">
+                              <!-- Metadata Rows -->
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>person</mat-icon>
+                                      <span class="label-heading">Author</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.author || idea.userName || 'Anonymous' }}</p>
+                                  </div>
+                              </div>
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>track_changes</mat-icon>
+                                      <span class="label-heading">Strategic Alignment</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.strategicAlignment || idea.StrategicAlignment || 'N/A' }}</p>
+                                  </div>
+                              </div>
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>category</mat-icon>
+                                      <span class="label-heading">Innovation Category</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.innovationCategory || idea.InnovationCategory || 'N/A' }}</p>
+                                  </div>
+                              </div>
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>subtitles</mat-icon>
+                                      <span class="label-heading">Sub Category</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.subCategory || idea.SubCategory || 'N/A' }}</p>
+                                  </div>
+                              </div>
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>memory</mat-icon>
+                                      <span class="label-heading">Technology Involved</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.technologyInvolved || idea.TechnologyInvolved || 'N/A' }}</p>
+                                  </div>
+                              </div>
+
+                              <!-- Narrative Rows -->
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>error_outline</mat-icon>
+                                      <span class="label-heading">Problem Statement</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.problemStatement || idea.ProblemStatement || 'N/A' }}</p>
+                                  </div>
+                              </div>
+                              <div class="meta-row">
+                                  <div class="meta-key">
+                                      <mat-icon>lightbulb_outline</mat-icon>
+                                      <span class="label-heading">Proposed Solution</span>
+                                  </div>
+                                  <div class="meta-value">
+                                      <p>{{ idea.proposedSolution || idea.ProposedSolution || 'N/A' }}</p>
+                                  </div>
+                              </div>
+                              @if (idea.useCase || idea.UseCase) {
+                                <div class="meta-row">
+                                    <div class="meta-key">
+                                        <mat-icon>assignment</mat-icon>
+                                        <span class="label-heading">Use Case & Benefits</span>
+                                    </div>
+                                    <div class="meta-value">
+                                        <p>{{ idea.useCase || idea.UseCase || 'N/A' }}</p>
+                                    </div>
+                                </div>
+                              }
+
+                              @if (idea.notes || idea.Notes) {
+                                <div class="meta-row">
+                                    <div class="meta-key">
+                                        <mat-icon>note</mat-icon>
+                                        <span class="label-heading">Original Author Notes</span>
+                                    </div>
+                                    <div class="meta-value">
+                                        <p>{{ idea.notes || idea.Notes || 'N/A' }}</p>
+                                    </div>
+                                </div>
+                              }
+                          </div>
+                      </div>
+
+                      <div class="scoring-inputs">
+                          <div class="form-group score-input-section">
+                              <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold:
+                                  70%)</label>
+                              <div class="score-control">
+                                  <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
+                                      (input)="clampScore($event)">
+                                  <div class="threshold-indicator"
+                                      [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
+                                      {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Met' : '✗ Low' }}
+                                  </div>
+                              </div>
+                              @if (scoringForm.get('Phase1.Score')?.invalid && scoringForm.get('Phase1.Score')?.touched) {
+                                <small class="field-error">
+                                    Score must be between 0 and 100.
+                                </small>
+                              }
+                          </div>
+
+                          <!-- AI Reasoning Card -->
+                          @if (parsedReasoning && parsedReasoning.length > 0) {
+                            <div class="ai-reasoning-card">
+                                <div class="card-header">
+                                    <mat-icon>psychology</mat-icon>
+                                    <h4>AI Evaluation Analysis</h4>
+                                </div>
+                                <div class="card-content">
+                                    @for (item of parsedReasoning; track $index) {
+                                      <div class="reasoning-item"
+                                          [class.overall]="item.label.toLowerCase().includes('overall')">
+                                          <span class="reasoning-label">{{ item.label }}</span>
+                                          <p class="reasoning-text">{{ item.content }}</p>
+                                      </div>
+                                    }
+                                </div>
+                            </div>
+                          }
+                      </div>
+
+                      <div class="phase-actions"
+                          style="display: flex; justify-content: flex-end; padding: 0 1.5rem 1.5rem;">
+                          <app-buttons buttonText="Update Idea" buttonStyleClass="btn-promote"
+                              (click)="updatePhase1Score()" [disabled]="isLoading" [isLoading]="isLoading">
+                              <mat-icon>sync</mat-icon>
+                          </app-buttons>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- PHASE 2: BUSINESS CASE -->
+              <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase2'"
+                  [class.locked]="isSectionLocked('phase2')"
+                  [title]="isSectionLocked('phase2') ? 'Threshold not reached' : ''">
+                  <div class="accordion-header" tabindex="0" role="button" (click)="toggleSection('phase2')" (keydown.enter)="toggleSection('phase2')" (keydown.space)="toggleSection('phase2')">
+                      <div class="header-main">
+                          <span class="step-number">2</span>
+                          <div class="header-text">
+                              <h3><mat-icon>assignment</mat-icon> Phase 2: Business Case</h3>
+                              <p class="phase-description">Evaluate the ideas business viability, risk, and strategic fit
+                              </p>
+                          </div>
+                          @if (isSectionLocked('phase2')) {
+                            <span class="lock-icon"><mat-icon>lock</mat-icon></span>
+                          }
+                      </div>
+                      <mat-icon>{{ expandedSection === 'phase2' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                  </div>
+
+                  <div class="accordion-content" formGroupName="Phase2">
+                      <div class="vertical-form">
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>stars</mat-icon> Expected Benefits <span class="info-tooltip"
+                                      title="What primary value or advantage does this idea offer?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of expectedBenefitsOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="ExpectedBenefits" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>public</mat-icon> Impact Scope <span class="info-tooltip"
+                                      title="Who does this idea affect?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of impactScopeOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="ImpactScope" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>warning_amber</mat-icon> Risk Level <span class="info-tooltip"
+                                      title="How risky is this idea to pursue?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of riskLevelOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="RiskLevel" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>fact_check</mat-icon> Evaluation Status <span class="info-tooltip"
+                                      title="What is the current status of this evaluation?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of evaluationStatusOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="EvaluationStatus" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>business</mat-icon> Responsible Dept <span class="info-tooltip"
+                                      title="Which team will own this?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of responsibleDeptOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="OwnerDepartment" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>moving</mat-icon> Next Steps <span class="info-tooltip"
+                                      title="What should happen next?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of actionStepOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="NextSteps" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>pending_actions</mat-icon> Current Stage <span class="info-tooltip"
+                                      title="Where is this project currently?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of resultOutcomeOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="CurrentStage" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <div class="form-group">
+                              <label for="DecisionDate"><mat-icon>event</mat-icon> Decision Date <span
+                                      class="info-tooltip" title="When should a decision be made?">ⓘ</span></label>
+                              <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
+                          </div>
+
+                          <div class="form-group">
+                              <label for="PlannedDurationWeeks"><mat-icon>history_toggle_off</mat-icon> Duration (Weeks)
+                                  <span class="info-tooltip" title="How long will this take?">ⓘ</span></label>
+                              <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
+                                  placeholder="Select Duration">
+                          </div>
+
+                          <div class="form-group verdict-group">
+                              <span class="label-heading"><mat-icon>gavel</mat-icon> Go / No-Go Verdict <span class="info-tooltip"
+                                      title="Should we go ahead with this idea?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of verdictOptions; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Verdict" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                              <div class="verdict-indicator"
+                                  [class.met]="scoringForm.get('Phase2.Verdict')?.value === 'Approved'">
+                                  <mat-icon>{{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? 'check_circle' :
+                                      'pending'
+                                      }}</mat-icon>
+                                  {{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? '✓ Approved to Proceed' :
+                                  'Waiting for Approval' }}
+                              </div>
+                          </div>
+
+                          <!-- Phase 2 Action Button -->
+                          <div class="phase-actions" style="display: flex; justify-content: flex-end; padding-top: 1rem;">
+                              <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" (click)="onSubmitPhase2()"
+                                  [disabled]="isSectionLocked('phase2') || (scoringForm.get('Phase2')?.invalid ?? false)" />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- PHASE 3: SCORING DIMENSIONS -->
+              <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase3'"
+                  [class.locked]="isSectionLocked('phase3')"
+                  [title]="isSectionLocked('phase3') ? 'Threshold not reached' : ''">
+                  <div class="accordion-header" tabindex="0" role="button" (click)="toggleSection('phase3')" (keydown.enter)="toggleSection('phase3')" (keydown.space)="toggleSection('phase3')">
+                      <div class="header-main">
+                          <span class="step-number">3</span>
+                          <div class="header-text">
+                              <h3><mat-icon>insights</mat-icon> Phase 3: Scoring Dimensions</h3>
+                              <p class="phase-description">Rank each dimension from 1 (lowest impact) to 3 (highest
+                                  benefit)</p>
+                          </div>
+                          @if (isSectionLocked('phase3')) {
+                            <span class="lock-icon"><mat-icon>lock</mat-icon></span>
+                          }
+                      </div>
+
+                      @if (!isSectionLocked('phase3')) {
+                        <div class="header-score">
+                            Final Score: <strong>{{ totalPhase3Score }}/36</strong>
+                        </div>
+                      }
+                      <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                  </div>
+
+
+
+                  <div class="accordion-content" formGroupName="Phase3">
+                      <!-- Rank Definitions (0-10 Scale mapping) -->
+                      <div class="low-high">
+                          <div class="def-group">
+                              <span class="def-rank low">Low (1)</span>
+                              <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource
+                                  consumption.
+                                  Suitable for small improvements.</p>
+                          </div>
+                          <div class="def-group">
+                              <span class="def-rank moderate">Moderate (2)</span>
+                              <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
+                                  effort. Represents steady value addition.</p>
+                          </div>
+                          <div class="def-group">
+                              <span class="def-rank high">High (3)</span>
+                              <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
+                                  commitment. Key to long-term strategy.</p>
+                          </div>
+                          <div class="def-note">
+                              <mat-icon>info</mat-icon>
+                              <p>Note: For <strong>Project Cost, Effort, and Risk</strong>, a "Low" score is a positive
+                                  outcome (less cost/risk is better).</p>
+                          </div>
+                      </div>
+
+                      <div class="vertical-form">
+                          <!-- Strategic Alignment -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>track_changes</mat-icon> Strategic Alignment <span class="info-tooltip"
+                                      title="How well does this idea align with our strategic goals?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of strategicAlignmentScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="StrategicAlignment" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Customer Impact -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>groups</mat-icon> Customer Impact <span class="info-tooltip"
+                                      title="What is the expected impact on customers or stakeholders?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of customerImpactScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="CustomerImpact" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Financial Benefit -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>monetization_on</mat-icon> Financial Benefit (ROI) <span
+                                      class="info-tooltip"
+                                      title="What is the projected financial return on investment?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of financialBenefitScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="FinancialBenefit" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Feasibility -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>construction</mat-icon> Feasibility (Tech/Ops) <span class="info-tooltip"
+                                      title="How feasible is the technical and operational implementation?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of feasibilityScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Feasibility" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Time to Value -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>speed</mat-icon> Time to Value <span class="info-tooltip"
+                                      title="How soon will the benefits of this idea be realized?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of timeToValueScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="TimeToValue" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Project Cost -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>savings</mat-icon> Project Cost <span class="info-tooltip"
+                                      title="What is the estimated cost of this project?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of costScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Cost" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Implementation Effort -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>engineering</mat-icon> Implementation Effort <span class="info-tooltip"
+                                      title="How much effort is required for implementation?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of effortScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Effort" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Execution Risk -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>report_problem</mat-icon> Execution Risk <span class="info-tooltip"
+                                      title="What are the risks associated with executing this idea?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of riskScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Risk" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Scalability -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>aspect_ratio</mat-icon> Scalability <span class="info-tooltip"
+                                      title="How easily can this solution be scaled?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of scalabilityScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Scalability" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Differentiation -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>workspace_premium</mat-icon> Differentiation <span class="info-tooltip"
+                                      title="How does this idea differentiate us from competitors?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of differentiationScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="Differentiation" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Sustainability Impact -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>eco</mat-icon> Sustainability & ESG <span class="info-tooltip"
+                                      title="What is the impact on sustainability and ESG goals?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of sustainabilityScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="SustainabilityImpact" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+
+                          <!-- Project Confidence -->
+                          <div class="form-group">
+                              <span class="label-heading"><mat-icon>verified</mat-icon> Project Confidence <span class="info-tooltip"
+                                      title="How confident are we in the success of this project?">ⓘ</span></span>
+                              <div class="radio-group">
+                                  @for (opt of confidenceScores; track opt.value) {
+                                    <label class="radio-option" [title]="opt.tip">
+                                        <input type="radio" formControlName="ProjectConfidence" [value]="opt.value">
+                                        <span>{{ opt.label }}</span>
+                                    </label>
+                                  }
+                              </div>
+                          </div>
+                      </div>
+
+                      <div class="summary-section">
+                          <div class="form-group">
+                              <label for="ReviewerComments"><mat-icon>comment</mat-icon> Final Reviewer Comments <span
+                                      class="text-danger">*</span></label>
+                              <textarea id="ReviewerComments" formControlName="ReviewerComments"
+                                  placeholder="Summarize your final verdict..."></textarea>
+                          </div>
+
+                          <div class="phase-actions"
+                              style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
+                              <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="button"
+                                  (click)="onSubmitPhase3()"
+                                  [disabled]="(scoringForm.get('Phase3')?.invalid) || isSectionLocked('phase3')" />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- PHASE 4: PROMOTE TO PROJECT -->
+              @if (idea) {
+                <div class="scoring-accordion phase4-special" [class.expanded]="expandedSection === 'phase4'"
+                    [class.locked]="isSectionLocked('phase4')"
+                    [title]="isSectionLocked('phase4') ? 'Prior evaluations must pass' : ''">
+                    <div class="accordion-header" tabindex="0" role="button" (click)="toggleSection('phase4')" (keydown.enter)="toggleSection('phase4')" (keydown.space)="toggleSection('phase4')">
+                        <div class="header-main">
+                            <span class="step-number">4</span>
+                            <div class="header-text">
+                                <h3><mat-icon>rocket_launch</mat-icon> Phase 4: Project Promotion</h3>
+                                <p class="phase-description">Finalize project details and assign an overseer.</p>
+                            </div>
+                            @if (isSectionLocked('phase4')) {
+                              <span class="lock-icon"><mat-icon>lock</mat-icon></span>
+                            }
+                        </div>
+
+                        @if (idea.isPromotedToProject) {
+                          <div class="header-status">
+
+                          </div>
+                        }
+
+                        <mat-icon class="expand-icon">{{ expandedSection === 'phase4' ? 'expand_more' : 'chevron_right'
+                            }}</mat-icon>
+                    </div>
+
+                    <div class="accordion-content">
+                        <div class="vertical-form promotion-form-container">
+                            @if (!idea.isPromotedToProject) {
+                              <div class="promotion-info-card">
+                                  <mat-icon>info</mat-icon>
+                                  <p>This idea has been <strong>Accepted</strong>. Promoting it will create a formal project
+                                      in the tracking system.</p>
+                              </div>
+                            }
+
+                            <div class="form-group">
+                                <label for="finalProjectTitle"><mat-icon>title</mat-icon> Project Final Title</label>
+                                <div class="input-with-icon textarea-icon">
+                                    <mat-icon>title</mat-icon>
+                                    <textarea id="finalProjectTitle" [(ngModel)]="projectData.title" [ngModelOptions]="{standalone: true}"
+                                        name="projectTitle" class="form-control premium" rows="2"
+                                        placeholder="Enter final project title"
+                                        [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="finalProjectDescription"><mat-icon>description</mat-icon> Description</label>
+                                <div class="input-with-icon textarea-icon">
+                                    <mat-icon>notes</mat-icon>
+                                    <textarea id="finalProjectDescription" [(ngModel)]="projectData.description" [ngModelOptions]="{standalone: true}"
+                                        name="projectDescription" class="form-control premium" rows="4"
+                                        placeholder="Enter final project description"
+                                        [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="projectOverseer"><mat-icon>person</mat-icon> Project Overseer</label>
+                                <div class="select-with-icon">
+                                    <mat-icon>person_search</mat-icon>
+                                    <select id="projectOverseer" [(ngModel)]="projectData.overseenByEmail" [ngModelOptions]="{standalone: true}"
+                                        name="overseerEmail" class="form-control premium" required
+                                        [disabled]="isPromoting || idea.isPromotedToProject || !allUsers.length">
+                                        <option value="" disabled selected>Select an overseer to lead this project
+                                        </option>
+                                        @for (user of allUsers; track user.email) {
+                                          <option [value]="user.email">
+                                              {{user.displayName || user.fullName || 'Unnamed User'}} ({{user.email}})
+                                          </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            @if (!idea.isPromotedToProject) {
+                              <div class="promotion-footer">
+                                  <button type="button" class="btn-primary-compact"
+                                      [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
+                                      (click)="createProjectFromIdea()">
+                                      @if (!isPromoting) {
+                                        <mat-icon>rocket_launch</mat-icon>
+                                      }
+                                      <span>{{ isPromoting ? 'Promoting...' : 'Promote to Project' }}</span>
+                                  </button>
+                              </div>
+                            }
+
+                            @if (idea.isPromotedToProject) {
+                              <div class="promotion-success-display">
+                                  <div class="success-content">
+                                      <div class="success-icon-wrapper">
+                                          <mat-icon>check_circle</mat-icon>
+                                      </div>
+                                      <div class="success-text">
+                                          <h4>Project Successfully Promoted</h4>
+                                          <p>The idea is now being tracked as a project. You can view its progress in the
+                                              Projects tab.</p>
+                                      </div>
+                                  </div>
+                              </div>
+                            }
                         </div>
                     </div>
-                    <mat-icon>{{ expandedSection === 'phase1' ? 'expand_more' : 'chevron_right' }}</mat-icon>
                 </div>
+              }
 
-                <div class="accordion-content" formGroupName="Phase1">
-                    <div class="read-only-details">
-                        <!-- Sequential Information List (Metadata + Narratives) -->
-                        <div class="metadata-list">
-                            <!-- Metadata Rows -->
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>person</mat-icon>
-                                    <label>Author</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.author || idea.author || idea.userName || 'Anonymous' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>track_changes</mat-icon>
-                                    <label>Strategic Alignment</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.strategicAlignment || idea.StrategicAlignment || 'N/A' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>category</mat-icon>
-                                    <label>Innovation Category</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.innovationCategory || idea.InnovationCategory || 'N/A' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>subtitles</mat-icon>
-                                    <label>Sub Category</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.subCategory || idea.SubCategory || 'N/A' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>memory</mat-icon>
-                                    <label>Technology Involved</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.technologyInvolved || idea.TechnologyInvolved || 'N/A' }}</p>
-                                </div>
-                            </div>
-
-                            <!-- Narrative Rows -->
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>error_outline</mat-icon>
-                                    <label>Problem Statement</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.problemStatement || idea.ProblemStatement || 'N/A' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row">
-                                <div class="meta-key">
-                                    <mat-icon>lightbulb_outline</mat-icon>
-                                    <label>Proposed Solution</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.proposedSolution || idea.ProposedSolution || 'N/A' }}</p>
-                                </div>
-                            </div>
-                            <div class="meta-row" *ngIf="idea.useCase || idea.UseCase">
-                                <div class="meta-key">
-                                    <mat-icon>assignment</mat-icon>
-                                    <label>Use Case & Benefits</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.useCase || idea.UseCase || 'N/A' }}</p>
-                                </div>
-                            </div>
-
-
-                            <div class="meta-row" *ngIf="idea.notes || idea.Notes">
-                                <div class="meta-key">
-                                    <mat-icon>note</mat-icon>
-                                    <label>Original Author Notes</label>
-                                </div>
-                                <div class="meta-value">
-                                    <p>{{ idea.notes || idea.Notes || 'N/A' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="scoring-inputs">
-                        <div class="form-group score-input-section">
-                            <label for="score-p1"><mat-icon>analytics</mat-icon> Evaluation Score (Threshold:
-                                70%)</label>
-                            <div class="score-control">
-                                <input type="number" id="score-p1" formControlName="Score" min="0" max="100"
-                                    (input)="clampScore($event)">
-                                <div class="threshold-indicator"
-                                    [class.met]="scoringForm.get('Phase1.Score')?.value >= 70">
-                                    {{ scoringForm.get('Phase1.Score')?.value >= 70 ? '✓ Met' : '✗ Low' }}
-                                </div>
-                            </div>
-                            <small class="field-error"
-                                *ngIf="scoringForm.get('Phase1.Score')?.invalid && scoringForm.get('Phase1.Score')?.touched">
-                                Score must be between 0 and 100.
-                            </small>
-                        </div>
-
-                        <!-- AI Reasoning Card -->
-                        <div class="ai-reasoning-card" *ngIf="parsedReasoning && parsedReasoning.length > 0">
-                            <div class="card-header">
-                                <mat-icon>psychology</mat-icon>
-                                <h4>AI Evaluation Analysis</h4>
-                            </div>
-                            <div class="card-content">
-                                <div class="reasoning-item" *ngFor="let item of parsedReasoning"
-                                    [class.overall]="item.label.toLowerCase().includes('overall')">
-                                    <span class="reasoning-label">{{ item.label }}</span>
-                                    <p class="reasoning-text">{{ item.content }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="phase-actions"
-                        style="display: flex; justify-content: flex-end; padding: 0 1.5rem 1.5rem;">
-                        <app-buttons buttonText="Update Idea" buttonStyleClass="btn-promote"
-                            (click)="updatePhase1Score()" [disabled]="isLoading" [isLoading]="isLoading">
-                            <mat-icon>sync</mat-icon>
-                        </app-buttons>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PHASE 2: BUSINESS CASE -->
-            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase2'"
-                [class.locked]="isSectionLocked('phase2')"
-                [title]="isSectionLocked('phase2') ? 'Threshold not reached' : ''">
-                <div class="accordion-header" (click)="toggleSection('phase2')">
-                    <div class="header-main">
-                        <span class="step-number">2</span>
-                        <div class="header-text">
-                            <h3><mat-icon>assignment</mat-icon> Phase 2: Business Case</h3>
-                            <p class="phase-description">Evaluate the ideas business viability, risk, and strategic fit
-                            </p>
-                        </div>
-                        <span *ngIf="isSectionLocked('phase2')" class="lock-icon"><mat-icon>lock</mat-icon></span>
-                    </div>
-                    <mat-icon>{{ expandedSection === 'phase2' ? 'expand_more' : 'chevron_right' }}</mat-icon>
-                </div>
-
-                <div class="accordion-content" formGroupName="Phase2">
-                    <div class="vertical-form">
-                        <div class="form-group">
-                            <label><mat-icon>stars</mat-icon> Expected Benefits <span class="info-tooltip"
-                                    title="What primary value or advantage does this idea offer?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of expectedBenefitsOptions"
-                                    [title]="opt.tip">
-                                    <input type="radio" formControlName="ExpectedBenefits" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>public</mat-icon> Impact Scope <span class="info-tooltip"
-                                    title="Who does this idea affect?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of impactScopeOptions" [title]="opt.tip">
-                                    <input type="radio" formControlName="ImpactScope" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>warning_amber</mat-icon> Risk Level <span class="info-tooltip"
-                                    title="How risky is this idea to pursue?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of riskLevelOptions" [title]="opt.tip">
-                                    <input type="radio" formControlName="RiskLevel" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>fact_check</mat-icon> Evaluation Status <span class="info-tooltip"
-                                    title="What is the current status of this evaluation?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of evaluationStatusOptions"
-                                    [title]="opt.tip">
-                                    <input type="radio" formControlName="EvaluationStatus" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>business</mat-icon> Responsible Dept <span class="info-tooltip"
-                                    title="Which team will own this?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of responsibleDeptOptions"
-                                    [title]="opt.tip">
-                                    <input type="radio" formControlName="OwnerDepartment" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>moving</mat-icon> Next Steps <span class="info-tooltip"
-                                    title="What should happen next?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of actionStepOptions" [title]="opt.tip">
-                                    <input type="radio" formControlName="NextSteps" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>pending_actions</mat-icon> Current Stage <span class="info-tooltip"
-                                    title="Where is this project currently?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of resultOutcomeOptions" [title]="opt.tip">
-                                    <input type="radio" formControlName="CurrentStage" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="DecisionDate"><mat-icon>event</mat-icon> Decision Date <span
-                                    class="info-tooltip" title="When should a decision be made?">ⓘ</span></label>
-                            <input type="date" id="DecisionDate" formControlName="DecisionDate" placeholder="dd/mm/yy">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="PlannedDurationWeeks"><mat-icon>history_toggle_off</mat-icon> Duration (Weeks)
-                                <span class="info-tooltip" title="How long will this take?">ⓘ</span></label>
-                            <input type="number" id="PlannedDurationWeeks" formControlName="PlannedDurationWeeks"
-                                placeholder="Select Duration">
-                        </div>
-
-                        <div class="form-group verdict-group">
-                            <label><mat-icon>gavel</mat-icon> Go / No-Go Verdict <span class="info-tooltip"
-                                    title="Should we go ahead with this idea?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of verdictOptions" [title]="opt.tip">
-                                    <input type="radio" formControlName="Verdict" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                            <div class="verdict-indicator"
-                                [class.met]="scoringForm.get('Phase2.Verdict')?.value === 'Approved'">
-                                <mat-icon>{{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? 'check_circle' :
-                                    'pending'
-                                    }}</mat-icon>
-                                {{ scoringForm.get('Phase2.Verdict')?.value === 'Approved' ? '✓ Approved to Proceed' :
-                                'Waiting for Approval' }}
-                            </div>
-                        </div>
-
-                        <!-- Phase 2 Action Button -->
-                        <div class="phase-actions" style="display: flex; justify-content: flex-end; padding-top: 1rem;">
-                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" (click)="onSubmitPhase2()"
-                                [disabled]="isSectionLocked('phase2') || (scoringForm.get('Phase2')?.invalid ?? false)" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PHASE 3: SCORING DIMENSIONS -->
-            <div class="scoring-accordion" [class.expanded]="expandedSection === 'phase3'"
-                [class.locked]="isSectionLocked('phase3')"
-                [title]="isSectionLocked('phase3') ? 'Threshold not reached' : ''">
-                <div class="accordion-header" (click)="toggleSection('phase3')">
-                    <div class="header-main">
-                        <span class="step-number">3</span>
-                        <div class="header-text">
-                            <h3><mat-icon>insights</mat-icon> Phase 3: Scoring Dimensions</h3>
-                            <p class="phase-description">Rank each dimension from 1 (lowest impact) to 3 (highest
-                                benefit)</p>
-                        </div>
-                        <span *ngIf="isSectionLocked('phase3')" class="lock-icon"><mat-icon>lock</mat-icon></span>
-                    </div>
-                    <div class="header-score" *ngIf="!isSectionLocked('phase3')">
-                        Final Score: <strong>{{ totalPhase3Score }}/36</strong>
-                    </div>
-                    <mat-icon>{{ expandedSection === 'phase3' ? 'expand_more' : 'chevron_right' }}</mat-icon>
-                </div>
-
-
-
-                <div class="accordion-content" formGroupName="Phase3">
-                    <!-- Rank Definitions (0-10 Scale mapping) -->
-                    <div class="low-high">
-                        <div class="def-group">
-                            <span class="def-rank low">Low (1)</span>
-                            <p><strong>Baseline / Low Impact:</strong> Minimal strategic shifts or low resource
-                                consumption.
-                                Suitable for small improvements.</p>
-                        </div>
-                        <div class="def-group">
-                            <span class="def-rank moderate">Moderate (2)</span>
-                            <p><strong>Standard / Balanced:</strong> Moderate organizational benefit with predictable
-                                effort. Represents steady value addition.</p>
-                        </div>
-                        <div class="def-group">
-                            <span class="def-rank high">High (3)</span>
-                            <p><strong>Significant / High Priority:</strong> Breakthrough potential or major resource
-                                commitment. Key to long-term strategy.</p>
-                        </div>
-                        <div class="def-note">
-                            <mat-icon>info</mat-icon>
-                            <p>Note: For <strong>Project Cost, Effort, and Risk</strong>, a "Low" score is a positive
-                                outcome (less cost/risk is better).</p>
-                        </div>
-                    </div>
-
-                    <div class="vertical-form">
-                        <!-- Strategic Alignment -->
-                        <div class="form-group">
-                            <label><mat-icon>track_changes</mat-icon> Strategic Alignment <span class="info-tooltip"
-                                    title="How well does this idea align with our strategic goals?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of strategicAlignmentScores"
-                                    [title]="opt.tip">
-                                    <input type="radio" formControlName="StrategicAlignment" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Customer Impact -->
-                        <div class="form-group">
-                            <label><mat-icon>groups</mat-icon> Customer Impact <span class="info-tooltip"
-                                    title="What is the expected impact on customers or stakeholders?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of customerImpactScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="CustomerImpact" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Financial Benefit -->
-                        <div class="form-group">
-                            <label><mat-icon>monetization_on</mat-icon> Financial Benefit (ROI) <span
-                                    class="info-tooltip"
-                                    title="What is the projected financial return on investment?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of financialBenefitScores"
-                                    [title]="opt.tip">
-                                    <input type="radio" formControlName="FinancialBenefit" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Feasibility -->
-                        <div class="form-group">
-                            <label><mat-icon>construction</mat-icon> Feasibility (Tech/Ops) <span class="info-tooltip"
-                                    title="How feasible is the technical and operational implementation?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of feasibilityScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Feasibility" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Time to Value -->
-                        <div class="form-group">
-                            <label><mat-icon>speed</mat-icon> Time to Value <span class="info-tooltip"
-                                    title="How soon will the benefits of this idea be realized?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of timeToValueScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="TimeToValue" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Project Cost -->
-                        <div class="form-group">
-                            <label><mat-icon>savings</mat-icon> Project Cost <span class="info-tooltip"
-                                    title="What is the estimated cost of this project?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of costScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Cost" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Implementation Effort -->
-                        <div class="form-group">
-                            <label><mat-icon>engineering</mat-icon> Implementation Effort <span class="info-tooltip"
-                                    title="How much effort is required for implementation?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of effortScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Effort" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Execution Risk -->
-                        <div class="form-group">
-                            <label><mat-icon>report_problem</mat-icon> Execution Risk <span class="info-tooltip"
-                                    title="What are the risks associated with executing this idea?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of riskScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Risk" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Scalability -->
-                        <div class="form-group">
-                            <label><mat-icon>aspect_ratio</mat-icon> Scalability <span class="info-tooltip"
-                                    title="How easily can this solution be scaled?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of scalabilityScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Scalability" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Differentiation -->
-                        <div class="form-group">
-                            <label><mat-icon>workspace_premium</mat-icon> Differentiation <span class="info-tooltip"
-                                    title="How does this idea differentiate us from competitors?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of differentiationScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="Differentiation" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Sustainability Impact -->
-                        <div class="form-group">
-                            <label><mat-icon>eco</mat-icon> Sustainability & ESG <span class="info-tooltip"
-                                    title="What is the impact on sustainability and ESG goals?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of sustainabilityScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="SustainabilityImpact" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Project Confidence -->
-                        <div class="form-group">
-                            <label><mat-icon>verified</mat-icon> Project Confidence <span class="info-tooltip"
-                                    title="How confident are we in the success of this project?">ⓘ</span></label>
-                            <div class="radio-group">
-                                <label class="radio-option" *ngFor="let opt of confidenceScores" [title]="opt.tip">
-                                    <input type="radio" formControlName="ProjectConfidence" [value]="opt.value">
-                                    <span>{{ opt.label }}</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="summary-section">
-                        <div class="form-group">
-                            <label for="ReviewerComments"><mat-icon>comment</mat-icon> Final Reviewer Comments <span
-                                    class="text-danger">*</span></label>
-                            <textarea id="ReviewerComments" formControlName="ReviewerComments"
-                                placeholder="Summarize your final verdict..."></textarea>
-                        </div>
-
-                        <div class="phase-actions"
-                            style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eee; margin-top: 1.5rem;">
-                            <app-buttons buttonText="Submit" buttonStyleClass="btn-promote" buttonType="button"
-                                (click)="onSubmitPhase3()"
-                                [disabled]="(scoringForm.get('Phase3')?.invalid) || isSectionLocked('phase3')" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PHASE 4: PROMOTE TO PROJECT -->
-            <div class="scoring-accordion phase4-special" [class.expanded]="expandedSection === 'phase4'"
-                [class.locked]="isSectionLocked('phase4')"
-                [title]="isSectionLocked('phase4') ? 'Prior evaluations must pass' : ''" *ngIf="idea">
-                <div class="accordion-header" (click)="toggleSection('phase4')">
-                    <div class="header-main">
-                        <span class="step-number">4</span>
-                        <div class="header-text">
-                            <h3><mat-icon>rocket_launch</mat-icon> Phase 4: Project Promotion</h3>
-                            <p class="phase-description">Finalize project details and assign an overseer.</p>
-                        </div>
-                        <span *ngIf="isSectionLocked('phase4')" class="lock-icon"><mat-icon>lock</mat-icon></span>
-                    </div>
-
-                    <div class="header-status" *ngIf="idea.isPromotedToProject">
-
-                    </div>
-
-                    <mat-icon class="expand-icon">{{ expandedSection === 'phase4' ? 'expand_more' : 'chevron_right'
-                        }}</mat-icon>
-                </div>
-
-                <div class="accordion-content">
-                    <div class="vertical-form promotion-form-container">
-                        <div class="promotion-info-card" *ngIf="!idea.isPromotedToProject">
-                            <mat-icon>info</mat-icon>
-                            <p>This idea has been <strong>Accepted</strong>. Promoting it will create a formal project
-                                in the tracking system.</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>title</mat-icon> Project Final Title</label>
-                            <div class="input-with-icon textarea-icon">
-                                <mat-icon>title</mat-icon>
-                                <textarea [(ngModel)]="projectData.title" [ngModelOptions]="{standalone: true}"
-                                    name="projectTitle" class="form-control premium" rows="2"
-                                    placeholder="Enter final project title"
-                                    [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>description</mat-icon> Description</label>
-                            <div class="input-with-icon textarea-icon">
-                                <mat-icon>notes</mat-icon>
-                                <textarea [(ngModel)]="projectData.description" [ngModelOptions]="{standalone: true}"
-                                    name="projectDescription" class="form-control premium" rows="4"
-                                    placeholder="Enter final project description"
-                                    [disabled]="isPromoting || idea.isPromotedToProject"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label><mat-icon>person</mat-icon> Project Overseer</label>
-                            <div class="select-with-icon">
-                                <mat-icon>person_search</mat-icon>
-                                <select [(ngModel)]="projectData.overseenByEmail" [ngModelOptions]="{standalone: true}"
-                                    name="overseerEmail" class="form-control premium" required
-                                    [disabled]="isPromoting || idea.isPromotedToProject || !allUsers.length">
-                                    <option value="" disabled selected>Select an overseer to lead this project
-                                    </option>
-                                    <option *ngFor="let user of allUsers" [value]="user.email">
-                                        {{user.displayName || user.userName || 'Unnamed User'}} ({{user.email}})
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="promotion-footer" *ngIf="!idea.isPromotedToProject">
-                            <button type="button" class="btn-primary-compact"
-                                [disabled]="isPromoting || !projectData.overseenByEmail || !projectData.title"
-                                (click)="createProjectFromIdea()">
-                                <mat-icon *ngIf="!isPromoting">rocket_launch</mat-icon>
-                                <span>{{ isPromoting ? 'Promoting...' : 'Promote to Project' }}</span>
-                            </button>
-                        </div>
-
-                        <div class="promotion-success-display" *ngIf="idea.isPromotedToProject">
-                            <div class="success-content">
-                                <div class="success-icon-wrapper">
-                                    <mat-icon>check_circle</mat-icon>
-                                </div>
-                                <div class="success-text">
-                                    <h4>Project Successfully Promoted</h4>
-                                    <p>The idea is now being tracked as a project. You can view its progress in the
-                                        Projects tab.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="scoring-actions" style="margin-top: 2rem;">
-                <app-buttons buttonText="CANCEL" buttonStyleClass="btn-leave-group" (click)="goBack()"
-                    [disabled]="isLoading" />
-            </div>
-        </form>
+              <div class="scoring-actions" style="margin-top: 2rem;">
+                  <app-buttons buttonText="CANCEL" buttonStyleClass="btn-leave-group" (click)="goBack()"
+                      [disabled]="isLoading" />
+              </div>
+          </form>
+        }
     </div>
 </div>

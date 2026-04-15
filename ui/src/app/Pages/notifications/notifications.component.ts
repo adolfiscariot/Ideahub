@@ -1,25 +1,20 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss']
 })
-export class NotificationsComponent implements OnInit {
+export class NotificationsComponent {
 
   requests: string[] = [];
   loading = false;
   errorMessage = '';
 
   private groupsService = inject(GroupsService);
-
-  ngOnInit(): void {
-    //this.loadRequests();
-  }
 
   loadRequests(groupId: string): void {
     this.loading = true;

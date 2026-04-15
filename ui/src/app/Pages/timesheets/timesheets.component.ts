@@ -40,16 +40,16 @@ export class TimesheetsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
 
-  @Input() isChildView: boolean = false;
+  @Input() isChildView = false;
   @Input() parentProjectId: number | null = null;
 
-  projectId: number = 0;
-  currentUserId: string = '';
-  isEditing: boolean = false;
+  projectId = 0;
+  currentUserId = '';
+  isEditing = false;
   editingLogId: number | null = null;
-  showDeleteModal: boolean = false;
+  showDeleteModal = false;
   logToDeleteId: number | null = null;
-  workDate: string = ''; // Initialized in ngOnInit
+  workDate = ''; // Initialized in ngOnInit
   availableTasks: RelevantTask[] = [];
   rows: TimesheetRow[] = [];
   recentLogs: TimesheetDto[] = [];
@@ -57,10 +57,10 @@ export class TimesheetsComponent implements OnInit {
   activeMediaTimesheetId: number | null = null;
 
   // Filtering State
-  filterUserId: string = '';
-  filterStartDate: string = '';
-  filterEndDate: string = '';
-  filterSeverity: string = '';
+  filterUserId = '';
+  filterStartDate = '';
+  filterEndDate = '';
+  filterSeverity = '';
   projectMembers: { id: string, name: string }[] = [];
 
   private formatDateToLocalISO(date: Date): string {
@@ -292,7 +292,7 @@ export class TimesheetsComponent implements OnInit {
           this.loadRecentLogs();
         }
       }
-    } catch (error) {
+    } catch {
       this.toastService.show('Failed to submit timesheet', 'error');
     } finally {
       this.isLoading = false;
@@ -341,7 +341,7 @@ export class TimesheetsComponent implements OnInit {
         this.loadRecentLogs();
         this.closeDeleteModal();
       }
-    } catch (error) {
+    } catch {
       this.toastService.show('Failed to delete log', 'error');
     }
   }
@@ -359,7 +359,7 @@ export class TimesheetsComponent implements OnInit {
     return 'Low';
   }
 
-  getSeverityStyle(severity: number | string | undefined | null): { [key: string]: string } {
+  getSeverityStyle(severity: number | string | undefined | null): Record<string, string> {
     const sev = severity ?? 0;
     const sevStr = typeof sev === 'string' ? sev.toLowerCase() : '';
     if (sevStr === 'high' || sev === 2) return { 'background-color': '#fff1f2', 'color': '#9f1239' };

@@ -10,7 +10,7 @@ import { NgIcon } from '@ng-icons/core';
   styleUrl: './dashboard-card.component.scss'
 })
 export class DashboardCardComponent {
-  @Input() title: string = '';
-  @Input() icon: string = '';
-  @Input() variant: string = '';
+  @Input() title = '';
+  @Input() icon = '';
+  @Input() variant = '';
 }
