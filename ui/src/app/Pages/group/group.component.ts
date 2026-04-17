@@ -11,7 +11,7 @@ import { ButtonsComponent } from "../../Components/buttons/buttons.component";
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
-import { NotificationsService } from '../../Services/notifications';
+import { MembershipNotificationsService } from '../../Services/membership-notifications.service';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -41,7 +41,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
-  private notificationsService = inject(NotificationsService);
+  private membershipNotificationsService = inject(MembershipNotificationsService);
   private fb = inject(FormBuilder);
 
   // Group data
@@ -463,7 +463,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
           this.toastService.show('Group deleted successfully!', 'success');
           this.loadGroups();
           this.groups = this.groups.filter(group => group.id.toString() !== groupId);
-          this.notificationsService.refreshPendingRequests();
+          this.membershipNotificationsService.refreshPendingRequests();
           this.closeDeleteModal();
 
           if (this.groups.length === 0) {

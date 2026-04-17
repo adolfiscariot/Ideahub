@@ -12,7 +12,7 @@ import { AuthService } from '../../Services/auth/auth.service';
 import { ToastService } from '../../Services/toast.service';
 import { Login } from '../../Interfaces/Login/login-interface';
 import { Router } from '@angular/router';
-import { NotificationsService } from '../../Services/notifications';
+import { MembershipNotificationsService } from '../../Services/membership-notifications.service';
 import { SignalrService } from '../../Services/signalr.service';
 
 @Component({
@@ -24,7 +24,7 @@ import { SignalrService } from '../../Services/signalr.service';
 export class LoginInputComponent {
   authService = inject(AuthService);
   toastService = inject(ToastService);
-  notificationsService = inject(NotificationsService);
+  membershipNotificationsService = inject(MembershipNotificationsService);
   router = inject(Router);
   isLoading = false;
   signalRService = inject(SignalrService);
@@ -56,7 +56,7 @@ export class LoginInputComponent {
             this.signalRService.startConnection();
           }, 50);
           this.router.navigate(['/home']);
-          this.notificationsService.refreshPendingRequests();
+          this.membershipNotificationsService.refreshPendingRequests();
           this.loginForm.reset();
         },
         error: (error) => {

@@ -7,7 +7,7 @@ import { GroupMembershipRequest } from '../Interfaces/Groups/groups-interfaces';
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationsService {
+export class MembershipNotificationsService {
   private pendingRequestsSubject = new BehaviorSubject<number>(0);
   pendingRequests$ = this.pendingRequestsSubject.asObservable();
 

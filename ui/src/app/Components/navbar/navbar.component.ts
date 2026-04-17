@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../Services/auth/auth.service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { NgIconsModule } from '@ng-icons/core';
-import { NotificationsService } from '../../Services/notifications';
+import { MembershipNotificationsService } from '../../Services/membership-notifications.service';
 import { NotificationService } from '../../Services/notification.service';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -21,14 +21,14 @@ import { combineLatest, map } from 'rxjs';
 export class NavbarComponent implements OnInit {
   date = new Date().getFullYear();
   authService = inject(AuthService);
-  notificationsService = inject(NotificationsService);   // group requests count
+  membershipNotificationsService = inject(MembershipNotificationsService);   // group requests count
   notificationService = inject(NotificationService);     // comment notifications count
 
   loggedInStatus = this.authService.isLoggedIn$;
 
   // Combined badge: group requests + unread comment notifications
   totalBadge$ = combineLatest([
-    this.notificationsService.pendingRequests$,
+    this.membershipNotificationsService.pendingRequests$,
     this.notificationService.unreadCount$
   ]).pipe(
     map(([requests, comments]) => requests + comments)

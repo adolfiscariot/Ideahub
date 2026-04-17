@@ -4,7 +4,7 @@ import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interface
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
-import { NotificationsService } from '../../Services/notifications';
+import { MembershipNotificationsService } from '../../Services/membership-notifications.service';
 import { NotificationService, CommentNotification } from '../../Services/notification.service';
 import { SignalrService } from '../../Services/signalr.service';
 import { Subscription } from 'rxjs';
@@ -21,7 +21,7 @@ import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   private groupsService = inject(GroupsService);
   private toastService = inject(ToastService);
-  private notificationsService = inject(NotificationsService);
+  private membershipNotificationsService = inject(MembershipNotificationsService);
   private notificationService = inject(NotificationService);
   private signalrService = inject(SignalrService);
   private router = inject(Router);
@@ -101,7 +101,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       next: () => {
         this.toastService.show('Request accepted', 'success');
         this.removeRequestFromGroup(req);
-        this.notificationsService.decrement(1);
+        this.membershipNotificationsService.decrement(1);
       },
       error: () => {
         this.toastService.show('Failed to accept request', 'error');
@@ -114,7 +114,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       next: () => {
         this.toastService.show('Request rejected', 'success');
         this.removeRequestFromGroup(req);
-        this.notificationsService.decrement(1);
+        this.membershipNotificationsService.decrement(1);
       },
       error: () => {
         this.toastService.show('Failed to reject request', 'error');
@@ -134,7 +134,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
           completed++;
           if (completed === requests.length && !failed) {
             this.toastService.show('All requests accepted', 'success');
-            this.notificationsService.decrement(requests.length);
+            this.membershipNotificationsService.decrement(requests.length);
           }
         },
         error: () => {
@@ -182,7 +182,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       this.groupedRequests.splice(groupIndex, 1);
     }
 
-    this.notificationsService.set(this.totalRequests);
+    this.membershipNotificationsService.set(this.totalRequests);
   }
 
   // ── Comment Notifications ──────────────────────────────────

@@ -99,7 +99,7 @@
               <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
               <span>Notifications</span>
             </div>
-            @if (notificationsService.pendingRequests$ | async; as count) {
+            @if (membershipNotificationsService.pendingRequests$ | async; as count) {
               <span class="mobile-notif-badge" [innerText]="count > 9 ? '9+' : count"></span>
             }
           </a>
