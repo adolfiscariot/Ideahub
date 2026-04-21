@@ -280,7 +280,8 @@ public class AuthController : ControllerBase
             {
                 AccessToken = accessToken,
                 RefreshToken = "cookie",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
+                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+                PasswordSetupRequired = string.IsNullOrEmpty(user.PasswordHash)
             }));
         }
 
@@ -554,4 +555,113 @@ public class AuthController : ControllerBase
         }
     }
 
+    
+    [HttpPost("sso-login")]
+    public async Task<IActionResult> SsoLogin([FromBody] SsoExchangeDto dto)
+    {
+
+        var ssoSecretHex = _configuration["Jwt:SsoSharedSecret"];
+        var ssoIssuer = _configuration["Jwt:SsoIssuer"];
+        var ssoAudience = _configuration["Jwt:SsoAudience"];
+
+        if (string.IsNullOrEmpty(ssoSecretHex))
+            return StatusCode(500, ApiResponse.Fail("SSO not configured on server"));
+        
+
+        try
+        {
+            var key = JwtHexToBytes.FromHexToBytes(ssoSecretHex);
+            var tokenHandler = new JwtSecurityTokenHandler();
+        
+            // Validate token from the Intranet
+            var principal = tokenHandler.ValidateToken(dto.Token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                
+                ValidateIssuer = true,
+                ValidIssuer = ssoIssuer,
+                
+                ValidateAudience = true,
+                ValidAudience = ssoAudience,
+                
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            // Extract identity from the passport
+            var email = principal.FindFirst("email")?.Value;
+            var name = principal.FindFirst("name")?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(ApiResponse.Fail("Invalid SSO token: Email missing"));
+
+            // Auto-Provisioning (Find or Create User)
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogInformation("SSO: Creating new account for {Email}", email);
+                user = new IdeahubUser
+                {
+                    DisplayName = name ?? email.Split('@')[0],
+                    Email = email,
+                    UserName = email,
+                    EmailConfirmed = true 
+                };
+                
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                    return BadRequest(ApiResponse.Fail("Failed to create SSO user", createResult.Errors.Select(e => e.Description).ToList()));
+
+                await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
+            }
+
+            // Issue Native IdeaHub access tokens to allow for login
+            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
+
+            _logger.LogInformation("SSO: Hand-off successful for {Email}", email);
+
+            return Ok(ApiResponse.Ok("SSO Login Successful", new TokenResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+                PasswordSetupRequired = string.IsNullOrEmpty(user.PasswordHash)
+            }));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("SSO Handoff failed: {Message}", ex.Message);
+            return BadRequest(ApiResponse.Fail("SSO Authentication failed"));
+        }
+    }
+
+    [Authorize]
+    [HttpPost("set-initial-password")]
+    public async Task<IActionResult> SetInitialPassword([FromBody] SetPasswordDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ApiResponse.Fail("Invalid request data"));
+
+        var user = await _userManager.FindByEmailAsync(dto.Email);
+        if (user == null)
+            return NotFound(ApiResponse.Fail("User not found"));
+
+        // Verify the user currently has NO password hash
+        if (!string.IsNullOrEmpty(user.PasswordHash))
+        {
+            return BadRequest(ApiResponse.Fail("Password already set. Please use the reset password functionality if you forgot it."));
+        }
+
+        var result = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("User {Email} set their initial local password.", dto.Email);
+            return Ok(ApiResponse.Ok("Password set successfully"));
+        }
+
+        return BadRequest(ApiResponse.Fail("Failed to set password", result.Errors.Select(e => e.Description).ToList()));
+    }
 }
