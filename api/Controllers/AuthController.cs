@@ -614,11 +614,16 @@ public class AuthController : ControllerBase
                     LastLoginAt = DateTime.UtcNow
                 };
                 
-                var createResult = await _userManager.CreateAsync(user);
-                if (!createResult.Succeeded)
-                    return BadRequest(ApiResponse.Fail("Failed to create SSO user", createResult.Errors.Select(e => e.Description).ToList()));
+                var roleResult = await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
+                if (!roleResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    _logger.LogWarning("SSO role assignment failed for {Email}", email);
+                    return BadRequest(ApiResponse.Fail(
+                        "Role assignment failed",
+                        roleResult.Errors.Select(e => e.Description).ToList()));
+                }
 
-                await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
             }
 
             // Issue Native IdeaHub access tokens to allow for login
