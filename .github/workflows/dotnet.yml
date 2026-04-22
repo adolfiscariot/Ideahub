@@ -25,7 +25,7 @@ jobs:
         working-directory: ui
 
       - name: Run JS tests
-        run: npm run test
+        run: npm run test:ci
         working-directory: ui
       
       - name: Setup dotnet
