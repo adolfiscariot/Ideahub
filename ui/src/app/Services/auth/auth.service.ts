@@ -380,8 +380,7 @@ export class AuthService {
   }
 
   setInitialPassword(password: string): Observable<ApiResponse<void>> {
-    const email = this.getEmail();
-    return this.http.post<ApiResponse<void>>(`${this.authUrl}/set-initial-password`, { email, newPassword: password, confirmPassword: password }).pipe(
+    return this.http.post<ApiResponse<void>>(`${this.authUrl}/set-initial-password`, { newPassword: password, confirmPassword: password }).pipe(
       map(response => this.convertResponse<void>(response)),
       tap(response => {
         if (response.success) {
