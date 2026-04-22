@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v4
       
@@ -15,8 +15,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - run: npm run lint
-      - run: npm run test
+
+      - name: Install JS dependencies
+        run: npm install
+        working-directory: ui
+
+      - name: Run JS lint
+        run: npm run lint
+        working-directory: ui
+
+      - name: Run JS tests
+        run: npm run test
+        working-directory: ui
       
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
