@@ -41,8 +41,11 @@ export class SsoLoginComponent implements OnInit {
       return;
     }
 
+    // Security: Clear the token from the URL and browser history immediately
+    history.replaceState({}, '', window.location.pathname);
+
     const ssoUrl = `${environment.apiUrl}/auth/sso-login`;
-    
+
     this.http.post<ApiResponse<AuthData>>(ssoUrl, { token })
       .subscribe({
         next: (response) => {
@@ -55,7 +58,7 @@ export class SsoLoginComponent implements OnInit {
             this.authService.setAuthData(response.data);
 
             console.log('SSO: State updated. Attempting redirect to /home...');
-            
+
             this.router.navigate(['/home']).then(navigated => {
               if (navigated) {
                 console.log('SSO: Navigation successful!');

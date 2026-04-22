@@ -586,8 +586,11 @@ public class AuthController : ControllerBase
                 ValidAudience = ssoAudience,
                 
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+                ClockSkew = TimeSpan.Zero,
+
+                // Pin the algorithm to HmacSha256
+                ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
+            }, out _);
 
             // Extract identity from the passport
             var email = principal.FindFirst("email")?.Value;
@@ -606,7 +609,9 @@ public class AuthController : ControllerBase
                     DisplayName = name ?? email.Split('@')[0],
                     Email = email,
                     UserName = email,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    LastLoginAt = DateTime.UtcNow
                 };
                 
                 var createResult = await _userManager.CreateAsync(user);
@@ -621,20 +626,35 @@ public class AuthController : ControllerBase
             var refreshToken = _tokenService.GenerateRefreshToken();
             await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
 
+            // Set Refresh Token in a persistent, HttpOnly cookie (aligning with regular login)
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Set to true in prod for HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+
             _logger.LogInformation("SSO: Hand-off successful for {Email}", email);
 
             return Ok(ApiResponse.Ok("SSO Login Successful", new TokenResponse
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken,
+                RefreshToken = "cookie",
                 RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
                 PasswordSetupRequired = string.IsNullOrEmpty(user.PasswordHash)
             }));
         }
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogWarning("SSO Token validation failed: {Message}", ex.Message);
+            return Unauthorized(ApiResponse.Fail("Invalid or expired SSO token"));
+        }
         catch (Exception ex)
         {
-            _logger.LogError("SSO Handoff failed: {Message}", ex.Message);
-            return BadRequest(ApiResponse.Fail("SSO Authentication failed"));
+            _logger.LogError(ex, "SSO Handoff failed: {Message}", ex.Message);
+            return StatusCode(500, ApiResponse.Fail("An internal error occurred during SSO authentication"));
         }
     }
 
@@ -645,7 +665,11 @@ public class AuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ApiResponse.Fail("Invalid request data"));
 
-        var user = await _userManager.FindByEmailAsync(dto.Email);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(ApiResponse.Fail("Invalid session"));
+
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
             return NotFound(ApiResponse.Fail("User not found"));
 
@@ -658,7 +682,7 @@ public class AuthController : ControllerBase
         var result = await _userManager.AddPasswordAsync(user, dto.NewPassword);
         if (result.Succeeded)
         {
-            _logger.LogInformation("User {Email} set their initial local password.", dto.Email);
+            _logger.LogInformation("User {Email} set their initial local password.", user.Email);
             return Ok(ApiResponse.Ok("Password set successfully"));
         }
 
