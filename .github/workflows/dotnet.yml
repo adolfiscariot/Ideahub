@@ -1,34 +1,56 @@
-name: .NET
+name: Full Stack CI Pipeline
 
 on:
   pull_request:
     branches: [ "dev" ]
 
 jobs:
-  build:
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+  frontend-ci:
+    name: Node Validation
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v4
       
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-
-      - name: Install JS dependencies
+      
+      - name: Install dependencies
         run: npm install
         working-directory: ui
-
-      - name: Run JS lint
+        
+      - name: Check Formatting
+        run: npm run format:check
+        working-directory: ui
+        
+      - name: Lint & Static Analysis
         run: npm run lint
         working-directory: ui
-
-      - name: Run JS tests
-        run: npm run test:ci
+        
+      - name: Unit Tests
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
         working-directory: ui
+        
+      - name: Integration Tests
+        run: npm run test:integration
+        working-directory: ui
+
+  # ==========================================
+  #.NET JOB
+  # ==========================================
+  backend-ci:
+    name: .NET Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
       
-      - name: Setup dotnet
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
@@ -36,15 +58,30 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
 
-      - name: Test with dotnet
-        run: dotnet test --no-restore --logger trx --results-directory "TestResults"
+      - name: Check Formatting
+        # Fails the build if code deviates from .editorconfig styles
+        run: dotnet format whitespace --verify-no-changes
+
+      - name: Lint & Static Analysis (Analyzers)
+        # Catches code smells and style violations
+        run: dotnet format analyzers --verify-no-changes
+
+      - name: Build with Strict Warnings
+        # Compiles the code and treats warnings as errors to enforce strict static analysis
+        run: dotnet build --no-restore -warnaserror
+
+      - name: Unit Tests
+        # Executes tests decorated with [Trait("Category", "Unit")]
+        run: dotnet test --no-build --verbosity normal --filter "Category=Unit" --logger trx --results-directory "TestResults/Unit"
+
+      - name: Integration Tests
+        # Executes tests decorated with [Trait("Category", "Integration")]
+        run: dotnet test --no-build --verbosity normal --filter "Category=Integration" --logger trx --results-directory "TestResults/Integration"
       
-      - name: Upload dotnet test results
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
-        with:
-          name: dotnet-results
-          path: TestResults
-        # Use always() to always run this step to publish test results when there are test failures
+        # Ensures test results are published even if the tests fail
         if: ${{ always() }}
-
-
+        with:
+          name: dotnet-test-results
+          path: TestResults

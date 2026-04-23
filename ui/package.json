@@ -1,6 +1,7 @@
 {
   "name": "ideahub",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --port 4200",
@@ -9,9 +10,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\"",
+    "test:integration": "echo 'Integration tests not yet configured' && exit 0"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^20.1.1",
     "@angular/cdk": "^20.1.1",
