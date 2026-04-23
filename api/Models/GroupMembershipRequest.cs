@@ -21,7 +21,7 @@ public class GroupMembershipRequest
     public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
 
     [DataType(DataType.DateTime)]
-    public DateTime? AcceptedOrRejectedAt { get; set; } 
+    public DateTime? AcceptedOrRejectedAt { get; set; }
 
     //Navigation properties
     public Group Group { get; set; } = null!;
@@ -30,6 +30,6 @@ public class GroupMembershipRequest
 public enum Status
 {
     Pending = 0,
-    Approved = 1, 
+    Approved = 1,
     Rejected = 2
 }

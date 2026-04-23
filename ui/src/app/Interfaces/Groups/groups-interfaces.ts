@@ -5,11 +5,11 @@ export interface Group {
   description: string;
   isActive: boolean;
   createdAt: Date | string;
-  createdByUserId: string; 
+  createdByUserId: string;
   isDeleted: boolean;
-  deletedByUserId?: string; 
+  deletedByUserId?: string;
   deletedAt?: Date | string;
-   
+
   memberCount?: number;
   ideaCount?: number;
   isMember?: boolean;
@@ -18,16 +18,16 @@ export interface Group {
     displayName: string;
     email: string;
   };
-  
+
   userRoleInGroup?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
   isPublic?: 'Public' | 'Private' | boolean;
 }
 export interface UserGroup {
-    userId: string; // Changed from number to string
-    groupId: string;
-    joinedAt: Date | string;
-    roleId: string;
-    roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
+  userId: string; // Changed from number to string
+  groupId: string;
+  joinedAt: Date | string;
+  roleId: string;
+  roleName?: 'SuperAdmin' | 'GroupAdmin' | 'Regular User';
 }
 
 export interface GroupMember {
@@ -51,12 +51,11 @@ export interface AddGroup {
 }
 
 export interface UserWithRoles {
-    id: number;
-    displayName: string;
-    email: string;
-    roles: string[]; // array of role names
+  id: number;
+  displayName: string;
+  email: string;
+  roles: string[]; // array of role names
 }
-
 
 // Group Membership Request - SINGLE DEFINITION
 export interface GroupMembershipRequest {
@@ -64,9 +63,9 @@ export interface GroupMembershipRequest {
   userId: string;
   groupId: string;
   status: 'Pending' | 'Approved' | 'Rejected';
-  requestedAt: string; 
+  requestedAt: string;
   acceptedOrRejectedAt?: string;
-  
+
   // Additional info from joins (optional)
   userName?: string;
   userEmail?: string;

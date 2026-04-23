@@ -29,7 +29,7 @@ namespace Ideahub.Tests
 
             _context = new IdeahubDbContext(options);
             _mockMediaService = new Mock<IMediaFileService>();
-            
+
             var store = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
@@ -137,7 +137,7 @@ namespace Ideahub.Tests
         public async Task UploadMedia_ExceedsSize_ShouldReturnBadRequest()
         {
             await SeedBasicData();
-            var fileMock = CreateMockFile("huge.png", 21L * 1024 * 1024); 
+            var fileMock = CreateMockFile("huge.png", 21L * 1024 * 1024);
             var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Image };
 
             var result = await _controller.UploadMedia(dto, ideaId: 10);
@@ -151,7 +151,7 @@ namespace Ideahub.Tests
             await SeedBasicData();
             var fileMock = CreateMockFile("proof.pdf", 1024);
             var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Document };
-            
+
             var ts = new Timesheet { Id = 1, UserId = "someone-else", Description = "Work", WorkDate = DateTime.Now };
             _context.Timesheets.Add(ts);
             await _context.SaveChangesAsync();
@@ -228,7 +228,7 @@ namespace Ideahub.Tests
             _mockMediaService.Setup(s => s.DeleteFileAsync(It.IsAny<string>())).ReturnsAsync(true);
 
             _mockMediaService.Setup(s => s.SaveFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>()))
-                .Callback(() => _context.Dispose()) 
+                .Callback(() => _context.Dispose())
                 .ReturnsAsync(savedPath);
 
             var dto = new MediaDto { File = fileMock.Object, MediaType = MediaType.Image };

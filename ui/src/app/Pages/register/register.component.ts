@@ -8,4 +8,4 @@ import { RegistrationInputComponent } from '../../Components/registration-input/
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent { }
+export class RegisterComponent {}

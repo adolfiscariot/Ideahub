@@ -98,12 +98,13 @@ public class IdeaController : ControllerBase
             }
 
             // Trigger Email Notifications
-            _ = NotifyUsersOfNewIdeaAsync(idea); 
+            _ = NotifyUsersOfNewIdeaAsync(idea);
 
             return Ok(ApiResponse.Ok($"New Idea Created by {userEmail}",
-            new {
-                    id = idea.Id
-                }
+            new
+            {
+                id = idea.Id
+            }
             ));
         }
         catch (Exception e)
@@ -129,7 +130,7 @@ public class IdeaController : ControllerBase
             // 1. Get Group Members (excluding author)
             var groupMembers = await scopedContext.UserGroups
                 .Where(ug => ug.GroupId == idea.GroupId && ug.UserId != idea.UserId)
-                .Select(ug => new { Email = ug.User!.Email, Name = ug.User.DisplayName ?? ug.User.UserName })
+                .Select(ug => new { Email = ug.User!.Email!, Name = ug.User.DisplayName ?? ug.User.UserName })
                 .Where(u => !string.IsNullOrEmpty(u.Email))
                 .ToListAsync();
 
@@ -147,10 +148,10 @@ public class IdeaController : ControllerBase
                 .Select(g => g.First())
                 .ToList();
 
-            _logger.LogInformation("Notification Debug: IdeaId={IdeaId}, GroupMembers={GMCount}, CommitteeMembers={CMCount}, TotalUniqueRecipients={Total}", 
+            _logger.LogInformation("Notification Debug: IdeaId={IdeaId}, GroupMembers={GMCount}, CommitteeMembers={CMCount}, TotalUniqueRecipients={Total}",
                 idea.Id, groupMembers.Count, committeeMembers.Count, recipients.Count);
 
-            if (!recipients.Any()) 
+            if (!recipients.Any())
             {
                 _logger.LogWarning("No recipients found for idea {IdeaId} notification.", idea.Id);
                 return;
@@ -193,7 +194,7 @@ public class IdeaController : ControllerBase
             }).ToList();
 
             await Task.WhenAll(committeeTasks);
-            
+
             _logger.LogInformation("Finished sending notifications for idea {ideaId}. Total sent: {count}", idea.Id, groupMembers.Count + committeeToNotify.Count);
         }
         catch (Exception ex)
@@ -283,7 +284,8 @@ public class IdeaController : ControllerBase
         var ideaDataToReturn = new List<object>();
         foreach (var idea in ideas)
         {
-            ideaDataToReturn.Add(new {
+            ideaDataToReturn.Add(new
+            {
                 idea.Id,
                 idea.Title,
                 idea.StrategicAlignment,
@@ -306,7 +308,7 @@ public class IdeaController : ControllerBase
             });
         }
 
-        
+
         return Ok(ApiResponse.Ok($"{ideas.Count()} Ideas found", ideaDataToReturn));
     }
 
@@ -530,11 +532,11 @@ public class IdeaController : ControllerBase
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                _logger.LogError("User not authenticated");
-                return Unauthorized(ApiResponse.Fail("User not authenticated"));
-            }
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _logger.LogError("User not authenticated");
+            return Unauthorized(ApiResponse.Fail("User not authenticated"));
+        }
         var idea = await _context.Ideas.FindAsync(ideaId);
         if (idea == null)
             return NotFound(ApiResponse.Fail("Idea not found"));

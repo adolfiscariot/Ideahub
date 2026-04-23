@@ -1,9 +1,17 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { VoteService } from './vote.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { VoteRequest, UnvoteRequest, SeeVotesRequest, VoteDetails } from '../Interfaces/Ideas/idea-interfaces';
+import {
+  VoteRequest,
+  UnvoteRequest,
+  SeeVotesRequest,
+  VoteDetails,
+} from '../Interfaces/Ideas/idea-interfaces';
 import { environment } from '../../environments/environment';
 
 describe('VoteService', () => {
@@ -15,7 +23,7 @@ describe('VoteService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [VoteService]
+      providers: [VoteService],
     });
     service = TestBed.inject(VoteService);
     http_mock = TestBed.inject(HttpTestingController);
@@ -32,19 +40,23 @@ describe('VoteService', () => {
   describe('castVote()', () => {
     it('should POST /cast-vote with groupId and ideaId as query params', () => {
       const request: VoteRequest = { groupId: 'g1', ideaId: 'i1' };
-      const mock_response: ApiResponse<void> = { success: true, message: 'Voted' };
+      const mock_response: ApiResponse<void> = {
+        success: true,
+        message: 'Voted',
+      };
 
-      service.castVote(request).subscribe(res => {
+      service.castVote(request).subscribe((res) => {
         expect(res.success).toBeTrue();
       });
 
-      const req = http_mock.expectOne(r => 
-        r.url === `${api_url}/cast-vote` && 
-        r.params.get('groupId') === 'g1' && 
-        r.params.get('ideaId') === 'i1'
+      const req = http_mock.expectOne(
+        (r) =>
+          r.url === `${api_url}/cast-vote` &&
+          r.params.get('groupId') === 'g1' &&
+          r.params.get('ideaId') === 'i1',
       );
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({}); 
+      expect(req.request.body).toEqual({});
       req.flush(mock_response);
     });
   });
@@ -52,13 +64,16 @@ describe('VoteService', () => {
   describe('unvote()', () => {
     it('should POST /unvote with voteId as query param', () => {
       const request: UnvoteRequest = { voteId: '500' };
-      const mock_response: ApiResponse<void> = { success: true, message: 'Removed' };
+      const mock_response: ApiResponse<void> = {
+        success: true,
+        message: 'Removed',
+      };
 
       service.unvote(request).subscribe();
 
-      const req = http_mock.expectOne(r => 
-        r.url === `${api_url}/unvote` && 
-        r.params.get('voteId') === '500'
+      const req = http_mock.expectOne(
+        (r) =>
+          r.url === `${api_url}/unvote` && r.params.get('voteId') === '500',
       );
       expect(req.request.method).toBe('POST');
       req.flush(mock_response);
@@ -68,24 +83,30 @@ describe('VoteService', () => {
   describe('seeVotes()', () => {
     it('should GET /see-votes with ideaId as query param', () => {
       const request: SeeVotesRequest = { ideaId: 'i1' };
-      const mock_details: VoteDetails[] = [{ 
-        voteId: 1, 
-        userId: 'u1', 
-        userName: 'User 1',
-        userEmail: 'u1@test.com',
-        ideaId: 10,
-        isDeleted: false,
-        time: '2024-01-01'
-      } as VoteDetails];
-      const mock_response: ApiResponse<VoteDetails[]> = { success: true, message: 'ok', data: mock_details };
+      const mock_details: VoteDetails[] = [
+        {
+          voteId: 1,
+          userId: 'u1',
+          userName: 'User 1',
+          userEmail: 'u1@test.com',
+          ideaId: 10,
+          isDeleted: false,
+          time: '2024-01-01',
+        } as VoteDetails,
+      ];
+      const mock_response: ApiResponse<VoteDetails[]> = {
+        success: true,
+        message: 'ok',
+        data: mock_details,
+      };
 
-      service.seeVotes(request).subscribe(res => {
+      service.seeVotes(request).subscribe((res) => {
         expect(res.data?.length).toBe(1);
       });
 
-      const req = http_mock.expectOne(r => 
-        r.url === `${api_url}/see-votes` && 
-        r.params.get('ideaId') === 'i1'
+      const req = http_mock.expectOne(
+        (r) =>
+          r.url === `${api_url}/see-votes` && r.params.get('ideaId') === 'i1',
       );
       expect(req.request.method).toBe('GET');
       req.flush(mock_response);

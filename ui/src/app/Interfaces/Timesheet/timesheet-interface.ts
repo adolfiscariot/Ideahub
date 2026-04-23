@@ -1,5 +1,3 @@
-
-
 export interface TimesheetDto {
   id?: number;
   taskId: number;
@@ -35,7 +33,7 @@ export interface TimesheetDetails {
 export enum BlockerSeverity {
   Low = 0,
   Medium = 1,
-  High = 2
+  High = 2,
 }
 
 export interface RelevantTask {

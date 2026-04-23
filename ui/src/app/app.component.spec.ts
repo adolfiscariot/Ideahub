@@ -13,8 +13,8 @@ describe('AppComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        provideIcons({})
-      ]
+        provideIcons({}),
+      ],
     }).compileComponents();
   });
 
@@ -29,5 +29,4 @@ describe('AppComponent', () => {
     const app = fixture.componentInstance;
     expect(app.title).toEqual('Ideahub');
   });
-
 });

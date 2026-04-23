@@ -47,7 +47,7 @@
 }
 
 .password-info-icon.met {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .password-info-icon.not-met {
@@ -86,7 +86,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   min-width: 180px; /* Even smaller */
   max-width: 200px;
   z-index: 1000;
@@ -120,7 +120,7 @@
 }
 
 .password-rules .met {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .strength-bars {
@@ -137,13 +137,11 @@
 }
 
 .strength-bars span.active {
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .form-section label,
 .password-header label {
-  
-  
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 4px;
@@ -165,7 +163,6 @@
 .show-password-btn .material-icons {
   font-size: 20px;
 }
-
 
 .registration-form:not(.page-header) {
   background-color: plum;

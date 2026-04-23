@@ -14,7 +14,7 @@ public class SubTaskAssignee
 
     [Required]
     public required string UserId { get; set; } = null!;
-    public IdeahubUser? User { get; set; } 
+    public IdeahubUser? User { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

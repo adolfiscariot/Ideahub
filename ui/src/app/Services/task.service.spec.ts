@@ -1,9 +1,17 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { TaskService } from './task.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { TaskDetails, TaskDto, SubTaskDetails, SubTaskDto } from '../Interfaces/Tasks/task-interface';
+import {
+  TaskDetails,
+  TaskDto,
+  SubTaskDetails,
+  SubTaskDto,
+} from '../Interfaces/Tasks/task-interface';
 import { environment } from '../../environments/environment';
 
 describe('TaskService', () => {
@@ -24,7 +32,7 @@ describe('TaskService', () => {
     taskAssignees: [],
     projectId: 101,
     mediaCount: 0,
-    subTasks: []
+    subTasks: [],
   };
 
   const mock_subtask: SubTaskDetails = {
@@ -36,13 +44,13 @@ describe('TaskService', () => {
     endDate: '2024-01-02T00:00:00Z',
     isCompleted: false,
     subTaskAssignees: [],
-    mediaCount: 0
+    mediaCount: 0,
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [TaskService]
+      providers: [TaskService],
     });
     service = TestBed.inject(TaskService);
     http_mock = TestBed.inject(HttpTestingController);
@@ -59,9 +67,13 @@ describe('TaskService', () => {
   // Task CRUD
   describe('Primary Tasks', () => {
     it('should GET /get-tasks/{projectId}', () => {
-      const mock_response: ApiResponse<TaskDetails[]> = { success: true, message: 'ok', data: [mock_task] };
+      const mock_response: ApiResponse<TaskDetails[]> = {
+        success: true,
+        message: 'ok',
+        data: [mock_task],
+      };
 
-      service.getProjectTasks(101).subscribe(res => {
+      service.getProjectTasks(101).subscribe((res) => {
         expect(res.data?.length).toBe(1);
         expect(res.data?.[0].title).toBe('Design UI');
       });
@@ -72,15 +84,19 @@ describe('TaskService', () => {
     });
 
     it('should POST /create/{projectId}', () => {
-      const dto: TaskDto = { 
-        title: 'New Task', 
+      const dto: TaskDto = {
+        title: 'New Task',
         description: 'Desc',
         startDate: '2024-01-01',
         endDate: '2024-01-02',
         labels: 'Dev',
-        taskAssignees: []
+        taskAssignees: [],
       };
-      const mock_response: ApiResponse<TaskDetails> = { success: true, message: 'ok', data: { ...mock_task, title: 'New Task' } };
+      const mock_response: ApiResponse<TaskDetails> = {
+        success: true,
+        message: 'ok',
+        data: { ...mock_task, title: 'New Task' },
+      };
 
       service.createTask(101, dto).subscribe();
 
@@ -91,7 +107,10 @@ describe('TaskService', () => {
     });
 
     it('should PUT /update-task/{taskId}', () => {
-      const mock_response: ApiResponse<void> = { success: true, message: 'updated' };
+      const mock_response: ApiResponse<void> = {
+        success: true,
+        message: 'updated',
+      };
 
       service.updateTask(1, { isCompleted: true }).subscribe();
 
@@ -101,7 +120,10 @@ describe('TaskService', () => {
     });
 
     it('should DELETE /delete-task/{taskId}', () => {
-      const mock_response: ApiResponse<void> = { success: true, message: 'deleted' };
+      const mock_response: ApiResponse<void> = {
+        success: true,
+        message: 'deleted',
+      };
 
       service.deleteTask(1).subscribe();
 
@@ -114,14 +136,18 @@ describe('TaskService', () => {
   // Subtask CRUD
   describe('Subtasks', () => {
     it('should POST /create-subtask/{taskId}', () => {
-      const dto: SubTaskDto = { 
+      const dto: SubTaskDto = {
         title: 'New Subtask',
         description: 'Sub desc',
         startDate: '2024-01-01',
         endDate: '2024-01-02',
-        subTaskAssignees: []
+        subTaskAssignees: [],
       };
-      const mock_response: ApiResponse<SubTaskDetails> = { success: true, message: 'ok', data: mock_subtask };
+      const mock_response: ApiResponse<SubTaskDetails> = {
+        success: true,
+        message: 'ok',
+        data: mock_subtask,
+      };
 
       service.createSubTask(1, dto).subscribe();
 

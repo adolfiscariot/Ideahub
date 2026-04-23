@@ -1,64 +1,85 @@
 <div class="media-section" [class.compact]="compactMode">
   <div class="media-gallery">
-
     @if (!compactMode && title) {
-    <h4 class="media-title">
-      {{ title }} ({{ mediaList.length }})
-    </h4>
+      <h4 class="media-title">{{ title }} ({{ mediaList.length }})</h4>
     }
 
     <!-- Loading -->
     @if (isLoading) {
-    <div class="loading">
-      Loading attachments…
-    </div>
+      <div class="loading">Loading attachments…</div>
     }
 
     <!-- Attachments list -->
     @if (!isLoading && mediaList.length > 0) {
-    <div class="media-grid" [class.vertical]="verticalLayout" [class.full-filename]="fullFileName">
+      <div
+        class="media-grid"
+        [class.vertical]="verticalLayout"
+        [class.full-filename]="fullFileName"
+      >
+        @for (media of mediaList; track media.id) {
+          <div class="media-item">
+            <!-- IMAGE -->
+            @if (media.mediaType === MediaType.Image) {
+              <div
+                class="media-placeholder"
+                tabindex="0"
+                role="button"
+                (click)="openMedia(media)"
+                (keydown.enter)="openMedia(media)"
+                (keydown.space)="openMedia(media)"
+              >
+                <span class="media-icon">🖼️</span>
+                <span
+                  class="media-label"
+                  [title]="getDisplayName(media.filePath)"
+                >
+                  {{ getDisplayName(media.filePath) }}
+                </span>
+              </div>
+            }
 
-      @for (media of mediaList; track media.id) {
-      <div class="media-item">
+            <!-- VIDEO -->
+            @if (media.mediaType === MediaType.Video) {
+              <div
+                class="video-placeholder"
+                tabindex="0"
+                role="button"
+                (click)="openMedia(media)"
+                (keydown.enter)="openMedia(media)"
+                (keydown.space)="openMedia(media)"
+              >
+                <span class="video-icon">▶️</span>
+                <span
+                  class="media-label"
+                  [title]="getDisplayName(media.filePath)"
+                >
+                  {{ getDisplayName(media.filePath) }}
+                </span>
+              </div>
+            }
 
-        <!-- IMAGE -->
-        @if (media.mediaType === MediaType.Image) {
-        <div class="media-placeholder" tabindex="0" role="button" (click)="openMedia(media)"
-          (keydown.enter)="openMedia(media)" (keydown.space)="openMedia(media)">
-
-          <span class="media-icon">🖼️</span>
-          <span class="media-label" [title]="getDisplayName(media.filePath)">
-            {{ getDisplayName(media.filePath) }}
-          </span>
-        </div>
-        }
-
-        <!-- VIDEO -->
-        @if (media.mediaType === MediaType.Video) {
-        <div class="video-placeholder" tabindex="0" role="button" (click)="openMedia(media)"
-          (keydown.enter)="openMedia(media)" (keydown.space)="openMedia(media)">
-
-          <span class="video-icon">▶️</span>
-          <span class="media-label" [title]="getDisplayName(media.filePath)">
-            {{ getDisplayName(media.filePath) }}
-          </span>
-        </div>
-        }
-
-        <!-- DOCUMENT -->
-        @if (media.mediaType === MediaType.Document) {
-        <div class="document-placeholder" tabindex="0" role="button" (click)="openMedia(media)"
-          (keydown.enter)="openMedia(media)" (keydown.space)="openMedia(media)">
-
-          <span class="document-icon">📄</span>
-          <span class="media-label" [title]="getDisplayName(media.filePath)">
-            {{ getDisplayName(media.filePath) }}
-          </span>
-        </div>
+            <!-- DOCUMENT -->
+            @if (media.mediaType === MediaType.Document) {
+              <div
+                class="document-placeholder"
+                tabindex="0"
+                role="button"
+                (click)="openMedia(media)"
+                (keydown.enter)="openMedia(media)"
+                (keydown.space)="openMedia(media)"
+              >
+                <span class="document-icon">📄</span>
+                <span
+                  class="media-label"
+                  [title]="getDisplayName(media.filePath)"
+                >
+                  {{ getDisplayName(media.filePath) }}
+                </span>
+              </div>
+            }
+          </div>
         }
       </div>
-      }
-    </div>
     }
   </div>
 </div>

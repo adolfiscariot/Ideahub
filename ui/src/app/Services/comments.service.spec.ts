@@ -1,9 +1,15 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { CommentsService } from './comments.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { viewComment, createComment } from '../Interfaces/Ideas/idea-interfaces';
+import {
+  viewComment,
+  createComment,
+} from '../Interfaces/Ideas/idea-interfaces';
 import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
@@ -54,7 +60,12 @@ describe('CommentsService', () => {
 
   describe('convertResponse (via getComments)', () => {
     it('should prefer response.status over response.success', () => {
-      const raw: RawMockResponse<viewComment[]> = { status: true, success: false, message: 'ok', data: [] };
+      const raw: RawMockResponse<viewComment[]> = {
+        status: true,
+        success: false,
+        message: 'ok',
+        data: [],
+      };
 
       service.getComments(1).subscribe((res) => {
         expect(res.success).toBeTrue();
@@ -64,7 +75,11 @@ describe('CommentsService', () => {
     });
 
     it('should fall back to response.success when status is absent', () => {
-      const raw: ApiResponse<viewComment[]> = { success: true, message: 'ok', data: [] };
+      const raw: ApiResponse<viewComment[]> = {
+        success: true,
+        message: 'ok',
+        data: [],
+      };
 
       service.getComments(1).subscribe((res) => {
         expect(res.success).toBeTrue();
@@ -74,7 +89,10 @@ describe('CommentsService', () => {
     });
 
     it('should default success to false when both status and success are falsy', () => {
-      const raw: RawMockResponse<viewComment[]> = { message: 'unauthorized', data: [] };
+      const raw: RawMockResponse<viewComment[]> = {
+        message: 'unauthorized',
+        data: [],
+      };
 
       service.getComments(1).subscribe((res) => {
         expect(res.success).toBeFalse();
@@ -98,7 +116,11 @@ describe('CommentsService', () => {
 
   describe('getComments(ideaId)', () => {
     it('should GET /comment/view-comments?ideaId={id}', () => {
-      const raw: ApiResponse<viewComment[]> = { success: true, message: 'ok', data: [mockComment] };
+      const raw: ApiResponse<viewComment[]> = {
+        success: true,
+        message: 'ok',
+        data: [mockComment],
+      };
 
       service.getComments(42).subscribe((res) => {
         expect(res.success).toBeTrue();
@@ -112,7 +134,11 @@ describe('CommentsService', () => {
     });
 
     it('should correctly embed the ideaId in the query string', () => {
-      const raw: ApiResponse<viewComment[]> = { success: true, message: 'ok', data: [] };
+      const raw: ApiResponse<viewComment[]> = {
+        success: true,
+        message: 'ok',
+        data: [],
+      };
 
       service.getComments(99).subscribe();
 
@@ -122,7 +148,11 @@ describe('CommentsService', () => {
     });
 
     it('should return an empty array when the idea has no comments', () => {
-      const raw: ApiResponse<viewComment[]> = { success: true, message: 'no comments', data: [] };
+      const raw: ApiResponse<viewComment[]> = {
+        success: true,
+        message: 'no comments',
+        data: [],
+      };
 
       service.getComments(10).subscribe((res) => {
         expect(res.data).toEqual([]);
@@ -136,7 +166,11 @@ describe('CommentsService', () => {
         { id: 1, content: 'First', createdAt: '2024-01-01T00:00:00Z' },
         { id: 2, content: 'Second', createdAt: '2024-01-02T00:00:00Z' },
       ];
-      const raw: ApiResponse<viewComment[]> = { success: true, message: 'ok', data: comments };
+      const raw: ApiResponse<viewComment[]> = {
+        success: true,
+        message: 'ok',
+        data: comments,
+      };
 
       service.getComments(5).subscribe((res) => {
         expect(res.data?.length).toBe(2);
@@ -151,7 +185,11 @@ describe('CommentsService', () => {
 
   describe('postComment(ideaId, payload)', () => {
     it('should POST to /comment/create-comment?ideaId={id}', () => {
-      const raw: ApiResponse<viewComment> = { success: true, message: 'created', data: mockComment };
+      const raw: ApiResponse<viewComment> = {
+        success: true,
+        message: 'created',
+        data: mockComment,
+      };
 
       service.postComment(42, mockCommentPayload).subscribe((res) => {
         expect(res.success).toBeTrue();
@@ -166,7 +204,11 @@ describe('CommentsService', () => {
     });
 
     it('should send the comment content in the request body', () => {
-      const raw: ApiResponse<viewComment> = { success: true, message: 'ok', data: mockComment };
+      const raw: ApiResponse<viewComment> = {
+        success: true,
+        message: 'ok',
+        data: mockComment,
+      };
       const payload: createComment = { content: 'Custom content' };
 
       service.postComment(7, payload).subscribe();
@@ -177,7 +219,11 @@ describe('CommentsService', () => {
     });
 
     it('should embed ideaId correctly in the URL query string', () => {
-      const raw: ApiResponse<viewComment> = { success: true, message: 'ok', data: mockComment };
+      const raw: ApiResponse<viewComment> = {
+        success: true,
+        message: 'ok',
+        data: mockComment,
+      };
 
       service.postComment(123, mockCommentPayload).subscribe();
 
@@ -187,7 +233,10 @@ describe('CommentsService', () => {
     });
 
     it('should handle an unsuccessful post response', () => {
-      const raw: ApiResponse<viewComment> = { success: false, message: 'Unauthorized' };
+      const raw: ApiResponse<viewComment> = {
+        success: false,
+        message: 'Unauthorized',
+      };
 
       service.postComment(42, mockCommentPayload).subscribe((res) => {
         expect(res.success).toBeFalse();
@@ -225,7 +274,10 @@ describe('CommentsService', () => {
     });
 
     it('should handle a failed delete (e.g. comment not found)', () => {
-      const raw: ApiResponse<void> = { success: false, message: 'Comment not found' };
+      const raw: ApiResponse<void> = {
+        success: false,
+        message: 'Comment not found',
+      };
 
       service.deleteComment(999).subscribe((res) => {
         expect(res.success).toBeFalse();

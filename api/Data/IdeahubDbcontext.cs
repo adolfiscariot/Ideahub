@@ -6,15 +6,16 @@ using System.Text.Json;
 
 namespace api.Data;
 
-public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
-    public IdeahubDbContext(DbContextOptions<IdeahubDbContext> options) : base(options){}
-    public DbSet<Group> Groups {get; set;}
-    public DbSet<Idea> Ideas {get; set;}
-    public DbSet<Comment> Comments {get; set;}
-    public DbSet<Media> Media {get; set;}
-    public DbSet<Project> Projects {get; set;}
-    public DbSet<UserGroup> UserGroups {get; set;} //joint table for users and groups(many-to-many r/ship)
-    public DbSet<Vote> Votes {get; set;}
+public class IdeahubDbContext : IdentityDbContext<IdeahubUser>
+{
+    public IdeahubDbContext(DbContextOptions<IdeahubDbContext> options) : base(options) { }
+    public DbSet<Group> Groups { get; set; }
+    public DbSet<Idea> Ideas { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<Media> Media { get; set; }
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<UserGroup> UserGroups { get; set; } //joint table for users and groups(many-to-many r/ship)
+    public DbSet<Vote> Votes { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<GroupMembershipRequest> GroupMembershipRequests { get; set; }
     public DbSet<PasswordReset> PasswordResets { get; set; }
@@ -382,36 +383,36 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-         // Comments Configuration
-         builder.Entity<Comment>(c =>
-        {
-            c.HasKey(c => c.Id);
+        // Comments Configuration
+        builder.Entity<Comment>(c =>
+       {
+           c.HasKey(c => c.Id);
 
-            //Properties
-            c.Property(c => c.Content)
-                .HasColumnType("text");
+           //Properties
+           c.Property(c => c.Content)
+               .HasColumnType("text");
 
-            c.Property(c => c.CreatedAt)
-                .IsRequired()
-                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
-                .ValueGeneratedOnAdd();
+           c.Property(c => c.CreatedAt)
+               .IsRequired()
+               .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+               .ValueGeneratedOnAdd();
 
-            c.HasQueryFilter(c => !c.Idea.IsDeleted);
+           c.HasQueryFilter(c => !c.Idea.IsDeleted);
 
-            //Foreign Keys
-            c.HasOne(c => c.User)
-                .WithMany(u => u.Comments)
-                .HasForeignKey(c => c.UserId);
-                
-            c.HasOne(c => c.Idea)
-                .WithMany(i => i.Comments)
-                .HasForeignKey(c => c.IdeaId);
+           //Foreign Keys
+           c.HasOne(c => c.User)
+               .WithMany(u => u.Comments)
+               .HasForeignKey(c => c.UserId);
 
-            //Index
-            c.HasIndex(c => c.Content);
-            c.HasIndex(c => c.UserId);
-            c.HasIndex(c => c.IdeaId);
-        });
+           c.HasOne(c => c.Idea)
+               .WithMany(i => i.Comments)
+               .HasForeignKey(c => c.IdeaId);
+
+           //Index
+           c.HasIndex(c => c.Content);
+           c.HasIndex(c => c.UserId);
+           c.HasIndex(c => c.IdeaId);
+       });
 
         //Project Configuration
         builder.Entity<Project>(p =>
@@ -640,7 +641,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
         builder.Entity<Notification>(n =>
         {
-            n.HasKey(n => n.Id); 
+            n.HasKey(n => n.Id);
 
             n.Property(n => n.IsRead)
                 .IsRequired()
@@ -648,13 +649,13 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             n.Property(n => n.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'") 
-                .ValueGeneratedOnAdd(); 
+                .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                .ValueGeneratedOnAdd();
 
             n.HasQueryFilter(n => !n.User.IsDeleted);
 
-            n.HasOne(n => n.User) 
-                .WithMany(u => u.Notifications) 
+            n.HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.RecipientId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -720,7 +721,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
 
             m.Property(m => m.MediaType)
                 .IsRequired()
-                .HasConversion<string>(); 
+                .HasConversion<string>();
 
             m.Property(m => m.CreatedAt)
                 .IsRequired()
@@ -854,9 +855,9 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .WithMany(u => u.TaskAssignees)
                 .HasForeignKey(ta => ta.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-                
+
             // Index
-            ta.HasIndex(ta => new {ta.ProjectTaskId, ta.UserId})
+            ta.HasIndex(ta => new { ta.ProjectTaskId, ta.UserId })
                 .IsUnique();
         });
 
@@ -877,7 +878,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser> {
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
-            sta.HasIndex(sta => new {sta.SubTaskId, sta.UserId})
+            sta.HasIndex(sta => new { sta.SubTaskId, sta.UserId })
                 .IsUnique();
         });
 

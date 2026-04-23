@@ -29,8 +29,6 @@ export class LoginInputComponent {
   isLoading = false;
   signalRService = inject(SignalrService);
 
-
-
   loginForm = new FormGroup({
     email: new FormControl('', {
       validators: [Validators.required, Validators.email],
@@ -43,7 +41,6 @@ export class LoginInputComponent {
   });
 
   onSubmit(event: Event) {
-
     if (this.loginForm.valid) {
       this.isLoading = true;
       const loginData: Login = this.loginForm.getRawValue();
@@ -66,7 +63,10 @@ export class LoginInputComponent {
       });
     } else {
       event.preventDefault();
-      this.toastService.show('Please input valid data in the login form', 'warning');
+      this.toastService.show(
+        'Please input valid data in the login form',
+        'warning',
+      );
     }
   }
 }

@@ -32,7 +32,7 @@ namespace Ideahub.Tests
 
             _mockNotificationService = new Mock<INotificationService>();
             _mockLogger = new Mock<ILogger<CommentController>>();
-            
+
             var userStoreMock = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(
                 userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
@@ -128,7 +128,7 @@ namespace Ideahub.Tests
             _context.Comments.AddRange(
                 new Comment { Content = "C1", IdeaId = idea1.Id, UserId = "u2" },
                 new Comment { Content = "C2", IdeaId = idea1.Id, UserId = "u3" },
-                new Comment { Content = "C3", IdeaId = idea2.Id, UserId = "u2" } 
+                new Comment { Content = "C3", IdeaId = idea2.Id, UserId = "u2" }
             );
             await _context.SaveChangesAsync();
 
@@ -139,7 +139,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             var list = Assert.IsAssignableFrom<System.Collections.IEnumerable>(response.Data);
-            
+
             int count = 0;
             foreach (var item in list) count++;
             Assert.Equal(2, count);

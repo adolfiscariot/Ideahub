@@ -54,12 +54,12 @@ namespace Ideahub.Tests
         {
             var user = new IdeahubUser { Id = _testUserId, Email = "test@example.com", DisplayName = "Test User" };
             var otherUser = new IdeahubUser { Id = "other-user", Email = "other@example.com", DisplayName = "Other User" };
-            
+
             var group = new Group { Id = 1, Name = "Test Group" };
             var idea = new Idea { Id = 1, Title = "Test Idea", GroupId = 1, UserId = _testUserId };
-            
+
             var comment = new Comment { Id = 1, IdeaId = 1, UserId = "other-user", Content = "Great idea!", User = otherUser, Idea = idea };
-            
+
             var n1 = new Notification { Id = 1, RecipientId = _testUserId, CommentId = 1, IsRead = false, CreatedAt = DateTime.UtcNow.AddMinutes(-10), Comment = comment };
             var n2 = new Notification { Id = 2, RecipientId = _testUserId, CommentId = 1, IsRead = true, CreatedAt = DateTime.UtcNow.AddMinutes(-5), Comment = comment };
             var n3 = new Notification { Id = 3, RecipientId = "other-user", CommentId = 1, IsRead = false, CreatedAt = DateTime.UtcNow, Comment = comment };
@@ -85,13 +85,13 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             var data = Assert.IsAssignableFrom<IEnumerable<object>>(response.Data);
-            
+
             Assert.Equal(2, data.Count());
-            
+
             var list = data.ToList();
             var firstId = list[0].GetType().GetProperty("Id")?.GetValue(list[0], null);
             var secondId = list[1].GetType().GetProperty("Id")?.GetValue(list[1], null);
-            
+
             // Verify ordering (n2 created -5m, n1 created -10m)
             Assert.Equal(2, (int)firstId!);
             Assert.Equal(1, (int)secondId!);
@@ -110,7 +110,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             Assert.NotNull(response.Data);
-            
+
             // Expected count: 1 (n1 is unread, n2 is read)
             var data = response.Data;
             var count = data?.GetType().GetProperty("count")?.GetValue(data, null);
@@ -173,7 +173,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             Assert.Contains("1 notification(s) marked as read", response.Message);
-            
+
             var unreadCount = await _context.Notifications.CountAsync(n => n.RecipientId == _testUserId && !n.IsRead);
             Assert.Equal(0, unreadCount);
         }

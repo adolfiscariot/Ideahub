@@ -3,6 +3,7 @@ using api.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Services;
+
 public interface ITokenService
 {
     Task<string> CreateAccessTokenAsync(IdeahubUser user);

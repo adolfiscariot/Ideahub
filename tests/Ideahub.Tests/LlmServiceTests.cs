@@ -73,7 +73,7 @@ namespace Ideahub.Tests
         {
             // Arrange
             var settings = new GeminiSettings { ApiKey = "fake-key" };
-            
+
             // 1. Fake prompt file
             var promptDir = Path.Combine(Directory.GetCurrentDirectory(), "Services", "LlmService", "Prompts");
             Directory.CreateDirectory(promptDir);
@@ -108,14 +108,15 @@ namespace Ideahub.Tests
         {
             // Arrange
             var settings = new GeminiSettings { ApiKey = "fake-key" };
-            
+
             // 1. Fake Prompt File again
             var promptDir = Path.Combine(Directory.GetCurrentDirectory(), "Services", "LlmService", "Prompts");
             Directory.CreateDirectory(promptDir);
             File.WriteAllText(Path.Combine(promptDir, "SystemPrompt.txt"), "Fake Prompt {title}");
 
             // 2. Mock a SUCCESSFUL Gemini response
-            var geminiResponse = new {
+            var geminiResponse = new
+            {
                 candidates = new[] {
                     new {
                         content = new {

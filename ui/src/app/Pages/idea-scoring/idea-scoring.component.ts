@@ -1,13 +1,43 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormsModule,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IdeasService } from '../../Services/ideas.services';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '../../Services/toast.service';
 import { ScoringService } from '../../Services/scoring.services';
-import { Idea, ActionStep, BusinessCaseDto, BusinessCaseResult, EvaluationStatus, ImpactScope, ResponsibleDepartment, RiskLevel, Verdict, StrategicAlignmentScore, CustomerImpactScore, FinancialBenefitScore, FeasibilityScore, TimeToValueScore, CostScore, EffortScore, RiskScore, ScalabilityScore, DifferentiationScore, SustainabilityScore, ConfidenceScore, ScoringDimensionsDto, ScoringStage } from '../../Interfaces/Ideas/idea-interfaces';
+import {
+  Idea,
+  ActionStep,
+  BusinessCaseDto,
+  BusinessCaseResult,
+  EvaluationStatus,
+  ImpactScope,
+  ResponsibleDepartment,
+  RiskLevel,
+  Verdict,
+  StrategicAlignmentScore,
+  CustomerImpactScore,
+  FinancialBenefitScore,
+  FeasibilityScore,
+  TimeToValueScore,
+  CostScore,
+  EffortScore,
+  RiskScore,
+  ScalabilityScore,
+  DifferentiationScore,
+  SustainabilityScore,
+  ConfidenceScore,
+  ScoringDimensionsDto,
+  ScoringStage,
+} from '../../Interfaces/Ideas/idea-interfaces';
 import { ProjectService } from '../../Services/project.service';
 import { CommitteeMembersService } from '../../Services/committeemembers.service';
 import { CreateProjectRequest } from '../../Interfaces/Projects/project-interface';
@@ -17,7 +47,14 @@ import { UserRecord } from '../../Interfaces/Users/user-interface';
 @Component({
   selector: 'app-idea-scoring',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ButtonsComponent, MatIconModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ButtonsComponent,
+    MatIconModule,
+    RouterModule,
+  ],
   templateUrl: './idea-scoring.component.html',
   styleUrl: './idea-scoring.component.scss',
 })
@@ -36,7 +73,7 @@ export class IdeaScoringComponent implements OnInit {
   ideaId = '';
   idea: Idea | null = null;
   isLoading = true;
-  parsedReasoning: { label: string, content: string }[] = [];
+  parsedReasoning: { label: string; content: string }[] = [];
 
   // Promotion state
   showProjectModal = false;
@@ -45,7 +82,7 @@ export class IdeaScoringComponent implements OnInit {
   projectData: CreateProjectRequest = {
     title: '',
     description: '',
-    overseenByEmail: ''
+    overseenByEmail: '',
   };
 
   // Accordion state
@@ -55,115 +92,383 @@ export class IdeaScoringComponent implements OnInit {
 
   // Phase 2 Dropdown Options
   expectedBenefitsOptions = [
-    { label: 'Time savings', value: 'Time savings', tip: 'This idea will save people time on repetitive or manual tasks' },
-    { label: 'Cost reduction', value: 'Cost reduction', tip: 'This idea will directly reduce business costs or spending' },
-    { label: 'Improved accuracy', value: 'Improved accuracy', tip: 'This idea will reduce errors and improve data or process quality' },
-    { label: 'Scalability', value: 'Scalability', tip: 'This idea will help the business handle more work without adding resources' },
-    { label: 'Efficiency', value: 'Efficiency', tip: 'This idea will make existing workflows faster or smoother' },
-    { label: 'Lead generation', value: 'Lead generation', tip: 'This idea will help bring in new customers or business opportunities' }
+    {
+      label: 'Time savings',
+      value: 'Time savings',
+      tip: 'This idea will save people time on repetitive or manual tasks',
+    },
+    {
+      label: 'Cost reduction',
+      value: 'Cost reduction',
+      tip: 'This idea will directly reduce business costs or spending',
+    },
+    {
+      label: 'Improved accuracy',
+      value: 'Improved accuracy',
+      tip: 'This idea will reduce errors and improve data or process quality',
+    },
+    {
+      label: 'Scalability',
+      value: 'Scalability',
+      tip: 'This idea will help the business handle more work without adding resources',
+    },
+    {
+      label: 'Efficiency',
+      value: 'Efficiency',
+      tip: 'This idea will make existing workflows faster or smoother',
+    },
+    {
+      label: 'Lead generation',
+      value: 'Lead generation',
+      tip: 'This idea will help bring in new customers or business opportunities',
+    },
   ];
 
   // Enum-based Options (Label/Value)
   impactScopeOptions = [
-    { label: 'Department', value: ImpactScope.Department, tip: 'Only affects one team or department' },
-    { label: 'Organization Wide', value: ImpactScope.OrganizationWide, tip: 'Affects the entire company across multiple teams' },
-    { label: 'External', value: ImpactScope.External, tip: 'Affects customers, partners, or people outside the company' }
+    {
+      label: 'Department',
+      value: ImpactScope.Department,
+      tip: 'Only affects one team or department',
+    },
+    {
+      label: 'Organization Wide',
+      value: ImpactScope.OrganizationWide,
+      tip: 'Affects the entire company across multiple teams',
+    },
+    {
+      label: 'External',
+      value: ImpactScope.External,
+      tip: 'Affects customers, partners, or people outside the company',
+    },
   ];
   riskLevelOptions = [
-    { label: 'Low', value: RiskLevel.Low, tip: 'Minimal chance of problems — safe to try' },
-    { label: 'Medium', value: RiskLevel.Medium, tip: 'Some risks exist but they can be managed' },
-    { label: 'High', value: RiskLevel.High, tip: 'Significant risks — needs careful planning before starting' }
+    {
+      label: 'Low',
+      value: RiskLevel.Low,
+      tip: 'Minimal chance of problems — safe to try',
+    },
+    {
+      label: 'Medium',
+      value: RiskLevel.Medium,
+      tip: 'Some risks exist but they can be managed',
+    },
+    {
+      label: 'High',
+      value: RiskLevel.High,
+      tip: 'Significant risks — needs careful planning before starting',
+    },
   ];
   evaluationStatusOptions = [
-    { label: 'Feasibility Research', value: EvaluationStatus.FeasibilityResearch, tip: 'Still researching whether this idea is doable' },
-    { label: 'Approved', value: EvaluationStatus.Approved, tip: 'This idea has been reviewed and approved to move forward' },
-    { label: 'Rejected', value: EvaluationStatus.Rejected, tip: 'This idea has been reviewed and will not be pursued' }
+    {
+      label: 'Feasibility Research',
+      value: EvaluationStatus.FeasibilityResearch,
+      tip: 'Still researching whether this idea is doable',
+    },
+    {
+      label: 'Approved',
+      value: EvaluationStatus.Approved,
+      tip: 'This idea has been reviewed and approved to move forward',
+    },
+    {
+      label: 'Rejected',
+      value: EvaluationStatus.Rejected,
+      tip: 'This idea has been reviewed and will not be pursued',
+    },
   ];
   responsibleDeptOptions = [
-    { label: 'Finance', value: ResponsibleDepartment.Finance, tip: 'The Finance team will own this' },
-    { label: 'IT', value: ResponsibleDepartment.IT, tip: 'The IT / Technology team will own this' },
-    { label: 'Operations', value: ResponsibleDepartment.Operations, tip: 'The Operations team will own this' },
-    { label: 'Marketing & Sales', value: ResponsibleDepartment.MarketingAndSales, tip: 'The Marketing or Sales team will own this' },
-    { label: 'Strategy & Compliance', value: ResponsibleDepartment.StrategyAndCompliance, tip: 'The Strategy or Compliance team will own this' }
+    {
+      label: 'Finance',
+      value: ResponsibleDepartment.Finance,
+      tip: 'The Finance team will own this',
+    },
+    {
+      label: 'IT',
+      value: ResponsibleDepartment.IT,
+      tip: 'The IT / Technology team will own this',
+    },
+    {
+      label: 'Operations',
+      value: ResponsibleDepartment.Operations,
+      tip: 'The Operations team will own this',
+    },
+    {
+      label: 'Marketing & Sales',
+      value: ResponsibleDepartment.MarketingAndSales,
+      tip: 'The Marketing or Sales team will own this',
+    },
+    {
+      label: 'Strategy & Compliance',
+      value: ResponsibleDepartment.StrategyAndCompliance,
+      tip: 'The Strategy or Compliance team will own this',
+    },
   ];
   actionStepOptions = [
-    { label: 'Prototype Development', value: ActionStep.PrototypeDevelopment, tip: 'Build a small working version to test the concept' },
-    { label: 'Stakeholder Review', value: ActionStep.StakeholderReview, tip: 'Present to key decision-makers for feedback' },
-    { label: 'Pilot Launch', value: ActionStep.PilotLaunch, tip: 'Run a small-scale trial with real users' },
-    { label: 'Market Feasibility Study', value: ActionStep.MarketFeasibilityStudy, tip: 'Research market demand and competition first' },
-    { label: 'Rollout Planning', value: ActionStep.RolloutPlanning, tip: 'Plan the full launch across the business' }
+    {
+      label: 'Prototype Development',
+      value: ActionStep.PrototypeDevelopment,
+      tip: 'Build a small working version to test the concept',
+    },
+    {
+      label: 'Stakeholder Review',
+      value: ActionStep.StakeholderReview,
+      tip: 'Present to key decision-makers for feedback',
+    },
+    {
+      label: 'Pilot Launch',
+      value: ActionStep.PilotLaunch,
+      tip: 'Run a small-scale trial with real users',
+    },
+    {
+      label: 'Market Feasibility Study',
+      value: ActionStep.MarketFeasibilityStudy,
+      tip: 'Research market demand and competition first',
+    },
+    {
+      label: 'Rollout Planning',
+      value: ActionStep.RolloutPlanning,
+      tip: 'Plan the full launch across the business',
+    },
   ];
   resultOutcomeOptions = [
-    { label: 'In Progress', value: BusinessCaseResult.InProgress, tip: 'Work is actively underway' },
-    { label: 'Pilot Stage', value: BusinessCaseResult.PilotStage, tip: 'Being tested with a small group first' },
-    { label: 'Awaiting Results', value: BusinessCaseResult.AwaitingResults, tip: 'Waiting for data or feedback before deciding' }
+    {
+      label: 'In Progress',
+      value: BusinessCaseResult.InProgress,
+      tip: 'Work is actively underway',
+    },
+    {
+      label: 'Pilot Stage',
+      value: BusinessCaseResult.PilotStage,
+      tip: 'Being tested with a small group first',
+    },
+    {
+      label: 'Awaiting Results',
+      value: BusinessCaseResult.AwaitingResults,
+      tip: 'Waiting for data or feedback before deciding',
+    },
   ];
   verdictOptions = [
-    { label: 'Approved', value: Verdict.Approved, tip: 'Go ahead — this idea is approved to proceed to scoring' },
-    { label: 'Awaiting Review', value: Verdict.AwaitingReview, tip: 'Not yet decided — still under review' },
-    { label: 'Park', value: Verdict.Park, tip: 'Put on hold — may be revisited later' }
+    {
+      label: 'Approved',
+      value: Verdict.Approved,
+      tip: 'Go ahead — this idea is approved to proceed to scoring',
+    },
+    {
+      label: 'Awaiting Review',
+      value: Verdict.AwaitingReview,
+      tip: 'Not yet decided — still under review',
+    },
+    {
+      label: 'Park',
+      value: Verdict.Park,
+      tip: 'Put on hold — may be revisited later',
+    },
   ];
 
   // Phase 3 Metric Options
   strategicAlignmentScores = [
-    { label: 'Low', value: StrategicAlignmentScore.Low, tip: 'Indirect or weak alignment with core objectives' },
-    { label: 'Moderate', value: StrategicAlignmentScore.Moderate, tip: 'Supports key goals but not a primary driver' },
-    { label: 'High', value: StrategicAlignmentScore.Strong, tip: 'Directly and strongly supports top organizational priorities' },
+    {
+      label: 'Low',
+      value: StrategicAlignmentScore.Low,
+      tip: 'Indirect or weak alignment with core objectives',
+    },
+    {
+      label: 'Moderate',
+      value: StrategicAlignmentScore.Moderate,
+      tip: 'Supports key goals but not a primary driver',
+    },
+    {
+      label: 'High',
+      value: StrategicAlignmentScore.Strong,
+      tip: 'Directly and strongly supports top organizational priorities',
+    },
   ];
   customerImpactScores = [
-    { label: 'Low', value: CustomerImpactScore.Low, tip: 'Minimal or indirect benefit to users/stakeholders' },
-    { label: 'Moderate', value: CustomerImpactScore.Moderate, tip: 'Noticeable improvement for a specific user segment' },
-    { label: 'High', value: CustomerImpactScore.High, tip: 'Significant positive transformation for large user groups' },
+    {
+      label: 'Low',
+      value: CustomerImpactScore.Low,
+      tip: 'Minimal or indirect benefit to users/stakeholders',
+    },
+    {
+      label: 'Moderate',
+      value: CustomerImpactScore.Moderate,
+      tip: 'Noticeable improvement for a specific user segment',
+    },
+    {
+      label: 'High',
+      value: CustomerImpactScore.High,
+      tip: 'Significant positive transformation for large user groups',
+    },
   ];
   financialBenefitScores = [
-    { label: 'Low', value: FinancialBenefitScore.Low, tip: 'Low or speculative ROI/revenue gain' },
-    { label: 'Moderate', value: FinancialBenefitScore.Moderate, tip: 'Solid return with moderate impact on bottom line' },
-    { label: 'High', value: FinancialBenefitScore.High, tip: 'Major revenue potential or significant cost savings' },
+    {
+      label: 'Low',
+      value: FinancialBenefitScore.Low,
+      tip: 'Low or speculative ROI/revenue gain',
+    },
+    {
+      label: 'Moderate',
+      value: FinancialBenefitScore.Moderate,
+      tip: 'Solid return with moderate impact on bottom line',
+    },
+    {
+      label: 'High',
+      value: FinancialBenefitScore.High,
+      tip: 'Major revenue potential or significant cost savings',
+    },
   ];
   feasibilityScores = [
-    { label: 'Very Difficult', value: FeasibilityScore.VeryDifficult, tip: 'Extremely complex or requires non-existent tech/skills' },
-    { label: 'Moderate', value: FeasibilityScore.Moderate, tip: 'Challenging but doable with existing resources' },
-    { label: 'High', value: FeasibilityScore.High, tip: 'Straightforward implementation using proven methods' },
+    {
+      label: 'Very Difficult',
+      value: FeasibilityScore.VeryDifficult,
+      tip: 'Extremely complex or requires non-existent tech/skills',
+    },
+    {
+      label: 'Moderate',
+      value: FeasibilityScore.Moderate,
+      tip: 'Challenging but doable with existing resources',
+    },
+    {
+      label: 'High',
+      value: FeasibilityScore.High,
+      tip: 'Straightforward implementation using proven methods',
+    },
   ];
   timeToValueScores = [
-    { label: 'Over 6 Months', value: TimeToValueScore.SixToTwelve, tip: 'Long-term project with delayed realization of benefits' },
-    { label: '3-6 Months', value: TimeToValueScore.ThreeToSix, tip: 'Average implementation timeline' },
-    { label: 'Under 3 Months', value: TimeToValueScore.UnderThreeMonths, tip: 'Quick win with immediate impact' }
+    {
+      label: 'Over 6 Months',
+      value: TimeToValueScore.SixToTwelve,
+      tip: 'Long-term project with delayed realization of benefits',
+    },
+    {
+      label: '3-6 Months',
+      value: TimeToValueScore.ThreeToSix,
+      tip: 'Average implementation timeline',
+    },
+    {
+      label: 'Under 3 Months',
+      value: TimeToValueScore.UnderThreeMonths,
+      tip: 'Quick win with immediate impact',
+    },
   ];
   costScores = [
-    { label: 'High', value: CostScore.High, tip: 'Requires significant budget and resource allocation' },
-    { label: 'Moderate', value: CostScore.Moderate, tip: 'Reasonable cost within standard project budgets' },
-    { label: 'Low', value: CostScore.Low, tip: 'Minimal financial investment required' },
+    {
+      label: 'High',
+      value: CostScore.High,
+      tip: 'Requires significant budget and resource allocation',
+    },
+    {
+      label: 'Moderate',
+      value: CostScore.Moderate,
+      tip: 'Reasonable cost within standard project budgets',
+    },
+    {
+      label: 'Low',
+      value: CostScore.Low,
+      tip: 'Minimal financial investment required',
+    },
   ];
   effortScores = [
-    { label: 'High', value: EffortScore.High, tip: 'Heavy workload requiring multiple teams or long hours' },
-    { label: 'Moderate', value: EffortScore.Moderate, tip: 'Steady effort manageable by a dedicated team' },
-    { label: 'Low', value: EffortScore.Low, tip: 'Simple tasks that can be completed quickly' },
+    {
+      label: 'High',
+      value: EffortScore.High,
+      tip: 'Heavy workload requiring multiple teams or long hours',
+    },
+    {
+      label: 'Moderate',
+      value: EffortScore.Moderate,
+      tip: 'Steady effort manageable by a dedicated team',
+    },
+    {
+      label: 'Low',
+      value: EffortScore.Low,
+      tip: 'Simple tasks that can be completed quickly',
+    },
   ];
   riskScores = [
-    { label: 'High', value: RiskScore.High, tip: 'High chance of failure or significant negative impact' },
-    { label: 'Moderate', value: RiskScore.Moderate, tip: 'Predictable risks that can be mitigated' },
-    { label: 'Low', value: RiskScore.Low, tip: 'Safe bet with minimal potential for error' },
+    {
+      label: 'High',
+      value: RiskScore.High,
+      tip: 'High chance of failure or significant negative impact',
+    },
+    {
+      label: 'Moderate',
+      value: RiskScore.Moderate,
+      tip: 'Predictable risks that can be mitigated',
+    },
+    {
+      label: 'Low',
+      value: RiskScore.Low,
+      tip: 'Safe bet with minimal potential for error',
+    },
   ];
   scalabilityScores = [
-    { label: 'Low', value: ScalabilityScore.Low, tip: 'Hard to expand or reuse beyond initial scope' },
-    { label: 'Moderate', value: ScalabilityScore.Moderate, tip: 'Can be adapted for larger use cases with some effort' },
-    { label: 'High', value: ScalabilityScore.High, tip: 'Built for growth and easy deployment across the org' },
+    {
+      label: 'Low',
+      value: ScalabilityScore.Low,
+      tip: 'Hard to expand or reuse beyond initial scope',
+    },
+    {
+      label: 'Moderate',
+      value: ScalabilityScore.Moderate,
+      tip: 'Can be adapted for larger use cases with some effort',
+    },
+    {
+      label: 'High',
+      value: ScalabilityScore.High,
+      tip: 'Built for growth and easy deployment across the org',
+    },
   ];
   differentiationScores = [
-    { label: 'Low Uniqueness', value: DifferentiationScore.LowUniqueness, tip: 'Common solution readily available elsewhere' },
-    { label: 'Moderate Uniqueness', value: DifferentiationScore.ModerateUniqueness, tip: 'Offers some unique value or improvements' },
-    { label: 'High Uniqueness', value: DifferentiationScore.HighDifferentiation, tip: 'Highly innovative and provides a competitive edge' },
+    {
+      label: 'Low Uniqueness',
+      value: DifferentiationScore.LowUniqueness,
+      tip: 'Common solution readily available elsewhere',
+    },
+    {
+      label: 'Moderate Uniqueness',
+      value: DifferentiationScore.ModerateUniqueness,
+      tip: 'Offers some unique value or improvements',
+    },
+    {
+      label: 'High Uniqueness',
+      value: DifferentiationScore.HighDifferentiation,
+      tip: 'Highly innovative and provides a competitive edge',
+    },
   ];
   sustainabilityScores = [
-    { label: 'Minimal Benefit', value: SustainabilityScore.MinimalBenefit, tip: 'No significant ESG or long-term sustainability impact' },
-    { label: 'Moderate Benefit', value: SustainabilityScore.ModerateBenefit, tip: 'Positive contribution to sustainability goals' },
-    { label: 'Strong Benefit', value: SustainabilityScore.StrongBenefit, tip: 'Major driver for eco-friendly or social responsibility' },
+    {
+      label: 'Minimal Benefit',
+      value: SustainabilityScore.MinimalBenefit,
+      tip: 'No significant ESG or long-term sustainability impact',
+    },
+    {
+      label: 'Moderate Benefit',
+      value: SustainabilityScore.ModerateBenefit,
+      tip: 'Positive contribution to sustainability goals',
+    },
+    {
+      label: 'Strong Benefit',
+      value: SustainabilityScore.StrongBenefit,
+      tip: 'Major driver for eco-friendly or social responsibility',
+    },
   ];
   confidenceScores = [
-    { label: 'Low', value: ConfidenceScore.Low, tip: 'Highly uncertain; many assumptions require validation' },
-    { label: 'Moderate', value: ConfidenceScore.Moderate, tip: 'Reasonable data exists to support the business case' },
-    { label: 'High', value: ConfidenceScore.High, tip: 'Very high certainty based on detailed research and data' },
+    {
+      label: 'Low',
+      value: ConfidenceScore.Low,
+      tip: 'Highly uncertain; many assumptions require validation',
+    },
+    {
+      label: 'Moderate',
+      value: ConfidenceScore.Moderate,
+      tip: 'Reasonable data exists to support the business case',
+    },
+    {
+      label: 'High',
+      value: ConfidenceScore.High,
+      tip: 'Very high certainty based on detailed research and data',
+    },
   ];
 
   ngOnInit() {
@@ -179,8 +484,11 @@ export class IdeaScoringComponent implements OnInit {
     this.scoringForm = this.fb.group({
       // Phase 1: Idea Evaluation
       Phase1: this.fb.group({
-        Score: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-        Notes: ['']
+        Score: [
+          0,
+          [Validators.required, Validators.min(0), Validators.max(100)],
+        ],
+        Notes: [''],
       }),
       // Phase 2: Business Case
       Phase2: this.fb.group({
@@ -193,7 +501,7 @@ export class IdeaScoringComponent implements OnInit {
         DecisionDate: ['', Validators.required],
         PlannedDurationWeeks: ['', [Validators.required, Validators.min(1)]],
         CurrentStage: [BusinessCaseResult.InProgress, Validators.required],
-        Verdict: ['', Validators.required]
+        Verdict: ['', Validators.required],
       }),
       // Phase 3: Scoring Dimensions
       Phase3: this.fb.group({
@@ -209,8 +517,8 @@ export class IdeaScoringComponent implements OnInit {
         Differentiation: ['', Validators.required],
         SustainabilityImpact: ['', Validators.required],
         ProjectConfidence: ['', Validators.required],
-        ReviewerComments: ['', Validators.required]
-      })
+        ReviewerComments: ['', Validators.required],
+      }),
     });
   }
 
@@ -221,7 +529,9 @@ export class IdeaScoringComponent implements OnInit {
       if (value > 100) value = 100;
       if (value < 0) value = 0;
       input.value = value.toString();
-      this.scoringForm.get('Phase1.Score')?.setValue(value, { emitEvent: false });
+      this.scoringForm
+        .get('Phase1.Score')
+        ?.setValue(value, { emitEvent: false });
     }
     this.scoringForm.get('Phase1.Score')?.markAsTouched();
   }
@@ -237,19 +547,28 @@ export class IdeaScoringComponent implements OnInit {
     this.ideasService.updateIdea(this.ideaId, update).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.show('Evaluation score updated successfully', 'success');
+          this.toastService.show(
+            'Evaluation score updated successfully',
+            'success',
+          );
           if (this.idea) {
             this.idea.Score = score;
           }
         } else {
-          this.toastService.show(res.message || 'Failed to update score', 'error');
+          this.toastService.show(
+            res.message || 'Failed to update score',
+            'error',
+          );
         }
         this.isLoading = false;
       },
       error: (err) => {
-        this.toastService.show(err.error?.message || 'Error updating score', 'error');
+        this.toastService.show(
+          err.error?.message || 'Error updating score',
+          'error',
+        );
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -260,7 +579,8 @@ export class IdeaScoringComponent implements OnInit {
         if (res.success && res.data) {
           this.idea = res.data;
           const score = this.idea.score ?? this.idea.Score ?? 0;
-          const reasoning = this.idea.aiReasoning ?? this.idea.AiReasoning ?? '';
+          const reasoning =
+            this.idea.aiReasoning ?? this.idea.AiReasoning ?? '';
 
           this.parsedReasoning = this.formatReasoning(reasoning);
           this.scoringForm.get('Phase1.Score')?.patchValue(score);
@@ -273,7 +593,7 @@ export class IdeaScoringComponent implements OnInit {
       error: () => {
         this.toastService.show('Failed to load idea details', 'error');
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -287,7 +607,10 @@ export class IdeaScoringComponent implements OnInit {
           const d = res.data;
 
           // Helper to map integer enums to strings
-          const mapEnum = <E extends Record<string, string | number>>(val: string | number | undefined, enumObj: E): string => {
+          const mapEnum = <E extends Record<string, string | number>>(
+            val: string | number | undefined,
+            enumObj: E,
+          ): string => {
             if (val === undefined || val === null) return '';
             if (typeof val === 'number') {
               const keys = Object.keys(enumObj);
@@ -306,16 +629,22 @@ export class IdeaScoringComponent implements OnInit {
             DecisionDate: (d.DecisionDate ?? '').toString().substring(0, 10),
             PlannedDurationWeeks: d.PlannedDurationWeeks ?? '',
             CurrentStage: mapEnum(d.CurrentStage, BusinessCaseResult),
-            Verdict: mapEnum(d.Verdict, Verdict)
+            Verdict: mapEnum(d.Verdict, Verdict),
           });
 
           // Auto-expand based on idea stage
           const currentStage = this.idea?.currentStage || '';
-          if (currentStage === 'BusinessCase' || currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
+          if (
+            currentStage === 'BusinessCase' ||
+            currentStage === 'ScoringDimensions' ||
+            currentStage === 'Completed' ||
+            currentStage === 3 ||
+            currentStage === ScoringStage.Accepted
+          ) {
             this.expandedSection = 'phase2';
           }
         }
-      }
+      },
     });
 
     // Load Phase 3: Scoring Dimensions
@@ -324,7 +653,10 @@ export class IdeaScoringComponent implements OnInit {
         if (res.success && res.data) {
           const d = res.data;
 
-          const mapEnum = <E extends Record<string, string | number>>(val: string | number | undefined, enumObj: E): string => {
+          const mapEnum = <E extends Record<string, string | number>>(
+            val: string | number | undefined,
+            enumObj: E,
+          ): string => {
             if (val === undefined || val === null) return '';
             if (typeof val === 'number') {
               const keys = Object.keys(enumObj);
@@ -334,9 +666,15 @@ export class IdeaScoringComponent implements OnInit {
           };
 
           this.scoringForm.get('Phase3')?.patchValue({
-            StrategicAlignment: mapEnum(d.StrategicAlignment, StrategicAlignmentScore),
+            StrategicAlignment: mapEnum(
+              d.StrategicAlignment,
+              StrategicAlignmentScore,
+            ),
             CustomerImpact: mapEnum(d.CustomerImpact, CustomerImpactScore),
-            FinancialBenefit: mapEnum(d.FinancialBenefit, FinancialBenefitScore),
+            FinancialBenefit: mapEnum(
+              d.FinancialBenefit,
+              FinancialBenefitScore,
+            ),
             Feasibility: mapEnum(d.Feasibility, FeasibilityScore),
             TimeToValue: mapEnum(d.TimeToValue, TimeToValueScore),
             Cost: mapEnum(d.Cost, CostScore),
@@ -344,18 +682,26 @@ export class IdeaScoringComponent implements OnInit {
             Risk: mapEnum(d.Risk, RiskScore),
             Scalability: mapEnum(d.Scalability, ScalabilityScore),
             Differentiation: mapEnum(d.Differentiation, DifferentiationScore),
-            SustainabilityImpact: mapEnum(d.SustainabilityImpact, SustainabilityScore),
+            SustainabilityImpact: mapEnum(
+              d.SustainabilityImpact,
+              SustainabilityScore,
+            ),
             ProjectConfidence: mapEnum(d.ProjectConfidence, ConfidenceScore),
-            ReviewerComments: d.ReviewerComments ?? ''
+            ReviewerComments: d.ReviewerComments ?? '',
           });
 
           // Auto-expand if in Phase 3 or Completed
           const currentStage = this.idea?.currentStage || '';
-          if (currentStage === 'ScoringDimensions' || currentStage === 'Completed' || currentStage === 3 || currentStage === ScoringStage.Accepted) {
+          if (
+            currentStage === 'ScoringDimensions' ||
+            currentStage === 'Completed' ||
+            currentStage === 3 ||
+            currentStage === ScoringStage.Accepted
+          ) {
             this.expandedSection = 'phase3';
           }
         }
-      }
+      },
     });
   }
 
@@ -366,12 +712,13 @@ export class IdeaScoringComponent implements OnInit {
     }
 
     const finalTitle = this.idea.Title || this.idea.title || '';
-    const finalDescription = this.idea.ProposedSolution || this.idea.proposedSolution || '';
+    const finalDescription =
+      this.idea.ProposedSolution || this.idea.proposedSolution || '';
 
     this.projectData = {
       title: finalTitle,
       description: finalDescription,
-      overseenByEmail: this.projectData.overseenByEmail || ''
+      overseenByEmail: this.projectData.overseenByEmail || '',
     };
   }
 
@@ -412,30 +759,73 @@ export class IdeaScoringComponent implements OnInit {
     const getMetricScore = (val: string, metric: string): number => {
       switch (metric) {
         case 'StrategicAlignment':
-          return val === 'Low' ? 1 : val === 'Moderate' ? 2 : val === 'Strong' ? 3 : 0;
+          return val === 'Low'
+            ? 1
+            : val === 'Moderate'
+              ? 2
+              : val === 'Strong'
+                ? 3
+                : 0;
         case 'CustomerImpact':
         case 'FinancialBenefit':
         case 'Scalability':
         case 'ProjectConfidence':
-          return val === 'Low' ? 1 : val === 'Moderate' ? 2 : val === 'High' ? 3 : 0;
+          return val === 'Low'
+            ? 1
+            : val === 'Moderate'
+              ? 2
+              : val === 'High'
+                ? 3
+                : 0;
         case 'Feasibility':
-          return val === 'VeryDifficult' ? 1 : val === 'Moderate' ? 2 : val === 'High' ? 3 : 0;
+          return val === 'VeryDifficult'
+            ? 1
+            : val === 'Moderate'
+              ? 2
+              : val === 'High'
+                ? 3
+                : 0;
         case 'TimeToValue':
-          return val === 'SixToTwelve' ? 1 : val === 'ThreeToSix' ? 2 : val === 'UnderThreeMonths' ? 3 : 0;
+          return val === 'SixToTwelve'
+            ? 1
+            : val === 'ThreeToSix'
+              ? 2
+              : val === 'UnderThreeMonths'
+                ? 3
+                : 0;
         case 'Cost':
         case 'Effort':
         case 'Risk':
-          return val === 'High' ? 1 : val === 'Moderate' ? 2 : val === 'Low' ? 3 : 0;
+          return val === 'High'
+            ? 1
+            : val === 'Moderate'
+              ? 2
+              : val === 'Low'
+                ? 3
+                : 0;
         case 'Differentiation':
-          return val === 'LowUniqueness' ? 1 : val === 'ModerateUniqueness' ? 2 : val === 'HighDifferentiation' ? 3 : 0;
+          return val === 'LowUniqueness'
+            ? 1
+            : val === 'ModerateUniqueness'
+              ? 2
+              : val === 'HighDifferentiation'
+                ? 3
+                : 0;
         case 'SustainabilityImpact':
-          return val === 'MinimalBenefit' ? 1 : val === 'ModerateBenefit' ? 2 : val === 'StrongBenefit' ? 3 : 0;
+          return val === 'MinimalBenefit'
+            ? 1
+            : val === 'ModerateBenefit'
+              ? 2
+              : val === 'StrongBenefit'
+                ? 3
+                : 0;
         default:
           return 0;
       }
     };
 
-    return getMetricScore(p3.StrategicAlignment, 'StrategicAlignment') +
+    return (
+      getMetricScore(p3.StrategicAlignment, 'StrategicAlignment') +
       getMetricScore(p3.CustomerImpact, 'CustomerImpact') +
       getMetricScore(p3.FinancialBenefit, 'FinancialBenefit') +
       getMetricScore(p3.Feasibility, 'Feasibility') +
@@ -446,13 +836,17 @@ export class IdeaScoringComponent implements OnInit {
       getMetricScore(p3.Scalability, 'Scalability') +
       getMetricScore(p3.Differentiation, 'Differentiation') +
       getMetricScore(p3.SustainabilityImpact, 'SustainabilityImpact') +
-      getMetricScore(p3.ProjectConfidence, 'ProjectConfidence');
+      getMetricScore(p3.ProjectConfidence, 'ProjectConfidence')
+    );
   }
 
   onSubmitPhase2() {
     const phase2Group = this.scoringForm.get('Phase2');
     if (phase2Group?.invalid) {
-      this.toastService.show('Please complete all required Phase 2 fields', 'info');
+      this.toastService.show(
+        'Please complete all required Phase 2 fields',
+        'info',
+      );
       phase2Group.markAllAsTouched();
       return;
     }
@@ -462,7 +856,10 @@ export class IdeaScoringComponent implements OnInit {
     this.scoringService.submitBusinessCase(this.ideaId, dto).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.show('Business Case submitted successfully', 'success');
+          this.toastService.show(
+            'Business Case submitted successfully',
+            'success',
+          );
           if (dto.Verdict === Verdict.Approved) {
             this.expandedSection = 'phase3';
           }
@@ -471,8 +868,11 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.toastService.show(err.error?.message || 'Error submitting business case', 'error');
-      }
+        this.toastService.show(
+          err.error?.message || 'Error submitting business case',
+          'error',
+        );
+      },
     });
   }
 
@@ -486,14 +886,16 @@ export class IdeaScoringComponent implements OnInit {
 
     const dto: ScoringDimensionsDto = {
       ...phase3Group?.value,
-      Score: this.totalPhase3Score
+      Score: this.totalPhase3Score,
     };
-
 
     this.scoringService.submitScoringDimensions(this.ideaId, dto).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastService.show('Final Scoring Dimensions submitted successfully', 'success');
+          this.toastService.show(
+            'Final Scoring Dimensions submitted successfully',
+            'success',
+          );
           this.loadIdea();
 
           // Auto-expand Phase 4 if accepted
@@ -508,8 +910,11 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.toastService.show(err.error?.message || 'Error submitting scoring dimensions', 'error');
-      }
+        this.toastService.show(
+          err.error?.message || 'Error submitting scoring dimensions',
+          'error',
+        );
+      },
     });
   }
 
@@ -517,7 +922,7 @@ export class IdeaScoringComponent implements OnInit {
     this.router.navigate([`/groups/${this.groupId}/ideas`]);
   }
 
-  formatReasoning(text: string): { label: string, content: string }[] {
+  formatReasoning(text: string): { label: string; content: string }[] {
     if (!text) return [];
 
     const sections = [
@@ -525,20 +930,24 @@ export class IdeaScoringComponent implements OnInit {
       'Problem viability',
       'Solution feasibility',
       'Business impact',
-      'Overall assessment'
+      'Overall assessment',
     ];
 
-    const result: { label: string, content: string }[] = [];
+    const result: { label: string; content: string }[] = [];
     const labelPattern = new RegExp(`(${sections.join('|')}):`, 'gi');
     const parts = text.split(labelPattern);
 
     for (let i = 1; i < parts.length; i += 2) {
       const label = parts[i];
       let content = parts[i + 1] || '';
-      content = content.trim().replace(/^[:\s-]+/, '').trim();
+      content = content
+        .trim()
+        .replace(/^[:\s-]+/, '')
+        .trim();
 
       if (label && content) {
-        const normalizedLabel = label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+        const normalizedLabel =
+          label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
         result.push({ label: normalizedLabel, content });
       }
     }
@@ -558,44 +967,63 @@ export class IdeaScoringComponent implements OnInit {
         }
       },
       error: () => {
-        this.toastService.show('Failed to load user list for overseer selection', 'error');
-      }
+        this.toastService.show(
+          'Failed to load user list for overseer selection',
+          'error',
+        );
+      },
     });
   }
 
   createProjectFromIdea() {
-    if (!this.idea || !this.projectData.overseenByEmail || !this.projectData.title) {
+    if (
+      !this.idea ||
+      !this.projectData.overseenByEmail ||
+      !this.projectData.title
+    ) {
       this.toastService.show('Please complete all required fields', 'error');
       return;
     }
 
     this.isPromoting = true;
 
-    this.projectService.createProject(
-      this.groupId,
-      this.ideaId,
-      this.projectData
-    ).subscribe({
-      next: (createRes) => {
-        if (createRes.success) {
-          this.toastService.show('Idea promoted to project successfully!', 'success');
-          if (this.idea) {
-            this.idea.isPromotedToProject = true;
+    this.projectService
+      .createProject(this.groupId, this.ideaId, this.projectData)
+      .subscribe({
+        next: (createRes) => {
+          if (createRes.success) {
+            this.toastService.show(
+              'Idea promoted to project successfully!',
+              'success',
+            );
+            if (this.idea) {
+              this.idea.isPromotedToProject = true;
+            }
+          } else {
+            this.toastService.show(
+              createRes.message || 'Project creation failed',
+              'error',
+            );
           }
-        } else {
-          this.toastService.show(createRes.message || 'Project creation failed', 'error');
-        }
-        this.isPromoting = false;
-      },
-      error: (err) => {
-        this.toastService.show(err.error?.message || 'Error creating project', 'error');
-        this.isPromoting = false;
-      }
-    });
+          this.isPromoting = false;
+        },
+        error: (err) => {
+          this.toastService.show(
+            err.error?.message || 'Error creating project',
+            'error',
+          );
+          this.isPromoting = false;
+        },
+      });
   }
 
   get isAccepted(): boolean {
     const stage = this.idea?.currentStage;
-    return stage === 3 || stage === ScoringStage.Accepted || stage === 'Accepted' || this.idea?.status === 'Accepted';
+    return (
+      stage === 3 ||
+      stage === ScoringStage.Accepted ||
+      stage === 'Accepted' ||
+      this.idea?.status === 'Accepted'
+    );
   }
 }

@@ -7,7 +7,7 @@ import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MediaService {
   private readonly apiUrl = `${environment.apiUrl}/media`;
@@ -17,7 +17,7 @@ export class MediaService {
     return {
       success: response.status || response.success || false,
       message: response.message || '',
-      data: response.data
+      data: response.data,
     };
   }
 
@@ -27,7 +27,7 @@ export class MediaService {
     if (file.size > maxSize) {
       return {
         valid: false,
-        message: `File size exceeds 20MB limit`
+        message: `File size exceeds 20MB limit`,
       };
     }
     return { valid: true };
@@ -37,7 +37,9 @@ export class MediaService {
     const fileName = file.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
 
-    if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)) {
+    if (
+      ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)
+    ) {
       return MediaType.Image;
     }
     if (['.mp4', '.mov', '.avi', '.wmv'].includes(extension)) {
@@ -54,7 +56,7 @@ export class MediaService {
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
-    timesheetId?: number
+    timesheetId?: number,
   ): Observable<ApiResponse<Media>> {
     const formData = new FormData();
     formData.append('File', file);
@@ -64,12 +66,16 @@ export class MediaService {
     if (ideaId) params = params.set('ideaId', ideaId.toString());
     if (commentId) params = params.set('commentId', commentId.toString());
     if (projectId) params = params.set('projectId', projectId.toString());
-    if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
+    if (projectTaskId)
+      params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.post<ApiResponse<Media>>(`${this.apiUrl}/upload-media`, formData, { params })
-      .pipe(map(response => this.convertResponse<Media>(response)));
+    return this.http
+      .post<
+        ApiResponse<Media>
+      >(`${this.apiUrl}/upload-media`, formData, { params })
+      .pipe(map((response) => this.convertResponse<Media>(response)));
   }
 
   viewMedia(
@@ -78,23 +84,26 @@ export class MediaService {
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
-    timesheetId?: number
+    timesheetId?: number,
   ): Observable<ApiResponse<Media[]>> {
     let params = new HttpParams();
 
     if (ideaId) params = params.set('ideaId', ideaId.toString());
     if (commentId) params = params.set('commentId', commentId.toString());
     if (projectId) params = params.set('projectId', projectId.toString());
-    if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
+    if (projectTaskId)
+      params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.get<ApiResponse<Media[]>>(`${this.apiUrl}/view-media`, { params })
-      .pipe(map(response => this.convertResponse<Media[]>(response)));
+    return this.http
+      .get<ApiResponse<Media[]>>(`${this.apiUrl}/view-media`, { params })
+      .pipe(map((response) => this.convertResponse<Media[]>(response)));
   }
 
   deleteMedia(mediaId: number): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${mediaId}`)
-      .pipe(map(response => this.convertResponse<void>(response)));
+    return this.http
+      .delete<ApiResponse<void>>(`${this.apiUrl}/${mediaId}`)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 }

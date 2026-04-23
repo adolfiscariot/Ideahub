@@ -31,15 +31,17 @@ namespace api.Services
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             };
-            
-            try{
+
+            try
+            {
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
                 // Push real-time notification via SignalR
                 await _hubContext.Clients.Group($"user_{userId}").SendAsync("ReceiveNotification", message);
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
                 _logger.LogError($"Error sending notification: {ex.Message}");
             }
         }

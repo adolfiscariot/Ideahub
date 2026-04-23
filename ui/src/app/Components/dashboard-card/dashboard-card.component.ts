@@ -7,7 +7,7 @@ import { NgIcon } from '@ng-icons/core';
   standalone: true,
   imports: [CommonModule, NgIcon],
   templateUrl: './dashboard-card.component.html',
-  styleUrl: './dashboard-card.component.scss'
+  styleUrl: './dashboard-card.component.scss',
 })
 export class DashboardCardComponent {
   @Input() title = '';

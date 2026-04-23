@@ -8,13 +8,12 @@ export const AuthGuard: CanActivateFn = (): Observable<boolean | UrlTree> => {
   const router = inject(Router);
 
   return authService.isLoggedIn$.pipe(
-    map(isLoggedIn => {
-      if(isLoggedIn){
-        return true
-      }else{
-        return router.createUrlTree(['/login'])
+    map((isLoggedIn) => {
+      if (isLoggedIn) {
+        return true;
+      } else {
+        return router.createUrlTree(['/login']);
       }
-    })
-  )
-
-}
+    }),
+  );
+};

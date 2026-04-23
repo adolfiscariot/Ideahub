@@ -129,11 +129,11 @@ namespace Ideahub.Tests
             // Arrange
             var dto = new LoginDto { Email = "user@test.com", Password = "CorrectPass" };
             var user = new IdeahubUser { Id = "u1", Email = dto.Email };
-            
+
             _mockUserManager.Setup(m => m.FindByEmailAsync(dto.Email)).ReturnsAsync(user);
             _mockSignInManager.Setup(m => m.PasswordSignInAsync(user, dto.Password, true, false))
                 .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
-            
+
             _mockTokenService.Setup(t => t.CreateAccessTokenAsync(user)).ReturnsAsync("access-token-123");
             _mockTokenService.Setup(t => t.GenerateRefreshToken()).Returns("refresh-token-456");
 
@@ -161,7 +161,7 @@ namespace Ideahub.Tests
             var requestBody = new TokenResponse { AccessToken = "expired-token", RefreshToken = "valid-refresh" };
             var user = new IdeahubUser { Id = "u1", UserName = "test" };
             var oldTokenHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("valid-refresh")));
-            
+
             user.RefreshTokens.Add(new RefreshToken { Token = oldTokenHash, HasExpired = false, RefreshTokenExpiry = DateTime.UtcNow.AddDays(1) });
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -187,7 +187,7 @@ namespace Ideahub.Tests
             // Arrange
             var requestBody = new TokenResponse { AccessToken = "some-token", RefreshToken = "cookie" };
             // Ensure no cookie is in the HttpContext
-            _controller.Request.Cookies = new Mock<IRequestCookieCollection>().Object; 
+            _controller.Request.Cookies = new Mock<IRequestCookieCollection>().Object;
 
             // Act
             var result = await _controller.RefreshAccessToken(requestBody);
@@ -205,7 +205,7 @@ namespace Ideahub.Tests
             var requestBody = new TokenResponse { AccessToken = "some-token", RefreshToken = "hacked-token" };
             var user = new IdeahubUser { Id = "u1", UserName = "test" };
             var tokenHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("hacked-token")));
-            
+
             user.RefreshTokens.Add(new RefreshToken { Token = tokenHash, HasExpired = true, RefreshTokenExpiry = DateTime.UtcNow.AddDays(1) });
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -230,7 +230,7 @@ namespace Ideahub.Tests
             var requestBody = new TokenResponse { AccessToken = "some-token", RefreshToken = "expired-token-val" };
             var user = new IdeahubUser { Id = "u1", UserName = "test" };
             var tokenHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes("expired-token-val")));
-            
+
             user.RefreshTokens.Add(new RefreshToken { Token = tokenHash, HasExpired = false, RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(-5) });
             _context.Users.Add(user);
             await _context.SaveChangesAsync();

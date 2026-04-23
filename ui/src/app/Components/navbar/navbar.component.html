@@ -1,78 +1,112 @@
 <div class="navbar">
   <div class="navbar-left">
-
     <!--If logged out this text should lead to the landing page otherwise
     it should lead to the home page-->
     @if (loggedInStatus | async; as isLoggedIn) {
-    <a class="product-text" [routerLink]="'/home'">Ideahub</a>
+      <a class="product-text" [routerLink]="'/home'">Ideahub</a>
     } @else {
-    <a class="product-text" [routerLink]="'/'">Ideahub</a>
+      <a class="product-text" [routerLink]="'/'">Ideahub</a>
     }
-
   </div>
   @if (loggedInStatus | async; as isLoggedIn) {
-  <nav class="nav-items">
-    <a routerLink="/home" routerLinkActive="active" aria-label="Navigate to Ideas page">
-      <mat-icon>home</mat-icon>
-      <span class="link-text">Home</span>
-    </a>
-    <a routerLink="/groups" routerLinkActive="active" aria-label="Navigate to Groups page">
-      <mat-icon>groups</mat-icon>
-      <span class="link-text">Groups</span>
-    </a>
-    <a routerLink="/projects" routerLinkActive="active" aria-label="Navigate to Projects page">
-      <mat-icon>topic</mat-icon>
-      <span class="link-text">Projects</span>
-    </a>
-    <a routerLink="/committeemembers" routerLinkActive="active" aria-label="Navigate to Committee Members page">
-      <mat-icon>verified_user</mat-icon>
-      <span class="link-text">Committee Members</span>
-    </a>
-  </nav>
+    <nav class="nav-items">
+      <a
+        routerLink="/home"
+        routerLinkActive="active"
+        aria-label="Navigate to Ideas page"
+      >
+        <mat-icon>home</mat-icon>
+        <span class="link-text">Home</span>
+      </a>
+      <a
+        routerLink="/groups"
+        routerLinkActive="active"
+        aria-label="Navigate to Groups page"
+      >
+        <mat-icon>groups</mat-icon>
+        <span class="link-text">Groups</span>
+      </a>
+      <a
+        routerLink="/projects"
+        routerLinkActive="active"
+        aria-label="Navigate to Projects page"
+      >
+        <mat-icon>topic</mat-icon>
+        <span class="link-text">Projects</span>
+      </a>
+      <a
+        routerLink="/committeemembers"
+        routerLinkActive="active"
+        aria-label="Navigate to Committee Members page"
+      >
+        <mat-icon>verified_user</mat-icon>
+        <span class="link-text">Committee Members</span>
+      </a>
+    </nav>
   }
-
 
   <div class="navbar-right">
     @if (loggedInStatus | async; as isLoggedIn) {
-    <a routerLink="/notifications" class="nav-link desktop-only">
-      <div class="notif-bell">
-        <button class="notification-btn" aria-label="Notifications">
-          <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
-        </button>
+      <a routerLink="/notifications" class="nav-link desktop-only">
+        <div class="notif-bell">
+          <button class="notification-btn" aria-label="Notifications">
+            <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
+          </button>
 
-        @if (totalBadge$ | async; as count) {
-          <span class="notif-badge" [innerText]="count > 9 ? '9+' : count"></span>
-        }
-      </div>
-    </a>
+          @if (totalBadge$ | async; as count) {
+            <span
+              class="notif-badge"
+              [innerText]="count > 9 ? '9+' : count"
+            ></span>
+          }
+        </div>
+      </a>
 
-    <app-buttons [buttonText]="'LOG OUT'" [buttonStyleClass]="'btn-logout-navbar desktop-only'" [buttonType]="'button'"
-      (click)="onLogout()" />
+      <app-buttons
+        [buttonText]="'LOG OUT'"
+        [buttonStyleClass]="'btn-logout-navbar desktop-only'"
+        [buttonType]="'button'"
+        (click)="onLogout()"
+      />
 
-    <!-- Hamburger Menu Button -->
-    <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
-      <mat-icon>menu</mat-icon>
-    </button>
-
+      <!-- Hamburger Menu Button -->
+      <button
+        class="hamburger-btn"
+        (click)="toggleMobileMenu()"
+        aria-label="Toggle menu"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
     } @else {
-    <app-buttons [buttonText]="'LOG IN'" [buttonStyleClass]="'btn-login-navbar'" [buttonType]="'button'"
-      [buttonLink]="'/login'" />
-    <app-buttons [buttonText]="'SIGN UP'" [buttonStyleClass]="'btn-signup-navbar'" [buttonType]="'button'"
-      [buttonLink]="'/register'" />
+      <app-buttons
+        [buttonText]="'LOG IN'"
+        [buttonStyleClass]="'btn-login-navbar'"
+        [buttonType]="'button'"
+        [buttonLink]="'/login'"
+      />
+      <app-buttons
+        [buttonText]="'SIGN UP'"
+        [buttonStyleClass]="'btn-signup-navbar'"
+        [buttonType]="'button'"
+        [buttonLink]="'/register'"
+      />
     }
-
   </div>
 
   <!-- Mobile Menu Overlay -->
   @if (isMobileMenuOpen) {
-    <div class="mobile-menu-overlay" 
-         (click)="closeMobileMenu()" 
-         (keydown.escape)="closeMobileMenu()"
-         tabindex="0">
-      <div class="mobile-menu-content" 
-           (click)="$event.stopPropagation()"
-           (keydown.enter)="$event.stopPropagation()"
-           tabindex="0">
+    <div
+      class="mobile-menu-overlay"
+      (click)="closeMobileMenu()"
+      (keydown.escape)="closeMobileMenu()"
+      tabindex="0"
+    >
+      <div
+        class="mobile-menu-content"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="$event.stopPropagation()"
+        tabindex="0"
+      >
         <div class="mobile-menu-header">
           <span class="mobile-menu-title">Menu</span>
           <button class="close-menu-btn" (click)="closeMobileMenu()">
@@ -81,32 +115,59 @@
         </div>
 
         <nav class="mobile-nav-items">
-          <a routerLink="/home" routerLinkActive="active" (click)="closeMobileMenu()">
+          <a
+            routerLink="/home"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
             <mat-icon>home</mat-icon> Home
           </a>
-          <a routerLink="/groups" routerLinkActive="active" (click)="closeMobileMenu()">
+          <a
+            routerLink="/groups"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
             <mat-icon>groups</mat-icon> Groups
           </a>
-          <a routerLink="/projects" routerLinkActive="active" (click)="closeMobileMenu()">
+          <a
+            routerLink="/projects"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
             <mat-icon>topic</mat-icon> Projects
           </a>
-          <a routerLink="/committeemembers" routerLinkActive="active" (click)="closeMobileMenu()">
+          <a
+            routerLink="/committeemembers"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
             <mat-icon>verified_user</mat-icon> Committee
           </a>
 
-          <a routerLink="/notifications" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-notif-link">
+          <a
+            routerLink="/notifications"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+            class="mobile-notif-link"
+          >
             <div class="mobile-notif-content">
               <ng-icon name="heroBell" size="24" class="bell-icon"></ng-icon>
               <span>Notifications</span>
             </div>
-            @if (membershipNotificationsService.pendingRequests$ | async; as count) {
-              <span class="mobile-notif-badge" [innerText]="count > 9 ? '9+' : count"></span>
+            @if (notificationsService.pendingRequests$ | async; as count) {
+              <span
+                class="mobile-notif-badge"
+                [innerText]="count > 9 ? '9+' : count"
+              ></span>
             }
           </a>
 
           <div class="mobile-menu-divider"></div>
 
-          <button class="mobile-logout-btn" (click)="onLogout(); closeMobileMenu()">
+          <button
+            class="mobile-logout-btn"
+            (click)="onLogout(); closeMobileMenu()"
+          >
             <mat-icon>logout</mat-icon> Log Out
           </button>
         </nav>

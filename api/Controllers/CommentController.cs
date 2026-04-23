@@ -29,7 +29,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpPost("create-comment")]
-    public async Task<IActionResult> CreateComment(CommentsDto commentsDto, int IdeaId) 
+    public async Task<IActionResult> CreateComment(CommentsDto commentsDto, int IdeaId)
     {
         try
         {
@@ -72,16 +72,17 @@ public class CommentController : ControllerBase
                 await _notificationService.SendNotificationAsync(idea.UserId, $"New comment on your idea '{idea.Title}': {comment.Content}", comment.Id);
             }
 
-             return Ok(ApiResponse.Ok(
-                $"New comment Created by {userEmail}",
-                new {
-                    id = comment.Id,
-                    content = comment.Content,
-                    createdAt = comment.CreatedAt,
-                    userId = comment.UserId,
-                    ideaId = comment.IdeaId
-                }
-            ));
+            return Ok(ApiResponse.Ok(
+               $"New comment Created by {userEmail}",
+               new
+               {
+                   id = comment.Id,
+                   content = comment.Content,
+                   createdAt = comment.CreatedAt,
+                   userId = comment.UserId,
+                   ideaId = comment.IdeaId
+               }
+           ));
         }
         catch (Exception e)
         {
@@ -90,7 +91,7 @@ public class CommentController : ControllerBase
         }
     }
 
-     //View all comments
+    //View all comments
     [HttpGet("view-comments")]
     public async Task<IActionResult> ViewComments(int IdeaId)
     {
@@ -125,7 +126,7 @@ public class CommentController : ControllerBase
         var commentDataToReturn = new List<object>();
         foreach (var comment in comments)
         {
-            commentDataToReturn.Add(new {comment.Id, comment.Content, comment.CreatedAt, comment.UserId, comment.IdeaId});
+            commentDataToReturn.Add(new { comment.Id, comment.Content, comment.CreatedAt, comment.UserId, comment.IdeaId });
         }
         return Ok(ApiResponse.Ok($"{comments.Count()} Comments found", commentDataToReturn));
     }

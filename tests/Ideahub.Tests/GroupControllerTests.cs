@@ -283,20 +283,20 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             var list = Assert.IsAssignableFrom<System.Collections.IEnumerable>(response.Data);
-            
+
             // Checking the first group in the list using Reflection to see the internal isMember property
             var groupList = list.Cast<object>().ToList();
             Assert.NotEmpty(groupList);
-            
+
             var firstItem = groupList[0];
             Assert.NotNull(firstItem);
-            
+
             var prop = firstItem.GetType().GetProperty("IsMember");
             Assert.NotNull(prop);
-            
+
             var value = prop.GetValue(firstItem);
             Assert.NotNull(value);
-            
+
             bool isMember = (bool)value;
             Assert.True(isMember);
         }

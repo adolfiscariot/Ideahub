@@ -32,7 +32,7 @@ public class BusinessCase
     public DateOnly DecisionDate { get; set; }
 
     [Required]
-    public int PlannedDurationWeeks { get; set; } 
+    public int PlannedDurationWeeks { get; set; }
 
     [Required]
     public BusinessCaseResult CurrentStage { get; set; }
@@ -52,62 +52,62 @@ public class BusinessCase
     public Idea Idea { get; set; } = null!;
 }
 
-public enum ImpactScope 
-{ 
+public enum ImpactScope
+{
     Unknown = 0,
-    Department = 1, 
-    OrganizationWide = 2, 
-    External = 3, 
+    Department = 1,
+    OrganizationWide = 2,
+    External = 3,
 }
 
-public enum RiskLevel 
-{ 
+public enum RiskLevel
+{
     Unknown = 0,
-    Low = 1, 
-    Medium = 2, 
-    High = 3 
+    Low = 1,
+    Medium = 2,
+    High = 3
 }
 
-public enum EvaluationStatus 
-{ 
+public enum EvaluationStatus
+{
     Unknown = 0,
     FeasibilityResearch = 1,
-    Approved = 2, 
-    Rejected = 3, 
+    Approved = 2,
+    Rejected = 3,
 }
 
-public enum ResponsibleDepartment 
-{ 
+public enum ResponsibleDepartment
+{
     Unknown = 0,
-    Finance = 1, 
-    IT = 2, 
-    Operations = 3, 
-    MarketingAndSales = 4, 
-    StrategyAndCompliance = 5 
+    Finance = 1,
+    IT = 2,
+    Operations = 3,
+    MarketingAndSales = 4,
+    StrategyAndCompliance = 5
 }
 
 public enum ActionStep
-{ 
+{
     Unknown = 0,
-    PrototypeDevelopment = 1, 
-    StakeholderReview = 2, 
-    PilotLaunch = 3, 
-    MarketFeasibilityStudy = 4, 
-    RolloutPlanning = 5 
+    PrototypeDevelopment = 1,
+    StakeholderReview = 2,
+    PilotLaunch = 3,
+    MarketFeasibilityStudy = 4,
+    RolloutPlanning = 5
 }
 
-public enum BusinessCaseResult 
-{ 
+public enum BusinessCaseResult
+{
     Unknown = 0,
-    InProgress = 1, 
-    PilotStage = 2, 
-    AwaitingResults = 3 
+    InProgress = 1,
+    PilotStage = 2,
+    AwaitingResults = 3
 }
 
-public enum Verdict 
-{ 
+public enum Verdict
+{
     Unknown = 0,
-    Approved = 1, 
-    AwaitingReview = 2, 
-    Park = 3 
+    Approved = 1,
+    AwaitingReview = 2,
+    Park = 3
 }

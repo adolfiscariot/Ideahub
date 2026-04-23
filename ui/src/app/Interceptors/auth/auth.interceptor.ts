@@ -1,9 +1,18 @@
-import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpEvent,
+  HttpHandlerFn,
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { catchError, Observable, tap, throwError, switchMap } from 'rxjs';
 import { inject } from '@angular/core';
 import { AuthService } from '../../Services/auth/auth.service';
 
-export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
+export const authInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+): Observable<HttpEvent<unknown>> => {
   const accessToken = localStorage.getItem('accessToken');
   const authService = inject(AuthService);
 
@@ -11,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
   let newRequest = req;
   if (accessToken) {
     newRequest = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${accessToken}`)
+      headers: req.headers.set('Authorization', `Bearer ${accessToken}`),
     });
   }
 
@@ -20,10 +29,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       // Log successful responses if needed
     }),
     catchError((error: HttpErrorResponse) => {
-
       // Handle 401 Unauthorized
       if (error.status === 401) {
-
         // Ignore 401 on Login (invalid credentials) -> just return error
         if (req.url.includes('/login')) {
           return throwError(() => error);
@@ -45,7 +52,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
           switchMap((newToken: string) => {
             // Refresh successful, retry original request with new token
             const retriedRequest = req.clone({
-              headers: req.headers.set('Authorization', `Bearer ${newToken}`)
+              headers: req.headers.set('Authorization', `Bearer ${newToken}`),
             });
             return next(retriedRequest);
           }),
@@ -53,11 +60,11 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
             // Refresh failed, logout
             authService.logoutLocal();
             return throwError(() => refreshError);
-          })
+          }),
         );
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

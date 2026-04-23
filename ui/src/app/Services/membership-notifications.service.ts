@@ -5,7 +5,7 @@ import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { GroupMembershipRequest } from '../Interfaces/Groups/groups-interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MembershipNotificationsService {
   private pendingRequestsSubject = new BehaviorSubject<number>(0);
@@ -23,7 +23,7 @@ export class MembershipNotificationsService {
         const count = res.data?.length ?? 0;
         this.pendingRequestsSubject.next(count);
       },
-      error: () => this.pendingRequestsSubject.next(0)
+      error: () => this.pendingRequestsSubject.next(0),
     });
   }
 
@@ -32,7 +32,9 @@ export class MembershipNotificationsService {
   }
 
   decrement(count = 1) {
-    this.pendingRequestsSubject.next(Math.max(this.pendingRequestsSubject.value - count, 0));
+    this.pendingRequestsSubject.next(
+      Math.max(this.pendingRequestsSubject.value - count, 0),
+    );
   }
 
   set(count: number) {

@@ -9,34 +9,36 @@ export const routes: Routes = [
     canActivate: [LandingGuard],
     loadComponent: () =>
       import('./Pages/landing-page/landing-page.component').then(
-        (m) => m.LandingPageComponent
+        (m) => m.LandingPageComponent,
       ),
   },
   {
     path: 'register',
     loadComponent: () =>
       import('./Pages/register/register.component').then(
-        (m) => m.RegisterComponent
+        (m) => m.RegisterComponent,
       ),
   },
   {
     path: 'confirm-registration',
     loadComponent: () =>
-      import(
-        './Pages/confirm-registration/confirm-registration.component'
-      ).then((m) => m.ConfirmRegistrationComponent),
+      import('./Pages/confirm-registration/confirm-registration.component').then(
+        (m) => m.ConfirmRegistrationComponent,
+      ),
   },
   {
     path: 'login',
     loadComponent: () =>
       import('./Pages/login-page/login-page.component').then(
-        (m) => m.LoginPageComponent
+        (m) => m.LoginPageComponent,
       ),
   },
   {
     path: 'forgot-password',
     loadComponent: () =>
-      import('./Pages/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
+      import('./Pages/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
   },
   {
     path: 'home',
@@ -54,7 +56,9 @@ export const routes: Routes = [
     path: 'projects',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('./Pages/projects/projects.component').then((m) => m.ProjectsComponent),
+      import('./Pages/projects/projects.component').then(
+        (m) => m.ProjectsComponent,
+      ),
   },
 
   {
@@ -68,7 +72,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard, CommitteeGuard],
     loadComponent: () =>
       import('./Pages/idea-scoring/idea-scoring.component').then(
-        (m) => m.IdeaScoringComponent
+        (m) => m.IdeaScoringComponent,
       ),
   },
   {
@@ -76,7 +80,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/global-notifications/global-notifications.component').then(
-        (m) => m.GlobalNotificationsComponent
+        (m) => m.GlobalNotificationsComponent,
       ),
   },
   {
@@ -84,20 +88,23 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/committeemembers/committeemembers.component').then(
-        (m) => m.CommitteeMembersComponent
+        (m) => m.CommitteeMembersComponent,
       ),
   },
   {
     path: 'projects/:projectId/tasks',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('./Pages/task-management/task-management.component').then((m) => m.TaskManagementComponent),
+      import('./Pages/task-management/task-management.component').then(
+        (m) => m.TaskManagementComponent,
+      ),
   },
   {
     path: 'projects/:projectId/timesheets',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('./Pages/timesheets/timesheets.component').then((m) => m.TimesheetsComponent),
-  }
-
+      import('./Pages/timesheets/timesheets.component').then(
+        (m) => m.TimesheetsComponent,
+      ),
+  },
 ];

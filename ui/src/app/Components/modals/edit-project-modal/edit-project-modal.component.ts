@@ -1,7 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,44 +15,46 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { Project, ProjectStatus } from '../../../Interfaces/Projects/Project';
 
 @Component({
-    selector: 'app-edit-project-modal',
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        MatDialogModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule
-    ],
-    templateUrl: './edit-project-modal.component.html',
-    styleUrls: ['./edit-project-modal.component.scss']
+  selector: 'app-edit-project-modal',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ],
+  templateUrl: './edit-project-modal.component.html',
+  styleUrls: ['./edit-project-modal.component.scss'],
 })
 export class EditProjectModalComponent implements OnInit {
-    editedProject: Partial<Project> = {};
-    ProjectStatus = ProjectStatus;
-    statusOptions = Object.values(ProjectStatus).filter(value => typeof value === 'number') as number[];
+  editedProject: Partial<Project> = {};
+  ProjectStatus = ProjectStatus;
+  statusOptions = Object.values(ProjectStatus).filter(
+    (value) => typeof value === 'number',
+  ) as number[];
 
-    private dialogRef = inject(MatDialogRef<EditProjectModalComponent>);
-    public data: { project: Project } = inject(MAT_DIALOG_DATA);
+  private dialogRef = inject(MatDialogRef<EditProjectModalComponent>);
+  public data: { project: Project } = inject(MAT_DIALOG_DATA);
 
-    ngOnInit() {
-        // Clone the data to avoid mutating the source directly until saved
-        this.editedProject = { ...this.data.project };
-    }
+  ngOnInit() {
+    // Clone the data to avoid mutating the source directly until saved
+    this.editedProject = { ...this.data.project };
+  }
 
-    getStatusLabel(status: number): string {
-        return ProjectStatus[status];
-    }
+  getStatusLabel(status: number): string {
+    return ProjectStatus[status];
+  }
 
-    onSave() {
-        this.dialogRef.close(this.editedProject);
-    }
+  onSave() {
+    this.dialogRef.close(this.editedProject);
+  }
 
-    onCancel() {
-        this.dialogRef.close();
-    }
+  onCancel() {
+    this.dialogRef.close();
+  }
 }

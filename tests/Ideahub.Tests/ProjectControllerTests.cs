@@ -31,7 +31,7 @@ namespace Ideahub.Tests
             _context = new IdeahubDbContext(options);
 
             _mockLogger = new Mock<ILogger<ProjectController>>();
-            
+
             var store = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
@@ -61,7 +61,7 @@ namespace Ideahub.Tests
             var group = new Group { Id = groupId, Name = "Test Group", IsPublic = true };
             var idea = new Idea { Id = ideaId, Title = "Test Idea", GroupId = groupId, Status = IdeaStatus.Open };
             var user = new IdeahubUser { Id = _testUserId, Email = _testUserEmail, DisplayName = "Test User", UserName = _testUserEmail };
-            
+
             _context.Groups.Add(group);
             _context.Ideas.Add(idea);
             _context.Users.Add(user);
@@ -77,11 +77,11 @@ namespace Ideahub.Tests
         {
             // Arrange
             await SeedBasicData();
-            var dto = new ProjectDto 
-            { 
-                Title = "New Project", 
-                Description = "Description", 
-                OverseenByEmail = _testUserEmail 
+            var dto = new ProjectDto
+            {
+                Title = "New Project",
+                Description = "Description",
+                OverseenByEmail = _testUserEmail
             };
 
             // Act
@@ -95,7 +95,7 @@ namespace Ideahub.Tests
             var project = await _context.Projects.FirstOrDefaultAsync(p => p.Title == "New Project");
             Assert.NotNull(project);
             Assert.Equal(1, project.IdeaId);
-            
+
             var idea = await _context.Ideas.FindAsync(1);
             Assert.Equal(IdeaStatus.Closed, idea!.Status);
             Assert.True(idea.IsPromotedToProject);
@@ -162,7 +162,7 @@ namespace Ideahub.Tests
         {
             // Arrange
             await SeedBasicData();
-            
+
             // Act
             var result = await _controller.ViewProjects(1);
 
@@ -198,23 +198,23 @@ namespace Ideahub.Tests
             // Arrange
             await SeedBasicData();
             _context.UserGroups.Add(new UserGroup { GroupId = 1, UserId = _testUserId });
-            
+
             // Add the missing overseer user
             var overseer = new IdeahubUser { Id = "other-boss", Email = "boss@example.com", DisplayName = "Boss", UserName = "boss@example.com" };
             _context.Users.Add(overseer);
 
-            var project = new Project 
-            { 
-                Id = 6, 
-                Title = "Assignee Project", 
-                GroupId = 1, 
-                IdeaId = 1, 
-                OverseenByUserId = "other-boss", 
-                CreatedByUserId = "other-boss" 
+            var project = new Project
+            {
+                Id = 6,
+                Title = "Assignee Project",
+                GroupId = 1,
+                IdeaId = 1,
+                OverseenByUserId = "other-boss",
+                CreatedByUserId = "other-boss"
             };
             var task = new ProjectTask { Id = 10, ProjectId = 6, Title = "Task" };
             var assignee = new TaskAssignee { ProjectTaskId = 10, UserId = _testUserId };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.TaskAssignees.Add(assignee);
@@ -232,20 +232,20 @@ namespace Ideahub.Tests
         {
             // Arrange
             await SeedBasicData();
-            
+
             // Add the missing stranger user
             var stranger = new IdeahubUser { Id = "stranger", Email = "stranger@example.com", DisplayName = "Stranger", UserName = "stranger@example.com" };
             _context.Users.Add(stranger);
 
             // User is NOT in the group and NOT the overseer
-            var project = new Project 
-            { 
-                Id = 7, 
-                Title = "Private Project", 
-                GroupId = 1, 
-                IdeaId = 1, 
-                OverseenByUserId = "stranger", 
-                CreatedByUserId = "stranger" 
+            var project = new Project
+            {
+                Id = 7,
+                Title = "Private Project",
+                GroupId = 1,
+                IdeaId = 1,
+                OverseenByUserId = "stranger",
+                CreatedByUserId = "stranger"
             };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
@@ -339,12 +339,12 @@ namespace Ideahub.Tests
             // Arrange
             await SeedBasicData();
             _context.UserGroups.Add(new UserGroup { GroupId = 1, UserId = _testUserId });
-            
+
             var project = new Project { Id = 20, Title = "Progress Project", GroupId = 1, IdeaId = 1, OverseenByUserId = _testUserId, CreatedByUserId = _testUserId };
-            
+
             // Task 1: No subtasks, Completed -> 100%
             var task1 = new ProjectTask { Id = 100, ProjectId = 20, Title = "T1", IsCompleted = true };
-            
+
             // Task 2: 2 subtasks, 1 completed -> 50%
             var task2 = new ProjectTask { Id = 101, ProjectId = 20, Title = "T2", IsCompleted = false };
 
@@ -352,7 +352,7 @@ namespace Ideahub.Tests
             _context.ProjectTasks.Add(task1);
             _context.ProjectTasks.Add(task2);
             await _context.SaveChangesAsync();
-            
+
             var st1 = new SubTask { Id = 200, ProjectTaskId = 101, Title = "ST1", IsCompleted = true };
             var st2 = new SubTask { Id = 201, ProjectTaskId = 101, Title = "ST2", IsCompleted = false };
             _context.SubTasks.AddRange(st1, st2);
@@ -365,7 +365,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = okResult.Value as ApiResponse;
             Assert.NotNull(response);
-            
+
             // Expected progress: (100 + 50) / 2 = 75.0%
             var data = response.Data;
             var progress = data?.GetType().GetProperty("Progress")?.GetValue(data, null);

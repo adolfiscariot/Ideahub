@@ -1,5 +1,4 @@
 <div class="groups-container">
-
   <!-- Header Section with Create Button -->
   <header class="groups-header">
     <div class="header-content">
@@ -12,7 +11,8 @@
         [buttonText]="'ⓘ'"
         [buttonStyleClass]="'btn-info-icon'"
         title="Groups Guideline"
-        (click)="displayGroupInfo()">
+        (click)="displayGroupInfo()"
+      >
       </app-buttons>
 
       @if (!showCreateModal && !isLoading && groups.length > 0) {
@@ -20,13 +20,14 @@
           [buttonText]="'Create Group'"
           [buttonStyleClass]="'btn-create-group'"
           [buttonType]="'button'"
-          (click)="openCreateModal()">
+          (click)="openCreateModal()"
+        >
         </app-buttons>
       }
     </div>
   </header>
 
-  <hr class="divider">
+  <hr class="divider" />
 
   <!-- Loading State -->
   @if (isLoading) {
@@ -39,7 +40,6 @@
   <!-- Groups List -->
   @if (!isLoading) {
     <div class="groups-list">
-      
       <!-- No Groups State vs Grid View -->
       @if (groups.length === 0) {
         <div class="no-groups">
@@ -51,7 +51,8 @@
             [buttonText]="' + Create First Group'"
             [buttonStyleClass]="'btn-create-first-group'"
             [buttonType]="'button'"
-            (click)="openCreateModal()">
+            (click)="openCreateModal()"
+          >
           </app-buttons>
         </div>
       } @else {
@@ -75,7 +76,7 @@
 
                 <!-- Description -->
                 <p class="group-description">{{ group.description }}</p>
-              </div> 
+              </div>
 
               <!-- Stats -->
               <div class="group-stats">
@@ -89,7 +90,9 @@
                 </div>
                 <div class="stat">
                   <span class="stat-icon">📅</span>
-                  <span class="stat-date">{{ formatDate(group.createdAt) }}</span>
+                  <span class="stat-date">{{
+                    formatDate(group.createdAt)
+                  }}</span>
                 </div>
                 <div class="stat">
                   <span class="stat-icon">🔐</span>
@@ -97,7 +100,7 @@
                 </div>
               </div>
 
-              <hr class="group-divider">
+              <hr class="group-divider" />
 
               <!-- Bottom Section -->
               <div class="group-bottom">
@@ -107,24 +110,29 @@
                     [buttonText]="'💡 View Ideas'"
                     [buttonStyleClass]="'btn-view-ideas'"
                     [buttonType]="'button'"
-                    (click)="onViewIdeas(group.id)">
+                    (click)="onViewIdeas(group.id)"
+                  >
                   </app-buttons>
                 }
 
                 <!-- Pending Approval -->
                 @if (!group.isMember && group.hasPendingRequest) {
-                  <div class="pending-status">
-                    ⏳ Pending Approval
-                  </div>
+                  <div class="pending-status">⏳ Pending Approval</div>
                 }
 
                 <!-- Join Button -->
-                @if (!group.isMember && !group.hasPendingRequest && group.isActive && !group.isDeleted) {
+                @if (
+                  !group.isMember &&
+                  !group.hasPendingRequest &&
+                  group.isActive &&
+                  !group.isDeleted
+                ) {
                   <app-buttons
                     [buttonText]="'Join Group'"
                     [buttonStyleClass]="'btn-join-group'"
                     [buttonType]="'button'"
-                    (click)="onJoinGroup(group.id)">
+                    (click)="onJoinGroup(group.id)"
+                  >
                   </app-buttons>
                 }
 
@@ -134,14 +142,16 @@
                     [buttonText]="'📋 Details'"
                     [buttonStyleClass]="'btn-group-details'"
                     [buttonType]="'button'"
-                    (click)="openDetailsModal(group)">
+                    (click)="openDetailsModal(group)"
+                  >
                   </app-buttons>
 
                   <app-buttons
                     [buttonText]="'👥 Members'"
                     [buttonStyleClass]="'btn-group-members'"
                     [buttonType]="'button'"
-                    (click)="openMembersModal(group)">
+                    (click)="openMembersModal(group)"
+                  >
                   </app-buttons>
 
                   @if (canConfigureGroup(group)) {
@@ -150,11 +160,12 @@
                       [buttonStyleClass]="'btn-reject'"
                       [buttonType]="'button'"
                       [title]="'Delete Group'"
-                      (click)="openDeleteModal(group)">
+                      (click)="openDeleteModal(group)"
+                    >
                     </app-buttons>
                   }
                 </div>
-              </div> 
+              </div>
             </div>
           }
         </div>
@@ -168,17 +179,18 @@
     [length]="groups.length"
     [pageSize]="8"
     [pageSizeOptions]="[8]"
-    (page)="onPageChange($event)">
+    (page)="onPageChange($event)"
+  >
   </mat-paginator>
 }
 
 <!-- Group Details Modal -->
-<app-modal 
+<app-modal
   [isOpen]="showDetailsModal"
   [title]="selectedGroup?.name + ' Details'"
   size="md"
-  (closeModal)="closeDetailsModal()">
-  
+  (closeModal)="closeDetailsModal()"
+>
   @if (selectedGroup) {
     <div modal-body>
       <div class="group-details-content">
@@ -186,27 +198,27 @@
           <strong>Description:</strong>
           <p>{{ selectedGroup.description }}</p>
         </div>
-        
+
         <div class="detail-row">
           <strong>Created By</strong>
-          <p>{{ selectedGroup.createdByUser?.displayName || 'Unknown' }}</p>
+          <p>{{ selectedGroup.createdByUser?.displayName || "Unknown" }}</p>
         </div>
-        
+
         <div class="detail-row">
           <strong>Created On</strong>
           <p>{{ formatDate(selectedGroup.createdAt) }}</p>
         </div>
-        
+
         <div class="detail-row">
           <strong>Privacy</strong>
           <p>{{ selectedGroup.isPublic }}</p>
         </div>
-        
+
         <div class="detail-row">
           <strong>Members</strong>
-          <p>{{ formatMemberCount(selectedGroup.memberCount || 0)}}</p>
+          <p>{{ formatMemberCount(selectedGroup.memberCount || 0) }}</p>
         </div>
-        
+
         <div class="detail-row">
           <strong>Ideas</strong>
           <p>{{ selectedGroup.ideaCount || 0 }}</p>
@@ -214,38 +226,41 @@
       </div>
     </div>
   }
-  
+
   <div modal-footer>
     <div class="modal-actions">
       <app-buttons
         [buttonText]="'Close'"
         [buttonStyleClass]="'btn-promote'"
         [buttonType]="'button'"
-        (click)="closeDetailsModal()">
+        (click)="closeDetailsModal()"
+      >
       </app-buttons>
     </div>
   </div>
 </app-modal>
 
 <!-- Create Group Modal -->
-<app-modal 
+<app-modal
   [isOpen]="showCreateModal"
   title="Create New Group"
   size="md"
-  (closeModal)="closeCreateModal()">
-  
+  (closeModal)="closeCreateModal()"
+>
   <div modal-body>
     <form [formGroup]="createGroupForm" (ngSubmit)="onCreateGroup()">
       <div class="form-group">
         <label for="groupName">Group Name</label>
 
-        <input id="groupName" type="text" formControlName="name"
+        <input
+          id="groupName"
+          type="text"
+          formControlName="name"
           placeholder="Enter group name"
           class="form-control"
-          [class.error]="name?.invalid && name?.touched">
-        <div class="char-count">
-          {{ nameCount }}/100
-        </div>
+          [class.error]="name?.invalid && name?.touched"
+        />
+        <div class="char-count">{{ nameCount }}/100</div>
         @if (nameLimitReached) {
           <div class="limit-message">
             You have reached the maximum allowed characters.
@@ -254,23 +269,30 @@
 
         @if (name?.invalid && name?.touched) {
           <div class="error-message">
-            @if (name?.errors?.['required']) { <div>Group name is required</div> }
-            @if (name?.errors?.['minlength']) { <div>Group name must be at least 3 characters</div> }
-            @if (name?.errors?.['maxlength']) { <div>Group name cannot exceed 100 characters</div> }
+            @if (name?.errors?.["required"]) {
+              <div>Group name is required</div>
+            }
+            @if (name?.errors?.["minlength"]) {
+              <div>Group name must be at least 3 characters</div>
+            }
+            @if (name?.errors?.["maxlength"]) {
+              <div>Group name cannot exceed 100 characters</div>
+            }
           </div>
         }
       </div>
       <div class="form-group">
         <label for="groupDescription">Description</label>
-        <textarea id="groupDescription" formControlName="description"
+        <textarea
+          id="groupDescription"
+          formControlName="description"
           placeholder="Describe what your group is about"
           rows="3"
           class="form-control auto-expand"
-          [class.error]="description?.invalid && description?.touched"></textarea>
+          [class.error]="description?.invalid && description?.touched"
+        ></textarea>
 
-        <div class="char-count">
-          {{ descCount }}/500
-        </div>
+        <div class="char-count">{{ descCount }}/500</div>
         @if (descLimitReached) {
           <div class="limit-message">
             You have reached the maximum allowed characters.
@@ -279,29 +301,36 @@
 
         @if (description?.invalid && description?.touched) {
           <div class="error-message">
-            @if (description?.errors?.['required']) { <div>Description is required</div> }
-            @if (description?.errors?.['minlength']) { <div>Description must be at least 10 characters</div> }
-            @if (description?.errors?.['maxlength']) { <div>Description cannot exceed 500 characters</div> }
+            @if (description?.errors?.["required"]) {
+              <div>Description is required</div>
+            }
+            @if (description?.errors?.["minlength"]) {
+              <div>Description must be at least 10 characters</div>
+            }
+            @if (description?.errors?.["maxlength"]) {
+              <div>Description cannot exceed 500 characters</div>
+            }
           </div>
         }
       </div>
       <div class="form-group">
         <label for="groupPrivacy">Privacy Status</label>
-        <select id="groupPrivacy" formControlName="isPublic"
+        <select
+          id="groupPrivacy"
+          formControlName="isPublic"
           class="form-control"
-          [class.error]="privacy?.invalid && privacy?.touched">
+          [class.error]="privacy?.invalid && privacy?.touched"
+        >
           <option [ngValue]="true">Public</option>
           <option [ngValue]="false">Private</option>
         </select>
         @if (privacy?.invalid && privacy?.touched) {
-          <div class="error-message">
-            Privacy status is required
-          </div>
+          <div class="error-message">Privacy status is required</div>
         }
       </div>
     </form>
   </div>
-  
+
   <div modal-footer>
     <div class="modal-actions">
       <app-buttons
@@ -309,7 +338,8 @@
         [buttonStyleClass]="'btn-modal-cancel'"
         [buttonType]="'button'"
         [disabled]="isSubmitting"
-        (click)="closeCreateModal()">
+        (click)="closeCreateModal()"
+      >
       </app-buttons>
 
       <app-buttons
@@ -317,45 +347,58 @@
         [buttonStyleClass]="'btn-promote'"
         [buttonType]="'submit'"
         [disabled]="createGroupForm.invalid || isSubmitting"
-        (click)="onCreateGroup()">
+        (click)="onCreateGroup()"
+      >
       </app-buttons>
     </div>
   </div>
 </app-modal>
 
 <!-- Delete Group Modal -->
-<app-modal 
+<app-modal
   [isOpen]="showDeleteModal"
   title="Confirm Delete"
   size="md"
-  (closeModal)="closeDeleteModal()">
-  
+  (closeModal)="closeDeleteModal()"
+>
   @if (selectedGroup) {
     <div modal-body>
       <div class="delete-confirm-content">
-        <p>Are you sure you want to delete the group <strong>"{{ selectedGroup.name }}"</strong>?</p>
-        <p class="warning-text">This action cannot be undone. All group data, ideas, and memberships will be permanently deleted.</p>
+        <p>
+          Are you sure you want to delete the group
+          <strong>"{{ selectedGroup.name }}"</strong>?
+        </p>
+        <p class="warning-text">
+          This action cannot be undone. All group data, ideas, and memberships
+          will be permanently deleted.
+        </p>
 
         <div class="type-confirm-section">
-           <p>To confirm, type the group name <strong>"{{ selectedGroup.name }}"</strong> in the box below:</p>
-            <input
-              type="text"
-              [formControl]="deleteConfirmControl"
-              [placeholder]="'Enter group name here'"
-              [disabled]="isDeleting"
-              [class.error]="deleteConfirmControl.invalid && deleteConfirmControl.touched"
-            />
+          <p>
+            To confirm, type the group name
+            <strong>"{{ selectedGroup.name }}"</strong> in the box below:
+          </p>
+          <input
+            type="text"
+            [formControl]="deleteConfirmControl"
+            [placeholder]="'Enter group name here'"
+            [disabled]="isDeleting"
+            [class.error]="
+              deleteConfirmControl.invalid && deleteConfirmControl.touched
+            "
+          />
 
-        @if (deleteConfirmControl.errors?.['mismatch'] && deleteConfirmControl.touched) {
-          <div class="error-message">
-            Group name does not match.
-          </div>
-        }
+          @if (
+            deleteConfirmControl.errors?.["mismatch"] &&
+            deleteConfirmControl.touched
+          ) {
+            <div class="error-message">Group name does not match.</div>
+          }
         </div>
       </div>
     </div>
   }
-  
+
   <div modal-footer>
     <div class="modal-actions">
       <app-buttons
@@ -363,18 +406,18 @@
         [buttonStyleClass]="'btn-modal-cancel'"
         [buttonType]="'button'"
         [disabled]="isDeleting"
-        (click)="closeDeleteModal()">
-        </app-buttons>
+        (click)="closeDeleteModal()"
+      >
+      </app-buttons>
 
-      
-     <app-buttons
-      [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
-      [buttonStyleClass]="'btn-reject'"
-      [buttonType]="'button'"
-      [disabled]="deleteConfirmControl.invalid || isDeleting"
-      (click)="selectedGroup && deleteGroup(selectedGroup.id)">
-    </app-buttons>
-
+      <app-buttons
+        [buttonText]="isDeleting ? 'Deleting...' : 'Delete Group'"
+        [buttonStyleClass]="'btn-reject'"
+        [buttonType]="'button'"
+        [disabled]="deleteConfirmControl.invalid || isDeleting"
+        (click)="selectedGroup && deleteGroup(selectedGroup.id)"
+      >
+      </app-buttons>
     </div>
   </div>
 </app-modal>
@@ -383,32 +426,39 @@
   [isOpen]="showGroupInfoModal"
   title="Groups"
   size="md"
-  (closeModal)="closeGroupInfo()">
-
+  (closeModal)="closeGroupInfo()"
+>
   <div modal-body>
     <div class="group-info-modal">
       <div class="section">
         <div class="section">
-        <h3 class="section-title">
-          <span class="icon">💡</span>
-          Contributing Ideas
-        </h3>
-        <ul class="rule-list">
-
-          <li class="rule-item">
-            <div class="rule-header">
-              <span class="bullet"></span>
-              <span>To contribute ideas you <strong>must be a member of a group</strong>. You can either join an existing group or create a group of your own that best fits the category your idea falls under.</span>
-            </div>
-          </li>
-          <li class="rule-item">
-            <div class="rule-header">
-              <span class="bullet"></span>
-              <span>Once an idea is promoted, it <strong class="warning">cannot be deleted.</strong></span>
-            </div>
-          </li>
-        </ul>
-      </div>
+          <h3 class="section-title">
+            <span class="icon">💡</span>
+            Contributing Ideas
+          </h3>
+          <ul class="rule-list">
+            <li class="rule-item">
+              <div class="rule-header">
+                <span class="bullet"></span>
+                <span
+                  >To contribute ideas you
+                  <strong>must be a member of a group</strong>. You can either
+                  join an existing group or create a group of your own that best
+                  fits the category your idea falls under.</span
+                >
+              </div>
+            </li>
+            <li class="rule-item">
+              <div class="rule-header">
+                <span class="bullet"></span>
+                <span
+                  >Once an idea is promoted, it
+                  <strong class="warning">cannot be deleted.</strong></span
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
         <h3 class="section-title">
           <span class="icon">👥</span>
           Joining Groups
@@ -419,19 +469,24 @@
               <span class="bullet"></span>
               <strong>Public Groups</strong>
             </div>
-            <div class="rule-text">Click the join group button to Join instantly and you'll be redirected to the group's Ideas page automatically.</div>
+            <div class="rule-text">
+              Click the join group button to Join instantly and you'll be
+              redirected to the group's Ideas page automatically.
+            </div>
           </li>
           <li class="rule-item">
             <div class="rule-header">
               <span class="bullet"></span>
               <strong>Private Groups</strong>
             </div>
-            <div class="rule-text">Your request will be pending until an admin approves it.</div>
+            <div class="rule-text">
+              Your request will be pending until an admin approves it.
+            </div>
           </li>
         </ul>
       </div>
 
-      <hr class="divider">
+      <hr class="divider" />
 
       <div class="section">
         <h3 class="section-title">
@@ -444,18 +499,23 @@
               <span class="bullet"></span>
               <strong>If You're an Admin</strong>
             </div>
-            <div class="rule-text">You must transfer ownership to another member before you can leave.</div>
+            <div class="rule-text">
+              You must transfer ownership to another member before you can
+              leave.
+            </div>
           </li>
         </ul>
         <div class="note-box">
           <div class="note-icon">📝</div>
           <div class="note-content">
-            <strong>Note:</strong> Transferring ownership automatically removes you from the group. Ownership can be given to any current member of the group.
+            <strong>Note:</strong> Transferring ownership automatically removes
+            you from the group. Ownership can be given to any current member of
+            the group.
           </div>
         </div>
       </div>
 
-      <hr class="divider">
+      <hr class="divider" />
 
       <div class="section">
         <h3 class="section-title">
@@ -466,7 +526,11 @@
           <li class="rule-item">
             <div class="rule-header">
               <span class="bullet"></span>
-              <span>Admins receive alerts for pending join requests via the <strong>notification bell</strong> or the <strong>View Requests</strong> button on Ideas page.</span>
+              <span
+                >Admins receive alerts for pending join requests via the
+                <strong>notification bell</strong> or the
+                <strong>View Requests</strong> button on Ideas page.</span
+              >
             </div>
           </li>
         </ul>
@@ -477,17 +541,18 @@
   <div modal-footer>
     <div class="modal-footer-content">
       <app-buttons
-          [buttonText]="'Don’t show again'"
-          [buttonStyleClass]="'btn-reject'"
-          (click)="dontShowGroupInfoAgain()">
-        </app-buttons>
+        [buttonText]="'Don’t show again'"
+        [buttonStyleClass]="'btn-reject'"
+        (click)="dontShowGroupInfoAgain()"
+      >
+      </app-buttons>
 
-        <app-buttons
-          [buttonText]="'Got it, let’s go!'"
-          [buttonStyleClass]="'btn-promote'"
-          (click)="closeGroupInfo()">
-        </app-buttons>
-    
+      <app-buttons
+        [buttonText]="'Got it, let’s go!'"
+        [buttonStyleClass]="'btn-promote'"
+        (click)="closeGroupInfo()"
+      >
+      </app-buttons>
     </div>
   </div>
 </app-modal>

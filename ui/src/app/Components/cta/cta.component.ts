@@ -6,8 +6,6 @@ import { ButtonsComponent } from '../buttons/buttons.component';
   imports: [ButtonsComponent],
   standalone: true,
   templateUrl: './cta.component.html',
-  styleUrl: './cta.component.scss'
+  styleUrl: './cta.component.scss',
 })
-export class CtaComponent {
-
-}
+export class CtaComponent {}
