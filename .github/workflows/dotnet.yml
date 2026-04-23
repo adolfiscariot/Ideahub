@@ -9,7 +9,7 @@ jobs:
   # FRONTEND
   # ==========================================
   frontend-ci:
-    name: Angular Validation
+    name: Node Validation
     runs-on: ubuntu-latest
     
     steps:
