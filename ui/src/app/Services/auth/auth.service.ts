@@ -1,5 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, of, Subscription, timer } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  throwError,
+  of,
+  Subscription,
+  timer,
+} from 'rxjs';
 import { catchError, tap, finalize, filter, take, map } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
@@ -23,7 +30,8 @@ export class AuthService {
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
 
   private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+  private refreshTokenSubject: BehaviorSubject<string | null> =
+    new BehaviorSubject<string | null>(null);
   private refreshSubscription?: Subscription;
 
   private http = inject(HttpClient);
@@ -40,41 +48,47 @@ export class AuthService {
     return {
       success: response.status || response.success || false,
       message: response.message || '',
-      data: response.data
+      data: response.data,
     };
   }
 
   register(registrationData: Registration): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(`${this.authUrl}/register`, registrationData).pipe(
-      map(response => this.convertResponse<void>(response)),
-      catchError((e) => {
-        const errorMessage = e.error?.message || e.message || 'Registration failed';
-        throw new Error(errorMessage);
-      })
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/register`, registrationData)
+      .pipe(
+        map((response) => this.convertResponse<void>(response)),
+        catchError((e) => {
+          const errorMessage =
+            e.error?.message || e.message || 'Registration failed';
+          throw new Error(errorMessage);
+        }),
+      );
   }
 
   login(loginData: Login): Observable<ApiResponse<AuthData>> {
-    return this.http.post<ApiResponse<AuthData>>(`${this.authUrl}/login`, loginData, { withCredentials: true }).pipe(
-      map(response => this.convertResponse<AuthData>(response)),
-      tap((response) => {
-        if (response.success && response.data?.accessToken) {
-          localStorage.setItem('accessToken', response.data.accessToken);
-          this._isLoggedIn.next(true);
-          this.setupRefreshTimer();
-        } else {
-          throw new Error(response.message || 'Login failed');
-        }
-      }),
-      catchError((e) => {
-        const errorMessage = e.error?.message || e.message || 'Login failed';
-        throw new Error(errorMessage);
-      })
-    );
+    return this.http
+      .post<
+        ApiResponse<AuthData>
+      >(`${this.authUrl}/login`, loginData, { withCredentials: true })
+      .pipe(
+        map((response) => this.convertResponse<AuthData>(response)),
+        tap((response) => {
+          if (response.success && response.data?.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+            this._isLoggedIn.next(true);
+            this.setupRefreshTimer();
+          } else {
+            throw new Error(response.message || 'Login failed');
+          }
+        }),
+        catchError((e) => {
+          const errorMessage = e.error?.message || e.message || 'Login failed';
+          throw new Error(errorMessage);
+        }),
+      );
   }
 
   logout(): Observable<ApiResponse<void> | boolean> {
-
     // Check local token status
     const token = localStorage.getItem('accessToken');
     if (!token) {
@@ -83,15 +97,19 @@ export class AuthService {
     }
 
     // 2. Attempt server-side logout
-    return this.http.post<ApiResponse<void>>(`${this.authUrl}/logout`, {}, { withCredentials: true }).pipe(
-      catchError((error: HttpErrorResponse) => {
-        return throwError(() => error);
-      }),
-      // 3. Always clean up locally, regardless of server response
-      finalize(() => {
-        this.logoutLocal();
-      })
-    );
+    return this.http
+      .post<
+        ApiResponse<void>
+      >(`${this.authUrl}/logout`, {}, { withCredentials: true })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error);
+        }),
+        // 3. Always clean up locally, regardless of server response
+        finalize(() => {
+          this.logoutLocal();
+        }),
+      );
   }
 
   /**
@@ -108,8 +126,8 @@ export class AuthService {
     if (this.isRefreshing) {
       // If a refresh is already in progress, wait for it to complete
       return this.refreshTokenSubject.pipe(
-        filter(token => token != null),
-        take(1)
+        filter((token) => token != null),
+        take(1),
       );
     }
 
@@ -125,29 +143,33 @@ export class AuthService {
 
     const payload = { accessToken, refreshToken: 'cookie' };
 
-    return this.http.post<AuthData>(`${this.authUrl}/refresh-token`, payload, { withCredentials: true }).pipe(
-      map((response) => {
-        const newAccessToken = response.accessToken;
-        if (newAccessToken) {
-          localStorage.setItem('accessToken', newAccessToken);
-          this._isLoggedIn.next(true);
-          this.refreshTokenSubject.next(newAccessToken);
-          this.setupRefreshTimer();
-          return newAccessToken;
-        } else {
-          this.logoutLocal();
-          throw new Error('No access token in response');
-        }
-      }),
-      catchError((error) => {
-        this.refreshTokenSubject.next(null); //Signal failure without breaking subject
-        this.logoutLocal();
-        return throwError(() => error);
-      }),
-      finalize(() => {
-        this.isRefreshing = false;
+    return this.http
+      .post<AuthData>(`${this.authUrl}/refresh-token`, payload, {
+        withCredentials: true,
       })
-    );
+      .pipe(
+        map((response) => {
+          const newAccessToken = response.accessToken;
+          if (newAccessToken) {
+            localStorage.setItem('accessToken', newAccessToken);
+            this._isLoggedIn.next(true);
+            this.refreshTokenSubject.next(newAccessToken);
+            this.setupRefreshTimer();
+            return newAccessToken;
+          } else {
+            this.logoutLocal();
+            throw new Error('No access token in response');
+          }
+        }),
+        catchError((error) => {
+          this.refreshTokenSubject.next(null); //Signal failure without breaking subject
+          this.logoutLocal();
+          return throwError(() => error);
+        }),
+        finalize(() => {
+          this.isRefreshing = false;
+        }),
+      );
   }
 
   /**
@@ -186,13 +208,13 @@ export class AuthService {
       if (timeout > 0) {
         this.refreshSubscription = timer(timeout).subscribe(() => {
           this.refreshToken().subscribe({
-            error: () => this.logoutLocal()
+            error: () => this.logoutLocal(),
           });
         });
       } else {
         // Token is already very close to expiry or expired, refresh now
         this.refreshToken().subscribe({
-          error: () => this.logoutLocal()
+          error: () => this.logoutLocal(),
         });
       }
     } catch {
@@ -256,21 +278,27 @@ export class AuthService {
       const userId =
         payload.sub ||
         payload.nameid ||
-        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+        payload[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+        ];
 
       return {
         id: userId,
         email:
           payload.email ||
-          payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+          payload[
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
+          ],
         roles: (() => {
-          const r = payload.role ||
-            payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+          const r =
+            payload.role ||
+            payload[
+              'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+            ] ||
             [];
           return Array.isArray(r) ? r : [r];
-        })()
+        })(),
       };
-
     } catch {
       return null;
     }
@@ -287,9 +315,9 @@ export class AuthService {
   hasRole(roleName: string): boolean {
     const roles = this.getCurrentUserRoles();
     // Check both exact match and case-insensitive
-    return roles.some(role =>
-      role === roleName ||
-      role.toLowerCase() === roleName.toLowerCase()
+    return roles.some(
+      (role) =>
+        role === roleName || role.toLowerCase() === roleName.toLowerCase(),
     );
   }
 
@@ -315,7 +343,7 @@ export class AuthService {
 
   // Check if user has any of the given roles
   hasAnyRole(roleNames: string[]): boolean {
-    return roleNames.some(roleName => this.hasRole(roleName));
+    return roleNames.some((roleName) => this.hasRole(roleName));
   }
 
   // Get current user ID
@@ -336,23 +364,20 @@ export class AuthService {
   }
 
   forgotPassword(payload: ForgotPassword): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(
-      `${this.authUrl}/forgot-password`,
-      payload
-    ).pipe(map(response => this.convertResponse<void>(response)));
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/forgot-password`, payload)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
   validateResetCode(code: string): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(
-      `${this.authUrl}/validate-reset-code`,
-      { code }
-    ).pipe(map(response => this.convertResponse<void>(response)));
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/validate-reset-code`, { code })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
   resetPassword(payload: ResetPassword): Observable<ApiResponse<void>> {
-    return this.http.post<ApiResponse<void>>(
-      `${this.authUrl}/reset-password`,
-      payload
-    ).pipe(map(response => this.convertResponse<void>(response)));
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/reset-password`, payload)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 }

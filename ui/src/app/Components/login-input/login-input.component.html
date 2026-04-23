@@ -1,5 +1,10 @@
 <div class="login-input">
-  <form class="login-form" id="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit($event)">
+  <form
+    class="login-form"
+    id="login-form"
+    [formGroup]="loginForm"
+    (ngSubmit)="onSubmit($event)"
+  >
     <div class="page-header">Log In</div>
     <div class="form-section">
       <label for="name-input">Email</label>
@@ -10,19 +15,15 @@
         formControlName="email"
       />
     </div>
-    @if (loginForm.get('email')?.touched) {
-    <div class="error-message">
-      @if (loginForm.get('email')?.errors?.['email']) {
-      <span>
-        Please enter a valid email address
-      </span>
-      }
-      @if (loginForm.get('email')?.errors?.['required']) {
-      <span>
-        Please enter your email address
-      </span>
-      }
-    </div>
+    @if (loginForm.get("email")?.touched) {
+      <div class="error-message">
+        @if (loginForm.get("email")?.errors?.["email"]) {
+          <span> Please enter a valid email address </span>
+        }
+        @if (loginForm.get("email")?.errors?.["required"]) {
+          <span> Please enter your email address </span>
+        }
+      </div>
     }
 
     <div class="form-section">
@@ -34,10 +35,16 @@
         formControlName="password"
       />
     </div>
-    <div class="forgot-password-link"> <a routerLink="/forgot-password">Forgot password?</a> </div>
+    <div class="forgot-password-link">
+      <a routerLink="/forgot-password">Forgot password?</a>
+    </div>
     <div class="submit-button">
-      <app-buttons [buttonText]="'Log In'" [buttonStyleClass]="'btn-login'" [buttonType]="'submit'"
-        [isLoading]="isLoading" />
+      <app-buttons
+        [buttonText]="'Log In'"
+        [buttonStyleClass]="'btn-login'"
+        [buttonType]="'submit'"
+        [isLoading]="isLoading"
+      />
       <ng-container>
         <p>Don't yet have an account?</p>
         <a routerLink="/register"><u>Sign up here</u></a>

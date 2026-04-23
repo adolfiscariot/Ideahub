@@ -8,9 +8,8 @@ describe('GroupMembersModalComponen', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GroupMembersModalComponent]
-    })
-    .compileComponents();
+      imports: [GroupMembersModalComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GroupMembersModalComponent);
     component = fixture.componentInstance;

@@ -1,10 +1,21 @@
 @if (isOpen) {
-  <div class="modal-overlay" 
-       [class]="overlayClass" 
-       (click)="onOverlayClick($event)"
-       (keydown.escape)="close()"
-       tabindex="0">
-    <div class="modal" [class]="modalClass" [ngClass]="{'modal-sm': size === 'sm', 'modal-md': size === 'md', 'modal-lg': size === 'lg', 'modal-xl': size === 'xl'}">
+  <div
+    class="modal-overlay"
+    [class]="overlayClass"
+    (click)="onOverlayClick($event)"
+    (keydown.escape)="close()"
+    tabindex="0"
+  >
+    <div
+      class="modal"
+      [class]="modalClass"
+      [ngClass]="{
+        'modal-sm': size === 'sm',
+        'modal-md': size === 'md',
+        'modal-lg': size === 'lg',
+        'modal-xl': size === 'xl',
+      }"
+    >
       <div class="modal-header">
         @if (title) {
           <h3>{{ title }}</h3>
@@ -12,10 +23,7 @@
         <ng-content select="[modal-header]"></ng-content>
 
         @if (showCloseButton) {
-          <button 
-                  class="btn-modal-close" 
-                  (click)="close()"
-                  title="Close">
+          <button class="btn-modal-close" (click)="close()" title="Close">
             ×
           </button>
         }

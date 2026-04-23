@@ -16,14 +16,22 @@ import { MatIconModule } from '@angular/material/icon';
           <h1>Task Workspace</h1>
           <p>Project ID: {{ projectId }}</p>
         </div>
-        
+
         <div class="content">
           <!-- Task content will go here -->
           <div style="padding: 50px; text-align: center;">
-              <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #6366f1;">construction</mat-icon>
-              <h2>Workspace Under Construction</h2>
-              <p>You have access! We are currently building the task management interface.</p>
-              <button routerLink="/projects" class="btn-back">Back to Projects</button>
+            <mat-icon
+              style="font-size: 48px; width: 48px; height: 48px; color: #6366f1;"
+              >construction</mat-icon
+            >
+            <h2>Workspace Under Construction</h2>
+            <p>
+              You have access! We are currently building the task management
+              interface.
+            </p>
+            <button routerLink="/projects" class="btn-back">
+              Back to Projects
+            </button>
           </div>
         </div>
       </div>
@@ -31,14 +39,19 @@ import { MatIconModule } from '@angular/material/icon';
       <div class="restricted-container">
         <mat-icon class="lock-icon">lock</mat-icon>
         <h1>Access Restricted</h1>
-        <p>You do not have permissions to view this project workspace. <br> 
-           Only the Project Overseer and assigned members can enter.</p>
-        <button routerLink="/projects" class="btn-back">Return to Projects</button>
+        <p>
+          You do not have permissions to view this project workspace. <br />
+          Only the Project Overseer and assigned members can enter.
+        </p>
+        <button routerLink="/projects" class="btn-back">
+          Return to Projects
+        </button>
       </div>
     }
 
     <style>
-      .tasks-container, .restricted-container {
+      .tasks-container,
+      .restricted-container {
         padding: 40px;
         max-width: 1200px;
         margin: 0 auto;
@@ -55,8 +68,16 @@ import { MatIconModule } from '@angular/material/icon';
         color: #ef4444;
         margin-bottom: 20px;
       }
-      h1 { color: #1e293b; font-size: 2rem; margin-bottom: 10px; }
-      p { color: #64748b; margin-bottom: 30px; font-size: 1.1rem; }
+      h1 {
+        color: #1e293b;
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+      p {
+        color: #64748b;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+      }
       .btn-back {
         background: #6366f1;
         color: white;
@@ -67,9 +88,11 @@ import { MatIconModule } from '@angular/material/icon';
         cursor: pointer;
         transition: background 0.2s;
       }
-      .btn-back:hover { background: #4f46e5; }
+      .btn-back:hover {
+        background: #4f46e5;
+      }
     </style>
-  `
+  `,
 })
 export class TasksComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -108,7 +131,7 @@ export class TasksComponent implements OnInit {
           this.accessDenied = true;
         }
         this.isLoading = false;
-      }
+      },
     });
   }
 }

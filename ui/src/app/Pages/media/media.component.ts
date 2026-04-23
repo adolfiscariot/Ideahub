@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { CommonModule } from '@angular/common';
@@ -10,7 +17,7 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './media.component.html',
-  styleUrls: ['./media.component.scss']
+  styleUrls: ['./media.component.scss'],
 })
 export class MediaComponent implements OnInit, OnChanges {
   @Input() ideaId?: string | number;
@@ -36,27 +43,51 @@ export class MediaComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ideaId'] || changes['commentId'] || changes['projectId'] || changes['timesheetId'] || changes['projectTaskId'] || changes['subTaskId']) {
+    if (
+      changes['ideaId'] ||
+      changes['commentId'] ||
+      changes['projectId'] ||
+      changes['timesheetId'] ||
+      changes['projectTaskId'] ||
+      changes['subTaskId']
+    ) {
       this.loadMedia();
     }
   }
 
   loadMedia(): void {
-    if (!this.ideaId && !this.commentId && !this.projectId && !this.timesheetId && !this.projectTaskId && !this.subTaskId) return;
+    if (
+      !this.ideaId &&
+      !this.commentId &&
+      !this.projectId &&
+      !this.timesheetId &&
+      !this.projectTaskId &&
+      !this.subTaskId
+    )
+      return;
 
     this.isLoading = true;
 
-    this.mediaService.viewMedia(this.ideaId, this.commentId, this.projectId, this.projectTaskId, this.subTaskId, this.timesheetId).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        if (response.success && response.data) {
-          this.mediaList = response.data;
-        }
-      },
-      error: () => {
-        this.isLoading = false;
-      }
-    });
+    this.mediaService
+      .viewMedia(
+        this.ideaId,
+        this.commentId,
+        this.projectId,
+        this.projectTaskId,
+        this.subTaskId,
+        this.timesheetId,
+      )
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          if (response.success && response.data) {
+            this.mediaList = response.data;
+          }
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
   }
 
   getMediaUrl(filePath: string): string {

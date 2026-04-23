@@ -11,7 +11,7 @@
   box-sizing: border-box;
 }
 
-.stat-privacy{
+.stat-privacy {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
   padding: 6px;
@@ -21,7 +21,10 @@
 }
 
 .group-info-modal {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: #2d3748;
   line-height: 1.6;
   font-size: 14px;
@@ -255,11 +258,8 @@
 /* ============================= */
 
 .paginator-wrapper {
-
   display: flex;
   justify-content: center;
-
-
 }
 
 :host ::ng-deep .mat-mdc-paginator {
@@ -272,7 +272,6 @@
 :host ::ng-deep .mat-mdc-paginator-range-label {
   font-size: 13px;
   color: #4a5568;
-  
 }
 
 :host ::ng-deep .mat-mdc-icon-button {
@@ -291,7 +290,6 @@
 :host ::ng-deep .mat-mdc-paginator-page-size {
   display: none;
 }
-
 
 /* Buttons */
 .create-group-header-btn,
@@ -333,8 +331,6 @@
 
 /* Detail block styling */
 .detail-row {
- 
-  
   border-radius: 8px;
   padding: 14px 16px;
   display: flex;
@@ -386,7 +382,7 @@
   margin-top: 0.25rem;
 }
 
-.delete-confirm-content{
+.delete-confirm-content {
   margin: 50px;
 }
 
@@ -405,9 +401,9 @@
 }
 
 .auto-expand {
-  overflow-y: auto;       /* allow scrolling */
-  resize: none;           /* prevent manual drag */
-  max-height: 500px;      /* stop growing after this */
+  overflow-y: auto; /* allow scrolling */
+  resize: none; /* prevent manual drag */
+  max-height: 500px; /* stop growing after this */
 }
 
 .create-group-header-btn:hover,
@@ -502,12 +498,12 @@
   border-radius: 8px;
   padding: 20px;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%; 
+  height: 100%;
 }
 
 .group-top {
@@ -515,7 +511,6 @@
   flex-direction: column;
   flex-grow: 1; /* description can expand downward */
 }
-
 
 /* Header */
 .group-header {
@@ -526,11 +521,10 @@
   min-height: 60px;
 }
 
-
 /* Description */
 .group-description {
   margin-top: 8px;
-  max-height: 80px;   /* prevents pushing stats down */
+  max-height: 80px; /* prevents pushing stats down */
   overflow: hidden;
   line-height: 1.4;
   font-size: 14px;
@@ -538,9 +532,8 @@
 
 /* Bottom Section */
 .group-bottom {
-  margin-top: auto; 
+  margin-top: auto;
 }
-
 
 /* Actions */
 .group-actions {
@@ -550,8 +543,8 @@
 }
 
 .group-title-section {
-  flex: 1; 
-  min-width: 0; 
+  flex: 1;
+  min-width: 0;
 }
 
 .group-name {
@@ -564,9 +557,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word; 
+  word-break: break-word;
 }
-
 
 /* Stats */
 .group-stats {
@@ -753,7 +745,6 @@
   background: rgba(244, 67, 54, 0.1);
 }
 
-
 /* Modal */
 .create-group-modal-overlay {
   position: fixed;
@@ -847,7 +838,7 @@ form {
 
 /* Clear float */
 .form-group::after {
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }
@@ -971,8 +962,6 @@ textarea.form-control {
   resize: vertical;
   display: block;
 }
-
-
 
 .btn-secondary {
   background: white;

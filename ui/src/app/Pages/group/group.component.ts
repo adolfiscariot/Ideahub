@@ -1,5 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupsService } from '../../Services/groups.service';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -7,19 +12,27 @@ import { ToastService } from '../../Services/toast.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonsComponent } from "../../Components/buttons/buttons.component";
+import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { ModalComponent } from '../../Components/modal/modal.component';
 import { GroupMembersModalComponent } from '../../Components/modals/group-members-modal/group-members-modal.component';
 import { AbstractControl } from '@angular/forms';
 import { NotificationsService } from '../../Services/notifications';
 import { updateCharCount } from '../../Components/utils/char-count-util';
 import { Subject, takeUntil } from 'rxjs';
-import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { Group, GroupMember, AddGroup, RawBackendGroup, JoinGroupResponse } from '../../Interfaces/Groups/groups-interfaces';
+import {
+  MatPaginator,
+  MatPaginatorModule,
+  PageEvent,
+} from '@angular/material/paginator';
+import {
+  Group,
+  GroupMember,
+  AddGroup,
+  RawBackendGroup,
+  JoinGroupResponse,
+} from '../../Interfaces/Groups/groups-interfaces';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { FormControl } from '@angular/forms';
-
-
 
 @Component({
   selector: 'app-groups',
@@ -87,19 +100,32 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.createGroupForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-      isPublic: [true, Validators.required]
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(100),
+        ],
+      ],
+      description: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(500),
+        ],
+      ],
+      isPublic: [true, Validators.required],
     });
     this.deleteConfirmControl = this.fb.control('') as FormControl;
   }
-
 
   ngOnInit() {
     // Get current user ID first
     this.currentUserId = this.authService.getCurrentUserId();
     this.loadGroups();
-    
+
     const hideInfo = localStorage.getItem('hideGroupInfo') === 'true';
     this.showGroupInfoModal = !hideInfo;
     this.setupCharCounters();
@@ -111,18 +137,24 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   private setupCharCounters() {
-    this.createGroupForm.get('name')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
+    this.createGroupForm
+      .get('name')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         const result = updateCharCount(this.createGroupForm, 'name', 100);
         this.nameCount = result.count;
         this.nameLimitReached = result.limitReached;
       });
 
-    this.createGroupForm.get('description')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
+    this.createGroupForm
+      .get('description')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        const result = updateCharCount(this.createGroupForm, 'description', 500);
+        const result = updateCharCount(
+          this.createGroupForm,
+          'description',
+          500,
+        );
         this.descCount = result.count;
         this.descLimitReached = result.limitReached;
       });
@@ -155,42 +187,52 @@ export class GroupsComponent implements OnInit, OnDestroy {
         this.isLoading = false;
 
         if (response.success && response.data) {
-          this.groups = response.data.map((raw: Group | Record<string, unknown>) => {
-            const group = raw as RawBackendGroup;
-            const mappedId = group.id || group.Id || '';
-            return {
-              ...group,
-              id: mappedId,
-              name: (group.name || group.Name || '').trim(),
-              description: group.description || group.Description || '',
-              isMember: group.isMember || group.IsMember || false,
-              hasPendingRequest: group.hasPendingRequest || group.HasPendingRequest || false,
-              memberCount: group.memberCount || group.MemberCount || 0,
-              ideaCount: group.ideaCount || group.IdeaCount || 0,
-              isActive: group.isActive || group.IsActive !== false,
-              isDeleted: group.isDeleted || group.IsDeleted || false,
-              createdAt: group.createdAt || group.CreatedAt || new Date().toISOString(),
-              createdByUserId: group.createdByUserId || group.CreatedByUserId || '',
-              createdByUser: group.createdByUser || group.CreatedByUser || {
-                displayName: 'Unknown',
-                email: ''
-              },
-              isPublic:
-                group.isPublic === true ||
-                  (typeof group.isPublic === 'string' && group.isPublic.toLowerCase() === 'true') ||
+          this.groups = response.data.map(
+            (raw: Group | Record<string, unknown>) => {
+              const group = raw as RawBackendGroup;
+              const mappedId = group.id || group.Id || '';
+              return {
+                ...group,
+                id: mappedId,
+                name: (group.name || group.Name || '').trim(),
+                description: group.description || group.Description || '',
+                isMember: group.isMember || group.IsMember || false,
+                hasPendingRequest:
+                  group.hasPendingRequest || group.HasPendingRequest || false,
+                memberCount: group.memberCount || group.MemberCount || 0,
+                ideaCount: group.ideaCount || group.IdeaCount || 0,
+                isActive: group.isActive || group.IsActive !== false,
+                isDeleted: group.isDeleted || group.IsDeleted || false,
+                createdAt:
+                  group.createdAt ||
+                  group.CreatedAt ||
+                  new Date().toISOString(),
+                createdByUserId:
+                  group.createdByUserId || group.CreatedByUserId || '',
+                createdByUser: group.createdByUser ||
+                  group.CreatedByUser || {
+                    displayName: 'Unknown',
+                    email: '',
+                  },
+                isPublic:
+                  group.isPublic === true ||
+                  (typeof group.isPublic === 'string' &&
+                    group.isPublic.toLowerCase() === 'true') ||
                   group.IsPublic === true ||
-                  (typeof group.IsPublic === 'string' && group.IsPublic.toLowerCase() === 'true')
-                  ? 'Public'
-                  : 'Private',
-            } as Group;
-          });
+                  (typeof group.IsPublic === 'string' &&
+                    group.IsPublic.toLowerCase() === 'true')
+                    ? 'Public'
+                    : 'Private',
+              } as Group;
+            },
+          );
 
           this.groups.sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           );
           this.dontShowPages = this.groups.length <= this.pageSize;
           this.updatePaginatedGroups();
-
         } else {
           this.groups = [];
         }
@@ -198,7 +240,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       error: () => {
         this.isLoading = false;
         this.groups = [];
-      }
+      },
     });
   }
 
@@ -232,7 +274,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       width: '600px',
       maxHeight: '90vh',
       data: { group: group },
-      panelClass: 'custom-modal'
+      panelClass: 'custom-modal',
     });
   }
 
@@ -263,8 +305,10 @@ export class GroupsComponent implements OnInit, OnDestroy {
           String(value ?? '')
             .toLowerCase()
             .replace(/\s+/g, '');
-        return normalize(control.value) === normalize(group.name) ? null : { mismatch: true };
-      }
+        return normalize(control.value) === normalize(group.name)
+          ? null
+          : { mismatch: true };
+      },
     ]);
     this.deleteConfirmControl.updateValueAndValidity();
   }
@@ -282,12 +326,15 @@ export class GroupsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const group = this.groups.find(g => String(g.id) === String(groupId));
+    const group = this.groups.find((g) => String(g.id) === String(groupId));
 
     if (!group) return;
 
     if (!group.isMember) {
-      this.toastService.show('You must be a member of this group to view ideas.', 'info');
+      this.toastService.show(
+        'You must be a member of this group to view ideas.',
+        'info',
+      );
       return;
     }
 
@@ -299,13 +346,13 @@ export class GroupsComponent implements OnInit, OnDestroy {
       state: {
         isGroupCreator: isGroupCreator,
         groupName: group.name,
-        groupCreatorId: group.createdByUserId
-      }
+        groupCreatorId: group.createdByUserId,
+      },
     });
   }
 
   onJoinGroup(groupId: string) {
-    const group = this.groups.find(g => String(g.id) === String(groupId));
+    const group = this.groups.find((g) => String(g.id) === String(groupId));
 
     if (!group) return;
 
@@ -315,48 +362,63 @@ export class GroupsComponent implements OnInit, OnDestroy {
     }
 
     if (group?.hasPendingRequest) {
-      this.toastService.show('You already have a pending request for this group!', 'info');
+      this.toastService.show(
+        'You already have a pending request for this group!',
+        'info',
+      );
       return;
     }
 
     this.groupsService.joinGroup(groupId).subscribe({
       next: (response: ApiResponse<JoinGroupResponse>) => {
         const isSuccess = response.success;
-        
+
         // Handle both casing variants for isPublic from JoinGroupResponse
         const isPublic = response.data?.isPublic ?? response.data?.IsPublic;
 
         if (isSuccess && isPublic === false) {
-          this.toastService.show('Request sent! Waiting for admin approval.', 'success');
+          this.toastService.show(
+            'Request sent! Waiting for admin approval.',
+            'success',
+          );
           group.isMember = false;
           group.hasPendingRequest = true; // Mark as pending immediately
           this.loadGroups();
-        }
-        else if (isSuccess && isPublic === true) {
+        } else if (isSuccess && isPublic === true) {
           this.toastService.show('Joined successfully', 'success');
           group.isMember = true;
           this.onViewIdeas(groupId);
-        }
-        else if (isSuccess) {
+        } else if (isSuccess) {
           // Success but isPublic flag missing or unmapped
           this.toastService.show('Join request successful', 'success');
           this.loadGroups();
-        }
-        else {
+        } else {
           if (response.message?.includes('already a member')) {
-            this.toastService.show('You are already a member of this group!', 'info');
+            this.toastService.show(
+              'You are already a member of this group!',
+              'info',
+            );
             this.loadGroups();
           } else if (response.message?.includes('pending request')) {
-            this.toastService.show('You already have a pending request for this group!', 'info');
+            this.toastService.show(
+              'You already have a pending request for this group!',
+              'info',
+            );
             this.loadGroups();
           } else {
-            this.toastService.show(response.message || 'Failed to send join request.', 'error');
+            this.toastService.show(
+              response.message || 'Failed to send join request.',
+              'error',
+            );
           }
         }
       },
       error: () => {
-        this.toastService.show('Failed to send join request. Please try again.', 'error');
-      }
+        this.toastService.show(
+          'Failed to send join request. Please try again.',
+          'error',
+        );
+      },
     });
   }
 
@@ -391,12 +453,20 @@ export class GroupsComponent implements OnInit, OnDestroy {
           this.createGroupForm.reset();
           this.closeCreateModal();
         } else {
-          if (response.message?.includes('authenticated') ||
+          if (
+            response.message?.includes('authenticated') ||
             response.message?.includes('User ID') ||
-            response.message?.includes('login')) {
-            this.toastService.show('Please login to create a group.', 'warning');
+            response.message?.includes('login')
+          ) {
+            this.toastService.show(
+              'Please login to create a group.',
+              'warning',
+            );
           } else {
-            this.toastService.show(response.message || 'Failed to create group.', 'error');
+            this.toastService.show(
+              response.message || 'Failed to create group.',
+              'error',
+            );
           }
         }
       },
@@ -406,11 +476,17 @@ export class GroupsComponent implements OnInit, OnDestroy {
         if (error.status === 401) {
           this.toastService.show('Please login to create a group.', 'warning');
         } else if (error.status === 400) {
-          this.toastService.show('Invalid group data. Please check your input.', 'error');
+          this.toastService.show(
+            'Invalid group data. Please check your input.',
+            'error',
+          );
         } else {
-          this.toastService.show('Failed to create group. Please try again.', 'error');
+          this.toastService.show(
+            'Failed to create group. Please try again.',
+            'error',
+          );
         }
-      }
+      },
     });
   }
 
@@ -432,7 +508,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
               displayName: member.displayName || (m['name'] as string),
               userName: m['userName'] as string,
               email: member.email,
-              createdByUserId: m['createdByUserId'] as string
+              createdByUserId: m['createdByUserId'] as string,
             } as GroupMember;
           });
         } else {
@@ -442,7 +518,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       error: () => {
         this.isLoadingMembers = false;
         this.groupMembers = [];
-      }
+      },
     });
   }
 
@@ -462,7 +538,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
         if (response.success) {
           this.toastService.show('Group deleted successfully!', 'success');
           this.loadGroups();
-          this.groups = this.groups.filter(group => group.id.toString() !== groupId);
+          this.groups = this.groups.filter(
+            (group) => group.id.toString() !== groupId,
+          );
           this.notificationsService.refreshPendingRequests();
           this.closeDeleteModal();
 
@@ -471,12 +549,20 @@ export class GroupsComponent implements OnInit, OnDestroy {
             this.subtitle = 'All groups have been deleted.';
           }
         } else {
-          this.toastService.show(response.message || 'Failed to delete group', 'error');
+          this.toastService.show(
+            response.message || 'Failed to delete group',
+            'error',
+          );
 
-          if (response.message?.includes('permission') ||
+          if (
+            response.message?.includes('permission') ||
             response.message?.includes('admin') ||
-            response.message?.includes('not allowed')) {
-            this.toastService.show('Only group admin can delete groups.', 'warning');
+            response.message?.includes('not allowed')
+          ) {
+            this.toastService.show(
+              'Only group admin can delete groups.',
+              'warning',
+            );
           }
         }
       },
@@ -486,13 +572,19 @@ export class GroupsComponent implements OnInit, OnDestroy {
         if (error.status === 401) {
           this.toastService.show('Please login to delete groups.', 'warning');
         } else if (error.status === 403) {
-          this.toastService.show('You do not have permission to delete this group.', 'warning');
+          this.toastService.show(
+            'You do not have permission to delete this group.',
+            'warning',
+          );
         } else if (error.status === 404) {
           this.toastService.show('Group not found.', 'error');
         } else {
-          this.toastService.show('Failed to delete group. It may have linked projects', 'error');
+          this.toastService.show(
+            'Failed to delete group. It may have linked projects',
+            'error',
+          );
         }
-      }
+      },
     });
   }
 
@@ -505,7 +597,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
       return d.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return 'Invalid date';
@@ -524,8 +616,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   getInitials(name: string): string {
     if (!name) return '?';
-    return name.split(' ')
-      .map(part => part[0])
+    return name
+      .split(' ')
+      .map((part) => part[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
@@ -537,7 +630,10 @@ export class GroupsComponent implements OnInit, OnDestroy {
     if (!group || !group.createdByUserId || !this.currentUserId) return false;
 
     // Normalize both IDs (trim and lowercase)
-    const groupCreatorId = group.createdByUserId.toString().trim().toLowerCase();
+    const groupCreatorId = group.createdByUserId
+      .toString()
+      .trim()
+      .toLowerCase();
     const currentId = this.currentUserId.toString().trim().toLowerCase();
 
     return groupCreatorId === currentId;
@@ -553,7 +649,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
     return this.pendingRequests.get(groupId) || false;
   }
 
-  // ===== FORM GETTER METHODS ===== 
+  // ===== FORM GETTER METHODS =====
 
   get name() {
     return this.createGroupForm.get('name');

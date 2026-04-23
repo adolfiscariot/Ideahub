@@ -6,14 +6,14 @@ import {
   VoteRequest,
   UnvoteRequest,
   SeeVotesRequest,
-  VoteDetails
+  VoteDetails,
 } from '../Interfaces/Ideas/idea-interfaces';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VoteService {
   private readonly apiUrl = `${environment.apiUrl}/vote`;
@@ -33,29 +33,26 @@ export class VoteService {
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
 
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/cast-vote`, {}, { params }).pipe(
-      map(response => this.convertResponse<void>(response))
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.apiUrl}/cast-vote`, {}, { params })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
-
 
   // POST remove vote (unvote)
   unvote(request: UnvoteRequest): Observable<ApiResponse<void>> {
-    const params = new HttpParams()
-      .set('voteId', request.voteId);
+    const params = new HttpParams().set('voteId', request.voteId);
 
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/unvote`, {}, { params }).pipe(
-      map(response => this.convertResponse<void>(response))
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.apiUrl}/unvote`, {}, { params })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
-  // GET see votes for an idea (Group Admin only) 
+  // GET see votes for an idea (Group Admin only)
   seeVotes(request: SeeVotesRequest): Observable<ApiResponse<VoteDetails[]>> {
-    const params = new HttpParams()
-      .set('ideaId', request.ideaId);
+    const params = new HttpParams().set('ideaId', request.ideaId);
 
-    return this.http.get<ApiResponse<VoteDetails[]>>(`${this.apiUrl}/see-votes`, { params }).pipe(
-      map(response => this.convertResponse<VoteDetails[]>(response))
-    );
+    return this.http
+      .get<ApiResponse<VoteDetails[]>>(`${this.apiUrl}/see-votes`, { params })
+      .pipe(map((response) => this.convertResponse<VoteDetails[]>(response)));
   }
 }

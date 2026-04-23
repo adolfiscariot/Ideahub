@@ -5,7 +5,10 @@ import { CommonModule } from '@angular/common';
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { NotificationsService } from '../../Services/notifications';
-import { NotificationService, CommentNotification } from '../../Services/notification.service';
+import {
+  NotificationService,
+  CommentNotification,
+} from '../../Services/notification.service';
 import { SignalrService } from '../../Services/signalr.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
@@ -51,9 +54,11 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     this.loadCommentNotifications();
 
     // Re-fetch notifications list when a new one arrives via SignalR
-    this.signalRSub = this.signalrService.notificationSubject.subscribe((msg) => {
-      if (msg) this.loadCommentNotifications();
-    });
+    this.signalRSub = this.signalrService.notificationSubject.subscribe(
+      (msg) => {
+        if (msg) this.loadCommentNotifications();
+      },
+    );
   }
 
   ngOnDestroy() {
@@ -73,11 +78,24 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     this.groupsService.viewGlobalRequests().subscribe({
       next: (res: ApiResponse<GroupMembershipRequest[]>) => {
         const allRequests = res.data ?? [];
-        const groupMap = new Map<string, { groupId: string; groupName: string; requests: GroupMembershipRequest[]; open?: boolean }>();
+        const groupMap = new Map<
+          string,
+          {
+            groupId: string;
+            groupName: string;
+            requests: GroupMembershipRequest[];
+            open?: boolean;
+          }
+        >();
 
         allRequests.forEach((r: GroupMembershipRequest) => {
           if (!groupMap.has(r.groupId)) {
-            groupMap.set(r.groupId, { groupId: r.groupId, groupName: r.groupName ?? 'Unknown Group', requests: [], open: false });
+            groupMap.set(r.groupId, {
+              groupId: r.groupId,
+              groupName: r.groupName ?? 'Unknown Group',
+              requests: [],
+              open: false,
+            });
           }
           groupMap.get(r.groupId)!.requests.push(r);
         });
@@ -88,7 +106,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       error: () => {
         //this.errorRequests = 'Failed to load requests';
         this.loadingRequests = false;
-      }
+      },
     });
   }
 
@@ -97,29 +115,33 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   }
 
   acceptRequest(req: GroupMembershipRequest) {
-    this.groupsService.acceptRequest(req.groupId.toString(), req.userEmail!).subscribe({
-      next: () => {
-        this.toastService.show('Request accepted', 'success');
-        this.removeRequestFromGroup(req);
-        this.notificationsService.decrement(1);
-      },
-      error: () => {
-        this.toastService.show('Failed to accept request', 'error');
-      }
-    });
+    this.groupsService
+      .acceptRequest(req.groupId.toString(), req.userEmail!)
+      .subscribe({
+        next: () => {
+          this.toastService.show('Request accepted', 'success');
+          this.removeRequestFromGroup(req);
+          this.notificationsService.decrement(1);
+        },
+        error: () => {
+          this.toastService.show('Failed to accept request', 'error');
+        },
+      });
   }
 
   rejectRequest(req: GroupMembershipRequest) {
-    this.groupsService.rejectRequest(req.groupId.toString(), req.userEmail!).subscribe({
-      next: () => {
-        this.toastService.show('Request rejected', 'success');
-        this.removeRequestFromGroup(req);
-        this.notificationsService.decrement(1);
-      },
-      error: () => {
-        this.toastService.show('Failed to reject request', 'error');
-      }
-    });
+    this.groupsService
+      .rejectRequest(req.groupId.toString(), req.userEmail!)
+      .subscribe({
+        next: () => {
+          this.toastService.show('Request rejected', 'success');
+          this.removeRequestFromGroup(req);
+          this.notificationsService.decrement(1);
+        },
+        error: () => {
+          this.toastService.show('Failed to reject request', 'error');
+        },
+      });
   }
 
   acceptAll(group: { requests: GroupMembershipRequest[] }) {
@@ -127,21 +149,23 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     let completed = 0;
     let failed = false;
 
-    requests.forEach(req => {
-      this.groupsService.acceptRequest(req.groupId.toString(), req.userEmail!).subscribe({
-        next: () => {
-          this.removeRequestFromGroup(req);
-          completed++;
-          if (completed === requests.length && !failed) {
-            this.toastService.show('All requests accepted', 'success');
-            this.notificationsService.decrement(requests.length);
-          }
-        },
-        error: () => {
-          failed = true;
-          this.toastService.show('Some requests failed to accept', 'error');
-        }
-      });
+    requests.forEach((req) => {
+      this.groupsService
+        .acceptRequest(req.groupId.toString(), req.userEmail!)
+        .subscribe({
+          next: () => {
+            this.removeRequestFromGroup(req);
+            completed++;
+            if (completed === requests.length && !failed) {
+              this.toastService.show('All requests accepted', 'success');
+              this.notificationsService.decrement(requests.length);
+            }
+          },
+          error: () => {
+            failed = true;
+            this.toastService.show('Some requests failed to accept', 'error');
+          },
+        });
     });
   }
 
@@ -150,33 +174,42 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
     let completed = 0;
     let failed = false;
 
-    requests.forEach(req => {
-      this.groupsService.rejectRequest(req.groupId.toString(), req.userEmail!).subscribe({
-        next: () => {
-          this.removeRequestFromGroup(req);
-          completed++;
-          if (completed === requests.length && !failed) {
-            this.toastService.show('All requests rejected', 'success');
-          }
-        },
-        error: () => {
-          failed = true;
-          this.toastService.show('Some requests failed to reject', 'error');
-        }
-      });
+    requests.forEach((req) => {
+      this.groupsService
+        .rejectRequest(req.groupId.toString(), req.userEmail!)
+        .subscribe({
+          next: () => {
+            this.removeRequestFromGroup(req);
+            completed++;
+            if (completed === requests.length && !failed) {
+              this.toastService.show('All requests rejected', 'success');
+            }
+          },
+          error: () => {
+            failed = true;
+            this.toastService.show('Some requests failed to reject', 'error');
+          },
+        });
     });
   }
 
   get totalRequests(): number {
-    return this.groupedRequests.reduce((total, group) => total + group.requests.length, 0);
+    return this.groupedRequests.reduce(
+      (total, group) => total + group.requests.length,
+      0,
+    );
   }
 
   private removeRequestFromGroup(req: GroupMembershipRequest) {
-    const groupIndex = this.groupedRequests.findIndex(g => g.groupId === req.groupId);
+    const groupIndex = this.groupedRequests.findIndex(
+      (g) => g.groupId === req.groupId,
+    );
     if (groupIndex === -1) return;
 
     const group = this.groupedRequests[groupIndex];
-    group.requests = group.requests.filter(r => r.userEmail !== req.userEmail);
+    group.requests = group.requests.filter(
+      (r) => r.userEmail !== req.userEmail,
+    );
 
     if (group.requests.length === 0) {
       this.groupedRequests.splice(groupIndex, 1);
@@ -198,7 +231,7 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       error: () => {
         //this.errorNotifications = 'Failed to load notifications';
         this.loadingNotifications = false;
-      }
+      },
     });
   }
 
@@ -211,29 +244,34 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.toastService.show('Failed to mark as read', 'error');
-      }
+      },
     });
   }
 
   markAllAsRead() {
     this.notificationService.markAllAsRead().subscribe({
       next: () => {
-        this.commentNotifications.forEach(n => n.isRead = true);
+        this.commentNotifications.forEach((n) => (n.isRead = true));
         this.toastService.show('All notifications marked as read', 'success');
         // Dismiss read notifications after 3 seconds
         setTimeout(() => {
-          this.commentNotifications = this.commentNotifications.filter(n => !n.isRead);
+          this.commentNotifications = this.commentNotifications.filter(
+            (n) => !n.isRead,
+          );
         }, 30000);
       },
       error: () => {
         this.toastService.show('Failed to mark all as read', 'error');
-      }
+      },
     });
   }
 
   onNotificationClick(notification: CommentNotification) {
     this.router.navigate(['/groups', notification.comment.groupId, 'ideas'], {
-      queryParams: { ideaId: notification.comment.ideaId, commentId: notification.comment.id }
+      queryParams: {
+        ideaId: notification.comment.ideaId,
+        commentId: notification.comment.id,
+      },
     });
 
     if (!notification.isRead) {
@@ -242,6 +280,6 @@ export class GlobalNotificationsComponent implements OnInit, OnDestroy {
   }
 
   get unreadCount(): number {
-    return this.commentNotifications.filter(n => !n.isRead).length;
+    return this.commentNotifications.filter((n) => !n.isRead).length;
   }
 }

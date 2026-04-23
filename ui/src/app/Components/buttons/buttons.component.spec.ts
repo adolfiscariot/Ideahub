@@ -8,9 +8,8 @@ describe('LandingPageButtonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LandingPageButtonsComponent]
-    })
-    .compileComponents();
+      imports: [LandingPageButtonsComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LandingPageButtonsComponent);
     component = fixture.componentInstance;

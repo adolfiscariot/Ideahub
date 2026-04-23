@@ -1,14 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Idea, CreateIdeaRequest, VoteRequest, PromoteRequest, IdeaUpdate, UnvoteRequest, SeeVotesRequest } from '../Interfaces/Ideas/idea-interfaces';
+import {
+  Idea,
+  CreateIdeaRequest,
+  VoteRequest,
+  PromoteRequest,
+  IdeaUpdate,
+  UnvoteRequest,
+  SeeVotesRequest,
+} from '../Interfaces/Ideas/idea-interfaces';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { VoteService } from './vote.service';
 import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IdeasService {
   private readonly apiUrl = `${environment.apiUrl}/idea`;
@@ -20,12 +28,17 @@ export class IdeasService {
     return {
       success: response.status || response.success || false,
       message: response.message || '',
-      data: response.data
+      data: response.data,
     };
   }
 
   // GET all ideas for a group
-  getIdeasByGroup(groupId: string, type?: string, domain?: string, impact?: string): Observable<ApiResponse<Idea[]>> {
+  getIdeasByGroup(
+    groupId: string,
+    type?: string,
+    domain?: string,
+    impact?: string,
+  ): Observable<ApiResponse<Idea[]>> {
     let params = new HttpParams().set('groupId', groupId);
 
     if (type) {
@@ -37,9 +50,9 @@ export class IdeasService {
     if (impact) {
       params = params.set('impact', impact);
     }
-    return this.http.get<ApiResponse<Idea[]>>(`${this.apiUrl}/view-ideas`, { params }).pipe(
-      map(response => this.convertResponse<Idea[]>(response))
-    );
+    return this.http
+      .get<ApiResponse<Idea[]>>(`${this.apiUrl}/view-ideas`, { params })
+      .pipe(map((response) => this.convertResponse<Idea[]>(response)));
   }
 
   // GET single idea
@@ -48,52 +61,58 @@ export class IdeasService {
       .set('groupId', groupId)
       .set('ideaId', ideaId);
 
-    return this.http.get<ApiResponse<Idea>>(`${this.apiUrl}/open-idea`, { params }).pipe(
-      map(response => this.convertResponse<Idea>(response))
-    );
+    return this.http
+      .get<ApiResponse<Idea>>(`${this.apiUrl}/open-idea`, { params })
+      .pipe(map((response) => this.convertResponse<Idea>(response)));
   }
 
   // POST create new idea
   createIdea(request: CreateIdeaRequest): Observable<ApiResponse<Idea>> {
     const params = new HttpParams().set('groupId', request.groupId);
 
-    return this.http.post<ApiResponse<Idea>>(`${this.apiUrl}/create-idea`, {
-      Title: request.Title,
-      ProblemStatement: request.ProblemStatement,
-      ProposedSolution: request.ProposedSolution,
-      StrategicAlignment: request.StrategicAlignment,
-      UseCase: request.UseCase,
-      InnovationCategory: request.InnovationCategory,
-      SubCategory: request.SubCategory,
-      TechnologyInvolved: request.TechnologyInvolved,
-      Notes: request.Notes
-    }, { params }).pipe(
-      map(response => this.convertResponse<Idea>(response))
-    );
+    return this.http
+      .post<ApiResponse<Idea>>(
+        `${this.apiUrl}/create-idea`,
+        {
+          Title: request.Title,
+          ProblemStatement: request.ProblemStatement,
+          ProposedSolution: request.ProposedSolution,
+          StrategicAlignment: request.StrategicAlignment,
+          UseCase: request.UseCase,
+          InnovationCategory: request.InnovationCategory,
+          SubCategory: request.SubCategory,
+          TechnologyInvolved: request.TechnologyInvolved,
+          Notes: request.Notes,
+        },
+        { params },
+      )
+      .pipe(map((response) => this.convertResponse<Idea>(response)));
   }
 
   // PUT update idea
-  updateIdea(ideaId: string, updateIdea: IdeaUpdate): Observable<ApiResponse<Idea>> {
-    return this.http.put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}`, updateIdea).pipe(
-      map(response => this.convertResponse<Idea>(response))
-    );
+  updateIdea(
+    ideaId: string,
+    updateIdea: IdeaUpdate,
+  ): Observable<ApiResponse<Idea>> {
+    return this.http
+      .put<ApiResponse<Idea>>(`${this.apiUrl}/${ideaId}`, updateIdea)
+      .pipe(map((response) => this.convertResponse<Idea>(response)));
   }
 
   // Close idea
   closeIdea(ideaId: string): Observable<ApiResponse<void>> {
-    return this.http.patch<ApiResponse<void>>(
-      `${this.apiUrl}/close-idea?ideaId=${ideaId}`,
-      null
-    ).pipe(
-      map(res => this.convertResponse<void>(res))
-    );
+    return this.http
+      .patch<
+        ApiResponse<void>
+      >(`${this.apiUrl}/close-idea?ideaId=${ideaId}`, null)
+      .pipe(map((res) => this.convertResponse<void>(res)));
   }
 
   // DELETE idea
   deleteIdea(ideaId: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${ideaId}`).pipe(
-      map(response => this.convertResponse<void>(response))
-    );
+    return this.http
+      .delete<ApiResponse<void>>(`${this.apiUrl}/${ideaId}`)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
   // POST promote idea to project
@@ -102,16 +121,16 @@ export class IdeasService {
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
 
-    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/promote-idea`, {}, { params }).pipe(
-      map(response => this.convertResponse<void>(response))
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.apiUrl}/promote-idea`, {}, { params })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
   // POST vote for idea
   voteForIdea(groupId: string, ideaId: string) {
     const request: VoteRequest = {
       groupId: groupId,
-      ideaId: ideaId
+      ideaId: ideaId,
     };
     return this.voteService.castVote(request);
   }
@@ -119,7 +138,7 @@ export class IdeasService {
   // Remove vote
   removeVote(voteId: string) {
     const request: UnvoteRequest = {
-      voteId: voteId
+      voteId: voteId,
     };
     return this.voteService.unvote(request);
   }
@@ -127,7 +146,7 @@ export class IdeasService {
   // Get votes for idea
   getVotesForIdea(ideaId: string) {
     const request: SeeVotesRequest = {
-      ideaId: ideaId
+      ideaId: ideaId,
     };
     return this.voteService.seeVotes(request);
   }

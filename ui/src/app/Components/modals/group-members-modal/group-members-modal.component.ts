@@ -4,7 +4,11 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupsService } from '../../../Services/groups.service';
-import { Group, GroupMember, JoinGroupResponse } from '../../../Interfaces/Groups/groups-interfaces';
+import {
+  Group,
+  GroupMember,
+  JoinGroupResponse,
+} from '../../../Interfaces/Groups/groups-interfaces';
 import { ApiResponse } from '../../../Interfaces/Api-Response/api-response';
 import { ToastService } from '../../../Services/toast.service';
 import { AuthService } from '../../../Services/auth/auth.service';
@@ -14,7 +18,7 @@ import { AuthService } from '../../../Services/auth/auth.service';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './group-members-modal.component.html',
-  styleUrls: ['./group-members-modal.component.scss']
+  styleUrls: ['./group-members-modal.component.scss'],
 })
 export class GroupMembersModalComponent implements OnInit {
   members: GroupMember[] = [];
@@ -36,7 +40,7 @@ export class GroupMembersModalComponent implements OnInit {
 
   checkOwnership() {
     this.currentUserEmail = this.authService.getEmail() || '';
-    // Assuming backend data.group has createdByUserId or createdByUser.email. 
+    // Assuming backend data.group has createdByUserId or createdByUser.email.
     // We might need to check against userId or email depending on what data we have.
     // Ideally we check ID. But let's check what we have.
 
@@ -63,7 +67,7 @@ export class GroupMembersModalComponent implements OnInit {
       error: () => {
         this.isLoading = false;
         this.toastService.show('Failed to load group members.', 'error');
-      }
+      },
     });
   }
 
@@ -73,25 +77,31 @@ export class GroupMembersModalComponent implements OnInit {
       next: (response: ApiResponse<JoinGroupResponse>) => {
         this.joining = false;
         const isSuccess = response.success;
-        
+
         // Handle both casing variants for isPublic from JoinGroupResponse
         const isPublic = response.data?.isPublic ?? response.data?.IsPublic;
 
         if (isSuccess) {
           if (isPublic === false) {
-            this.toastService.show('Join request sent! Awaiting admin approval.', 'success');
+            this.toastService.show(
+              'Join request sent! Awaiting admin approval.',
+              'success',
+            );
           } else {
             this.toastService.show('Joined successfully!', 'success');
           }
           this.dialogRef.close({ joined: true });
         } else {
-          this.toastService.show(response.message || 'Failed to join group.', 'error');
+          this.toastService.show(
+            response.message || 'Failed to join group.',
+            'error',
+          );
         }
       },
       error: () => {
         this.joining = false;
         this.toastService.show('Failed to join group.', 'error');
-      }
+      },
     });
   }
 
@@ -102,29 +112,42 @@ export class GroupMembersModalComponent implements OnInit {
       return;
     }
 
-    if (!confirm(`Are you sure you want to transfer ownership of this group to ${member.displayName || memberEmail}? You will lose admin privileges.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to transfer ownership of this group to ${member.displayName || memberEmail}? You will lose admin privileges.`,
+      )
+    ) {
       return;
     }
 
-    this.groupsService.transferOwnership(this.data.group.id, memberEmail).subscribe({
-      next: (response: ApiResponse<void>) => {
-        if (response.success) {
-          this.toastService.show('Ownership transferred successfully.', 'success');
-          this.dialogRef.close({ ownershipTransferred: true });
-        } else {
-          this.toastService.show(response.message || 'Failed to transfer ownership.', 'error');
-        }
-      },
-      error: () => {
-        this.toastService.show('Failed to transfer ownership.', 'error');
-      }
-    });
+    this.groupsService
+      .transferOwnership(this.data.group.id, memberEmail)
+      .subscribe({
+        next: (response: ApiResponse<void>) => {
+          if (response.success) {
+            this.toastService.show(
+              'Ownership transferred successfully.',
+              'success',
+            );
+            this.dialogRef.close({ ownershipTransferred: true });
+          } else {
+            this.toastService.show(
+              response.message || 'Failed to transfer ownership.',
+              'error',
+            );
+          }
+        },
+        error: () => {
+          this.toastService.show('Failed to transfer ownership.', 'error');
+        },
+      });
   }
 
   getInitials(name: string) {
     if (!name) return '?';
-    return name.split(' ')
-      .map(part => part[0])
+    return name
+      .split(' ')
+      .map((part) => part[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);

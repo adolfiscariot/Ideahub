@@ -1,9 +1,17 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { ProjectService } from './project.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { Project, ProjectStatus, ProjectBackendDto, CreateProjectRequest } from '../Interfaces/Projects/project-interface';
+import {
+  Project,
+  ProjectStatus,
+  ProjectBackendDto,
+  CreateProjectRequest,
+} from '../Interfaces/Projects/project-interface';
 import { environment } from '../../environments/environment';
 
 describe('ProjectService', () => {
@@ -23,7 +31,7 @@ describe('ProjectService', () => {
     overseenByUserId: 'user-002',
     groupName: 'Engineering',
     ideaName: 'Solar Expansion',
-    progress: 45
+    progress: 45,
   };
 
   const mock_project: Project = {
@@ -36,13 +44,13 @@ describe('ProjectService', () => {
     overseenById: 'user-002',
     groupName: 'Engineering',
     ideaTitle: 'Solar Expansion',
-    progress: 45
+    progress: 45,
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ProjectService]
+      providers: [ProjectService],
     });
     service = TestBed.inject(ProjectService);
     http_mock = TestBed.inject(HttpTestingController);
@@ -64,10 +72,10 @@ describe('ProjectService', () => {
       const mock_response: ApiResponse<ProjectBackendDto[]> = {
         success: true,
         message: 'ok',
-        data: [mock_dto]
+        data: [mock_dto],
       };
 
-      service.getMyProjects().subscribe(projects => {
+      service.getMyProjects().subscribe((projects) => {
         const mapped = projects[0];
         expect(mapped.id).toBe(1);
         expect(mapped.overseenBy).toBe('Manager X');
@@ -82,17 +90,26 @@ describe('ProjectService', () => {
   // createProject
   describe('createProject()', () => {
     it('should POST with groupId and ideaId as query params', () => {
-      const request: CreateProjectRequest = { title: 'T', description: 'D', overseenByEmail: 'e@e.com' };
-      const mock_response: ApiResponse<{ projectId: number }> = { success: true, message: 'ok', data: { projectId: 123 } };
+      const request: CreateProjectRequest = {
+        title: 'T',
+        description: 'D',
+        overseenByEmail: 'e@e.com',
+      };
+      const mock_response: ApiResponse<{ projectId: number }> = {
+        success: true,
+        message: 'ok',
+        data: { projectId: 123 },
+      };
 
-      service.createProject('g-1', 'i-1', request).subscribe(res => {
+      service.createProject('g-1', 'i-1', request).subscribe((res) => {
         expect(res.data?.projectId).toBe(123);
       });
 
-      const req = http_mock.expectOne(r => 
-        r.url === `${api_url}/create-project` && 
-        r.params.get('groupId') === 'g-1' && 
-        r.params.get('ideaId') === 'i-1'
+      const req = http_mock.expectOne(
+        (r) =>
+          r.url === `${api_url}/create-project` &&
+          r.params.get('groupId') === 'g-1' &&
+          r.params.get('ideaId') === 'i-1',
       );
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(request);
@@ -100,23 +117,33 @@ describe('ProjectService', () => {
     });
 
     it('should propagate backend error messages', () => {
-      const request: CreateProjectRequest = { title: 'T', description: 'D', overseenByEmail: 'e@e.com' };
+      const request: CreateProjectRequest = {
+        title: 'T',
+        description: 'D',
+        overseenByEmail: 'e@e.com',
+      };
       const error_response = { message: 'Quota exceeded' };
 
       service.createProject('g-1', 'i-1', request).subscribe({
-        error: (err: Error) => expect(err.message).toBe('Quota exceeded')
+        error: (err: Error) => expect(err.message).toBe('Quota exceeded'),
       });
 
-      http_mock.expectOne(r => r.url === `${api_url}/create-project`).flush(error_response, { status: 400, statusText: 'Bad Request' });
+      http_mock
+        .expectOne((r) => r.url === `${api_url}/create-project`)
+        .flush(error_response, { status: 400, statusText: 'Bad Request' });
     });
   });
 
   // REST actions
   describe('REST Lifecycle', () => {
     it('should GET project details by ID', () => {
-      const mock_response: ApiResponse<Project> = { success: true, message: 'ok', data: mock_project };
-      
-      service.getProjectById(1).subscribe(res => {
+      const mock_response: ApiResponse<Project> = {
+        success: true,
+        message: 'ok',
+        data: mock_project,
+      };
+
+      service.getProjectById(1).subscribe((res) => {
         expect(res.data?.title).toBe('Solar Energy Phase 1');
       });
 
@@ -125,9 +152,13 @@ describe('ProjectService', () => {
 
     it('should PUT to update project', () => {
       const update = { title: 'Renewable energy' };
-      const mock_response: ApiResponse<Project> = { success: true, message: 'ok', data: { ...mock_project, title: 'Renewable energy' } };
+      const mock_response: ApiResponse<Project> = {
+        success: true,
+        message: 'ok',
+        data: { ...mock_project, title: 'Renewable energy' },
+      };
 
-      service.updateProject(1, update).subscribe(res => {
+      service.updateProject(1, update).subscribe((res) => {
         expect(res.data?.title).toBe('Renewable energy');
       });
 

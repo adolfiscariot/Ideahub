@@ -1,42 +1,42 @@
 .cta-component {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100%
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
 }
 
 .cta-header {
-    font-size: xx-large;
+  font-size: xx-large;
 }
 
 .header-text {
-    position: relative;
-    display: inline-block;
-    font-size: 2em;
-    color: black;
-    font-weight: 700;
+  position: relative;
+  display: inline-block;
+  font-size: 2em;
+  color: black;
+  font-weight: 700;
 }
 
 .header-text::after {
-    content: '';
-    border-radius: 2px;
-    background-color: purple;
-    position: absolute;
-    width: 80%;
-    transform: translate(-50%);
-    height: 5px;
-    left: 50%;
-    bottom: -10px;
+  content: "";
+  border-radius: 2px;
+  background-color: purple;
+  position: absolute;
+  width: 80%;
+  transform: translate(-50%);
+  height: 5px;
+  left: 50%;
+  bottom: -10px;
 }
 
 .header-underline {
-    margin-top: 10px;
-    width: 30px;
+  margin-top: 10px;
+  width: 30px;
 }
 
 .subheader-text {
-    font-size: 2em;
-    font-weight: 500;
-    color: black;
+  font-size: 2em;
+  font-weight: 500;
+  color: black;
 }
