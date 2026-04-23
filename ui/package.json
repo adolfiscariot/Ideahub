@@ -1,15 +1,17 @@
 {
   "name": "ideahub",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --port 4200",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\"",
+    "test:integration": "echo 'Integration tests not yet configured' && exit 0"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^20.1.1",
     "@angular/cdk": "^20.1.1",
@@ -42,6 +44,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "prettier": "^3.0.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "8.46.4"
   }
