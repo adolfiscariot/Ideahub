@@ -29,6 +29,9 @@ export class AuthService {
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
 
+  private _passwordSetupRequired = new BehaviorSubject<boolean>(false);
+  passwordSetupRequired$: Observable<boolean> = this._passwordSetupRequired.asObservable();
+
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<string | null> =
     new BehaviorSubject<string | null>(null);
@@ -39,6 +42,10 @@ export class AuthService {
   constructor() {
     const token = localStorage.getItem('accessToken');
     this._isLoggedIn.next(!!token);
+
+    const psr = localStorage.getItem('passwordSetupRequired');
+    this._passwordSetupRequired.next(psr === 'true');
+
     if (token) {
       this.setupRefreshTimer();
     }
@@ -50,6 +57,34 @@ export class AuthService {
       message: response.message || '',
       data: response.data,
     };
+  }
+
+  setAuthData(data: AuthData): void {
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      this._isLoggedIn.next(true);
+
+      if (data.passwordSetupRequired !== undefined) {
+        localStorage.setItem('passwordSetupRequired', data.passwordSetupRequired.toString());
+        this._passwordSetupRequired.next(data.passwordSetupRequired);
+      }
+
+      this.setupRefreshTimer();
+    }
+  }
+
+  setAuthData(data: AuthData): void {
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      this._isLoggedIn.next(true);
+
+      if (data.passwordSetupRequired !== undefined) {
+        localStorage.setItem('passwordSetupRequired', data.passwordSetupRequired.toString());
+        this._passwordSetupRequired.next(data.passwordSetupRequired);
+      }
+
+      this.setupRefreshTimer();
+    }
   }
 
   register(registrationData: Registration): Observable<ApiResponse<void>> {
@@ -181,7 +216,9 @@ export class AuthService {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('refreshTokenExpiry');
+    localStorage.removeItem('passwordSetupRequired');
     this._isLoggedIn.next(false);
+    this._passwordSetupRequired.next(false);
     // Note: HttpOnly cookie can only be cleared by the server during /logout
     this.router.navigate(['/login']);
   }
@@ -376,8 +413,31 @@ export class AuthService {
   }
 
   resetPassword(payload: ResetPassword): Observable<ApiResponse<void>> {
-    return this.http
-      .post<ApiResponse<void>>(`${this.authUrl}/reset-password`, payload)
-      .pipe(map((response) => this.convertResponse<void>(response)));
+    return this.http.post<ApiResponse<void>>(
+      `${this.authUrl}/reset-password`,
+      payload
+    ).pipe(map(response => this.convertResponse<void>(response)));
+  }
+
+  setInitialPassword(password: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.authUrl}/set-initial-password`, { newPassword: password, confirmPassword: password }).pipe(
+      map(response => this.convertResponse<void>(response)),
+      tap(response => {
+        if (response.success) {
+          localStorage.removeItem('passwordSetupRequired');
+          this._passwordSetupRequired.next(false);
+        }
+      }),
+      catchError((e) => {
+        const apiError = e.error as ApiResponse<void>;
+        let errorMessage = apiError?.message || e.message || 'Failed to set password';
+
+        if (apiError?.errors && apiError.errors.length > 0) {
+          errorMessage = apiError.errors[0];
+        }
+
+        throw new Error(errorMessage);
+      })
+    );
   }
 }

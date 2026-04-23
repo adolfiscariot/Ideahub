@@ -6,4 +6,5 @@ export interface CurrentUser {
 
 export interface AuthData {
   accessToken: string;
+  passwordSetupRequired?: boolean;
 }
