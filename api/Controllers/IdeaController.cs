@@ -130,7 +130,7 @@ public class IdeaController : ControllerBase
             // 1. Get Group Members (excluding author)
             var groupMembers = await scopedContext.UserGroups
                 .Where(ug => ug.GroupId == idea.GroupId && ug.UserId != idea.UserId)
-                .Select(ug => new { Email = ug.User!.Email, Name = ug.User.DisplayName ?? ug.User.UserName })
+                .Select(ug => new { Email = ug.User!.Email!, Name = ug.User.DisplayName ?? ug.User.UserName })
                 .Where(u => !string.IsNullOrEmpty(u.Email))
                 .ToListAsync();
 

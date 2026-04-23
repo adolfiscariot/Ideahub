@@ -396,11 +396,11 @@ public class TimesheetController : ControllerBase
             var allProjectTasks = await _context.TaskAssignees
                 .Where(
                     ta => ta.UserId == userId &&
-                    ta.ProjectTask.ProjectId == projectId &&
+                    ta.ProjectTask!.ProjectId == projectId &&
                     !ta.ProjectTask.IsDeleted &&
                     !ta.ProjectTask.IsCompleted
                 )
-                .Select(ta => new { ta.ProjectTask.Id, ta.ProjectTask.Title })
+                .Select(ta => new { ta.ProjectTask!.Id, ta.ProjectTask.Title })
                 .ToListAsync();
 
             return Ok(ApiResponse.Ok("Tasks retrieved", allProjectTasks));

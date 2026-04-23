@@ -240,9 +240,9 @@ public class ProjectController : ControllerBase
                 {
                     isAssignee = await _context.SubTaskAssignees
                         .AnyAsync(sta => sta.UserId == userId &&
-                                sta.SubTask.ProjectTask.ProjectId == projectId &&
-                                !sta.SubTask.ProjectTask.IsDeleted &&
-                                !sta.SubTask.IsDeleted);
+                                sta.SubTask!.ProjectTask!.ProjectId == projectId &&
+                                !sta.SubTask!.ProjectTask!.IsDeleted &&
+                                !sta.SubTask!.IsDeleted);
                 }
             }
 

@@ -279,7 +279,7 @@ namespace Ideahub.Tests
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var data = (System.Collections.IEnumerable)Assert.IsType<ApiResponse>(okResult.Value).Data;
+            var data = (System.Collections.IEnumerable)Assert.IsType<ApiResponse>(okResult.Value!).Data!;
             var list = new List<object>();
             foreach (var item in data) list.Add(item);
             Assert.Single(list);
