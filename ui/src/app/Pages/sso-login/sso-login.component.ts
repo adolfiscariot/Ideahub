@@ -11,18 +11,25 @@ import { environment } from '../../../environments/environment';
   standalone: true,
   imports: [],
   template: `
-    <div style="text-align: center; margin-top: 100px; font-family: sans-serif;">
+    <div
+      style="text-align: center; margin-top: 100px; font-family: sans-serif;"
+    >
       <h2 style="color: #1B467A;">Connecting to IdeaHub...</h2>
       <p>Verifying your Intranet credentials. Please wait.</p>
-      
+
       @if (errorMsg) {
         <div style="color: #d9534f; margin-top: 20px;">
           <p>{{ errorMsg }}</p>
-          <button (click)="goToLogin()" style="padding: 10px 20px; cursor: pointer;">Go to Login</button>
+          <button
+            (click)="goToLogin()"
+            style="padding: 10px 20px; cursor: pointer;"
+          >
+            Go to Login
+          </button>
         </div>
       }
     </div>
-  `
+  `,
 })
 export class SsoLoginComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -46,7 +53,8 @@ export class SsoLoginComponent implements OnInit {
 
     const ssoUrl = `${environment.apiUrl}/auth/sso-login`;
 
-    this.http.post<ApiResponse<AuthData>>(ssoUrl, { token }, { withCredentials: true })
+    this.http
+      .post<ApiResponse<AuthData>>(ssoUrl, { token }, { withCredentials: true })
       .subscribe({
         next: (response) => {
           const isSuccessful = response.success || response.status;
@@ -56,7 +64,7 @@ export class SsoLoginComponent implements OnInit {
 
             this.authService.setAuthData(response.data);
 
-            this.router.navigate(['/home']).then(navigated => {
+            this.router.navigate(['/home']).then((navigated) => {
               if (navigated) {
                 console.log('SSO: Navigation successful!');
               } else {
@@ -72,7 +80,7 @@ export class SsoLoginComponent implements OnInit {
           console.error('SSO Exchange error:', err);
           this.errorMsg = 'Connection to authentication server failed.';
           setTimeout(() => this.goToLogin(), 3000);
-        }
+        },
       });
   }
 

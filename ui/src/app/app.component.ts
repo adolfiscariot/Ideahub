@@ -9,7 +9,13 @@ import { PasswordNagBannerComponent } from './Components/password-nag-banner/pas
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ToastComponent, PasswordNagBannerComponent],
+  imports: [
+    RouterOutlet,
+    NavbarComponent,
+    FooterComponent,
+    ToastComponent,
+    PasswordNagBannerComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

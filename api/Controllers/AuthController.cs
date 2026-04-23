@@ -555,7 +555,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    
+
     [HttpPost("sso-login")]
     public async Task<IActionResult> SsoLogin([FromBody] SsoExchangeDto dto)
     {
@@ -569,7 +569,7 @@ public class AuthController : ControllerBase
             _logger.LogError("SSO Configuration is missing one or more required fields (Secret, Issuer, or Audience).");
             return StatusCode(500, ApiResponse.Fail("SSO is not properly configured on the server."));
         }
-        
+
 
         try
         {
@@ -577,19 +577,19 @@ public class AuthController : ControllerBase
             var tokenHandler = new JwtSecurityTokenHandler();
             tokenHandler.InboundClaimTypeMap.Clear(); // Prevent C# from renaming "email" to a schema URL
 
-        
+
             // Validate token from the Intranet
             var principal = tokenHandler.ValidateToken(dto.Token, new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
-                
+
                 ValidateIssuer = true,
                 ValidIssuer = ssoIssuer,
-                
+
                 ValidateAudience = true,
                 ValidAudience = ssoAudience,
-                
+
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
 
@@ -618,7 +618,7 @@ public class AuthController : ControllerBase
                     CreatedAt = DateTime.UtcNow,
                     LastLoginAt = DateTime.UtcNow
                 };
-                
+
                 var createResult = await _userManager.CreateAsync(user);
                 if (!createResult.Succeeded)
                 {

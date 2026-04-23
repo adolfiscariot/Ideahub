@@ -103,13 +103,15 @@ export const routes: Routes = [
     path: 'projects/:projectId/timesheets',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('./Pages/timesheets/timesheets.component').then((m) => m.TimesheetsComponent),
+      import('./Pages/timesheets/timesheets.component').then(
+        (m) => m.TimesheetsComponent,
+      ),
   },
   {
     path: 'sso-login',
     loadComponent: () =>
       import('./Pages/sso-login/sso-login.component').then(
-        (m) => m.SsoLoginComponent
+        (m) => m.SsoLoginComponent,
       ),
   },
   {
@@ -117,7 +119,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./Pages/set-password/set-password.component').then(
-        (m) => m.SetPasswordComponent
+        (m) => m.SetPasswordComponent,
       ),
-  }
+  },
 ];

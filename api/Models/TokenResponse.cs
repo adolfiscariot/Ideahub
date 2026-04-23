@@ -11,7 +11,7 @@ public class TokenResponse
 
     [Required]
     [DataType(DataType.DateTime)]
-    public DateTime RefreshTokenExpiry { get; set; } 
+    public DateTime RefreshTokenExpiry { get; set; }
 
     public bool PasswordSetupRequired { get; set; }
 }
