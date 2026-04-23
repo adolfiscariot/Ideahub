@@ -30,7 +30,7 @@ namespace Ideahub.Tests
             _context = new IdeahubDbContext(options);
 
             _mockLogger = new Mock<ILogger<TaskController>>();
-            
+
             var store = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
@@ -61,19 +61,19 @@ namespace Ideahub.Tests
         public async Task CreateTask_AsOverseer_ShouldSucceed()
         {
             // Arrange
-            var project = new Project 
-            { 
-                Id = 1, 
-                Title = "Test Project", 
+            var project = new Project
+            {
+                Id = 1,
+                Title = "Test Project",
                 OverseenByUserId = _testUserId,
-                Status = ProjectStatus.Planning 
+                Status = ProjectStatus.Planning
             };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
-            var dto = new TaskDto 
-            { 
-                Title = "First Task", 
+            var dto = new TaskDto
+            {
+                Title = "First Task",
                 Description = "Doing work",
                 TaskAssignees = new List<string> { "user-456" }
             };
@@ -85,12 +85,12 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var apiResponse = Assert.IsType<ApiResponse>(okResult.Value);
             Assert.True(apiResponse.Status);
-            
+
             var createdTask = await _context.ProjectTasks.Include(t => t.TaskAssignees).FirstOrDefaultAsync(t => t.Title == "First Task");
             Assert.NotNull(createdTask);
             Assert.NotNull(createdTask.TaskAssignees);
             Assert.Single(createdTask.TaskAssignees);
-            
+
             var updatedProject = await _context.Projects.FindAsync(1);
             Assert.Equal(ProjectStatus.Active, updatedProject!.Status); // Should transition from Planning to Active
         }
@@ -99,11 +99,11 @@ namespace Ideahub.Tests
         public async Task CreateTask_AsNonOverseer_ShouldReturnForbidden()
         {
             // Arrange
-            var project = new Project 
-            { 
-                Id = 2, 
-                Title = "Other Project", 
-                OverseenByUserId = "someone-else" 
+            var project = new Project
+            {
+                Id = 2,
+                Title = "Other Project",
+                OverseenByUserId = "someone-else"
             };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
@@ -129,7 +129,7 @@ namespace Ideahub.Tests
             var project = new Project { Id = 3, Title = "Member Project", OverseenByUserId = "overseer-789" };
             var task = new ProjectTask { Id = 101, ProjectId = 3, Title = "Shared Task" };
             var assignment = new TaskAssignee { ProjectTaskId = 101, UserId = _testUserId };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.TaskAssignees.Add(assignment);
@@ -171,7 +171,7 @@ namespace Ideahub.Tests
             var project = new Project { Id = 5, Title = "Update Project", OverseenByUserId = _testUserId };
             var task = new ProjectTask { Id = 202, ProjectId = 5, Title = "Main Task", IsCompleted = false };
             var subTask = new SubTask { Id = 303, ProjectTaskId = 202, Title = "Still Working", IsCompleted = false };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.SubTasks.Add(subTask);
@@ -193,7 +193,7 @@ namespace Ideahub.Tests
             var project = new Project { Id = 6, Title = "Assignee Project", OverseenByUserId = "boss" };
             var task = new ProjectTask { Id = 203, ProjectId = 6, Title = "Work", IsCompleted = false };
             var assignment = new TaskAssignee { ProjectTaskId = 203, UserId = _testUserId };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.TaskAssignees.Add(assignment);
@@ -216,7 +216,7 @@ namespace Ideahub.Tests
             // Arrange
             var project = new Project { Id = 7, Title = "Delete Project", OverseenByUserId = _testUserId };
             var task = new ProjectTask { Id = 204, ProjectId = 7, Title = "To Delete", IsDeleted = false };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             await _context.SaveChangesAsync();
@@ -241,15 +241,15 @@ namespace Ideahub.Tests
             var project = new Project { Id = 8, Title = "SubTask Project", OverseenByUserId = "boss" };
             var task = new ProjectTask { Id = 404, ProjectId = 8, Title = "Parent Task" };
             var assignment = new TaskAssignee { ProjectTaskId = 404, UserId = _testUserId };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.TaskAssignees.Add(assignment);
             await _context.SaveChangesAsync();
 
-            var dto = new SubTaskDto 
-            { 
-                Title = "Child SubTask", 
+            var dto = new SubTaskDto
+            {
+                Title = "Child SubTask",
                 Description = "Helping out",
                 SubTaskAssignees = new List<string> { _testUserId }
             };
@@ -272,7 +272,7 @@ namespace Ideahub.Tests
             var task = new ProjectTask { Id = 505, ProjectId = 9, Title = "Root Task" };
             var subTask = new SubTask { Id = 606, ProjectTaskId = 505, Title = "Parent SubTask", IsCompleted = false };
             var childSubTask = new SubTask { Id = 707, ProjectTaskId = 505, ParentSubTaskId = 606, Title = "Child SubTask", IsCompleted = false };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.SubTasks.Add(subTask);
@@ -295,7 +295,7 @@ namespace Ideahub.Tests
             var project = new Project { Id = 10, Title = "Final Project", OverseenByUserId = _testUserId };
             var task = new ProjectTask { Id = 808, ProjectId = 10, Title = "Task" };
             var subTask = new SubTask { Id = 909, ProjectTaskId = 808, Title = "SubTask" };
-            
+
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             _context.SubTasks.Add(subTask);

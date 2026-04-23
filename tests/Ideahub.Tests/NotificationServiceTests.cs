@@ -66,12 +66,12 @@ namespace Ideahub.Tests
             var service = CreateService();
             string userId = "user123";
             string message = "Hello World";
-            
+
             // 1. Create mock user, idea and comment
             var user = new IdeahubUser { Id = userId, UserName = "testuser", Email = "test@test.com", DisplayName = "Test User" };
             var idea = new Idea { Title = "Test Idea", StrategicAlignment = "Align", ProblemStatement = "Prob", ProposedSolution = "Sol", UseCase = "Use", InnovationCategory = "Cat", UserId = userId };
             var comment = new Comment { Content = "Test Comment", UserId = userId, Idea = idea };
-            
+
             _context.Users.Add(user);
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
@@ -98,7 +98,7 @@ namespace Ideahub.Tests
             // We can't easily make the In-Memory DB "fail," so we'll pass a null context 
             // or we could mock the context (but mocks for DbContext are complex).
             // For now, let's just trigger a null reference by not initializing the DB properly if we wanted.
-            
+
             var service = new NotificationService(_mockHubContext.Object, null!, _mockLogger.Object);
 
             // Act

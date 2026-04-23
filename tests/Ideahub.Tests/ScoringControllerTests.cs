@@ -101,8 +101,8 @@ namespace Ideahub.Tests
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
 
-            var dto = new BusinessCaseDto 
-            { 
+            var dto = new BusinessCaseDto
+            {
                 Verdict = Verdict.Approved,
                 ExpectedBenefits = "High",
                 RiskLevel = RiskLevel.Low,
@@ -244,9 +244,9 @@ namespace Ideahub.Tests
             // Arrange
             var idea = new Idea { Id = 8, Title = "BC Parent" };
             _context.Ideas.Add(idea);
-            var bc = new BusinessCase 
-            { 
-                IdeaId = 8, 
+            var bc = new BusinessCase
+            {
+                IdeaId = 8,
                 ExpectedBenefits = "Great stuff",
                 DecisionDate = DateOnly.FromDateTime(DateTime.Now)
             };
@@ -268,9 +268,9 @@ namespace Ideahub.Tests
             // Arrange
             var idea = new Idea { Id = 9, Title = "SD Parent" };
             _context.Ideas.Add(idea);
-            var sd = new ScoringDimensions 
-            { 
-                IdeaId = 9, 
+            var sd = new ScoringDimensions
+            {
+                IdeaId = 9,
                 Score = 88.5f,
                 ReviewerComments = "Looks good"
             };

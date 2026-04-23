@@ -44,10 +44,10 @@ namespace Ideahub.Tests
             // Mock Service Scope for background tasks
             var mockScope = new Mock<IServiceScope>();
             var mockServiceProvider = new Mock<IServiceProvider>();
-            
+
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mockScopeFactory.Setup(x => x.CreateScope()).Returns(mockScope.Object);
-            
+
             // Register scoped services
             mockServiceProvider.Setup(x => x.GetService(typeof(UserManager<IdeahubUser>))).Returns(_mockUserManager.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IEmailSender))).Returns(_mockEmailSender.Object);
@@ -80,8 +80,8 @@ namespace Ideahub.Tests
         public async Task GetCommitteeMembers_AppShouldReturnOnlyUsersInRole()
         {
             // Arrange
-            var committeeUsers = new List<IdeahubUser> 
-            { 
+            var committeeUsers = new List<IdeahubUser>
+            {
                 new() { Id = "u1", Email = "c1@test.com" },
                 new() { Id = "u2", Email = "c2@test.com" }
             };
@@ -95,7 +95,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             var data = Assert.IsAssignableFrom<System.Collections.IEnumerable>(response.Data);
-            
+
             int count = 0;
             foreach (var item in data) count++;
             Assert.Equal(2, count);
@@ -131,7 +131,7 @@ namespace Ideahub.Tests
             // Assert
             Assert.IsType<OkObjectResult>(result);
             _mockUserManager.Verify(m => m.AddToRoleAsync(targetUser, RoleConstants.CommitteeMember), Times.Once);
-            
+
             // Wait for the signal (timeout after 2s to prevent hanging)
             await Task.WhenAny(tcs.Task, Task.Delay(2000));
             _mockScopeFactory.Verify(f => f.CreateScope(), Times.AtLeastOnce);
@@ -174,7 +174,7 @@ namespace Ideahub.Tests
             // Arrange
             var targetEmail = "new@test.com";
             var targetUser = new IdeahubUser { Id = "t1", Email = targetEmail };
-            
+
             _mockUserManager.Setup(m => m.FindByEmailAsync(targetEmail)).ReturnsAsync(targetUser);
             _mockUserManager.Setup(m => m.AddToRoleAsync(targetUser, RoleConstants.CommitteeMember)).ReturnsAsync(IdentityResult.Success);
             _mockUserManager.Setup(m => m.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync((IdeahubUser)null!);
@@ -189,7 +189,7 @@ namespace Ideahub.Tests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            
+
             // Wait for the signal
             await Task.WhenAny(tcs.Task, Task.Delay(2000));
             _mockScopeFactory.Verify(f => f.CreateScope(), Times.AtLeastOnce);

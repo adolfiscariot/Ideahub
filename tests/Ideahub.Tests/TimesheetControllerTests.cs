@@ -55,7 +55,7 @@ namespace Ideahub.Tests
         {
             var user = new IdeahubUser { Id = _testUserId, UserName = "testuser", Email = _testUserEmail, DisplayName = "Test User" };
             var otherUser = new IdeahubUser { Id = "other-user", UserName = "other", Email = "other@test.com", DisplayName = "Other User" };
-            
+
             var group = new Group { Id = 1, Name = "Test Group" };
             var project = new Project { Id = 1, Title = "Main Project", GroupId = 1, OverseenByUserId = "other-user" };
             var task = new ProjectTask { Id = 1, Project = project, Title = "Main Task" };
@@ -65,7 +65,7 @@ namespace Ideahub.Tests
             _context.Projects.Add(project);
             _context.ProjectTasks.Add(task);
             await _context.SaveChangesAsync();
-            
+
             // Clear tracker to ensure fresh data retrieval
             _context.ChangeTracker.Clear();
         }
@@ -265,7 +265,7 @@ namespace Ideahub.Tests
             await SeedBasicData();
             var project2 = new Project { Id = 2, Title = "Other Proj", GroupId = 1, OverseenByUserId = "other" };
             var task2 = new ProjectTask { Id = 2, ProjectId = 2, Title = "Other task" };
-            
+
             _context.Projects.Add(project2);
             _context.ProjectTasks.Add(task2);
             _context.Timesheets.AddRange(

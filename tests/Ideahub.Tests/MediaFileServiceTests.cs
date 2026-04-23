@@ -34,7 +34,7 @@ namespace Ideahub.Tests
             var content = "Hello World";
             var fileMock = new Mock<IFormFile>();
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(content));
-            
+
             fileMock.Setup(_ => _.FileName).Returns(fileName);
             fileMock.Setup(_ => _.Length).Returns(ms.Length);
             fileMock.Setup(_ => _.OpenReadStream()).Returns(ms);
@@ -87,7 +87,7 @@ namespace Ideahub.Tests
             Assert.Contains("media/SecretFolder/", relativePath);
             var expectedPath = Path.Combine(_storagePath, "SecretFolder");
             Assert.True(Directory.Exists(expectedPath));
-            
+
             // Should NOT have created a folder two levels up
             var forbiddenPath = Path.GetFullPath(Path.Combine(_storagePath, "..", "..", "SecretFolder"));
             Assert.False(Directory.Exists(forbiddenPath));
@@ -101,10 +101,10 @@ namespace Ideahub.Tests
             var fileName = "temp.txt";
             var dirPath = Path.Combine(_storagePath, subFolder);
             Directory.CreateDirectory(dirPath);
-            
+
             var fullPath = Path.Combine(dirPath, fileName);
             File.WriteAllText(fullPath, "content");
-            
+
             var relativePath = $"media/{subFolder}/{fileName}";
 
             // Act
