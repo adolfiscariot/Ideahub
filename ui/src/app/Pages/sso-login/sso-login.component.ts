@@ -41,23 +41,20 @@ export class SsoLoginComponent implements OnInit {
       return;
     }
 
-    // Security: Clear the token from the URL and browser history immediately
+    // Clear the token from the URL and browser history immediately
     history.replaceState({}, '', window.location.pathname);
 
     const ssoUrl = `${environment.apiUrl}/auth/sso-login`;
 
-    this.http.post<ApiResponse<AuthData>>(ssoUrl, { token })
+    this.http.post<ApiResponse<AuthData>>(ssoUrl, { token }, { withCredentials: true })
       .subscribe({
         next: (response) => {
-          // console.log('SSO: Backend responded!');
           const isSuccessful = response.success || response.status;
 
           if (isSuccessful && response.data?.accessToken) {
             console.log('SSO: Success! Passing data to AuthService...');
 
             this.authService.setAuthData(response.data);
-
-            console.log('SSO: State updated. Attempting redirect to /home...');
 
             this.router.navigate(['/home']).then(navigated => {
               if (navigated) {

@@ -564,14 +564,19 @@ public class AuthController : ControllerBase
         var ssoIssuer = _configuration["Jwt:SsoIssuer"];
         var ssoAudience = _configuration["Jwt:SsoAudience"];
 
-        if (string.IsNullOrEmpty(ssoSecretHex))
-            return StatusCode(500, ApiResponse.Fail("SSO not configured on server"));
+        if (string.IsNullOrEmpty(ssoSecretHex) || string.IsNullOrEmpty(ssoIssuer) || string.IsNullOrEmpty(ssoAudience))
+        {
+            _logger.LogError("SSO Configuration is missing one or more required fields (Secret, Issuer, or Audience).");
+            return StatusCode(500, ApiResponse.Fail("SSO is not properly configured on the server."));
+        }
         
 
         try
         {
             var key = JwtHexToBytes.FromHexToBytes(ssoSecretHex);
             var tokenHandler = new JwtSecurityTokenHandler();
+            tokenHandler.InboundClaimTypeMap.Clear(); // Prevent C# from renaming "email" to a schema URL
+
         
             // Validate token from the Intranet
             var principal = tokenHandler.ValidateToken(dto.Token, new TokenValidationParameters
@@ -614,6 +619,15 @@ public class AuthController : ControllerBase
                     LastLoginAt = DateTime.UtcNow
                 };
                 
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogWarning("SSO user creation failed for {Email}", email);
+                    return BadRequest(ApiResponse.Fail(
+                        "User creation failed",
+                        createResult.Errors.Select(e => e.Description).ToList()));
+                }
+
                 var roleResult = await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
                 if (!roleResult.Succeeded)
                 {
