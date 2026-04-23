@@ -49,7 +49,7 @@ export class SsoLoginComponent implements OnInit {
     this.http.post<ApiResponse<AuthData>>(ssoUrl, { token })
       .subscribe({
         next: (response) => {
-          console.log('SSO: Backend responded!', response);
+          // console.log('SSO: Backend responded!');
           const isSuccessful = response.success || response.status;
 
           if (isSuccessful && response.data?.accessToken) {
@@ -67,7 +67,7 @@ export class SsoLoginComponent implements OnInit {
               }
             });
           } else {
-            console.error('SSO: Response missing success/data', response);
+            console.error('SSO: Response missing success/data');
             this.errorMsg = 'Auth failed: Response structure mismatch.';
           }
         },
