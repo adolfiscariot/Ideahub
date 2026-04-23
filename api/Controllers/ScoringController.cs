@@ -37,7 +37,8 @@ public class ScoringController : ControllerBase
         var idea = await _context.Ideas.FirstOrDefaultAsync(i => i.Id == ideaId);
 
         // Check if idea exists
-        if (idea == null){
+        if (idea == null)
+        {
             _logger.LogError("Idea not found");
             return NotFound(ApiResponse.Fail("Idea not found."));
         }
@@ -51,8 +52,9 @@ public class ScoringController : ControllerBase
         {
             var (score, reasoning) = await _scoringService.EvaluateAndStageIdeaAsync(idea);
 
-            return Ok(ApiResponse.Ok("Phase 1: AI Evaluation completed.", new { 
-                Score = score, 
+            return Ok(ApiResponse.Ok("Phase 1: AI Evaluation completed.", new
+            {
+                Score = score,
                 Reasoning = reasoning,
                 NextStage = idea.CurrentStage.ToString()
             }));
@@ -85,7 +87,7 @@ public class ScoringController : ControllerBase
             return BadRequest(ApiResponse.Fail("Phase 1 score threshold not met."));
 
         var businessCase = idea.BusinessCase ?? new BusinessCase { IdeaId = idea.Id };
-        
+
         // Map DTO to Model
         businessCase.ExpectedBenefits = dto.ExpectedBenefits;
         businessCase.ImpactScope = dto.ImpactScope;
@@ -123,7 +125,8 @@ public class ScoringController : ControllerBase
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Phase 2 scoring successful!");
-        return Ok(ApiResponse.Ok("Phase 2: Business Case submitted.", new { 
+        return Ok(ApiResponse.Ok("Phase 2: Business Case submitted.", new
+        {
             Verdict = businessCase.Verdict.ToString(),
             NextStage = idea.CurrentStage.ToString()
         }));
@@ -157,12 +160,14 @@ public class ScoringController : ControllerBase
         if (idea == null)
             return NotFound(ApiResponse.Fail("Idea not found."));
 
-        if (idea.CurrentStage != ScoringStage.ScoringDimensions){
+        if (idea.CurrentStage != ScoringStage.ScoringDimensions)
+        {
             _logger.LogError("Idea is not in the scoring dimensions stage");
             return BadRequest(ApiResponse.Fail("Idea is not in the Scoring Dimensions stage. Please ensure the Business Case was Approved."));
         }
 
-        if (idea.BusinessCase == null || idea.BusinessCase.Verdict != Verdict.Approved){
+        if (idea.BusinessCase == null || idea.BusinessCase.Verdict != Verdict.Approved)
+        {
             _logger.LogError("Business case verdict must be approved");
             return BadRequest(ApiResponse.Fail("Business Case Verdict must be Approved to enter Phase 3."));
         }

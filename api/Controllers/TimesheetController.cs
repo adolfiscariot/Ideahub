@@ -141,10 +141,10 @@ public class TimesheetController : ControllerBase
 
             var createdIds = timesheets.Select(t => t.Id).ToList();
 
-            return Ok(ApiResponse.Ok($"{timesheets.Count} work logs created successfully, {invalidRows.Count} skipped", new 
-            { 
-                createdIds, 
-                invalidRows 
+            return Ok(ApiResponse.Ok($"{timesheets.Count} work logs created successfully, {invalidRows.Count} skipped", new
+            {
+                createdIds,
+                invalidRows
             }));
         }
         catch (Exception ex)
@@ -382,7 +382,8 @@ public class TimesheetController : ControllerBase
     [HttpGet("relevant-tasks")]
     public async Task<IActionResult> GetMyRelevantTasks([FromQuery] int projectId)
     {
-        try {
+        try
+        {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized(ApiResponse.Fail("User not authenticated"));
 
@@ -399,10 +400,11 @@ public class TimesheetController : ControllerBase
                     !ta.ProjectTask.IsDeleted &&
                     !ta.ProjectTask.IsCompleted
                 )
-                .Select(ta => new {ta.ProjectTask.Id, ta.ProjectTask.Title})
+                .Select(ta => new { ta.ProjectTask.Id, ta.ProjectTask.Title })
                 .ToListAsync();
 
-            return Ok(ApiResponse.Ok("Tasks retrieved", allProjectTasks)); }
+            return Ok(ApiResponse.Ok("Tasks retrieved", allProjectTasks));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to fetch relevant tasks for project {ProjectId}", projectId);

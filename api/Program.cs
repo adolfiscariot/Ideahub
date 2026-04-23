@@ -59,7 +59,7 @@ var key = JwtHexToBytes.FromHexToBytes(JwtKey);
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-builder.Services.AddAuthentication(options => 
+builder.Services.AddAuthentication(options =>
 {
     //Use Jwt as default token for authentication & challenges
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -88,28 +88,28 @@ builder.Services.AddAuthentication(options =>
             RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         };
         options.Events = new JwtBearerEvents
-{
-    OnMessageReceived = context =>
-    {
-
-        var path = context.HttpContext.Request.Path;
-        if (path.StartsWithSegments("/hubs/notifications"))
         {
-            var accessToken = context.Request.Query["access_token"];
-            if (!string.IsNullOrEmpty(accessToken))
+            OnMessageReceived = context =>
             {
-                context.Token = accessToken;
-            }
-        }
 
-        return Task.CompletedTask;
-    },
-    OnAuthenticationFailed = ctx =>
-    {
-        Console.WriteLine($"Auth failed: {ctx.Exception}");
-        return Task.CompletedTask;
-    }
-};
+                var path = context.HttpContext.Request.Path;
+                if (path.StartsWithSegments("/hubs/notifications"))
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        context.Token = accessToken;
+                    }
+                }
+
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"Auth failed: {ctx.Exception}");
+                return Task.CompletedTask;
+            }
+        };
 
     });
 
@@ -122,7 +122,7 @@ builder.Services.AddAuthorization(options =>
 
     //GroupAdmin (&SuperAdmin) can access stuff
     options.AddPolicy("GroupAdminOnly", policy =>
-        policy.RequireAssertion(context => 
+        policy.RequireAssertion(context =>
             context.User.IsInRole(RoleConstants.SuperAdmin) ||
             context.User.IsInRole(RoleConstants.GroupAdmin)
         )
@@ -261,12 +261,12 @@ while (retries > 0)
 
 // Seed roles after migrations
 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-var roles = new[] 
-{ 
-    RoleConstants.SuperAdmin, 
-    RoleConstants.GroupAdmin, 
-    RoleConstants.RegularUser, 
-    RoleConstants.CommitteeMember 
+var roles = new[]
+{
+    RoleConstants.SuperAdmin,
+    RoleConstants.GroupAdmin,
+    RoleConstants.RegularUser,
+    RoleConstants.CommitteeMember
 };
 foreach (var role in roles)
 {
@@ -291,8 +291,9 @@ if (superAdminUser != null && !await userManager.IsInRoleAsync(superAdminUser, R
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
-} else
-{ 
+}
+else
+{
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }

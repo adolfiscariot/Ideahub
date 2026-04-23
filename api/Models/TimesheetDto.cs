@@ -29,7 +29,7 @@ public class TimesheetDto
     public string? BlockerDescription { get; set; }
 
     public BlockerSeverity? BlockerSeverity { get; set; }
-    
+
     public DateTime? CreatedAt { get; set; }
     public int? MediaCount { get; set; }
     public string? UserId { get; set; }

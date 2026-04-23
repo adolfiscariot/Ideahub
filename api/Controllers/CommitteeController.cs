@@ -53,7 +53,8 @@ public class CommitteeController : ControllerBase
 
         var result = await _userManager.AddToRoleAsync(user, RoleConstants.CommitteeMember);
 
-        if (!result.Succeeded){
+        if (!result.Succeeded)
+        {
             _logger.LogError("Failed to add user to committee");
             return BadRequest(ApiResponse.Fail("Failed to add user to committee", result.Errors.Select(e => e.Description).ToList()));
         }
@@ -82,7 +83,7 @@ public class CommitteeController : ControllerBase
 
             var name = user.DisplayName ?? user.UserName;
             var subject = "🏆 Welcome to the Ideahub Committee!";
-            
+
             var emailBody = $@"
                 <div style=""font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; padding: 40px; color: #1e293b;"">
                   <div style=""max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;"">

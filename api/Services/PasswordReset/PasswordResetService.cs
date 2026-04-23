@@ -17,7 +17,7 @@ public class PasswordResetService : IPasswordResetService
     private const int CodeLength = 12;
 
     private static readonly char[] AllowedChars =
-        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".ToCharArray(); 
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".ToCharArray();
 
     public PasswordResetService(
         IdeahubDbContext context,

@@ -29,7 +29,7 @@ public class EmailSender : IEmailSender
     {
         //SendGrid configs
         var ApiKey = _settings.ApiKey;
-        var SenderEmail = new EmailAddress(_settings.SenderEmail, _settings.SenderName);        
+        var SenderEmail = new EmailAddress(_settings.SenderEmail, _settings.SenderName);
         var Client = new SendGridClient(ApiKey);
         var to = new EmailAddress(toEmail);
         var Message = MailHelper.CreateSingleEmail(SenderEmail, to, subject, message, message);
@@ -42,7 +42,7 @@ public class EmailSender : IEmailSender
         else
         {
             _logger.LogInformation($"Email successfully sent to {toEmail}. Status: {response.StatusCode}");
-          // _logger.LogInformation($"Email successfully sent");
+            // _logger.LogInformation($"Email successfully sent");
         }
     }
 }

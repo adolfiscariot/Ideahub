@@ -7,6 +7,6 @@ namespace api.Models;
 
 public class CommentsDto
 {
-    [Column (TypeName = "text")]
-    public string Content {get; set;} = string.Empty;
+    [Column(TypeName = "text")]
+    public string Content { get; set; } = string.Empty;
 }

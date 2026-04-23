@@ -7,54 +7,54 @@ namespace api.Models;
 
 public class Project
 {
-    public int Id {get; set;}
+    public int Id { get; set; }
 
     [Required]
-    [MaxLength (256)]
-    public string Title {get; set;} = string.Empty;
+    [MaxLength(256)]
+    public string Title { get; set; } = string.Empty;
 
     [Required]
-    [Column (TypeName = "text")]
-    public string Description {get; set;} = string.Empty;
+    [Column(TypeName = "text")]
+    public string Description { get; set; } = string.Empty;
 
     [Required]
-    public ProjectStatus Status {get; set;} = ProjectStatus.Planning;
+    public ProjectStatus Status { get; set; } = ProjectStatus.Planning;
 
     [Required]
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [DataType(DataType.DateTime)]
-    public DateTime? EndedAt {get; set;}
+    public DateTime? EndedAt { get; set; }
 
-    public bool IsDeleted {get; set;} = false;
-    public DateTime? DeletedAt {get; set;}
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime UpdatedAt {get; set;} = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     [Required]
-    [ForeignKey ("CreatedByUser")]
-    public string CreatedByUserId {get; set;} = string.Empty;
+    [ForeignKey("CreatedByUser")]
+    public string CreatedByUserId { get; set; } = string.Empty;
 
     [Required]
-    [ForeignKey ("OverseenByUser")]
-    public string OverseenByUserId {get; set;} = string.Empty;
+    [ForeignKey("OverseenByUser")]
+    public string OverseenByUserId { get; set; } = string.Empty;
 
     [Required]
-    [ForeignKey ("Idea")]
-    public int IdeaId {get; set;}
+    [ForeignKey("Idea")]
+    public int IdeaId { get; set; }
 
     [Required]
-    [ForeignKey ("Group")]
-    public int GroupId {get; set;}
+    [ForeignKey("Group")]
+    public int GroupId { get; set; }
 
 
     //Navigation Properties
-    public Idea Idea {get; set;} = null!;
-    public Group Group {get; set;} = null!;
-    public IdeahubUser CreatedByUser {get; set;} = null!;
-    public IdeahubUser OverseenByUser {get; set;} = null!;
+    public Idea Idea { get; set; } = null!;
+    public Group Group { get; set; } = null!;
+    public IdeahubUser CreatedByUser { get; set; } = null!;
+    public IdeahubUser OverseenByUser { get; set; } = null!;
     public ICollection<Media> Media { get; set; } = new List<Media>();
     public ICollection<ProjectTask> Tasks { get; set; } = new List<ProjectTask>();
 
