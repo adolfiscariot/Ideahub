@@ -7,7 +7,7 @@ describe('ToastService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ToastService]
+      providers: [ToastService],
     });
     service = TestBed.inject(ToastService);
   });
@@ -19,7 +19,7 @@ describe('ToastService', () => {
   describe('show()', () => {
     it('should add a toast to the stream', () => {
       let currentToasts: Toast[] = [];
-      const sub = service.toasts$.subscribe(t => currentToasts = t);
+      const sub = service.toasts$.subscribe((t) => (currentToasts = t));
 
       service.show('Hello world', 'success');
 
@@ -42,7 +42,7 @@ describe('ToastService', () => {
     it('should remove a toast manually', () => {
       const id = service.show('Delete me');
       let currentToasts: Toast[] = [];
-      const sub = service.toasts$.subscribe(t => currentToasts = t);
+      const sub = service.toasts$.subscribe((t) => (currentToasts = t));
 
       expect(currentToasts.length).toBe(1);
       service.remove(id);
@@ -55,7 +55,7 @@ describe('ToastService', () => {
   describe('Auto-removal (fakeAsync)', () => {
     it('should remove toast automatically after duration', fakeAsync(() => {
       let currentToasts: Toast[] = [];
-      const sub = service.toasts$.subscribe(t => currentToasts = t);
+      const sub = service.toasts$.subscribe((t) => (currentToasts = t));
 
       service.show('Temp toast', 'info', 1000);
       expect(currentToasts.length).toBe(1);
@@ -72,12 +72,12 @@ describe('ToastService', () => {
     }));
 
     it('should NOT remove toast automatically if duration is 0', fakeAsync(() => {
-       let currentToasts: Toast[] = [];
-       service.toasts$.subscribe(t => currentToasts = t);
+      let currentToasts: Toast[] = [];
+      service.toasts$.subscribe((t) => (currentToasts = t));
 
-       service.show('Infinite', 'warning', 0);
-       tick(10000); 
-       expect(currentToasts.length).toBe(1);
+      service.show('Infinite', 'warning', 0);
+      tick(10000);
+      expect(currentToasts.length).toBe(1);
     }));
   });
 
@@ -85,7 +85,7 @@ describe('ToastService', () => {
     it('should clear all active timeouts', fakeAsync(() => {
       service.show('Cleanup', 'info', 1000);
       service.ngOnDestroy();
-      
+
       tick(2000);
       // If it still cleaned up, the coverage/logic for timeouts would be accessed
       // Since it's a private map, we verify it doesn't crash

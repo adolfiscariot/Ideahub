@@ -7,7 +7,7 @@ import { NgIcon } from '@ng-icons/core';
   standalone: true,
   imports: [CommonModule, NgIcon],
   templateUrl: './personal-stat-card.component.html',
-  styleUrl: './personal-stat-card.component.scss'
+  styleUrl: './personal-stat-card.component.scss',
 })
 export class PersonalStatCardComponent {
   @Input() label = '';

@@ -1,49 +1,49 @@
 export interface MostVotedIdea {
-    id: number;
-    title: string;
-    proposedSolution: string;
-    author: string;
-    groupName: string;
-    voteCount: number;
-    groupId: number;
-    isMember: boolean;
+  id: number;
+  title: string;
+  proposedSolution: string;
+  author: string;
+  groupName: string;
+  voteCount: number;
+  groupId: number;
+  isMember: boolean;
 }
 
 export interface TopContributor {
-    displayName: string;
-    email: string;
-    ideaCount: number;
+  displayName: string;
+  email: string;
+  ideaCount: number;
 }
 
 export interface PromotedIdea {
-    id: number;
-    title: string;
-    proposedSolution: string;
-    author: string;
-    groupName: string;
-    promotedDate: string;
-    projectId: number;
-    groupId?: number;
+  id: number;
+  title: string;
+  proposedSolution: string;
+  author: string;
+  groupName: string;
+  promotedDate: string;
+  projectId: number;
+  groupId?: number;
 }
 
 export interface IdeaStats {
-    total: number;
-    open: number;
-    promoted: number;
-    closed: number;
+  total: number;
+  open: number;
+  promoted: number;
+  closed: number;
 }
 
 export interface GroupEngagement {
-    id: number;
-    name: string;
-    ideaCount: number;
-    voteCount: number;
-    isMember: boolean;
+  id: number;
+  name: string;
+  ideaCount: number;
+  voteCount: number;
+  isMember: boolean;
 }
 
 export interface PersonalStats {
-    ideasCreated: number;
-    votesCast: number;
-    projectsInvolved: number;
-    groupsCreated: number;
+  ideasCreated: number;
+  votesCast: number;
+  projectsInvolved: number;
+  groupsCreated: number;
 }

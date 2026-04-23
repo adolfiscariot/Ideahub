@@ -1,104 +1,161 @@
 <div class="ideas-container" [class.split-view]="selectedIdea">
-
   <!-- Left Panel: Ideas List -->
   <div class="ideas-list-panel">
     <!-- Header with Members Section -->
     <header class="ideas-header">
       <div class="header-content">
         <div class="header-text">
-          <h1 class="page-title">{{ groupName || 'Loading group name...' }}</h1>
-          <p class="page-subtitle">Explore and collaborate on ideas within the group</p>
+          <h1 class="page-title">{{ groupName || "Loading group name..." }}</h1>
+          <p class="page-subtitle">
+            Explore and collaborate on ideas within the group
+          </p>
         </div>
 
         <div class="header-actions">
           <!-- Primary Action: Share Idea (Mobile Only) -->
           @if (!showShareModal) {
-          <app-buttons buttonStyleClass="btn-share-idea mobile-only-share" (click)="openShareModal()" [disabled]="false"
-            title="Share a new idea with the group">
-            ✚ Share Idea
-          </app-buttons>
+            <app-buttons
+              buttonStyleClass="btn-share-idea mobile-only-share"
+              (click)="openShareModal()"
+              [disabled]="false"
+              title="Share a new idea with the group"
+            >
+              ✚ Share Idea
+            </app-buttons>
           }
           <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
             <span class="dots-icon">⋮</span>
           </button>
           <!-- Secondary Actions (Desktop: Row, Mobile: Dropdown) -->
           <div class="secondary-actions" [class.show-mobile]="showMobileMenu">
-
-            <app-buttons [buttonText]="'ⓘ'" [buttonStyleClass]="'btn-info-icon'" title="Ideas Guideline"
-              (click)="displayIdeaInfo(); closeMobileMenu()">
+            <app-buttons
+              [buttonText]="'ⓘ'"
+              [buttonStyleClass]="'btn-info-icon'"
+              title="Ideas Guideline"
+              (click)="displayIdeaInfo(); closeMobileMenu()"
+            >
             </app-buttons>
 
             <!-- Members Section -->
-            <div class="members-section" tabindex="0" role="button" (click)="openMembersModal(); closeMobileMenu()"
+            <div
+              class="members-section"
+              tabindex="0"
+              role="button"
+              (click)="openMembersModal(); closeMobileMenu()"
               (keydown.enter)="openMembersModal(); closeMobileMenu()"
-              (keydown.space)="openMembersModal(); closeMobileMenu()">
+              (keydown.space)="openMembersModal(); closeMobileMenu()"
+            >
               <div class="members-icon">👥</div>
               <div class="members-info">
-                <div class="members-count">{{ membersCount || 0 }} member (s)</div>
+                <div class="members-count">
+                  {{ membersCount || 0 }} member (s)
+                </div>
                 <div class="members-label">Click to view</div>
               </div>
             </div>
             <!-- View Requests Button (only for group creator) -->
             @if (isGroupCreator()) {
-            <app-buttons [buttonText]="'👁️ View Requests'" buttonStyleClass="btn-view-requests"
-              (click)="viewRequests(groupId); closeMobileMenu()" [disabled]="false" title="View pending join requests">
-            </app-buttons>
+              <app-buttons
+                [buttonText]="'👁️ View Requests'"
+                buttonStyleClass="btn-view-requests"
+                (click)="viewRequests(groupId); closeMobileMenu()"
+                [disabled]="false"
+                title="View pending join requests"
+              >
+              </app-buttons>
             }
             <!-- Share Idea (Desktop Only) -->
             @if (!showShareModal) {
-            <app-buttons buttonStyleClass="btn-share-idea desktop-only-share" (click)="openShareModal()"
-              [disabled]="false" title="Share a new idea with the group">
-              ✚ Share Idea
-            </app-buttons>
+              <app-buttons
+                buttonStyleClass="btn-share-idea desktop-only-share"
+                (click)="openShareModal()"
+                [disabled]="false"
+                title="Share a new idea with the group"
+              >
+                ✚ Share Idea
+              </app-buttons>
             }
 
-            <app-buttons buttonStyleClass="btn-leave-group" (click)="confirmLeaveGroup(); closeMobileMenu()"
-              [disabled]="false" title="Leave this group">
+            <app-buttons
+              buttonStyleClass="btn-leave-group"
+              (click)="confirmLeaveGroup(); closeMobileMenu()"
+              [disabled]="false"
+              title="Leave this group"
+            >
               🚪 Leave Group
             </app-buttons>
-
           </div>
 
           <!-- Requests Modal -->
           @if (showRequestsModal) {
-          <div class="modal-backdrop" (click)="closeRequestsModal()" tabindex="0" role="button"
-            (keydown.enter)="closeRequestsModal()">
-            <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
-              role="dialog" aria-modal="true" tabindex="-1">
-              <h3>Pending Requests ({{ pendingRequests.length }})</h3>
-              @if (loadingRequests) {
-              <div>Loading...</div>
-              }
-              @if (errorRequests) {
-              <div>{{ errorRequests }}</div>
-              }
-              @if (!loadingRequests && !errorRequests && pendingRequests.length === 0) {
-              <div class="no-requests-message">
-                <p>No pending requests</p>
-              </div>
-              }
-              @if (!loadingRequests && !errorRequests && pendingRequests.length > 0) {
-              <ul class="request-list">
-                @for (req of pendingRequests; track req) {
-                <li class="request-item">
-                  <span><b>Email: </b> {{ req.email }}</span>
-                  <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
-                    (click)="acceptRequest(groupId, req.email)">
-                  </app-buttons>
-                  <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
-                    (click)="rejectRequest(groupId, req.email)">
-                  </app-buttons>
-                </li>
+            <div
+              class="modal-backdrop"
+              (click)="closeRequestsModal()"
+              tabindex="0"
+              role="button"
+              (keydown.enter)="closeRequestsModal()"
+            >
+              <div
+                class="modal-content"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                role="dialog"
+                aria-modal="true"
+                tabindex="-1"
+              >
+                <h3>Pending Requests ({{ pendingRequests.length }})</h3>
+                @if (loadingRequests) {
+                  <div>Loading...</div>
                 }
-              </ul>
-              }
-              <app-buttons [buttonText]="'Close'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
-                (click)="closeRequestsModal()">
-              </app-buttons>
+                @if (errorRequests) {
+                  <div>{{ errorRequests }}</div>
+                }
+                @if (
+                  !loadingRequests &&
+                  !errorRequests &&
+                  pendingRequests.length === 0
+                ) {
+                  <div class="no-requests-message">
+                    <p>No pending requests</p>
+                  </div>
+                }
+                @if (
+                  !loadingRequests &&
+                  !errorRequests &&
+                  pendingRequests.length > 0
+                ) {
+                  <ul class="request-list">
+                    @for (req of pendingRequests; track req) {
+                      <li class="request-item">
+                        <span><b>Email: </b> {{ req.email }}</span>
+                        <app-buttons
+                          [buttonText]="'Accept'"
+                          [buttonStyleClass]="'btn-accept'"
+                          [buttonType]="'button'"
+                          (click)="acceptRequest(groupId, req.email)"
+                        >
+                        </app-buttons>
+                        <app-buttons
+                          [buttonText]="'Reject'"
+                          [buttonStyleClass]="'btn-reject'"
+                          [buttonType]="'button'"
+                          (click)="rejectRequest(groupId, req.email)"
+                        >
+                        </app-buttons>
+                      </li>
+                    }
+                  </ul>
+                }
+                <app-buttons
+                  [buttonText]="'Close'"
+                  [buttonStyleClass]="'btn-promote'"
+                  [buttonType]="'button'"
+                  (click)="closeRequestsModal()"
+                >
+                </app-buttons>
+              </div>
             </div>
-          </div>
           }
-
         </div>
       </div>
     </header>
@@ -111,493 +168,759 @@
           <span class="sort-label">Sort by:</span>
           <div class="sort-options">
             <!-- Sort Option: Top Voted (Fixed) -->
-            <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')"
-              (click)="setSortMode('top')" [disabled]="false" title="Sort ideas by most votes">
+            <app-buttons
+              [buttonStyleClass]="
+                'btn-sort ' + (sortMode === 'top' ? 'btn-sort-active' : '')
+              "
+              (click)="setSortMode('top')"
+              [disabled]="false"
+              title="Sort ideas by most votes"
+            >
               Top Voted
             </app-buttons>
 
             <div class="sort-separator">|</div>
 
             <!-- Sort Option: Newest (Fixed) -->
-            <app-buttons [buttonStyleClass]="'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')"
-              (click)="setSortMode('newest')" [disabled]="false" title="Sort ideas by newest first">
+            <app-buttons
+              [buttonStyleClass]="
+                'btn-sort ' + (sortMode === 'newest' ? 'btn-sort-active' : '')
+              "
+              (click)="setSortMode('newest')"
+              [disabled]="false"
+              title="Sort ideas by newest first"
+            >
               Newest
             </app-buttons>
           </div>
         </div>
 
         <!-- View Closed Ideas Button -->
-        <app-buttons [buttonText]="showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'"
+        <app-buttons
+          [buttonText]="
+            showClosedIdeas ? '👁️ Hide Closed Ideas' : '📋 View Closed Ideas'
+          "
           [buttonStyleClass]="
-        (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') + ' btn-promote'
-      " (click)="toggleViewClosedIdeas()" [disabled]="false"
-          [title]="showClosedIdeas ? 'Click to view open ideas' : 'Click to view closed ideas'">
+            (showClosedIdeas ? 'btn-viewing-closed' : 'btn-view-closed') +
+            ' btn-promote'
+          "
+          (click)="toggleViewClosedIdeas()"
+          [disabled]="false"
+          [title]="
+            showClosedIdeas
+              ? 'Click to view open ideas'
+              : 'Click to view closed ideas'
+          "
+        >
         </app-buttons>
-
 
         <div class="filter-container" #dropdown>
           <div class="filter-dropdown">
-            <div class="dropdown-header" tabindex="0" role="button" (click)="toggleDropdown()"
-              (keydown.enter)="toggleDropdown()" (keydown.space)="toggleDropdown()">
-              <span>{{ selectedOptionLabel || 'All Categories' }}</span>
+            <div
+              class="dropdown-header"
+              tabindex="0"
+              role="button"
+              (click)="toggleDropdown()"
+              (keydown.enter)="toggleDropdown()"
+              (keydown.space)="toggleDropdown()"
+            >
+              <span>{{ selectedOptionLabel || "All Categories" }}</span>
               <span class="dropdown-arrow">▼</span>
             </div>
 
             @if (isDropdownOpen) {
-            <div class="dropdown-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"
-              role="menu" tabindex="-1">
-              <!-- All Categories -->
-              <div class="filter-option">
-                <input type="radio" id="all_categories" name="all"
-                  [checked]="!selectedType && !selectedDomain && !selectedImpact" (change)="clearAllCategories()">
-                <label for="all_categories">All Categories</label>
+              <div
+                class="dropdown-content"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()"
+                role="menu"
+                tabindex="-1"
+              >
+                <!-- All Categories -->
+                <div class="filter-option">
+                  <input
+                    type="radio"
+                    id="all_categories"
+                    name="all"
+                    [checked]="
+                      !selectedType && !selectedDomain && !selectedImpact
+                    "
+                    (change)="clearAllCategories()"
+                  />
+                  <label for="all_categories">All Categories</label>
+                </div>
+                <!-- TYPE -->
+                <div class="filter-section">
+                  <div class="section-header">TYPE</div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="type-new"
+                      name="type"
+                      value="new"
+                      [(ngModel)]="selectedType"
+                      (change)="selectCategory('type', 'new')"
+                    />
+                    <label for="type-new">New Ideas</label>
+                  </div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="type-prod-improvement"
+                      name="type"
+                      value="current_process_improvement"
+                      [(ngModel)]="selectedType"
+                      (change)="
+                        selectCategory('type', 'current_process_improvement')
+                      "
+                    />
+                    <label for="type-prod-improvement"
+                      >Process Improvement</label
+                    >
+                  </div>
+                </div>
+                <!-- DOMAIN -->
+                <div class="filter-section">
+                  <div class="section-header">DOMAIN</div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="tech"
+                      name="domain"
+                      value="tech"
+                      [(ngModel)]="selectedDomain"
+                      (change)="selectCategory('domain', 'tech')"
+                    />
+                    <label for="tech">Tech</label>
+                  </div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="non_tech"
+                      name="domain"
+                      value="non_tech"
+                      [(ngModel)]="selectedDomain"
+                      (change)="selectCategory('domain', 'non_tech')"
+                    />
+                    <label for="non_tech">Non-Tech</label>
+                  </div>
+                </div>
+                <!-- IMPACT -->
+                <div class="filter-section">
+                  <div class="section-header">IMPACT</div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="culture"
+                      name="impact"
+                      value="workplace_culture"
+                      [(ngModel)]="selectedImpact"
+                      (change)="selectCategory('impact', 'workplace_culture')"
+                    />
+                    <label for="culture">Workplace Culture</label>
+                  </div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="financial"
+                      name="impact"
+                      value="financial"
+                      [(ngModel)]="selectedImpact"
+                      (change)="selectCategory('impact', 'financial')"
+                    />
+                    <label for="financial">Financial</label>
+                  </div>
+                  <div class="filter-option">
+                    <input
+                      type="radio"
+                      id="productivity"
+                      name="impact"
+                      value="productivity"
+                      [(ngModel)]="selectedImpact"
+                      (change)="selectCategory('impact', 'productivity')"
+                    />
+                    <label for="productivity">Productivity</label>
+                  </div>
+                </div>
               </div>
-              <!-- TYPE -->
-              <div class="filter-section">
-                <div class="section-header">TYPE</div>
-                <div class="filter-option">
-                  <input type="radio" id="type-new" name="type" value="new" [(ngModel)]="selectedType"
-                    (change)="selectCategory('type', 'new')">
-                  <label for="type-new">New Ideas</label>
-                </div>
-                <div class="filter-option">
-                  <input type="radio" id="type-prod-improvement" name="type" value="current_process_improvement"
-                    [(ngModel)]="selectedType" (change)="selectCategory('type', 'current_process_improvement')">
-                  <label for="type-prod-improvement">Process Improvement</label>
-                </div>
-              </div>
-              <!-- DOMAIN -->
-              <div class="filter-section">
-                <div class="section-header">DOMAIN</div>
-                <div class="filter-option">
-                  <input type="radio" id="tech" name="domain" value="tech" [(ngModel)]="selectedDomain"
-                    (change)="selectCategory('domain', 'tech')">
-                  <label for="tech">Tech</label>
-                </div>
-                <div class="filter-option">
-                  <input type="radio" id="non_tech" name="domain" value="non_tech" [(ngModel)]="selectedDomain"
-                    (change)="selectCategory('domain', 'non_tech')">
-                  <label for="non_tech">Non-Tech</label>
-                </div>
-              </div>
-              <!-- IMPACT -->
-              <div class="filter-section">
-                <div class="section-header">IMPACT</div>
-                <div class="filter-option">
-                  <input type="radio" id="culture" name="impact" value="workplace_culture" [(ngModel)]="selectedImpact"
-                    (change)="selectCategory('impact', 'workplace_culture')">
-                  <label for="culture">Workplace Culture</label>
-                </div>
-                <div class="filter-option">
-                  <input type="radio" id="financial" name="impact" value="financial" [(ngModel)]="selectedImpact"
-                    (change)="selectCategory('impact', 'financial')">
-                  <label for="financial">Financial</label>
-                </div>
-                <div class="filter-option">
-                  <input type="radio" id="productivity" name="impact" value="productivity" [(ngModel)]="selectedImpact"
-                    (change)="selectCategory('impact', 'productivity')">
-                  <label for="productivity">Productivity</label>
-                </div>
-              </div>
-            </div>
             }
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- Loading State -->
     @if (isLoading) {
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading ideas...</p>
-    </div>
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading ideas...</p>
+      </div>
     }
 
-    @if (ideas.length === 0 && (selectedType || selectedDomain || selectedImpact)) {
-    <div>
-      <p class="empty-filter">🔍 No ideas match these filters</p>
-      <p class="empty-filter-sub">Try adjusting your filters.</p>
-    </div>
+    @if (
+      ideas.length === 0 && (selectedType || selectedDomain || selectedImpact)
+    ) {
+      <div>
+        <p class="empty-filter">🔍 No ideas match these filters</p>
+        <p class="empty-filter-sub">Try adjusting your filters.</p>
+      </div>
     }
 
     <!-- No Ideas State (open ideas) -->
-    @if (!isLoading && ideas.length === 0 && !showShareModal && !selectedType && !selectedDomain && !selectedImpact &&
-    !showClosedIdeas) {
-    <div class="no-ideas">
-      <div class="no-ideas-content">
-        <div class="no-ideas-icon">💡</div>
-        <h3>No ideas yet</h3>
-        <p>Be the first to share an idea with the group!</p>
-        <app-buttons buttonStyleClass="btn-share-idea" (click)="openShareModal()" [disabled]="false"
-          title="Share a new idea with the group">
-          <span class="create-icon">+</span> Share Idea
-        </app-buttons>
-        <!-- Leave Group -->
+    @if (
+      !isLoading &&
+      ideas.length === 0 &&
+      !showShareModal &&
+      !selectedType &&
+      !selectedDomain &&
+      !selectedImpact &&
+      !showClosedIdeas
+    ) {
+      <div class="no-ideas">
+        <div class="no-ideas-content">
+          <div class="no-ideas-icon">💡</div>
+          <h3>No ideas yet</h3>
+          <p>Be the first to share an idea with the group!</p>
+          <app-buttons
+            buttonStyleClass="btn-share-idea"
+            (click)="openShareModal()"
+            [disabled]="false"
+            title="Share a new idea with the group"
+          >
+            <span class="create-icon">+</span> Share Idea
+          </app-buttons>
+          <!-- Leave Group -->
+        </div>
       </div>
-    </div>
     }
 
     <!-- No Closed Ideas State -->
     @if (!isLoading && ideas.length === 0 && showClosedIdeas) {
-    <div class="no-closed-ideas">
-      <div class="no-closed-ideas-content">
-        <div class="no-closed-ideas-icon">📭</div>
-        <h3>No closed ideas</h3>
-        <p>There are no closed ideas in this group yet.</p>
-        <app-buttons buttonStyleClass="btn-promote" (click)="toggleViewClosedIdeas()" [disabled]="false"
-          title="View open ideas">
-          ← Back to Open Ideas
-        </app-buttons>
+      <div class="no-closed-ideas">
+        <div class="no-closed-ideas-content">
+          <div class="no-closed-ideas-icon">📭</div>
+          <h3>No closed ideas</h3>
+          <p>There are no closed ideas in this group yet.</p>
+          <app-buttons
+            buttonStyleClass="btn-promote"
+            (click)="toggleViewClosedIdeas()"
+            [disabled]="false"
+            title="View open ideas"
+          >
+            ← Back to Open Ideas
+          </app-buttons>
+        </div>
       </div>
-    </div>
     }
 
     <!-- Ideas List -->
     @if (!isLoading && ideas.length > 0) {
-    <div class="ideas-list">
-      @for (idea of ideas; track trackById($index, idea); let last = $last) {
-      <!-- Idea Card -->
-      <div class="idea-card" [class.selected]="selectedIdea?.id === idea.id" [class.promoted]="idea.isPromotedToProject"
-        [class.closed-idea]="idea.status === 'Closed'" tabindex="0" role="button" (click)="selectIdea(idea)"
-        (keydown.enter)="selectIdea(idea)" (keydown.space)="selectIdea(idea)">
-        <div class="idea-card-header">
-          <div class="idea-header-top">
-            <h3 class="idea-title">{{ idea.Title }}
-              @if (idea.status === 'Closed') {
-              <span class="closed-badge-title">CLOSED</span>
+      <div class="ideas-list">
+        @for (idea of ideas; track trackById($index, idea); let last = $last) {
+          <!-- Idea Card -->
+          <div
+            class="idea-card"
+            [class.selected]="selectedIdea?.id === idea.id"
+            [class.promoted]="idea.isPromotedToProject"
+            [class.closed-idea]="idea.status === 'Closed'"
+            tabindex="0"
+            role="button"
+            (click)="selectIdea(idea)"
+            (keydown.enter)="selectIdea(idea)"
+            (keydown.space)="selectIdea(idea)"
+          >
+            <div class="idea-card-header">
+              <div class="idea-header-top">
+                <h3 class="idea-title">
+                  {{ idea.Title }}
+                  @if (idea.status === "Closed") {
+                    <span class="closed-badge-title">CLOSED</span>
+                  }
+                </h3>
+                @if (idea.isReadyForPromotion) {
+                  <span class="promotion-badge-title">
+                    ⭐ Ready for Promotion
+                  </span>
+                }
+              </div>
+              <div class="idea-card-meta">
+                <span class="idea-date">{{
+                  formatIdeaDate(idea.createdAt)
+                }}</span>
+              </div>
+            </div>
+            <p class="idea-description">
+              {{
+                idea.ProposedSolution.length > 150
+                  ? (idea.ProposedSolution | slice: 0 : 150) + "..."
+                  : idea.ProposedSolution
+              }}
+              @if (idea.ProposedSolution.length > 150) {
+                <span class="read-more">Read more</span>
               }
-            </h3>
-            @if (idea.isReadyForPromotion) {
-            <span class="promotion-badge-title"> ⭐ Ready for Promotion </span>
-            }
+            </p>
+            <!-- Idea Action Buttons-->
+            <div class="idea-footer-actions">
+              <!-- Vote button -->
+              <app-buttons
+                [buttonStyleClass]="
+                  'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')
+                "
+                (click)="
+                  $event.stopPropagation();
+                  idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)
+                "
+                [disabled]="isVoting || isUnvoting"
+                title="Vote for this idea"
+              >
+                👍
+                @if (isGroupCreator()) {
+                  <span class="vote-count">{{ idea.voteCount || 0 }}</span>
+                }
+              </app-buttons>
+              <!-- View voters button (left panel) -->
+              @if (
+                idea.status !== "Closed" &&
+                isGroupCreator() &&
+                (idea.voteCount || 0) > 0
+              ) {
+                <app-buttons
+                  buttonStyleClass="btn-view-voters"
+                  (click)="$event.stopPropagation(); onViewVoters(idea, $event)"
+                  [disabled]="false"
+                  title="View voters"
+                >
+                  👁️ Voters
+                </app-buttons>
+              }
+              <!-- Promoted badge -->
+              @if (idea.isPromotedToProject) {
+                <span class="promoted-badge-footer"> ✔ Promoted </span>
+              }
+              <!-- Review button (left panel) -->
+              @if (idea.status !== "Closed" && isCommitteeMember) {
+                <app-buttons
+                  buttonStyleClass="btn-primary"
+                  (click)="$event.stopPropagation(); navigateToScoring(idea)"
+                  [disabled]="false"
+                  title="Review & Score Idea"
+                >
+                  Review
+                </app-buttons>
+              }
+            </div>
           </div>
-          <div class="idea-card-meta">
-            <span class="idea-date">{{ formatIdeaDate(idea.createdAt) }}</span>
-          </div>
-        </div>
-        <p class="idea-description">
-          {{ idea.ProposedSolution.length > 150 ? (idea.ProposedSolution | slice:0:150) + '...' : idea.ProposedSolution
-          }}
-          @if (idea.ProposedSolution.length > 150) {
-          <span class="read-more">Read more</span>
-          }
-        </p>
-        <!-- Idea Action Buttons-->
-        <div class="idea-footer-actions">
-          <!-- Vote button -->
-          <app-buttons [buttonStyleClass]="'btn-vote ' + (idea.userVoted ? 'btn-vote-active' : '')"
-            (click)="$event.stopPropagation(); idea.userVoted ? onUnvote(idea, $event) : onVote(idea.id)"
-            [disabled]="isVoting || isUnvoting" title="Vote for this idea">
-            👍
-            @if (isGroupCreator()) {
-            <span class="vote-count">{{ idea.voteCount || 0 }}</span>
-            }
-          </app-buttons>
-          <!-- View voters button (left panel) -->
-          @if (idea.status !== 'Closed' && isGroupCreator() && (idea.voteCount || 0) > 0) {
-          <app-buttons buttonStyleClass="btn-view-voters" (click)="$event.stopPropagation(); onViewVoters(idea, $event)"
-            [disabled]="false" title="View voters">
-            👁️ Voters
-          </app-buttons>
-          }
-          <!-- Promoted badge -->
-          @if (idea.isPromotedToProject) {
-          <span class="promoted-badge-footer">
-            ✔ Promoted
-          </span>
-          }
-          <!-- Review button (left panel) -->
-          @if (idea.status !== 'Closed' && isCommitteeMember) {
-          <app-buttons buttonStyleClass="btn-primary" (click)="$event.stopPropagation(); navigateToScoring(idea)"
-            [disabled]="false" title="Review & Score Idea">
-            Review
-          </app-buttons>
-          }
-        </div>
+        }
       </div>
-      }
-    </div>
     }
   </div>
 
   <!-- Right Panel: Idea Details (Split View) -->
   @if (selectedIdea) {
-  <div class="idea-details-panel">
-    <div class="details-panel-header">
-      <h2 class="details-title">Idea Details</h2>
-      <!-- Add "Read Only" badge for closed ideas -->
-      @if (showClosedIdeas || selectedIdea.status === 'Closed') {
-      <div class="read-only-badge">
-        <span class="read-only-text">Read Only</span>
+    <div class="idea-details-panel">
+      <div class="details-panel-header">
+        <h2 class="details-title">Idea Details</h2>
+        <!-- Add "Read Only" badge for closed ideas -->
+        @if (showClosedIdeas || selectedIdea.status === "Closed") {
+          <div class="read-only-badge">
+            <span class="read-only-text">Read Only</span>
+          </div>
+        }
+        <!-- Close Details Button -->
+        <app-buttons
+          buttonStyleClass="btn-close-details"
+          (click)="selectedIdea = null"
+          [disabled]="false"
+          title="Close details"
+        >
+          ×
+        </app-buttons>
       </div>
-      }
-      <!-- Close Details Button -->
-      <app-buttons buttonStyleClass="btn-close-details" (click)="selectedIdea = null" [disabled]="false"
-        title="Close details">
-        ×
-      </app-buttons>
-    </div>
-    <div class="details-panel-content">
-      <!-- View Mode Only (No inline editing) -->
-      <div class="view-mode">
-        <div class="details-idea-header">
-          <!-- ROW 1 -->
-          <div class="details-row-1">
-            <h3 class="details-idea-title">{{ selectedIdea.Title }}
-              <!-- Closed badge in details -->
-              @if (showClosedIdeas || selectedIdea.status === 'Closed') {
-              <span class="closed-badge-details">CLOSED</span>
-              }
-            </h3>
-            <div class="details-actions-right">
-              <app-buttons [buttonStyleClass]="'btn-vote ' + (selectedIdea.userVoted ? 'btn-vote-active' : '')"
-                (click)="$event.stopPropagation(); selectedIdea.userVoted ? onUnvote(selectedIdea, $event) : onVote(selectedIdea.id)"
-                [disabled]="isVoting || isUnvoting" title="Vote for this idea">
-                👍
-                @if (isGroupCreator()) {
-                <span class="vote-count">{{ selectedIdea.voteCount || 0 }}</span>
+      <div class="details-panel-content">
+        <!-- View Mode Only (No inline editing) -->
+        <div class="view-mode">
+          <div class="details-idea-header">
+            <!-- ROW 1 -->
+            <div class="details-row-1">
+              <h3 class="details-idea-title">
+                {{ selectedIdea.Title }}
+                <!-- Closed badge in details -->
+                @if (showClosedIdeas || selectedIdea.status === "Closed") {
+                  <span class="closed-badge-details">CLOSED</span>
                 }
-              </app-buttons>
-              <!-- View voters button prominent -->
-              @if (selectedIdea.status !== 'Closed' && isGroupCreator() && (selectedIdea.voteCount || 0) > 0) {
-              <app-buttons buttonStyleClass="btn-view-voters"
-                (click)="$event.stopPropagation(); onViewVoters(selectedIdea, $event)" [disabled]="false"
-                title="View voters">
-                👁️ Voters
-              </app-buttons>
-              }
-              <!-- For closed ideas, hide action buttons -->
-              @if (!showClosedIdeas && selectedIdea.status !== 'Closed') {
-              <!-- Mobile Actions Menu Button -->
-              <button class="idea-menu-btn" (click)="toggleIdeaActionsMenu()" title="More options">
-                ⋮
-              </button>
-              <!-- Actions Container (Desktop: Row, Mobile: Dropdown) -->
-              <div class="idea-actions-container" [class.show-mobile-menu]="showIdeaActionsMenu">
-                @if (isUserIdeaOwner(selectedIdea)) {
-                <app-buttons buttonStyleClass="btn-edit" (click)="startEditing(); closeIdeaActionsMenu()"
-                  [disabled]="false" title="Edit idea">
-                  ✎ Edit
+              </h3>
+              <div class="details-actions-right">
+                <app-buttons
+                  [buttonStyleClass]="
+                    'btn-vote ' +
+                    (selectedIdea.userVoted ? 'btn-vote-active' : '')
+                  "
+                  (click)="
+                    $event.stopPropagation();
+                    selectedIdea.userVoted
+                      ? onUnvote(selectedIdea, $event)
+                      : onVote(selectedIdea.id)
+                  "
+                  [disabled]="isVoting || isUnvoting"
+                  title="Vote for this idea"
+                >
+                  👍
+                  @if (isGroupCreator()) {
+                    <span class="vote-count">{{
+                      selectedIdea.voteCount || 0
+                    }}</span>
+                  }
                 </app-buttons>
+                <!-- View voters button prominent -->
+                @if (
+                  selectedIdea.status !== "Closed" &&
+                  isGroupCreator() &&
+                  (selectedIdea.voteCount || 0) > 0
+                ) {
+                  <app-buttons
+                    buttonStyleClass="btn-view-voters"
+                    (click)="
+                      $event.stopPropagation();
+                      onViewVoters(selectedIdea, $event)
+                    "
+                    [disabled]="false"
+                    title="View voters"
+                  >
+                    👁️ Voters
+                  </app-buttons>
                 }
-                <!-- Delete button for idea owner -->
-                @if (isUserIdeaOwner(selectedIdea)) {
-                <app-buttons buttonStyleClass="btn-delete"
-                  (click)="$event.stopPropagation(); openDeleteIdeaModal(selectedIdea.id); closeIdeaActionsMenu()"
-                  [disabled]="false" title="Delete idea">
-                  🗑️ Delete
-                </app-buttons>
+                <!-- For closed ideas, hide action buttons -->
+                @if (!showClosedIdeas && selectedIdea.status !== "Closed") {
+                  <!-- Mobile Actions Menu Button -->
+                  <button
+                    class="idea-menu-btn"
+                    (click)="toggleIdeaActionsMenu()"
+                    title="More options"
+                  >
+                    ⋮
+                  </button>
+                  <!-- Actions Container (Desktop: Row, Mobile: Dropdown) -->
+                  <div
+                    class="idea-actions-container"
+                    [class.show-mobile-menu]="showIdeaActionsMenu"
+                  >
+                    @if (isUserIdeaOwner(selectedIdea)) {
+                      <app-buttons
+                        buttonStyleClass="btn-edit"
+                        (click)="startEditing(); closeIdeaActionsMenu()"
+                        [disabled]="false"
+                        title="Edit idea"
+                      >
+                        ✎ Edit
+                      </app-buttons>
+                    }
+                    <!-- Delete button for idea owner -->
+                    @if (isUserIdeaOwner(selectedIdea)) {
+                      <app-buttons
+                        buttonStyleClass="btn-delete"
+                        (click)="
+                          $event.stopPropagation();
+                          openDeleteIdeaModal(selectedIdea.id);
+                          closeIdeaActionsMenu()
+                        "
+                        [disabled]="false"
+                        title="Delete idea"
+                      >
+                        🗑️ Delete
+                      </app-buttons>
+                    }
+                    <!-- Close Idea button for admins -->
+                    @if (isGroupCreator() && selectedIdea.status !== "Closed") {
+                      <app-buttons
+                        buttonStyleClass="btn-promote"
+                        (click)="
+                          $event.stopPropagation();
+                          closeIdeabtn(selectedIdea.id);
+                          closeIdeaActionsMenu()
+                        "
+                        [disabled]="false"
+                        title="Close Idea"
+                      >
+                        🛑 Close Idea
+                      </app-buttons>
+                    }
+                  </div>
                 }
-                <!-- Close Idea button for admins -->
-                @if (isGroupCreator() && selectedIdea.status !== 'Closed') {
-                <app-buttons buttonStyleClass="btn-promote"
-                  (click)="$event.stopPropagation(); closeIdeabtn(selectedIdea.id); closeIdeaActionsMenu()"
-                  [disabled]="false" title="Close Idea">
-                  🛑 Close Idea
-                </app-buttons>
-                }
-              </div>
-              }
-              <!-- Show vote count for closed ideas -->
-              <!-- <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="closed-vote-display">
+                <!-- Show vote count for closed ideas -->
+                <!-- <div *ngIf="showClosedIdeas || selectedIdea.status === 'Closed'" class="closed-vote-display">
                                 <span class="closed-vote-count">{{ selectedIdea.voteCount || 0 }} votes</span>
                               </div> -->
-            </div>
-          </div>
-          <!-- ROW 2 -->
-          <div class="details-row-2">
-            <div class="details-date">{{ formatIdeaDate(selectedIdea.createdAt) }}</div>
-            @if (selectedIdea.isPromotedToProject) {
-            <span class="promoted-badge-left">✔ Promoted</span>
-            }
-          </div>
-        </div>
-        <!-- Add read-only message for closed ideas -->
-        @if (showClosedIdeas || selectedIdea.status === 'Closed') {
-        <div class="read-only-message">
-          <!--<p class="read-only-text">📌 This idea is closed and read-only</p> -->
-        </div>
-        }
-        <div class="details-section">
-          <h4 class="details-section-title">Problem Statement</h4>
-          <p class="details-idea-description">{{ selectedIdea.ProblemStatement }}</p>
-        </div>
-        <div class="details-section">
-          <h4 class="details-section-title">Proposed Solution</h4>
-          <p class="details-idea-description">{{ selectedIdea.ProposedSolution }}</p>
-        </div>
-        <!-- DISPLAY MEDIA FOR IDEAS -->
-        @if (selectedIdea) {
-        <div class="details-section">
-          <app-media [ideaId]="selectedIdea.id" [title]="'Supporting Media'">
-          </app-media>
-        </div>
-        }
-        <!-- Comments section - different for closed vs open ideas -->
-        @if (!showClosedIdeas && selectedIdea.status !== 'Closed') {
-        <div class="comments-section">
-          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
-          <div class="new-comment">
-            <textarea [(ngModel)]="newCommentContent" placeholder="Share your thoughts on this idea..."></textarea>
-            <!-- Selected files preview -->
-            @if (selectedCommentFiles.length > 0) {
-            <div class="selected-files-preview">
-              @for (file of selectedCommentFiles; track file; let i = $index) {
-              <div class="file-preview">
-                <span class="file-name">{{ file.name }}</span>
-                <span class="file-size">({{ formatFileSize(file.size) }})</span>
-                <button type="button" (click)="removeCommentFile(i)" class="remove-file">×</button>
               </div>
+            </div>
+            <!-- ROW 2 -->
+            <div class="details-row-2">
+              <div class="details-date">
+                {{ formatIdeaDate(selectedIdea.createdAt) }}
+              </div>
+              @if (selectedIdea.isPromotedToProject) {
+                <span class="promoted-badge-left">✔ Promoted</span>
               }
             </div>
-            }
-            <div class="comment-action-bar">
-              @if (!isPostingComment) {
-              <div class="attach-section">
-                <input type="file" #commentFileInput multiple (change)="onCommentFileSelected($event)"
-                  [accept]="allowedFileTypes" style="display: none">
-                <app-buttons [buttonText]="'📎 Attach Media Files'" buttonStyleClass="btn-promote"
-                  (click)="commentFileInput.click()">
-                </app-buttons>
-                @if (selectedCommentFiles.length === 0) {
-                <span class="file-hint">
-                  Optional
-                </span>
+          </div>
+          <!-- Add read-only message for closed ideas -->
+          @if (showClosedIdeas || selectedIdea.status === "Closed") {
+            <div class="read-only-message">
+              <!--<p class="read-only-text">📌 This idea is closed and read-only</p> -->
+            </div>
+          }
+          <div class="details-section">
+            <h4 class="details-section-title">Problem Statement</h4>
+            <p class="details-idea-description">
+              {{ selectedIdea.ProblemStatement }}
+            </p>
+          </div>
+          <div class="details-section">
+            <h4 class="details-section-title">Proposed Solution</h4>
+            <p class="details-idea-description">
+              {{ selectedIdea.ProposedSolution }}
+            </p>
+          </div>
+          <!-- DISPLAY MEDIA FOR IDEAS -->
+          @if (selectedIdea) {
+            <div class="details-section">
+              <app-media
+                [ideaId]="selectedIdea.id"
+                [title]="'Supporting Media'"
+              >
+              </app-media>
+            </div>
+          }
+          <!-- Comments section - different for closed vs open ideas -->
+          @if (!showClosedIdeas && selectedIdea.status !== "Closed") {
+            <div class="comments-section">
+              <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+              <div class="new-comment">
+                <textarea
+                  [(ngModel)]="newCommentContent"
+                  placeholder="Share your thoughts on this idea..."
+                ></textarea>
+                <!-- Selected files preview -->
+                @if (selectedCommentFiles.length > 0) {
+                  <div class="selected-files-preview">
+                    @for (
+                      file of selectedCommentFiles;
+                      track file;
+                      let i = $index
+                    ) {
+                      <div class="file-preview">
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size"
+                          >({{ formatFileSize(file.size) }})</span
+                        >
+                        <button
+                          type="button"
+                          (click)="removeCommentFile(i)"
+                          class="remove-file"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    }
+                  </div>
                 }
-                <span class="file-hint">•</span>
-                <span class="file-hint">Max 20MB</span>
-              </div>
-              }
-              <div class="post-section">
-                @if (commentStatus) {
-                <div class="comment-status">
-                  {{ commentStatus }}
+                <div class="comment-action-bar">
+                  @if (!isPostingComment) {
+                    <div class="attach-section">
+                      <input
+                        type="file"
+                        #commentFileInput
+                        multiple
+                        (change)="onCommentFileSelected($event)"
+                        [accept]="allowedFileTypes"
+                        style="display: none"
+                      />
+                      <app-buttons
+                        [buttonText]="'📎 Attach Media Files'"
+                        buttonStyleClass="btn-promote"
+                        (click)="commentFileInput.click()"
+                      >
+                      </app-buttons>
+                      @if (selectedCommentFiles.length === 0) {
+                        <span class="file-hint"> Optional </span>
+                      }
+                      <span class="file-hint">•</span>
+                      <span class="file-hint">Max 20MB</span>
+                    </div>
+                  }
+                  <div class="post-section">
+                    @if (commentStatus) {
+                      <div class="comment-status">
+                        {{ commentStatus }}
+                      </div>
+                    }
+                    <app-buttons
+                      [buttonText]="
+                        isPostingComment ? 'Posting...' : 'Post Comment'
+                      "
+                      [buttonStyleClass]="'btn-accept'"
+                      [disabled]="!newCommentContent.trim() || isPostingComment"
+                      (click)="addComment()"
+                    >
+                    </app-buttons>
+                  </div>
                 </div>
+              </div>
+              <div id="comments-list">
+                @for (comment of comments; track comment) {
+                  <div
+                    class="comment"
+                    [id]="'comment-' + comment.id"
+                    [class.own-comment]="comment.userId === currentUserId"
+                    [class.highlight-comment]="
+                      comment.id === highlightedCommentId
+                    "
+                  >
+                    <div class="comment-header">
+                      <div class="comment-meta">
+                        <span class="comment-author">
+                          {{
+                            comment.userId === currentUserId ? "You" : "User"
+                          }}
+                        </span>
+                        <span class="comment-date">
+                          {{ formatRelativeTime(comment.createdAt) }}
+                        </span>
+                      </div>
+                      <!-- Delete icon only on hover -->
+                      @if (comment.userId === currentUserId) {
+                        <button
+                          type="button"
+                          class="delete-icon"
+                          (click)="deleteComment(comment.id)"
+                          title="Delete comment"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14H6L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4h6v2"></path>
+                          </svg>
+                        </button>
+                      }
+                    </div>
+                    <p class="comment-text">{{ comment.content }}</p>
+                    <!-- DISPLAY MEDIA FOR COMMENTS -->
+                    @if (comment.id) {
+                      <div class="comment-media-section">
+                        <app-media
+                          [commentId]="comment.id"
+                          [title]="''"
+                          [compactMode]="true"
+                        >
+                        </app-media>
+                      </div>
+                    }
+                  </div>
                 }
-                <app-buttons [buttonText]="isPostingComment ? 'Posting...' : 'Post Comment'"
-                  [buttonStyleClass]="'btn-accept'" [disabled]="!newCommentContent.trim() || isPostingComment"
-                  (click)="addComment()">
-                </app-buttons>
               </div>
             </div>
-          </div>
-          <div id="comments-list">
-            @for (comment of comments; track comment) {
-            <div class="comment" [id]="'comment-' + comment.id" [class.own-comment]="comment.userId === currentUserId"
-              [class.highlight-comment]="comment.id === highlightedCommentId">
-              <div class="comment-header">
-                <div class="comment-meta">
-                  <span class="comment-author">
-                    {{ comment.userId === currentUserId ? 'You' : 'User' }}
-                  </span>
-                  <span class="comment-date">
-                    {{ formatRelativeTime(comment.createdAt) }}
-                  </span>
+          }
+          <!-- Read-only comments for closed ideas -->
+          @if (showClosedIdeas || selectedIdea.status === "Closed") {
+            <div class="comments-section-readonly">
+              <h4 class="comments-title">Comments ({{ comments.length }})</h4>
+              <p class="read-only-comment-note">
+                Comments are disabled for closed ideas
+              </p>
+              <!-- Display existing comments in read-only mode -->
+              <div id="comments-list">
+                @for (comment of comments; track comment) {
+                  <div
+                    class="comment"
+                    [id]="'comment-' + comment.id"
+                    [class.own-comment]="comment.userId === currentUserId"
+                  >
+                    <div class="comment-header">
+                      <div class="comment-meta">
+                        <span class="comment-author">
+                          {{
+                            comment.userId === currentUserId ? "You" : "User"
+                          }}
+                        </span>
+                        <span class="comment-date">
+                          {{ formatRelativeTime(comment.createdAt) }}
+                        </span>
+                      </div>
+                      <!-- Hide delete button for closed ideas -->
+                    </div>
+                    <p class="comment-text">{{ comment.content }}</p>
+                    <!-- DISPLAY MEDIA FOR COMMENTS (read-only) -->
+                    @if (comment.id) {
+                      <div class="comment-media-section">
+                        <app-media
+                          [commentId]="comment.id"
+                          [title]="''"
+                          [compactMode]="true"
+                        >
+                        </app-media>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          <!-- Rest of your details section (Author info, etc.) stays the same -->
+          @if (selectedIdea.userName) {
+            <div class="details-section">
+              <h4 class="details-section-title">Author</h4>
+              <div class="author-info">
+                <div class="author-avatar">
+                  {{ selectedIdea.userName.charAt(0) || "U" }}
                 </div>
-                <!-- Delete icon only on hover -->
-                @if (comment.userId === currentUserId) {
-                <button type="button" class="delete-icon" (click)="deleteComment(comment.id)" title="Delete comment">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6l-1 14H6L5 6"></path>
-                    <path d="M10 11v6"></path>
-                    <path d="M14 11v6"></path>
-                    <path d="M9 6V4h6v2"></path>
-                  </svg>
-                </button>
-                }
-              </div>
-              <p class="comment-text">{{ comment.content }}</p>
-              <!-- DISPLAY MEDIA FOR COMMENTS -->
-              @if (comment.id) {
-              <div class="comment-media-section">
-                <app-media [commentId]="comment.id" [title]="''" [compactMode]="true">
-                </app-media>
-              </div>
-              }
-            </div>
-            }
-          </div>
-        </div>
-        }
-        <!-- Read-only comments for closed ideas -->
-        @if (showClosedIdeas || selectedIdea.status === 'Closed') {
-        <div class="comments-section-readonly">
-          <h4 class="comments-title">Comments ({{ comments.length }})</h4>
-          <p class="read-only-comment-note">Comments are disabled for closed ideas</p>
-          <!-- Display existing comments in read-only mode -->
-          <div id="comments-list">
-            @for (comment of comments; track comment) {
-            <div class="comment" [id]="'comment-' + comment.id" [class.own-comment]="comment.userId === currentUserId">
-              <div class="comment-header">
-                <div class="comment-meta">
-                  <span class="comment-author">
-                    {{ comment.userId === currentUserId ? 'You' : 'User' }}
-                  </span>
-                  <span class="comment-date">
-                    {{ formatRelativeTime(comment.createdAt) }}
-                  </span>
+                <div class="author-details">
+                  <div class="author-name">
+                    {{ selectedIdea.userName || "Unknown User" }}
+                    @if (isUserIdeaOwner(selectedIdea)) {
+                      <span class="you-badge">(You)</span>
+                    }
+                  </div>
+                  <div class="author-role">
+                    @if (isGroupCreator() && isUserIdeaOwner(selectedIdea)) {
+                      <span>Group Creator & Idea Owner</span>
+                    }
+                    @if (isGroupCreator() && !isUserIdeaOwner(selectedIdea)) {
+                      <span>Group Creator</span>
+                    }
+                    @if (!isGroupCreator() && isUserIdeaOwner(selectedIdea)) {
+                      <span>Idea Owner</span>
+                    }
+                    @if (!isGroupCreator() && !isUserIdeaOwner(selectedIdea)) {
+                      <span>Member</span>
+                    }
+                  </div>
                 </div>
-                <!-- Hide delete button for closed ideas -->
-              </div>
-              <p class="comment-text">{{ comment.content }}</p>
-              <!-- DISPLAY MEDIA FOR COMMENTS (read-only) -->
-              @if (comment.id) {
-              <div class="comment-media-section">
-                <app-media [commentId]="comment.id" [title]="''" [compactMode]="true">
-                </app-media>
-              </div>
-              }
-            </div>
-            }
-          </div>
-        </div>
-        }
-        <!-- Rest of your details section (Author info, etc.) stays the same -->
-        @if (selectedIdea.userName) {
-        <div class="details-section">
-          <h4 class="details-section-title">Author</h4>
-          <div class="author-info">
-            <div class="author-avatar">{{ selectedIdea.userName.charAt(0) || 'U' }}</div>
-            <div class="author-details">
-              <div class="author-name">{{ selectedIdea.userName || 'Unknown User' }}
-                @if (isUserIdeaOwner(selectedIdea)) {
-                <span class="you-badge">(You)</span>
-                }
-              </div>
-              <div class="author-role">
-                @if (isGroupCreator() && isUserIdeaOwner(selectedIdea)) {
-                <span>Group Creator & Idea Owner</span>
-                }
-                @if (isGroupCreator() && !isUserIdeaOwner(selectedIdea)) {
-                <span>Group Creator</span>
-                }
-                @if (!isGroupCreator() && isUserIdeaOwner(selectedIdea)) {
-                <span>Idea Owner</span>
-                }
-                @if (!isGroupCreator() && !isUserIdeaOwner(selectedIdea)) {
-                <span>Member</span>
-                }
               </div>
             </div>
-          </div>
+          }
         </div>
-        }
       </div>
     </div>
-  </div>
   }
   <!-- Share Idea Modal -->
-  <app-modal [isOpen]="showShareModal" [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'" [size]="'md'"
-    (closeModal)="closeShareModal()">
-
+  <app-modal
+    [isOpen]="showShareModal"
+    [title]="isEditMode ? 'Edit Idea' : 'Share New Idea'"
+    [size]="'md'"
+    (closeModal)="closeShareModal()"
+  >
     <div modal-body>
-
       <form [formGroup]="shareIdeaForm" class="share-idea-form">
-
         <!-- Section: Core Information -->
         <div class="form-section-header">
           <h4>Core Information</h4>
@@ -607,53 +930,87 @@
         <div class="form-grid">
           <!-- Idea Title -->
           <div class="form-group full-width">
-            <label for="idea-title">Idea Title <span class="required">*</span></label>
-            <input type="text" id="idea-title" class="form-control" formControlName="Title"
-              placeholder="Enter a descriptive title for your idea" maxlength="50">
+            <label for="idea-title"
+              >Idea Title <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              id="idea-title"
+              class="form-control"
+              formControlName="Title"
+              placeholder="Enter a descriptive title for your idea"
+              maxlength="50"
+            />
             <div class="char-count">{{ shareTitleCount }}/50</div>
-            @if (shareIdeaForm.get('Title')?.touched) {
-            @if (shareIdeaForm.get('Title')?.errors?.['required']) {
-            <div class="error-message">Title is required</div>
-            }
-            @if (shareIdeaForm.get('Title')?.errors?.['minlength']) {
-            <div class="error-message">Title must be at least 5 characters</div>
-            }
+            @if (shareIdeaForm.get("Title")?.touched) {
+              @if (shareIdeaForm.get("Title")?.errors?.["required"]) {
+                <div class="error-message">Title is required</div>
+              }
+              @if (shareIdeaForm.get("Title")?.errors?.["minlength"]) {
+                <div class="error-message">
+                  Title must be at least 5 characters
+                </div>
+              }
             }
           </div>
 
           <!-- Problem Statement -->
           <div class="form-group full-width">
-            <label for="problem-statement">Problem Statement <span class="required">*</span></label>
-            <textarea id="problem-statement" class="form-control-description" formControlName="ProblemStatement"
-              rows="3" placeholder="What is the problem you are trying to solve?"></textarea>
+            <label for="problem-statement"
+              >Problem Statement <span class="required">*</span></label
+            >
+            <textarea
+              id="problem-statement"
+              class="form-control-description"
+              formControlName="ProblemStatement"
+              rows="3"
+              placeholder="What is the problem you are trying to solve?"
+            ></textarea>
             <div class="char-count">{{ shareProblemCount }}/250</div>
-            @if (shareIdeaForm.get('ProblemStatement')?.touched) {
-            @if (shareIdeaForm.get('ProblemStatement')?.errors?.['required']) {
-            <div class="error-message">Problem Statement is required</div>
-            }
-            @if (shareIdeaForm.get('ProblemStatement')?.errors?.['minlength']) {
-            <div class="error-message">Problem Statement must be at least 100 characters</div>
-            }
+            @if (shareIdeaForm.get("ProblemStatement")?.touched) {
+              @if (
+                shareIdeaForm.get("ProblemStatement")?.errors?.["required"]
+              ) {
+                <div class="error-message">Problem Statement is required</div>
+              }
+              @if (
+                shareIdeaForm.get("ProblemStatement")?.errors?.["minlength"]
+              ) {
+                <div class="error-message">
+                  Problem Statement must be at least 100 characters
+                </div>
+              }
             }
           </div>
 
           <!-- Proposed Solution -->
           <div class="form-group full-width">
-            <label for="proposed-solution">Proposed Solution <span class="required">*</span></label>
-            <textarea id="proposed-solution" class="form-control-description" formControlName="ProposedSolution"
-              rows="3" placeholder="Describe your proposed solution in detail..."></textarea>
+            <label for="proposed-solution"
+              >Proposed Solution <span class="required">*</span></label
+            >
+            <textarea
+              id="proposed-solution"
+              class="form-control-description"
+              formControlName="ProposedSolution"
+              rows="3"
+              placeholder="Describe your proposed solution in detail..."
+            ></textarea>
             <div class="char-count">{{ shareDescCount }}/1000</div>
-            @if (shareIdeaForm.get('ProposedSolution')?.touched) {
-            @if (shareIdeaForm.get('ProposedSolution')?.errors?.['required']) {
-            <div class="error-message">Proposed Solution is required</div>
-            }
-            @if (shareIdeaForm.get('ProposedSolution')?.errors?.['minlength']) {
-            <div class="error-message">Proposed Solution must be at least 5 characters</div>
-            }
+            @if (shareIdeaForm.get("ProposedSolution")?.touched) {
+              @if (
+                shareIdeaForm.get("ProposedSolution")?.errors?.["required"]
+              ) {
+                <div class="error-message">Proposed Solution is required</div>
+              }
+              @if (
+                shareIdeaForm.get("ProposedSolution")?.errors?.["minlength"]
+              ) {
+                <div class="error-message">
+                  Proposed Solution must be at least 5 characters
+                </div>
+              }
             }
           </div>
-
-
         </div>
 
         <!-- Section: Strategic Alignment -->
@@ -663,50 +1020,97 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label for="strategic-alignment">Strategic Objective Alignment <span class="required">*</span></label>
-            <select id="strategic-alignment" class="form-control" formControlName="StrategicAlignment">
+            <label for="strategic-alignment"
+              >Strategic Objective Alignment
+              <span class="required">*</span></label
+            >
+            <select
+              id="strategic-alignment"
+              class="form-control"
+              formControlName="StrategicAlignment"
+            >
               <option value="" disabled>Select an objective</option>
-              <option value="Revenue Growth/Pipeline">Revenue Growth/Pipeline</option>
-              <option value="Cost efficiency/productivity">Cost efficiency/productivity</option>
-              <option value="Customer/ Stakeholder Satisfaction">Customer/ Stakeholder Satisfaction</option>
-              <option value="Quality/Compliance (ISO/QMS)">Quality/Compliance (ISO/QMS)</option>
+              <option value="Revenue Growth/Pipeline">
+                Revenue Growth/Pipeline
+              </option>
+              <option value="Cost efficiency/productivity">
+                Cost efficiency/productivity
+              </option>
+              <option value="Customer/ Stakeholder Satisfaction">
+                Customer/ Stakeholder Satisfaction
+              </option>
+              <option value="Quality/Compliance (ISO/QMS)">
+                Quality/Compliance (ISO/QMS)
+              </option>
               <option value="Execution Excellence">Execution Excellence</option>
-              <option value="Market Expansion/Acquisition">Market Expansion/Acquisition</option>
-              <option value="Sustainability/ESG (SDGs 4/5/8)">Sustainability/ESG (SDGs 4/5/8)</option>
+              <option value="Market Expansion/Acquisition">
+                Market Expansion/Acquisition
+              </option>
+              <option value="Sustainability/ESG (SDGs 4/5/8)">
+                Sustainability/ESG (SDGs 4/5/8)
+              </option>
               <option value="Risk Reduction">Risk Reduction</option>
               <option value="Innovation/New">Innovation/New</option>
             </select>
-            @if (shareIdeaForm.get('StrategicAlignment')?.errors?.['required'] &&
-            shareIdeaForm.get('StrategicAlignment')?.touched) {
-            <div class="error-message">Strategic Alignment is required</div>
+            @if (
+              shareIdeaForm.get("StrategicAlignment")?.errors?.["required"] &&
+              shareIdeaForm.get("StrategicAlignment")?.touched
+            ) {
+              <div class="error-message">Strategic Alignment is required</div>
             }
           </div>
 
           <div class="form-group">
-            <label for="innovation-category">Innovation Category <span class="required">*</span></label>
-            <select id="innovation-category" class="form-control" formControlName="InnovationCategory">
+            <label for="innovation-category"
+              >Innovation Category <span class="required">*</span></label
+            >
+            <select
+              id="innovation-category"
+              class="form-control"
+              formControlName="InnovationCategory"
+            >
               <option value="" disabled>Select a category</option>
               <option value="Process & Operations">Process & Operations</option>
-              <option value="Tech & Infrastructure">Tech & Infrastructure</option>
+              <option value="Tech & Infrastructure">
+                Tech & Infrastructure
+              </option>
               <option value="Software & Product">Software & Product</option>
               <option value="Automation & AI">Automation & AI</option>
-              <option value="Customer & User Experience">Customer & User Experience</option>
+              <option value="Customer & User Experience">
+                Customer & User Experience
+              </option>
               <option value="Cost & Efficiency">Cost & Efficiency</option>
-              <option value="Strategy & Business Model">Strategy & Business Model</option>
+              <option value="Strategy & Business Model">
+                Strategy & Business Model
+              </option>
             </select>
-            @if (shareIdeaForm.get('InnovationCategory')?.errors?.['required'] &&
-            shareIdeaForm.get('InnovationCategory')?.touched) {
-            <div class="error-message">Innovation Category is required</div>
+            @if (
+              shareIdeaForm.get("InnovationCategory")?.errors?.["required"] &&
+              shareIdeaForm.get("InnovationCategory")?.touched
+            ) {
+              <div class="error-message">Innovation Category is required</div>
             }
           </div>
 
           <div class="form-group full-width">
-            <label for="main-benefit">Main Benefit / Expected Use Case <span class="required">*</span></label>
-            <textarea id="main-benefit" class="form-control-description" formControlName="UseCase" rows="3"
-              placeholder="Who benefits and how?" maxlength="1000"></textarea>
+            <label for="main-benefit"
+              >Main Benefit / Expected Use Case
+              <span class="required">*</span></label
+            >
+            <textarea
+              id="main-benefit"
+              class="form-control-description"
+              formControlName="UseCase"
+              rows="3"
+              placeholder="Who benefits and how?"
+              maxlength="1000"
+            ></textarea>
             <div class="char-count">{{ shareUseCaseCount }}/1000</div>
-            @if (shareIdeaForm.get('UseCase')?.errors?.['required'] && shareIdeaForm.get('UseCase')?.touched) {
-            <div class="error-message">Use Case is required</div>
+            @if (
+              shareIdeaForm.get("UseCase")?.errors?.["required"] &&
+              shareIdeaForm.get("UseCase")?.touched
+            ) {
+              <div class="error-message">Use Case is required</div>
             }
           </div>
         </div>
@@ -719,27 +1123,45 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="sub-category">Sub-Category / Functional Area</label>
-            <select id="sub-category" class="form-control" formControlName="SubCategory">
+            <select
+              id="sub-category"
+              class="form-control"
+              formControlName="SubCategory"
+            >
               <option value="" selected>Select functional area</option>
               <option value="License Optimization">License Optimization</option>
               <option value="Cloud Migration">Cloud Migration</option>
               <option value="Edge Computing">Edge Computing</option>
               <option value="DevOps/CI-CD">DevOps/CI-CD</option>
-              <option value="Containers & Services">Containers & Services</option>
+              <option value="Containers & Services">
+                Containers & Services
+              </option>
               <option value="New features">New features</option>
               <option value="UI/UX updates">UI/UX updates</option>
               <option value="API integrations">API integrations</option>
               <option value="Mobile Enhancements">Mobile Enhancements</option>
               <option value="Process Bots (RPA)">Process Bots (RPA)</option>
-              <option value="Machine Learning Models">Machine Learning Models</option>
-              <option value="Chatbots & Virtual Assistants">Chatbots & Virtual Assistants</option>
+              <option value="Machine Learning Models">
+                Machine Learning Models
+              </option>
+              <option value="Chatbots & Virtual Assistants">
+                Chatbots & Virtual Assistants
+              </option>
               <option value="Smart Monitoring">Smart Monitoring</option>
               <option value="Agile Practices">Agile Practices</option>
-              <option value="Infrastructure as Code">Infrastructure as Code</option>
-              <option value="Service Management (ITSM)">Service Management (ITSM)</option>
-              <option value="Automated Incident Response">Automated Incident Response</option>
+              <option value="Infrastructure as Code">
+                Infrastructure as Code
+              </option>
+              <option value="Service Management (ITSM)">
+                Service Management (ITSM)
+              </option>
+              <option value="Automated Incident Response">
+                Automated Incident Response
+              </option>
               <option value="Self-Service Tools">Self-Service Tools</option>
-              <option value="Role-Based Dashboards">Role-Based Dashboards</option>
+              <option value="Role-Based Dashboards">
+                Role-Based Dashboards
+              </option>
               <option value="Feedback Integration">Feedback Integration</option>
               <option value="Accessibility">Accessibility</option>
               <option value="Serverless Computing">Serverless Computing</option>
@@ -754,20 +1176,39 @@
 
           <div class="form-group full-width">
             <label for="tech-involved">Technology Involved</label>
-            <select id="tech-involved" class="form-control" formControlName="TechnologyInvolved">
+            <select
+              id="tech-involved"
+              class="form-control"
+              formControlName="TechnologyInvolved"
+            >
               <option value="" selected>Select technology</option>
-              <option value="Cloud Computing Platforms">Cloud Computing Platforms</option>
-              <option value="Containerization & Orchestration">Containerization & Orchestration</option>
-              <option value="AI and ML Learning Frameworks">AI and ML Learning Frameworks</option>
-              <option value="Robotic Process Automation (RPA) Tools">Robotic Process Automation (RPA) Tools</option>
-              <option value="Cybersecurity & Identity Management">Cybersecurity & Identity Management</option>
+              <option value="Cloud Computing Platforms">
+                Cloud Computing Platforms
+              </option>
+              <option value="Containerization & Orchestration">
+                Containerization & Orchestration
+              </option>
+              <option value="AI and ML Learning Frameworks">
+                AI and ML Learning Frameworks
+              </option>
+              <option value="Robotic Process Automation (RPA) Tools">
+                Robotic Process Automation (RPA) Tools
+              </option>
+              <option value="Cybersecurity & Identity Management">
+                Cybersecurity & Identity Management
+              </option>
             </select>
           </div>
 
           <div class="form-group full-width">
             <label for="additional-notes">Additional Notes</label>
-            <textarea id="additional-notes" class="form-control-description" formControlName="Notes" rows="3"
-              placeholder="Optional notes, clarifications, assumptions, constraints, etc."></textarea>
+            <textarea
+              id="additional-notes"
+              class="form-control-description"
+              formControlName="Notes"
+              rows="3"
+              placeholder="Optional notes, clarifications, assumptions, constraints, etc."
+            ></textarea>
             <div class="char-count">{{ shareNotesCount }}/1000</div>
           </div>
         </div>
@@ -776,24 +1217,42 @@
         <div class="form-group">
           <!-- Selected files preview -->
           @if (selectedIdeaFiles.length > 0) {
-          <div class="selected-files">
-            @for (file of selectedIdeaFiles; track file; let i = $index) {
-            <div class="file-preview">
-              <span class="file-name">{{ file.name }}</span>
-              <span class="file-size">({{ formatIdeaCommentFileSize(file.size) }})</span>
-              <button type="button" (click)="removeFile(i, 'idea')" class="remove-file">×</button>
+            <div class="selected-files">
+              @for (file of selectedIdeaFiles; track file; let i = $index) {
+                <div class="file-preview">
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size"
+                    >({{ formatIdeaCommentFileSize(file.size) }})</span
+                  >
+                  <button
+                    type="button"
+                    (click)="removeFile(i, 'idea')"
+                    class="remove-file"
+                  >
+                    ×
+                  </button>
+                </div>
+              }
             </div>
-            }
-          </div>
           }
 
           <div class="file-input-row">
             <label for="idea-media">Attach Supporting Media</label>
-            <input type="file" id="idea-media" #ideaFileInput multiple (change)="onFileSelected($event, 'idea')"
-              [accept]="allowedFileTypes" style="display: none">
+            <input
+              type="file"
+              id="idea-media"
+              #ideaFileInput
+              multiple
+              (change)="onFileSelected($event, 'idea')"
+              [accept]="allowedFileTypes"
+              style="display: none"
+            />
             <div class="media-upload-left">
-              <app-buttons [buttonText]="'📎 Attach Media Files'" (click)="ideaFileInput.click()"
-                [buttonStyleClass]="'btn-promote'">
+              <app-buttons
+                [buttonText]="'📎 Attach Media Files'"
+                (click)="ideaFileInput.click()"
+                [buttonStyleClass]="'btn-promote'"
+              >
               </app-buttons>
               <div class="media-file-info">
                 <span class="file-hint">Optional</span>
@@ -806,87 +1265,137 @@
           </div>
 
           @if (ideaUploadStatus) {
-          <div class="upload-status">
-            {{ ideaUploadStatus }}
-          </div>
+            <div class="upload-status">
+              {{ ideaUploadStatus }}
+            </div>
           }
         </div>
       </form>
-
     </div>
 
     <div modal-footer>
       <div class="footer-buttons">
-        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-reject'" (click)="showShareModal = false">
+        <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-reject'"
+          (click)="showShareModal = false"
+        >
         </app-buttons>
 
-        <app-buttons [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'" [buttonStyleClass]="'btn-promote'"
+        <app-buttons
+          [buttonText]="isEditMode ? 'Update Idea' : 'Share Idea'"
+          [buttonStyleClass]="'btn-promote'"
           (click)="
             isEditMode
               ? onUpdateIdeaFromModal(shareIdeaForm.value)
               : onShareIdea()
-          ">
+          "
+        >
         </app-buttons>
       </div>
     </div>
-
   </app-modal>
 
   <!-- Admin Leave Group Modal -->
   @if (showAdminLeaveModal) {
-  <div class="modal-backdrop" (click)="showAdminLeaveModal=false" tabindex="0" role="button"
-    (keydown.enter)="showAdminLeaveModal=false">
-    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog"
-      aria-modal="true" tabindex="-1">
-      <h2>You are the group admin</h2>
-      <p>You must either delete the group or transfer ownership before leaving.</p>
-      <div class="modal-actions">
-        <app-buttons [buttonText]="'Delete Group'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
-          (click)="deleteGroup()">
-        </app-buttons>
-        <app-buttons [buttonText]="'Transfer Ownership'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
-          (click)="openTransferOwnershipModal()">
-        </app-buttons>
-        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-promote'" [buttonType]="'button'"
-          (click)="showAdminLeaveModal = false">
-        </app-buttons>
+    <div
+      class="modal-backdrop"
+      (click)="showAdminLeaveModal = false"
+      tabindex="0"
+      role="button"
+      (keydown.enter)="showAdminLeaveModal = false"
+    >
+      <div
+        class="modal-content"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+      >
+        <h2>You are the group admin</h2>
+        <p>
+          You must either delete the group or transfer ownership before leaving.
+        </p>
+        <div class="modal-actions">
+          <app-buttons
+            [buttonText]="'Delete Group'"
+            [buttonStyleClass]="'btn-reject'"
+            [buttonType]="'button'"
+            (click)="deleteGroup()"
+          >
+          </app-buttons>
+          <app-buttons
+            [buttonText]="'Transfer Ownership'"
+            [buttonStyleClass]="'btn-promote'"
+            [buttonType]="'button'"
+            (click)="openTransferOwnershipModal()"
+          >
+          </app-buttons>
+          <app-buttons
+            [buttonText]="'Cancel'"
+            [buttonStyleClass]="'btn-promote'"
+            [buttonType]="'button'"
+            (click)="showAdminLeaveModal = false"
+          >
+          </app-buttons>
+        </div>
       </div>
     </div>
-  </div>
   }
 
   <!-- Transfer Ownership Modal -->
   @if (showTransferOwnershipModal) {
-  <div class="modal-backdrop" (click)="showTransferOwnershipModal = false" tabindex="0" role="button"
-    (keydown.enter)="showTransferOwnershipModal = false">
-    <div class="modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="dialog"
-      aria-modal="true" tabindex="-1">
-      <h2>Transfer Group Ownership</h2>
-      <p>Select a member to promote as the new admin.</p>
-      <select [(ngModel)]="newOwnerEmail" class="form-control">
-        <option value="" disabled selected>
-          Select new owner
-        </option>
-        @for (member of groupMembers; track member) {
-        <option [value]="member.email">
-          ({{ member.userName }}) ({{ member.email }})
-        </option>
-        }
-      </select>
-      <div class="modal-actions">
-        <app-buttons [buttonText]="'Confirm Transfer'" [buttonStyleClass]="'btn-promote'" (click)="transferOwnership()">
-        </app-buttons>
-        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-secondary'"
-          (click)="showTransferOwnershipModal = false">
-        </app-buttons>
+    <div
+      class="modal-backdrop"
+      (click)="showTransferOwnershipModal = false"
+      tabindex="0"
+      role="button"
+      (keydown.enter)="showTransferOwnershipModal = false"
+    >
+      <div
+        class="modal-content"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+      >
+        <h2>Transfer Group Ownership</h2>
+        <p>Select a member to promote as the new admin.</p>
+        <select [(ngModel)]="newOwnerEmail" class="form-control">
+          <option value="" disabled selected>Select new owner</option>
+          @for (member of groupMembers; track member) {
+            <option [value]="member.email">
+              ({{ member.userName }}) ({{ member.email }})
+            </option>
+          }
+        </select>
+        <div class="modal-actions">
+          <app-buttons
+            [buttonText]="'Confirm Transfer'"
+            [buttonStyleClass]="'btn-promote'"
+            (click)="transferOwnership()"
+          >
+          </app-buttons>
+          <app-buttons
+            [buttonText]="'Cancel'"
+            [buttonStyleClass]="'btn-secondary'"
+            (click)="showTransferOwnershipModal = false"
+          >
+          </app-buttons>
+        </div>
       </div>
     </div>
-  </div>
   }
 
   <!-- Member Leave Group Modal -->
-  <app-modal [isOpen]="showMemberLeaveModal" title="Leave Group" size="md" (closeModal)="cancelMemberLeave()">
-
+  <app-modal
+    [isOpen]="showMemberLeaveModal"
+    title="Leave Group"
+    size="md"
+    (closeModal)="cancelMemberLeave()"
+  >
     <div modal-body>
       <div class="member-leave-group">
         <p>Are you sure you want to leave this group?</p>
@@ -896,81 +1405,105 @@
 
     <div modal-footer>
       <div class="footer-buttons">
-
-        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" (click)="cancelMemberLeave()">
+        <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-modal-cancel'"
+          (click)="cancelMemberLeave()"
+        >
         </app-buttons>
 
-        <app-buttons [buttonText]="'Leave Group'" [buttonStyleClass]="'btn-reject'" (click)="confirmMemberLeave()">
+        <app-buttons
+          [buttonText]="'Leave Group'"
+          [buttonStyleClass]="'btn-reject'"
+          (click)="confirmMemberLeave()"
+        >
         </app-buttons>
-
-
       </div>
     </div>
   </app-modal>
 
   <!-- Delete IDEA -->
-  <app-modal [isOpen]="showDeleteIdeaModal" title="Delete Idea" size="md" (closeModal)="cancelDeleteIdea()">
-
+  <app-modal
+    [isOpen]="showDeleteIdeaModal"
+    title="Delete Idea"
+    size="md"
+    (closeModal)="cancelDeleteIdea()"
+  >
     <div modal-body>
       <div class="delete-idea">
-        <p>Are you sure you want to delete this idea? </p>
+        <p>Are you sure you want to delete this idea?</p>
         <p class="warning-text">This action cannot be undone.</p>
       </div>
     </div>
 
     <div modal-footer>
       <div class="footer-buttons">
-
-        <app-buttons [buttonText]="'Cancel'" [buttonStyleClass]="'btn-modal-cancel'" (click)="cancelDeleteIdea()">
+        <app-buttons
+          [buttonText]="'Cancel'"
+          [buttonStyleClass]="'btn-modal-cancel'"
+          (click)="cancelDeleteIdea()"
+        >
         </app-buttons>
 
-        <app-buttons [buttonText]="'Delete Idea'" [buttonStyleClass]="'btn-reject'" (click)="onDeleteIdea()">
+        <app-buttons
+          [buttonText]="'Delete Idea'"
+          [buttonStyleClass]="'btn-reject'"
+          (click)="onDeleteIdea()"
+        >
         </app-buttons>
-
       </div>
     </div>
   </app-modal>
 
   <!-- View voters modal -->
-  <app-modal [isOpen]="showVotersModalView" title="{{ selectedIdeaForVoters?.Title || 'Voters' }}" size="md"
-    (closeModal)="closeVotersModal()">
-
+  <app-modal
+    [isOpen]="showVotersModalView"
+    title="{{ selectedIdeaForVoters?.Title || 'Voters' }}"
+    size="md"
+    (closeModal)="closeVotersModal()"
+  >
     <div modal-body>
       @if (isViewingVoters) {
-      <div>
-        <p>Loading voters...</p>
-      </div>
+        <div>
+          <p>Loading voters...</p>
+        </div>
       }
 
       @if (!isViewingVoters && votersList.length === 0) {
-      <div>
-        <p>No votes yet for this idea.</p>
-      </div>
+        <div>
+          <p>No votes yet for this idea.</p>
+        </div>
       }
 
       @if (votersList.length > 0) {
-      <ul>
-        @for (voter of votersList; track voter; let i = $index) {
-        <li>
-          {{ voter.userName }}
-          <br />
-        </li>
-        }
-      </ul>
+        <ul>
+          @for (voter of votersList; track voter; let i = $index) {
+            <li>
+              {{ voter.userName }}
+              <br />
+            </li>
+          }
+        </ul>
       }
     </div>
   </app-modal>
 
   <!-- Idea Info modal -->
-  <app-modal [isOpen]="showIdeaInfoModal" title="Welcome to Ideas" size="md" (closeModal)="closeIdeaInfo()">
-
+  <app-modal
+    [isOpen]="showIdeaInfoModal"
+    title="Welcome to Ideas"
+    size="md"
+    (closeModal)="closeIdeaInfo()"
+  >
     <div modal-body>
       <div class="idea-info-modal">
         <p>Your space to share actionable improvements</p>
 
         <p class="intro-text">
-          This page is your space for <strong>practical, actionable ideas</strong> that can improve productivity,
-          efficiency, or working conditions. Focus on realistic ideas that can be implemented in weeks or months.
+          This page is your space for
+          <strong>practical, actionable ideas</strong> that can improve
+          productivity, efficiency, or working conditions. Focus on realistic
+          ideas that can be implemented in weeks or months.
         </p>
 
         <h3>Valid Ideas Look Like</h3>
@@ -978,13 +1511,18 @@
         <div class="examples-happy-path">
           <div class="idea-example">
             <h4>Automating Attendance Registration</h4>
-            <p>Use fingerprints to register attendance instead of manually writing it on Odoo.</p>
+            <p>
+              Use fingerprints to register attendance instead of manually
+              writing it on Odoo.
+            </p>
           </div>
 
           <div class="idea-example">
             <h4>Knowledge Sharing Space</h4>
-            <p>A space e.g. excel sheet for people to post articles/posts/blogs they read that others might find
-              interesting.</p>
+            <p>
+              A space e.g. excel sheet for people to post articles/posts/blogs
+              they read that others might find interesting.
+            </p>
           </div>
         </div>
 
@@ -998,28 +1536,36 @@
 
           <div class="idea-example avoid">
             <h4>We should build an app to sell second hand cars</h4>
-            <p>Out of scope — focus on specific, tangible changes within the workplace</p>
+            <p>
+              Out of scope — focus on specific, tangible changes within the
+              workplace
+            </p>
           </div>
         </div>
 
         <p class="tip-note">
-          Tip: Ask yourself, “Is this idea work related, will it improve productivity or make work more efficient?" If
-          yes, it belongs here. If no, it has to go.
+          Tip: Ask yourself, “Is this idea work related, will it improve
+          productivity or make work more efficient?" If yes, it belongs here. If
+          no, it has to go.
         </p>
-
       </div>
       <div modal-footer>
         <div class="modal-footer-content">
-
-          <app-buttons [buttonText]="'Don’t show again'" [buttonStyleClass]="'btn-reject'"
-            (click)="dontShowIdeaInfoAgain()">
+          <app-buttons
+            [buttonText]="'Don’t show again'"
+            [buttonStyleClass]="'btn-reject'"
+            (click)="dontShowIdeaInfoAgain()"
+          >
           </app-buttons>
 
-          <app-buttons [buttonText]="'Got it, let’s go!'" [buttonStyleClass]="'btn-promote'" (click)="closeIdeaInfo()">
+          <app-buttons
+            [buttonText]="'Got it, let’s go!'"
+            [buttonStyleClass]="'btn-promote'"
+            (click)="closeIdeaInfo()"
+          >
           </app-buttons>
-
         </div>
       </div>
     </div>
-
   </app-modal>
+</div>

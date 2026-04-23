@@ -61,7 +61,7 @@ public class ScoringService : IScoringService
         }
         else
         {
-            idea.CurrentStage = ScoringStage.Evaluation; 
+            idea.CurrentStage = ScoringStage.Evaluation;
             //_logger.LogInformation("Idea {IdeaId} staged as Evaluation with score {score}.", idea.Id, score);
             _logger.LogInformation("Idea staged as Evaluation");
         }

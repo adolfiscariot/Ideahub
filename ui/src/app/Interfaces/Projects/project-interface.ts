@@ -3,7 +3,7 @@ export enum ProjectStatus {
   Active = 1,
   Completed = 2,
   Shelved = 3,
-  Cancelled = 4
+  Cancelled = 4,
 }
 
 export interface Project {

@@ -4,9 +4,8 @@ import { FormGroup } from '@angular/forms';
 export function updateCharCount(
   form: FormGroup,
   field: string,
-  max: number
+  max: number,
 ): { count: number; limitReached: boolean } {
-
   const control = form.get(field);
   const value: string = control?.value || '';
 

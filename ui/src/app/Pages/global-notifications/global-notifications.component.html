@@ -1,20 +1,30 @@
 <!-- Tab Toggle -->
 <div class="tab-toggle">
-  <button class="tab-btn" [class.active]="activeTab === 'requests'" (click)="setTab('requests')">
+  <button
+    class="tab-btn"
+    [class.active]="activeTab === 'requests'"
+    (click)="setTab('requests')"
+  >
     Requests
     @if (totalRequests > 0) {
-      <span class="tab-badge">{{ totalRequests > 9 ? '9+' : totalRequests }}</span>
+      <span class="tab-badge">{{
+        totalRequests > 9 ? "9+" : totalRequests
+      }}</span>
     }
   </button>
-  <button class="tab-btn" [class.active]="activeTab === 'comments'" (click)="setTab('comments')">
+  <button
+    class="tab-btn"
+    [class.active]="activeTab === 'comments'"
+    (click)="setTab('comments')"
+  >
     Comments
     @if (unreadCount > 0) {
-      <span class="tab-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+      <span class="tab-badge">{{ unreadCount > 9 ? "9+" : unreadCount }}</span>
     }
   </button>
 </div>
 
-@if (activeTab === 'requests') {
+@if (activeTab === "requests") {
   @if (loadingRequests) {
     <div class="loading">Loading pending requests...</div>
   }
@@ -22,9 +32,7 @@
     <div class="error">{{ errorRequests }}</div>
   }
   @if (!loadingRequests && groupedRequests.length === 0) {
-    <div class="no-requests">
-      No pending requests
-    </div>
+    <div class="no-requests">No pending requests</div>
   }
 
   @if (!loadingRequests && groupedRequests.length > 0) {
@@ -32,8 +40,10 @@
       <div class="requests-header">
         <div class="header-title">
           <h2>Group Requests</h2>
-          <span class="total-count">{{ totalRequests }} pending request(s) across {{ groupedRequests.length }}
-            group(s)</span>
+          <span class="total-count"
+            >{{ totalRequests }} pending request(s) across
+            {{ groupedRequests.length }} group(s)</span
+          >
         </div>
       </div>
 
@@ -52,7 +62,7 @@
             </div>
             <div class="group-header-right">
               <span class="badge">{{ group.requests.length }}</span>
-              <span class="arrow">{{ group.open ? '▼' : '▶' }}</span>
+              <span class="arrow">{{ group.open ? "▼" : "▶" }}</span>
             </div>
           </div>
 
@@ -62,11 +72,19 @@
                 <div class="request-item">
                   <span class="request-email">{{ req.userEmail }}</span>
                   <div class="action-buttons">
-                    <app-buttons [buttonText]="'Accept'" [buttonStyleClass]="'btn-accept'" [buttonType]="'button'"
-                      (click)="acceptRequest(req)">
+                    <app-buttons
+                      [buttonText]="'Accept'"
+                      [buttonStyleClass]="'btn-accept'"
+                      [buttonType]="'button'"
+                      (click)="acceptRequest(req)"
+                    >
                     </app-buttons>
-                    <app-buttons [buttonText]="'Reject'" [buttonStyleClass]="'btn-reject'" [buttonType]="'button'"
-                      (click)="rejectRequest(req)">
+                    <app-buttons
+                      [buttonText]="'Reject'"
+                      [buttonStyleClass]="'btn-reject'"
+                      [buttonType]="'button'"
+                      (click)="rejectRequest(req)"
+                    >
                     </app-buttons>
                   </div>
                 </div>
@@ -74,13 +92,21 @@
 
               <div class="group-action-buttons">
                 @if (group.requests.length > 1) {
-                  <app-buttons [buttonText]="'Reject All'" [buttonStyleClass]="'btn-reject'"
-                    [buttonType]="'button'" (click)="rejectAll(group)">
+                  <app-buttons
+                    [buttonText]="'Reject All'"
+                    [buttonStyleClass]="'btn-reject'"
+                    [buttonType]="'button'"
+                    (click)="rejectAll(group)"
+                  >
                   </app-buttons>
                 }
                 @if (group.requests.length > 1) {
-                  <app-buttons [buttonText]="'Accept All'" [buttonStyleClass]="'btn-accept'"
-                    [buttonType]="'button'" (click)="acceptAll(group)">
+                  <app-buttons
+                    [buttonText]="'Accept All'"
+                    [buttonStyleClass]="'btn-accept'"
+                    [buttonType]="'button'"
+                    (click)="acceptAll(group)"
+                  >
                   </app-buttons>
                 }
               </div>
@@ -92,7 +118,7 @@
   }
 }
 
-@if (activeTab === 'comments') {
+@if (activeTab === "comments") {
   @if (loadingNotifications) {
     <div class="loading">Loading notifications...</div>
   }
@@ -101,9 +127,7 @@
   }
 
   @if (!loadingNotifications && commentNotifications.length === 0) {
-    <div class="no-requests">
-      No comment notifications
-    </div>
+    <div class="no-requests">No comment notifications</div>
   }
 
   @if (!loadingNotifications && commentNotifications.length > 0) {
@@ -111,10 +135,16 @@
       <div class="requests-header">
         <div class="header-title">
           <h2>Comment Notifications</h2>
-          <span class="total-count">{{ commentNotifications.length }} notification(s), {{ unreadCount }} unread</span>
+          <span class="total-count"
+            >{{ commentNotifications.length }} notification(s),
+            {{ unreadCount }} unread</span
+          >
         </div>
         @if (unreadCount > 0) {
-          <button class="mark-all-btn" (click)="$event.stopPropagation(); markAllAsRead()">
+          <button
+            class="mark-all-btn"
+            (click)="$event.stopPropagation(); markAllAsRead()"
+          >
             Mark all as read
           </button>
         }
@@ -129,17 +159,25 @@
           (keydown.space)="onNotificationClick(notif); $event.preventDefault()"
           tabindex="0"
           role="button"
-          style="cursor: pointer;"
+          style="cursor: pointer"
         >
           <div class="notif-body">
             <div class="notif-meta">
-              <span class="notif-commenter">{{ notif.comment.commenterName }}</span>
-              <span class="notif-idea">commented on <strong>{{ notif.comment.ideaTitle }}</strong></span>
+              <span class="notif-commenter">{{
+                notif.comment.commenterName
+              }}</span>
+              <span class="notif-idea"
+                >commented on
+                <strong>{{ notif.comment.ideaTitle }}</strong></span
+              >
             </div>
             <p class="notif-content">"{{ notif.comment.content }}"</p>
           </div>
           @if (!notif.isRead) {
-            <button class="mark-read-btn" (click)="$event.stopPropagation(); markAsRead(notif)">
+            <button
+              class="mark-read-btn"
+              (click)="$event.stopPropagation(); markAsRead(notif)"
+            >
               Mark as read
             </button>
           }

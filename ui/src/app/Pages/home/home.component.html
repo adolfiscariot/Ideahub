@@ -7,29 +7,58 @@
   <!-- Idea Statistics Summary -->
   @if (ideaStats) {
     <div class="stats-summary">
-      <app-stat-card label="Total Ideas" [value]="ideaStats.total" icon="heroLightBulb" variant="total"></app-stat-card>
-      <app-stat-card label="Open" [value]="ideaStats.total - ideaStats.promoted" icon="heroLockOpen"
-        variant="open"></app-stat-card>
-      <app-stat-card label="Promoted" [value]="ideaStats.promoted" icon="heroRocketLaunch"
-        variant="promoted"></app-stat-card>
-      <app-stat-card label="Closed" [value]="ideaStats.closed" icon="heroLockClosed" variant="closed"></app-stat-card>
+      <app-stat-card
+        label="Total Ideas"
+        [value]="ideaStats.total"
+        icon="heroLightBulb"
+        variant="total"
+      ></app-stat-card>
+      <app-stat-card
+        label="Open"
+        [value]="ideaStats.total - ideaStats.promoted"
+        icon="heroLockOpen"
+        variant="open"
+      ></app-stat-card>
+      <app-stat-card
+        label="Promoted"
+        [value]="ideaStats.promoted"
+        icon="heroRocketLaunch"
+        variant="promoted"
+      ></app-stat-card>
+      <app-stat-card
+        label="Closed"
+        [value]="ideaStats.closed"
+        icon="heroLockClosed"
+        variant="closed"
+      ></app-stat-card>
     </div>
   }
 
   <div class="analytics-grid">
     <!-- Most Voted Ideas -->
-    <app-dashboard-card title="Most Voted Ideas" variant="most-voted" icon="heroChartBar">
+    <app-dashboard-card
+      title="Most Voted Ideas"
+      variant="most-voted"
+      icon="heroChartBar"
+    >
       @if (mostVotedIdeas.length > 0) {
         <div>
           @for (idea of mostVotedIdeas; track idea.id) {
-            <div class="list-item clickable" tabindex="0" role="button" (click)="onIdeaClick(idea)" (keydown.enter)="onIdeaClick(idea)" (keydown.space)="onIdeaClick(idea)">
+            <div
+              class="list-item clickable"
+              tabindex="0"
+              role="button"
+              (click)="onIdeaClick(idea)"
+              (keydown.enter)="onIdeaClick(idea)"
+              (keydown.space)="onIdeaClick(idea)"
+            >
               <div class="item-main">
-                <h3>{{idea.title}}</h3>
-                <p>{{idea.proposedSolution}}</p>
+                <h3>{{ idea.title }}</h3>
+                <p>{{ idea.proposedSolution }}</p>
               </div>
               <div class="item-meta">
-                <span class="author">by {{idea.author}}</span>
-                <span class="badge vote-badge">{{idea.voteCount}} votes</span>
+                <span class="author">by {{ idea.author }}</span>
+                <span class="badge vote-badge">{{ idea.voteCount }} votes</span>
               </div>
             </div>
           }
@@ -40,18 +69,22 @@
     </app-dashboard-card>
 
     <!-- Top Contributors -->
-    <app-dashboard-card title="Top Contributors" variant="top-contributors" icon="heroTrophy">
+    <app-dashboard-card
+      title="Top Contributors"
+      variant="top-contributors"
+      icon="heroTrophy"
+    >
       @if (topContributors.length > 0) {
         <div>
           @for (user of topContributors; track user.email; let i = $index) {
             <div class="list-item contributor-item">
-              <div class="rank">{{i + 1}}</div>
+              <div class="rank">{{ i + 1 }}</div>
               <div class="item-main">
-                <h3>{{user.displayName}}</h3>
-                <p class="email">{{user.email}}</p>
+                <h3>{{ user.displayName }}</h3>
+                <p class="email">{{ user.email }}</p>
               </div>
               <div class="item-meta">
-                <span class="badge idea-badge">{{user.ideaCount}} ideas</span>
+                <span class="badge idea-badge">{{ user.ideaCount }} ideas</span>
               </div>
             </div>
           }
@@ -62,17 +95,32 @@
     </app-dashboard-card>
 
     <!-- Group Engagement -->
-    <app-dashboard-card title="Top Groups" variant="group-engagement" icon="heroUserGroup">
+    <app-dashboard-card
+      title="Top Groups"
+      variant="group-engagement"
+      icon="heroUserGroup"
+    >
       @if (groupEngagement.length > 0) {
         <div>
           @for (group of groupEngagement; track group.id) {
-            <div class="list-item clickable" tabindex="0" role="button" (click)="onGroupClick(group)" (keydown.enter)="onGroupClick(group)" (keydown.space)="onGroupClick(group)">
+            <div
+              class="list-item clickable"
+              tabindex="0"
+              role="button"
+              (click)="onGroupClick(group)"
+              (keydown.enter)="onGroupClick(group)"
+              (keydown.space)="onGroupClick(group)"
+            >
               <div class="item-main">
-                <h3>{{group.name}}</h3>
+                <h3>{{ group.name }}</h3>
               </div>
               <div class="item-meta">
-                <span class="badge idea-badge">{{group.ideaCount}} ideas</span>
-                <span class="badge vote-badge">{{group.voteCount}} votes</span>
+                <span class="badge idea-badge"
+                  >{{ group.ideaCount }} ideas</span
+                >
+                <span class="badge vote-badge"
+                  >{{ group.voteCount }} votes</span
+                >
               </div>
             </div>
           }
@@ -83,21 +131,30 @@
     </app-dashboard-card>
 
     <!-- Promoted Ideas -->
-    <app-dashboard-card title="Promoted Ideas" variant="promoted-ideas" icon="heroStar">
+    <app-dashboard-card
+      title="Promoted Ideas"
+      variant="promoted-ideas"
+      icon="heroStar"
+    >
       @if (promotedIdeas.length > 0) {
         <div>
           @for (idea of promotedIdeas; track idea.id) {
-            <div class="list-item" [class.clickable]="idea.projectId" tabindex="0" role="button"
+            <div
+              class="list-item"
+              [class.clickable]="idea.projectId"
+              tabindex="0"
+              role="button"
               (click)="idea.projectId && onPromotedIdeaClick(idea)"
               (keydown.enter)="idea.projectId && onPromotedIdeaClick(idea)"
-              (keydown.space)="idea.projectId && onPromotedIdeaClick(idea)">
+              (keydown.space)="idea.projectId && onPromotedIdeaClick(idea)"
+            >
               <div class="item-main">
-                <h3>{{idea.title}}</h3>
-                <p>{{idea.proposedSolution}}</p>
+                <h3>{{ idea.title }}</h3>
+                <p>{{ idea.proposedSolution }}</p>
               </div>
               <div class="item-meta">
-                <span class="author">by {{idea.author}}</span>
-                <span class="date">{{idea.promotedDate | date}}</span>
+                <span class="author">by {{ idea.author }}</span>
+                <span class="date">{{ idea.promotedDate | date }}</span>
               </div>
             </div>
           }
@@ -113,38 +170,56 @@
     <div class="personal-stats-section">
       <h2>Your Impact</h2>
       <div class="personal-stats-grid">
-        <app-stat-card label="Ideas Created" [value]="personalStats.ideasCreated || 0" icon="heroLightBulb"
-          variant="created"></app-stat-card>
-        <app-stat-card label="Votes Cast" [value]="personalStats.votesCast || 0" icon="heroHandThumbUp"
-          variant="votes"></app-stat-card>
-        <app-stat-card label="Projects Involved" [value]="personalStats.projectsInvolved || 0" icon="heroBriefcase"
-          variant="projects"></app-stat-card>
-        <app-stat-card label="Groups Created" [value]="personalStats.groupsCreated || 0" icon="heroUserGroup"
-          variant="groups"></app-stat-card>
+        <app-stat-card
+          label="Ideas Created"
+          [value]="personalStats.ideasCreated || 0"
+          icon="heroLightBulb"
+          variant="created"
+        ></app-stat-card>
+        <app-stat-card
+          label="Votes Cast"
+          [value]="personalStats.votesCast || 0"
+          icon="heroHandThumbUp"
+          variant="votes"
+        ></app-stat-card>
+        <app-stat-card
+          label="Projects Involved"
+          [value]="personalStats.projectsInvolved || 0"
+          icon="heroBriefcase"
+          variant="projects"
+        ></app-stat-card>
+        <app-stat-card
+          label="Groups Created"
+          [value]="personalStats.groupsCreated || 0"
+          icon="heroUserGroup"
+          variant="groups"
+        ></app-stat-card>
       </div>
     </div>
   }
 
-  <app-modal [isOpen]="showWelcomeInfoModal" title="Welcome Guide" size="md" (closeModal)="closeWelcomeInfo()">
-
+  <app-modal
+    [isOpen]="showWelcomeInfoModal"
+    title="Welcome Guide"
+    size="md"
+    (closeModal)="closeWelcomeInfo()"
+  >
     <div modal-body>
       <div class="welcome-info-modal">
         <div class="section">
-
           <!-- Welcome -->
           <h3 class="section-title">
             <span class="icon">👋</span>
             Welcome to IdeaHub
           </h3>
           <p>
-            IdeaHub is Adept Technologies’ internal platform for capturing, tracking, and turning employee ideas into
-            real, executable initiatives.
+            IdeaHub is Adept Technologies’ internal platform for capturing,
+            tracking, and turning employee ideas into real, executable
+            initiatives.
           </p>
-
         </div>
 
         <div class="section">
-
           <!-- Getting Started -->
           <h3 class="section-title">
             <span class="icon">📊</span>
@@ -156,7 +231,8 @@
               <div class="rule-header">
                 <span class="bullet"></span>
                 <span>
-                  The homepage gives you a quick snapshot of idea activity at Adept and your personal involvement.
+                  The homepage gives you a quick snapshot of idea activity at
+                  Adept and your personal involvement.
                 </span>
               </div>
             </li>
@@ -165,8 +241,9 @@
               <div class="rule-header">
                 <span class="bullet"></span>
                 <span>
-                  To participate, go to the <strong>Groups</strong> page and join an existing group or create a new one
-                  to contribute valuable ideas.
+                  To participate, go to the <strong>Groups</strong> page and
+                  join an existing group or create a new one to contribute
+                  valuable ideas.
                 </span>
               </div>
             </li>
@@ -175,24 +252,27 @@
               <div class="rule-header">
                 <span class="bullet"></span>
                 <span>
-                  When an idea gains enough support and meets the required threshold, it is promoted into a project. At
-                  that point, an overseer is assigned to act as the project owner, and the idea moves from discussion
-                  into execution within the company.
+                  When an idea gains enough support and meets the required
+                  threshold, it is promoted into a project. At that point, an
+                  overseer is assigned to act as the project owner, and the idea
+                  moves from discussion into execution within the company.
                 </span>
               </div>
             </li>
           </ul>
-
         </div>
       </div>
     </div>
 
     <div modal-footer>
       <div class="modal-footer-content">
-        <app-buttons [buttonText]="'Got it, let’s go!'" [buttonStyleClass]="'btn-promote'" (click)="closeWelcomeInfo()">
+        <app-buttons
+          [buttonText]="'Got it, let’s go!'"
+          [buttonStyleClass]="'btn-promote'"
+          (click)="closeWelcomeInfo()"
+        >
         </app-buttons>
       </div>
     </div>
-
   </app-modal>
 </div>

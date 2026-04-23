@@ -47,9 +47,9 @@ public class TokenService : ITokenService
         if (string.IsNullOrWhiteSpace(user.Email))
         {
             _logger.LogError("Email not found");
-            throw new Exception("Email not found") ;
+            throw new Exception("Email not found");
         }
-        
+
         //data to be used in the token's payload
         var claims = new List<Claim>
         {

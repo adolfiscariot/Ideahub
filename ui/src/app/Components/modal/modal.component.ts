@@ -1,12 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+} from '@angular/core';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './modal.component.html',
-  styleUrls: ['./modal.component.scss']
+  styleUrls: ['./modal.component.scss'],
 })
 export class ModalComponent {
   @Input() isOpen = false;
@@ -33,7 +39,10 @@ export class ModalComponent {
   }
 
   onOverlayClick(event: MouseEvent) {
-    if (this.closeOnOverlayClick && (event.target as HTMLElement).classList.contains('modal-overlay')) {
+    if (
+      this.closeOnOverlayClick &&
+      (event.target as HTMLElement).classList.contains('modal-overlay')
+    ) {
       this.close();
     }
   }

@@ -299,18 +299,18 @@ public class AuthController : ControllerBase
 
         // _logger.LogInformation("Refresh attempt for user. Cookie present: {cookiePresent}, Body present: {bodyPresent}", 
         //     !string.IsNullOrEmpty(cookieToken), !string.IsNullOrEmpty(tokenRequest?.RefreshToken));
-        _logger.LogInformation("Refreshing attempt for user"); 
+        _logger.LogInformation("Refreshing attempt for user");
         if (string.IsNullOrEmpty(rawRefreshToken))
         {
             //_logger.LogError("Refresh token is missing from cookie and request body");
-            _logger.LogError("Missing Refresh token"); 
+            _logger.LogError("Missing Refresh token");
             return BadRequest(ApiResponse.Fail("Refresh token is required"));
         }
 
         if (rawRefreshToken == "cookie")
         {
             //_logger.LogError("Browser failed to send the actual refreshToken cookie");
-            _logger.LogError("Auth cookie missing"); 
+            _logger.LogError("Auth cookie missing");
             return BadRequest(ApiResponse.Fail("Authentication cookie missing. Please try logging in again."));
         }
 
@@ -325,7 +325,7 @@ public class AuthController : ControllerBase
         if (principal?.Identity is null)
         {
             //_logger.LogError("Couldn't get principal's identity from expired token. Token might be malformed or tampered with.");
-            _logger.LogError("Invalid access token"); 
+            _logger.LogError("Invalid access token");
             return BadRequest(ApiResponse.Fail("Invalid access token"));
         }
 
@@ -333,7 +333,7 @@ public class AuthController : ControllerBase
         if (userId is null)
         {
             //_logger.LogError("User ID not found in token claims"); 
-            _logger.LogError("User ID not found"); 
+            _logger.LogError("User ID not found");
             return BadRequest(ApiResponse.Fail("Invalid access token claims"));
         }
 
@@ -386,7 +386,7 @@ public class AuthController : ControllerBase
 
         var newRefreshToken = new RefreshToken
         {
-            Token = hashedNewToken, 
+            Token = hashedNewToken,
             TokenId = Guid.NewGuid().ToString(),
             HasExpired = false,
             RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
@@ -434,7 +434,7 @@ public class AuthController : ControllerBase
             if (userId is null)
             {
                 _logger.LogError("Logout failed. User Id not found");
-                return NotFound(ApiResponse.Fail("Logout failed. User Id not found")); 
+                return NotFound(ApiResponse.Fail("Logout failed. User Id not found"));
             }
             await _tokenService.RevokeRefreshTokenAsync(userId);
             Response.Cookies.Delete("refreshToken"); // Clear rotation cookie

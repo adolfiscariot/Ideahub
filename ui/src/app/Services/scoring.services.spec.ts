@@ -1,17 +1,20 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { ScoringService } from './scoring.services';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { 
-  BusinessCaseDto, 
-  ScoringDimensionsDto, 
-  ImpactScope, 
-  RiskLevel, 
-  EvaluationStatus, 
-  ResponsibleDepartment, 
-  ActionStep, 
-  BusinessCaseResult, 
+import {
+  BusinessCaseDto,
+  ScoringDimensionsDto,
+  ImpactScope,
+  RiskLevel,
+  EvaluationStatus,
+  ResponsibleDepartment,
+  ActionStep,
+  BusinessCaseResult,
   Verdict,
   StrategicAlignmentScore,
   CustomerImpactScore,
@@ -24,7 +27,7 @@ import {
   ScalabilityScore,
   DifferentiationScore,
   SustainabilityScore,
-  ConfidenceScore
+  ConfidenceScore,
 } from '../Interfaces/Ideas/idea-interfaces';
 import { environment } from '../../environments/environment';
 
@@ -45,7 +48,7 @@ describe('ScoringService', () => {
     DecisionDate: '2024-01-01',
     PlannedDurationWeeks: 12,
     CurrentStage: BusinessCaseResult.InProgress,
-    Verdict: Verdict.Approved
+    Verdict: Verdict.Approved,
   };
 
   const mock_dimensions: ScoringDimensionsDto = {
@@ -62,13 +65,13 @@ describe('ScoringService', () => {
     SustainabilityImpact: SustainabilityScore.StrongBenefit,
     ProjectConfidence: ConfidenceScore.High,
     Score: 85,
-    ReviewerComments: 'Clear winner'
+    ReviewerComments: 'Clear winner',
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ScoringService]
+      providers: [ScoringService],
     });
     service = TestBed.inject(ScoringService);
     http_mock = TestBed.inject(HttpTestingController);
@@ -85,9 +88,12 @@ describe('ScoringService', () => {
   // Phase 1: Automated AI Evaluation
   describe('Phase 1: evaluateIdea()', () => {
     it('should POST to /evaluate/{ideaId}', () => {
-      const mock_response: ApiResponse<void> = { success: true, message: 'Evaluation started' };
+      const mock_response: ApiResponse<void> = {
+        success: true,
+        message: 'Evaluation started',
+      };
 
-      service.evaluateIdea('idea-123').subscribe(res => {
+      service.evaluateIdea('idea-123').subscribe((res) => {
         expect(res.success).toBeTrue();
       });
 
@@ -111,9 +117,13 @@ describe('ScoringService', () => {
     });
 
     it('should GET /business-case/{ideaId}', () => {
-      const mock_response: ApiResponse<BusinessCaseDto> = { success: true, message: 'ok', data: mock_business_case };
+      const mock_response: ApiResponse<BusinessCaseDto> = {
+        success: true,
+        message: 'ok',
+        data: mock_business_case,
+      };
 
-      service.getBusinessCase('idea-123').subscribe(res => {
+      service.getBusinessCase('idea-123').subscribe((res) => {
         expect(res.data?.ExpectedBenefits).toBe('Reduced latency');
       });
 
@@ -137,9 +147,13 @@ describe('ScoringService', () => {
     });
 
     it('should GET /dimensions/{ideaId}', () => {
-      const mock_response: ApiResponse<ScoringDimensionsDto> = { success: true, message: 'ok', data: mock_dimensions };
+      const mock_response: ApiResponse<ScoringDimensionsDto> = {
+        success: true,
+        message: 'ok',
+        data: mock_dimensions,
+      };
 
-      service.getScoringDimensions('idea-123').subscribe(res => {
+      service.getScoringDimensions('idea-123').subscribe((res) => {
         expect(res.data?.Score).toBe(85);
         expect(res.data?.ReviewerComments).toBe('Clear winner');
       });

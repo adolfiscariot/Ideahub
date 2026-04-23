@@ -1,7 +1,13 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { NotificationService, CommentNotification } from './notification.service';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
+import {
+  NotificationService,
+  CommentNotification,
+} from './notification.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { environment } from '../../environments/environment';
 
@@ -30,14 +36,14 @@ describe('NotificationService', () => {
       commenterName: 'Alice',
       ideaTitle: 'Processor Project',
       ideaId: 10,
-      groupId: 1
-    }
+      groupId: 1,
+    },
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [NotificationService]
+      providers: [NotificationService],
     });
     service = TestBed.inject(NotificationService);
     http_mock = TestBed.inject(HttpTestingController);
@@ -54,7 +60,11 @@ describe('NotificationService', () => {
   // unread count triggers
   describe('Unread Count Management', () => {
     it('should GET /unread-count when fetchUnreadCount is called', () => {
-      const mock_response: ApiResponse<{ count: number }> = { success: true, message: 'ok', data: { count: 5 } };
+      const mock_response: ApiResponse<{ count: number }> = {
+        success: true,
+        message: 'ok',
+        data: { count: 5 },
+      };
 
       service.fetchUnreadCount();
 
@@ -62,7 +72,7 @@ describe('NotificationService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mock_response);
 
-      service.unreadCount$.subscribe(count => {
+      service.unreadCount$.subscribe((count) => {
         expect(count).toBe(5);
       });
     });
@@ -70,16 +80,20 @@ describe('NotificationService', () => {
     it('should increment unread count locally', () => {
       service.setUnreadCount(10);
       service.incrementUnread();
-      service.unreadCount$.subscribe(count => expect(count).toBe(11));
+      service.unreadCount$.subscribe((count) => expect(count).toBe(11));
     });
   });
 
   // getNotifications
   describe('getNotifications()', () => {
     it('should GET /my-notifications', () => {
-      const mock_response: ApiResponse<CommentNotification[]> = { success: true, message: 'ok', data: [mock_notification] };
+      const mock_response: ApiResponse<CommentNotification[]> = {
+        success: true,
+        message: 'ok',
+        data: [mock_notification],
+      };
 
-      service.getNotifications().subscribe(res => {
+      service.getNotifications().subscribe((res) => {
         expect(res.data?.length).toBe(1);
         expect(res.data?.[0].comment.commenterName).toBe('Alice');
       });
@@ -96,7 +110,7 @@ describe('NotificationService', () => {
       const mock_response: ApiResponse<void> = { success: true, message: 'ok' };
       service.setUnreadCount(5);
 
-      service.markAsRead(101).subscribe(res => {
+      service.markAsRead(101).subscribe((res) => {
         expect(res.success).toBeTrue();
       });
 
@@ -104,7 +118,7 @@ describe('NotificationService', () => {
       expect(req.request.method).toBe('PATCH');
       req.flush(mock_response);
 
-      service.unreadCount$.subscribe(count => expect(count).toBe(4));
+      service.unreadCount$.subscribe((count) => expect(count).toBe(4));
     });
 
     it('should PATCH /mark-all-read and reset count to 0', () => {
@@ -116,7 +130,7 @@ describe('NotificationService', () => {
       const req = http_mock.expectOne(`${api_url}/mark-all-read`);
       req.flush(mock_response);
 
-      service.unreadCount$.subscribe(count => expect(count).toBe(0));
+      service.unreadCount$.subscribe((count) => expect(count).toBe(0));
     });
   });
 
@@ -124,8 +138,8 @@ describe('NotificationService', () => {
   describe('convertResponse', () => {
     it('should handle raw status as success', () => {
       const raw: RawMockResponse<null> = { status: true, message: 'done' };
-      
-      service.markAllAsRead().subscribe(res => {
+
+      service.markAllAsRead().subscribe((res) => {
         expect(res.success).toBeTrue();
       });
 
