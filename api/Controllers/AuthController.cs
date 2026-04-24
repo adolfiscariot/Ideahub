@@ -280,7 +280,8 @@ public class AuthController : ControllerBase
             {
                 AccessToken = accessToken,
                 RefreshToken = "cookie",
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
+                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+                PasswordSetupRequired = string.IsNullOrEmpty(user.PasswordHash)
             }));
         }
 
@@ -554,4 +555,156 @@ public class AuthController : ControllerBase
         }
     }
 
+
+    [HttpPost("sso-login")]
+    public async Task<IActionResult> SsoLogin([FromBody] SsoExchangeDto dto)
+    {
+
+        var ssoSecretHex = _configuration["Jwt:SsoSharedSecret"];
+        var ssoIssuer = _configuration["Jwt:SsoIssuer"];
+        var ssoAudience = _configuration["Jwt:SsoAudience"];
+
+        if (string.IsNullOrEmpty(ssoSecretHex) || string.IsNullOrEmpty(ssoIssuer) || string.IsNullOrEmpty(ssoAudience))
+        {
+            _logger.LogError("SSO Configuration is missing one or more required fields (Secret, Issuer, or Audience).");
+            return StatusCode(500, ApiResponse.Fail("SSO is not properly configured on the server."));
+        }
+
+
+        try
+        {
+            var key = JwtHexToBytes.FromHexToBytes(ssoSecretHex);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            tokenHandler.InboundClaimTypeMap.Clear(); // Prevent C# from renaming "email" to a schema URL
+
+
+            // Validate token from the Intranet
+            var principal = tokenHandler.ValidateToken(dto.Token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+
+                ValidateIssuer = true,
+                ValidIssuer = ssoIssuer,
+
+                ValidateAudience = true,
+                ValidAudience = ssoAudience,
+
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+
+                // Pin the algorithm to HmacSha256
+                ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
+            }, out _);
+
+            // Extract identity from the passport
+            var email = principal.FindFirst("email")?.Value;
+            var name = principal.FindFirst("name")?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(ApiResponse.Fail("Invalid SSO token: Email missing"));
+
+            // Auto-Provisioning (Find or Create User)
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogInformation("SSO: Creating new account for {Email}", email);
+                user = new IdeahubUser
+                {
+                    DisplayName = name ?? email.Split('@')[0],
+                    Email = email,
+                    UserName = email,
+                    EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    LastLoginAt = DateTime.UtcNow
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    _logger.LogWarning("SSO user creation failed for {Email}", email);
+                    return BadRequest(ApiResponse.Fail(
+                        "User creation failed",
+                        createResult.Errors.Select(e => e.Description).ToList()));
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
+                if (!roleResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    _logger.LogWarning("SSO role assignment failed for {Email}", email);
+                    return BadRequest(ApiResponse.Fail(
+                        "Role assignment failed",
+                        roleResult.Errors.Select(e => e.Description).ToList()));
+                }
+
+            }
+
+            // Issue Native IdeaHub access tokens to allow for login
+            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            await _tokenService.StoreRefreshTokenAsync(user.Id, refreshToken, DateTime.UtcNow.AddDays(7));
+
+            // Set Refresh Token in a persistent, HttpOnly cookie (aligning with regular login)
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Set to true in prod for HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+
+            _logger.LogInformation("SSO: Hand-off successful for {Email}", email);
+
+            return Ok(ApiResponse.Ok("SSO Login Successful", new TokenResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = "cookie",
+                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7),
+                PasswordSetupRequired = string.IsNullOrEmpty(user.PasswordHash)
+            }));
+        }
+        catch (SecurityTokenException ex)
+        {
+            _logger.LogWarning("SSO Token validation failed: {Message}", ex.Message);
+            return Unauthorized(ApiResponse.Fail("Invalid or expired SSO token"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SSO Handoff failed: {Message}", ex.Message);
+            return StatusCode(500, ApiResponse.Fail("An internal error occurred during SSO authentication"));
+        }
+    }
+
+    [Authorize]
+    [HttpPost("set-initial-password")]
+    public async Task<IActionResult> SetInitialPassword([FromBody] SetPasswordDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ApiResponse.Fail("Invalid request data"));
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(ApiResponse.Fail("Invalid session"));
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound(ApiResponse.Fail("User not found"));
+
+        // Verify the user currently has NO password hash
+        if (!string.IsNullOrEmpty(user.PasswordHash))
+        {
+            return BadRequest(ApiResponse.Fail("Password already set. Please use the reset password functionality if you forgot it."));
+        }
+
+        var result = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("User {Email} set their initial local password.", user.Email);
+            return Ok(ApiResponse.Ok("Password set successfully"));
+        }
+
+        return BadRequest(ApiResponse.Fail("Failed to set password", result.Errors.Select(e => e.Description).ToList()));
+    }
 }
