@@ -190,12 +190,14 @@ export class AuthService {
             this.setupRefreshTimer();
             return newAccessToken;
           } else {
-            this.logoutLocal();
             throw new Error(response.message || 'No access token in response');
           }
         }),
         catchError((error) => {
-          this.refreshTokenSubject.next(null);
+          // Surface the failure to any queued concurrent callers so they don't hang.
+          this.refreshTokenSubject.error(error);
+          // Reset the subject for future refresh attempts.
+          this.refreshTokenSubject = new BehaviorSubject<string | null>(null);
           this.logoutLocal();
           return throwError(() => error);
         }),
