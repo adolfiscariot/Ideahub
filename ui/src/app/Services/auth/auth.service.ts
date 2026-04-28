@@ -50,6 +50,14 @@ export class AuthService {
     if (token) {
       this.setupRefreshTimer();
     }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const currentToken = localStorage.getItem('accessToken');
+        if (currentToken) {
+          this.setupRefreshTimer();
+        }
+      }
+    });
   }
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
@@ -149,7 +157,6 @@ export class AuthService {
    */
   refreshToken(): Observable<string> {
     if (this.isRefreshing) {
-      // If a refresh is already in progress, wait for it to complete
       return this.refreshTokenSubject.pipe(
         filter((token) => token != null),
         take(1),
@@ -169,25 +176,28 @@ export class AuthService {
     const payload = { accessToken, refreshToken: 'cookie' };
 
     return this.http
-      .post<AuthData>(`${this.authUrl}/refresh-token`, payload, {
+      .post<ApiResponse<AuthData>>(`${this.authUrl}/refresh-token`, payload, {
         withCredentials: true,
       })
       .pipe(
+        map((response) => this.convertResponse<AuthData>(response)),
         map((response) => {
-          const newAccessToken = response.accessToken;
-          if (newAccessToken) {
+          const newAccessToken = response.data?.accessToken;
+          if (response.success && newAccessToken) {
             localStorage.setItem('accessToken', newAccessToken);
             this._isLoggedIn.next(true);
             this.refreshTokenSubject.next(newAccessToken);
             this.setupRefreshTimer();
             return newAccessToken;
           } else {
-            this.logoutLocal();
-            throw new Error('No access token in response');
+            throw new Error(response.message || 'No access token in response');
           }
         }),
         catchError((error) => {
-          this.refreshTokenSubject.next(null); //Signal failure without breaking subject
+          // Surface the failure to any queued concurrent callers so they don't hang.
+          this.refreshTokenSubject.error(error);
+          // Reset the subject for future refresh attempts.
+          this.refreshTokenSubject = new BehaviorSubject<string | null>(null);
           this.logoutLocal();
           return throwError(() => error);
         }),
@@ -230,7 +240,9 @@ export class AuthService {
       if (!payload.exp) return;
 
       const expiresAt = payload.exp * 1000;
-      const timeout = expiresAt - Date.now() - 60000; // Refresh 1 minute before expiry
+      // Refresh 2 minutes before expiry
+      const REFRESH_BUFFER_MS = 2 * 60 * 1000;
+      const timeout = expiresAt - Date.now() - REFRESH_BUFFER_MS;
 
       if (timeout > 0) {
         this.refreshSubscription = timer(timeout).subscribe(() => {
@@ -239,10 +251,11 @@ export class AuthService {
           });
         });
       } else {
-        // Token is already very close to expiry or expired, refresh now
-        this.refreshToken().subscribe({
-          error: () => this.logoutLocal(),
-        });
+        if (!this.isRefreshing) {
+          this.refreshToken().subscribe({
+            error: () => this.logoutLocal(),
+          });
+        }
       }
     } catch {
       // If parsing fails, we don't schedule a refresh
