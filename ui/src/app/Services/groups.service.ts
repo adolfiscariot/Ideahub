@@ -15,7 +15,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class GroupsService {
-  private apiUrl = `${environment.apiUrl}/group`;
+  private readonly apiUrl = `${environment.apiUrl}/group`;
 
   private http = inject(HttpClient);
 
