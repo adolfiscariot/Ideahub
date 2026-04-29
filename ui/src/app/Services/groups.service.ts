@@ -9,7 +9,7 @@ import {
   AddGroup,
   JoinGroupResponse,
 } from '../Interfaces/Groups/groups-interfaces';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
