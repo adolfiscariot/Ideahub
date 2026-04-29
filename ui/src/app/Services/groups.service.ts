@@ -16,6 +16,7 @@ import { environment } from '../../environments/environment';
 })
 export class GroupsService {
   private readonly apiUrl = `${environment.apiUrl}/group`;
+
   private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface
