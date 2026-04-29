@@ -447,11 +447,11 @@ public class GroupController : ControllerBase
             adminGroupIds.Contains(r.GroupId) &&
             r.Status.ToString() == "Pending")
         .Select(r => new
-            {
-                r.GroupId,
-                GroupName = r.Group.Name,
-                UserEmail = r.User.Email
-            })
+        {
+            r.GroupId,
+            GroupName = r.Group.Name,
+            UserEmail = r.User.Email
+        })
         .ToListAsync();
 
 
