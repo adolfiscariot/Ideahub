@@ -27,9 +27,13 @@ export class CommitteeMembersComponent implements OnInit {
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
 
-  ngOnInit() {
-    this.isSuperAdmin = this.authService.isSuperAdmin();
-    this.isCommitteeMember = this.authService.isCommitteeMember();
+  ngOnInit(): void {
+    this.authService.isSuperAdmin().subscribe((isAdmin: boolean) => {
+      this.isSuperAdmin = isAdmin;
+    });
+    this.authService.isCommitteeMember().subscribe((isMember: boolean) => {
+      this.isCommitteeMember = isMember;
+    });
     this.loadCommitteeMembers();
     this.loadAllUsers();
   }

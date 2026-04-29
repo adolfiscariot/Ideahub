@@ -2,13 +2,13 @@
   <div class="navbar-left">
     <!--If logged out this text should lead to the landing page otherwise
     it should lead to the home page-->
-    @if (loggedInStatus | async; as isLoggedIn) {
+    @if (loggedInStatus$ | async; as isLoggedIn) {
       <a class="product-text" [routerLink]="'/home'">Ideahub</a>
     } @else {
       <a class="product-text" [routerLink]="'/'">Ideahub</a>
     }
   </div>
-  @if (loggedInStatus | async; as isLoggedIn) {
+  @if (loggedInStatus$ | async; as isLoggedIn) {
     <nav class="nav-items">
       <a
         routerLink="/home"
@@ -46,7 +46,7 @@
   }
 
   <div class="navbar-right">
-    @if (loggedInStatus | async; as isLoggedIn) {
+    @if (loggedInStatus$ | async; as isLoggedIn) {
       <a routerLink="/notifications" class="nav-link desktop-only">
         <div class="notif-bell">
           <button class="notification-btn" aria-label="Notifications">
@@ -82,13 +82,13 @@
         [buttonText]="'LOG IN'"
         [buttonStyleClass]="'btn-login-navbar'"
         [buttonType]="'button'"
-        [buttonLink]="'/login'"
+        (click)="onLogin()"
       />
       <app-buttons
         [buttonText]="'SIGN UP'"
         [buttonStyleClass]="'btn-signup-navbar'"
         [buttonType]="'button'"
-        [buttonLink]="'/register'"
+        (click)="onSignUp()"
       />
     }
   </div>
