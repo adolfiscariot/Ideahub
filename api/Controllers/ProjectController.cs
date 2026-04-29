@@ -41,7 +41,7 @@ public class ProjectController : ControllerBase
             }
 
             //user info
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -124,7 +124,7 @@ public class ProjectController : ControllerBase
         try
         {
             //user info
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -335,7 +335,7 @@ public class ProjectController : ControllerBase
         try
         {
             //Fetch user
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -400,7 +400,7 @@ public class ProjectController : ControllerBase
     [HttpPut("{projectId}")]
     public async Task<IActionResult> UpdateProject(int projectId, ProjectUpdateDto projectUpdateDto)
     {
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         try
         {
             //fetch user info
@@ -506,7 +506,7 @@ public class ProjectController : ControllerBase
         try
         {
             //fetch user info
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
