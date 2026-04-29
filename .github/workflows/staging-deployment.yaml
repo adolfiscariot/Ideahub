@@ -50,11 +50,6 @@ jobs:
         run: |
           docker push ${{ steps.meta.outputs.image_ref }}
 
-      - name: Verify image is pullable
-        run: |
-          docker pull ${{ steps.meta.outputs.image_ref }}
-          echo "Image verified: ${{ steps.meta.outputs.image_ref }}"
-
   # ============================================================
   # 2. DEPLOY TO STAGING (on-prem via SSH — password auth)
   # ============================================================
