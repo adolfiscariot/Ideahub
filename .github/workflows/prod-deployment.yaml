@@ -90,7 +90,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ============================================================
-  # 3. DEPLOY TO PRODUCTION (EC2 via SSH — .pem key auth)
+  # 3. DEPLOY TO PRODUCTION
+  #    - EC2 already has ~/Ideahub/ with docker-compose.yml and .env
+  #    - No git pull needed — image is pulled from GHCR
+  #    - No --build flag — image was already built by the runner
   # ============================================================
   deploy-prod:
     name: Deploy to Production EC2
@@ -103,7 +106,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}    # usually ubuntu or ec2-user
+          username: ${{ secrets.EC2_USER }}    # ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}      # full contents of your .pem file
           port: 22
           script: |
@@ -124,6 +127,8 @@ jobs:
             echo "Deploying with Docker Compose..."
             cd ~/Ideahub
             IMAGE_REF=$IMAGE_REF docker compose up -d
+            # .env is already in ~/Ideahub/ so Compose picks it up automatically
+            # No --build flag — image is pre-built and pulled from GHCR
 
             echo "Production deployment complete — SHA: $SHA  Image: $IMAGE_REF"
 
