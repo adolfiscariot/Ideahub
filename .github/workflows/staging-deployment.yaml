@@ -59,7 +59,7 @@ jobs:
     needs: build-and-push
 
     steps:
-      - name: Deploy image to staging via SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.STAGING_HOST }}
@@ -69,27 +69,21 @@ jobs:
           script: |
             IMAGE_REF="${{ needs.build-and-push.outputs.image_ref }}"
 
-            echo "Pulling image: $IMAGE_REF"
+            echo "Logging into GHCR..."
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "Pulling image: $IMAGE_REF"
             docker pull "$IMAGE_REF"
 
-            echo "Stopping existing container (if any)..."
-            docker stop ideahub-staging || true
-            docker rm ideahub-staging || true
-
-            echo "Starting new container..."
-            docker run -d \
-              --name ideahub-staging \
-              --restart unless-stopped \
-              --env-file /etc/ideahub/staging.env \
-              -p 8080:8080 \
-              "$IMAGE_REF"
+            echo "Deploying with Docker Compose..."
+            cd /opt/ideahub
+            IMAGE_REF=$IMAGE_REF docker compose --env-file /etc/ideahub/staging.env up -d
 
             echo "Staging deployment complete: $IMAGE_REF"
 
   # ============================================================
   # 3. SMOKE TESTS — SSH into the server and test from inside
-  #    No external URL needed. Tests hit localhost on the server.
+  #    Hits localhost since the server is not publicly reachable
   # ============================================================
   smoke-tests:
     name: Smoke Tests on Staging
@@ -97,7 +91,7 @@ jobs:
     needs: deploy-staging
 
     steps:
-      - name: Run smoke tests on staging server via SSH
+      - name: Run smoke tests via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.STAGING_HOST }}
@@ -105,26 +99,27 @@ jobs:
           password: ${{ secrets.STAGING_PASSWORD }}
           port: ${{ secrets.STAGING_PORT || 22 }}
           script: |
-            echo "Waiting for container to be ready..."
-            sleep 5
+            echo "Waiting for containers to be ready..."
+            sleep 10
 
-            echo "Checking container is running..."
-            STATUS=$(docker inspect --format='{{.State.Status}}' ideahub-staging 2>/dev/null || echo "not found")
+            echo "Checking backend container status..."
+            STATUS=$(docker inspect --format='{{.State.Status}}' ideahub-backend 2>/dev/null || echo "not found")
             echo "Container status: $STATUS"
 
             if [ "$STATUS" != "running" ]; then
-              echo "Container is not running. Aborting."
+              echo "Backend container is not running. Aborting."
+              docker compose -f /opt/ideahub/docker-compose.yml logs ideahub-backend
               exit 1
             fi
 
-            echo "Running health check..."
-            curl --fail --retry 5 --retry-delay 3 http://localhost:8080/health \
+            echo "Running health check on backend..."
+            curl --fail --retry 5 --retry-delay 3 http://localhost:5065/health \
               && echo "Health check passed" \
               || (echo "Health check failed" && exit 1)
 
   # ============================================================
   # 4. MANUAL APPROVAL GATE
-  #    Workflow pauses here. A reviewer approves in GitHub UI.
+  #    Workflow pauses here until a reviewer approves in GitHub UI.
   #    Once approved, the prod workflow is triggered automatically.
   # ============================================================
   await-approval:
@@ -144,7 +139,7 @@ jobs:
       - name: Trigger production deployment
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.DEPLOY_PAT }}  # PAT with repo scope
+          token: ${{ secrets.DEPLOY_PAT }}
           event-type: deploy-prod
           client-payload: |
             {
