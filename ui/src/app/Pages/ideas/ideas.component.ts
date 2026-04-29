@@ -1992,7 +1992,8 @@ export class IdeasComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && Array.isArray(response.data)) {
             this.isCommitteeMember = response.data.some(
-              (member) => member.email?.toLowerCase() === userEmail.toLowerCase(),
+              (member) =>
+                member.email?.toLowerCase() === userEmail.toLowerCase(),
             );
           }
         },

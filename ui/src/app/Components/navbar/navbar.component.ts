@@ -28,7 +28,9 @@ import { combineLatest, map, take } from 'rxjs';
 })
 export class NavbarComponent implements OnInit {
   private readonly authService = inject(AuthService);
-  private readonly membershipNotificationsService = inject(MembershipNotificationsService);
+  private readonly membershipNotificationsService = inject(
+    MembershipNotificationsService,
+  );
   private readonly notificationService = inject(NotificationService);
 
   public readonly loggedInStatus$ = this.authService.isLoggedIn$;
