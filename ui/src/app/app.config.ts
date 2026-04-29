@@ -3,7 +3,11 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+  HTTP_INTERCEPTORS,
+} from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { heroBell } from '@ng-icons/heroicons/outline';
@@ -40,11 +44,11 @@ export const appConfig: ApplicationConfig = {
               authorizationParams: {
                 audience: 'https://api.ideahub',
                 scope: 'openid profile email offline_access',
-              }
-            }
-          }
-        ]
-      }
+              },
+            },
+          },
+        ],
+      },
     }),
   ],
 };

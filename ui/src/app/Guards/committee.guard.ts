@@ -3,7 +3,9 @@ import { Router, CanActivateFn, UrlTree } from '@angular/router';
 import { AuthService } from '../Services/auth/auth.service';
 import { Observable, map } from 'rxjs';
 
-export const CommitteeGuard: CanActivateFn = (): Observable<boolean | UrlTree> => {
+export const CommitteeGuard: CanActivateFn = (): Observable<
+  boolean | UrlTree
+> => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -14,6 +16,6 @@ export const CommitteeGuard: CanActivateFn = (): Observable<boolean | UrlTree> =
       }
 
       return router.createUrlTree(['/groups']);
-    })
+    }),
   );
 };

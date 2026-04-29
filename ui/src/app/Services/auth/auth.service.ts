@@ -1,8 +1,19 @@
 import { AppConfigService } from '../../core/services/app-config.service';
 import { inject, Injectable } from '@angular/core';
 import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
-import { Observable, map, of, switchMap, from, catchError, shareReplay } from 'rxjs';
-import { CurrentUser, ProfileResponse } from '../../Interfaces/Auth/auth-interfaces';
+import {
+  Observable,
+  map,
+  of,
+  switchMap,
+  from,
+  catchError,
+  shareReplay,
+} from 'rxjs';
+import {
+  CurrentUser,
+  ProfileResponse,
+} from '../../Interfaces/Auth/auth-interfaces';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
@@ -16,7 +27,8 @@ export class AuthService {
   /**
    * Public observables for application state
    */
-  public readonly isLoggedIn$: Observable<boolean> = this.auth0.isAuthenticated$;
+  public readonly isLoggedIn$: Observable<boolean> =
+    this.auth0.isAuthenticated$;
   public readonly user$: Observable<User | null | undefined> = this.auth0.user$;
   public readonly isLoading$: Observable<boolean> = this.auth0.isLoading$;
 
@@ -61,7 +73,7 @@ export class AuthService {
    */
   public getCurrentUser(): Observable<CurrentUser | null> {
     return this.isLoggedIn$.pipe(
-      switchMap(isLoggedIn => {
+      switchMap((isLoggedIn) => {
         if (!isLoggedIn) {
           this.localUserCache$ = null;
           return of(null);
@@ -78,14 +90,18 @@ export class AuthService {
             authorizationParams: {
               audience: 'https://api.ideahub',
               scope: 'openid profile email',
-            }
-          })
-        ).pipe(
-          switchMap(token => {
-            const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-            return this.http.get<ProfileResponse>(`${this.apiUrl}/profile`, { headers });
+            },
           }),
-          map(response => {
+        ).pipe(
+          switchMap((token) => {
+            const headers = new HttpHeaders({
+              Authorization: `Bearer ${token}`,
+            });
+            return this.http.get<ProfileResponse>(`${this.apiUrl}/profile`, {
+              headers,
+            });
+          }),
+          map((response) => {
             if (response?.status && response?.data) {
               return {
                 id: response.data.id,
@@ -96,11 +112,11 @@ export class AuthService {
             return null;
           }),
           catchError(() => of(null)),
-          shareReplay(1)
+          shareReplay(1),
         );
 
         return this.localUserCache$;
-      })
+      }),
     );
   }
 
@@ -114,25 +130,33 @@ export class AuthService {
           return false;
         }
         return user.roles.some(
-          (role: string) => 
-            role === roleName || role.toLowerCase() === roleName.toLowerCase()
+          (role: string) =>
+            role === roleName || role.toLowerCase() === roleName.toLowerCase(),
         );
-      })
+      }),
     );
   }
 
   // Role-specific helper methods
-  public isSuperAdmin(): Observable<boolean> { return this.hasRole('SuperAdmin'); }
-  public isGroupAdmin(): Observable<boolean> { return this.hasRole('GroupAdmin'); }
-  public isRegularUser(): Observable<boolean> { return this.hasRole('RegularUser'); }
-  public isCommitteeMember(): Observable<boolean> { return this.hasRole('CommitteeMember'); }
+  public isSuperAdmin(): Observable<boolean> {
+    return this.hasRole('SuperAdmin');
+  }
+  public isGroupAdmin(): Observable<boolean> {
+    return this.hasRole('GroupAdmin');
+  }
+  public isRegularUser(): Observable<boolean> {
+    return this.hasRole('RegularUser');
+  }
+  public isCommitteeMember(): Observable<boolean> {
+    return this.hasRole('CommitteeMember');
+  }
 
   /**
    * Returns the local GUID for the current user
    */
   public getUserId(): Observable<string> {
     return this.getCurrentUser().pipe(
-      map((user: CurrentUser | null): string => user?.id ?? '')
+      map((user: CurrentUser | null): string => user?.id ?? ''),
     );
   }
 }
