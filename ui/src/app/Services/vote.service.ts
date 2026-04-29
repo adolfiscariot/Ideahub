@@ -9,7 +9,7 @@ import {
   VoteDetails,
 } from '../Interfaces/Ideas/idea-interfaces';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',

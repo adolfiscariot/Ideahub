@@ -8,7 +8,7 @@ import {
   tap,
   map,
 } from 'rxjs';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 
 export interface CommentNotification {

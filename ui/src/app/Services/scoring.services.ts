@@ -6,7 +6,7 @@ import {
   BusinessCaseDto,
   ScoringDimensionsDto,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment.prod';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
