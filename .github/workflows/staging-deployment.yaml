@@ -15,6 +15,8 @@ env:
 jobs:
   # ============================================================
   # 1. BUILD & PUSH DOCKER IMAGE (tagged with commit SHA)
+  #    Runs on GitHub's cloud runner — needs internet access to
+  #    push to GHCR. Self-hosted runner not needed here.
   # ============================================================
   build-and-push:
     name: Build & Push Image
@@ -52,76 +54,70 @@ jobs:
           docker push ${{ steps.meta.outputs.image_ref }}
 
   # ============================================================
-  # 2. DEPLOY TO STAGING (on-prem via SSH — password auth)
+  # 2. DEPLOY TO STAGING
+  #    Runs on the self-hosted runner installed on the staging
+  #    server. No SSH needed — commands run directly on the
+  #    server. The runner must be installed and online first.
   # ============================================================
   deploy-staging:
     name: Deploy to Staging Server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-push
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          password: ${{ secrets.STAGING_PASSWORD }}
-          port: ${{ secrets.STAGING_PORT || 22 }}
-          script: |
-            IMAGE_REF="${{ needs.build-and-push.outputs.image_ref }}"
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            echo "Logging into GHCR..."
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Pull image
+        run: |
+          docker pull "${{ needs.build-and-push.outputs.image_ref }}"
 
-            echo "Pulling image: $IMAGE_REF"
-            docker pull "$IMAGE_REF"
+      - name: Deploy with Docker Compose
+        run: |
+          cd /opt/ideahub
+          IMAGE_REF=${{ needs.build-and-push.outputs.image_ref }} \
+            docker compose --env-file /etc/ideahub/staging.env up -d
 
-            echo "Deploying with Docker Compose..."
-            cd /opt/ideahub
-            IMAGE_REF=$IMAGE_REF docker compose --env-file /etc/ideahub/staging.env up -d
-
-            echo "Staging deployment complete: $IMAGE_REF"
+      - name: Confirm deployment
+        run: |
+          echo "Staging deployment complete: ${{ needs.build-and-push.outputs.image_ref }}"
 
   # ============================================================
-  # 3. SMOKE TESTS — SSH into the server and test from inside
-  # Hits localhost since the server is not publicly reachable
+  # 3. SMOKE TESTS
+  #    Also runs on the self-hosted runner so it can reach
+  #    localhost on the staging server directly.
   # ============================================================
   smoke-tests:
     name: Smoke Tests on Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy-staging
 
     steps:
-      - name: Run smoke tests via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.STAGING_HOST }}
-          username: ${{ secrets.STAGING_USER }}
-          password: ${{ secrets.STAGING_PASSWORD }}
-          port: ${{ secrets.STAGING_PORT || 22 }}
-          script: |
-            echo "Waiting for containers to be ready..."
-            sleep 10
+      - name: Wait for containers to be ready
+        run: sleep 10
 
-            echo "Checking backend container status..."
-            STATUS=$(docker inspect --format='{{.State.Status}}' ideahub-backend 2>/dev/null || echo "not found")
-            echo "Container status: $STATUS"
+      - name: Check backend container status
+        run: |
+          STATUS=$(docker inspect --format='{{.State.Status}}' ideahub-backend 2>/dev/null || echo "not found")
+          echo "Container status: $STATUS"
 
-            if [ "$STATUS" != "running" ]; then
-              echo "Backend container is not running. Aborting."
-              docker compose -f /opt/ideahub/docker-compose.yml logs ideahub-backend
-              exit 1
-            fi
+          if [ "$STATUS" != "running" ]; then
+            echo "Backend container is not running. Aborting."
+            docker compose -f /opt/ideahub/docker-compose.yml logs ideahub-backend
+            exit 1
+          fi
 
-            echo "Running health check on backend..."
-            curl --fail --retry 5 --retry-delay 3 http://localhost:5065/health \
-              && echo "Health check passed" \
-              || (echo "Health check failed" && exit 1)
+      - name: Health check
+        run: |
+          curl --fail --retry 5 --retry-delay 3 http://localhost:5065/health \
+            && echo "Health check passed" \
+            || (echo "Health check failed" && exit 1)
 
   # ============================================================
   # 4. MANUAL APPROVAL GATE
-  #    Workflow pauses here until a reviewer approves in GitHub UI.
-  #    Once approved, the prod workflow is triggered automatically.
+  #    Back on the cloud runner — only needs GitHub API access
+  #    to fire the repository_dispatch event to prod.
   # ============================================================
   await-approval:
     name: Await Team Approval
