@@ -1,5 +1,3 @@
-import { ApiResponse } from '../Projects/project-interface';
-
 export interface TimesheetDto {
   id?: number;
   taskId: number;
@@ -35,10 +33,16 @@ export interface TimesheetDetails {
 export enum BlockerSeverity {
   Low = 0,
   Medium = 1,
-  High = 2
+  High = 2,
 }
 
 export interface RelevantTask {
   id: number;
   title: string;
+}
+
+export interface InvalidTimesheetRow {
+  row: number;
+  error: string;
+  data: TimesheetDto;
 }

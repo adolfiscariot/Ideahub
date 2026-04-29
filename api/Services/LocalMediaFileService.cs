@@ -56,18 +56,18 @@ namespace api.Services
         {
             if (string.IsNullOrWhiteSpace(relativePath))
                 return string.Empty;
-                
+
             string cleanerPath = relativePath;
             if (cleanerPath.StartsWith("media/", StringComparison.OrdinalIgnoreCase))
             {
                 cleanerPath = cleanerPath.Substring(6);
             }
-            
+
             cleanerPath = cleanerPath.Replace("/", Path.DirectorySeparatorChar.ToString());
             string fullPath = Path.GetFullPath(Path.Combine(_rootPath, cleanerPath));
 
             var relative = Path.GetRelativePath(_rootPath, fullPath);
-            
+
             if (relative.StartsWith("..") || Path.IsPathRooted(relative))
                 throw new UnauthorizedAccessException("Attempted path traversal detected.");
 

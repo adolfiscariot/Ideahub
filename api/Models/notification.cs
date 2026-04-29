@@ -10,7 +10,7 @@ public class Notification
 
     [Required]
     [ForeignKey("User")]
-    public string RecipientId { get; set; } = string.Empty; 
+    public string RecipientId { get; set; } = string.Empty;
 
     [Required]
     [ForeignKey("Comment")]
@@ -22,7 +22,7 @@ public class Notification
     [Required]
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
     // Navigation Properties
     public IdeahubUser User { get; set; } = null!;
     public Comment Comment { get; set; } = null!;

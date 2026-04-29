@@ -32,7 +32,7 @@ namespace Ideahub.Tests
             var userStoreMock = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(
                 userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
-            
+
             _mockLogger = new Mock<ILogger<AnalyticsController>>();
 
             // Setup Controller with User Context
@@ -91,11 +91,11 @@ namespace Ideahub.Tests
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
-            
+
             var list = GetData<List<JsonElement>>(response.Data!);
             Assert.NotNull(list);
             Assert.Equal(3, list.Count);
-            
+
             // Should be sorted 3, 1, 2 (by vote count)
             Assert.Equal(3, list[0].GetProperty("Id").GetInt32());
             Assert.Equal(3, list[0].GetProperty("VoteCount").GetInt32());
@@ -113,7 +113,7 @@ namespace Ideahub.Tests
             var group = new Group { Id = 1, Name = "Group A" };
             group.UserGroups.Add(new UserGroup { UserId = _testUserId }); // Current user is a member
             _context.Groups.Add(group);
-            
+
             _context.Ideas.Add(new Idea { Id = 1, Title = "Test", GroupId = 1, UserId = "other" });
             await _context.SaveChangesAsync();
 
@@ -139,7 +139,7 @@ namespace Ideahub.Tests
             var user1 = new IdeahubUser { Id = "u1", DisplayName = "Active", Email = "a@a.com" };
             var user2 = new IdeahubUser { Id = "u2", DisplayName = "Inactive", Email = "b@b.com" };
             _context.Users.AddRange(user1, user2);
-            
+
             _context.Ideas.Add(new Idea { Title = "Idea 1", UserId = "u1" });
             await _context.SaveChangesAsync();
 
@@ -150,7 +150,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             var list = GetData<List<JsonElement>>(response.Data!);
-            
+
             Assert.Single(list!);
             Assert.Equal("Active", list![0].GetProperty("DisplayName").GetString());
             Assert.Equal(1, list![0].GetProperty("IdeaCount").GetInt32());
@@ -173,7 +173,7 @@ namespace Ideahub.Tests
             var idea1 = new Idea { Id = 1, Title = "Promoted", IsPromotedToProject = true, UserId = "u1", GroupId = 1 };
             var idea2 = new Idea { Id = 2, Title = "Draft", IsPromotedToProject = false, UserId = "u1", GroupId = 1 };
             _context.Ideas.AddRange(idea1, idea2);
-            
+
             var project = new Project { Id = 10, IdeaId = 1, Title = "Project X", CreatedByUserId = "u1" };
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
@@ -269,7 +269,7 @@ namespace Ideahub.Tests
             _context.Ideas.Add(new Idea { Title = "My Idea", UserId = _testUserId });
             _context.Votes.Add(new Vote { UserId = _testUserId });
             _context.Groups.Add(new Group { Name = "My Group", CreatedByUserId = _testUserId });
-            
+
             // Other data should not count
             _context.Ideas.Add(new Idea { Title = "Other", UserId = "other" });
             await _context.SaveChangesAsync();

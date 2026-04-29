@@ -39,21 +39,21 @@ namespace Ideahub.Tests
         public async Task EvaluateAndStageIdeaAsync_ShouldPromoteToBusinessCase_WhenScoreIsHigh()
         {
             // Arrange
-            var idea = new Idea 
-            { 
-                Id = 1, 
-                Title = "AI Idea", 
+            var idea = new Idea
+            {
+                Id = 1,
+                Title = "AI Idea",
                 CurrentStage = ScoringStage.Evaluation,
-                UserId = "user1" 
+                UserId = "user1"
             };
-            
+
             // Add user and idea to DB (to satisfy Query Filters)
             _context.Users.Add(new IdeahubUser { Id = "user1", UserName = "test", Email = "a@a.com", DisplayName = "Test" });
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
 
             _mockLlmService.Setup(l => l.EvaluateIdeaAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<System.Threading.CancellationToken>()))
                 .ReturnsAsync((85.0f, "Great idea!"));
@@ -73,20 +73,20 @@ namespace Ideahub.Tests
         public async Task EvaluateAndStageIdeaAsync_ShouldReject_WhenScoreIsLow()
         {
             // Arrange
-            var idea = new Idea 
-            { 
-                Id = 1, 
-                Title = "Weak Idea", 
+            var idea = new Idea
+            {
+                Id = 1,
+                Title = "Weak Idea",
                 CurrentStage = ScoringStage.Evaluation,
                 UserId = "user1"
             };
-            
+
             _context.Users.Add(new IdeahubUser { Id = "user1", UserName = "test", Email = "a@a.com", DisplayName = "Test" });
             _context.Ideas.Add(idea);
             await _context.SaveChangesAsync();
 
             _mockLlmService.Setup(l => l.EvaluateIdeaAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<System.Threading.CancellationToken>()))
                 .ReturnsAsync((40.0f, "Not feasible."));
@@ -106,13 +106,13 @@ namespace Ideahub.Tests
             var idea = new Idea { Id = 999 };
 
             _mockLlmService.Setup(l => l.EvaluateIdeaAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<System.Threading.CancellationToken>()))
                 .ReturnsAsync((50.0f, "Whatever"));
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.EvaluateAndStageIdeaAsync(idea));
         }
     }

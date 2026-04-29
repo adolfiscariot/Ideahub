@@ -35,7 +35,7 @@ namespace Ideahub.Tests
             _configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(myConfiguration)
                 .Build();
-            
+
             var userStoreMock = new Mock<IUserStore<IdeahubUser>>();
             _mockUserManager = new Mock<UserManager<IdeahubUser>>(
                 userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
@@ -49,14 +49,14 @@ namespace Ideahub.Tests
         public async Task CreateAccessTokenAsync_ShouldContainCorrectClaims()
         {
             // Arrange
-            var user = new IdeahubUser 
-            { 
-                Id = "user123", 
-                Email = "test@test.com", 
-                DisplayName = "Test User" 
+            var user = new IdeahubUser
+            {
+                Id = "user123",
+                Email = "test@test.com",
+                DisplayName = "Test User"
             };
             var roles = new List<string> { "SuperAdmin", "RegularUser" };
-            
+
             _mockUserManager.Setup(m => m.GetRolesAsync(user)).ReturnsAsync(roles);
 
             // Act
@@ -80,7 +80,7 @@ namespace Ideahub.Tests
             var emptyConfig = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>())
                 .Build();
-            
+
             var localService = new TokenService(emptyConfig, _mockUserManager.Object, _mockLogger.Object);
             var user = new IdeahubUser { Id = "1" };
 
@@ -99,7 +99,7 @@ namespace Ideahub.Tests
             Assert.NotEmpty(token);
             // Check if it's valid Base64
             Assert.True(token.EndsWith("==") || token.EndsWith("=") || token.Length % 4 == 0);
-            
+
             // 32 bytes hash = 44 base64 chars
             Assert.Equal(44, token.Length);
         }
@@ -111,7 +111,7 @@ namespace Ideahub.Tests
             string userId = "user1";
             string rawToken = "my-secret-refresh-token";
             var user = new IdeahubUser { Id = userId };
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
             _mockUserManager.Setup(m => m.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
 
@@ -121,10 +121,10 @@ namespace Ideahub.Tests
             // Assert
             Assert.Single(user.RefreshTokens);
             var storedToken = user.RefreshTokens.First().Token;
-            
+
             // It should NOT be the raw token
             Assert.NotEqual(rawToken, storedToken);
-            
+
             // Check if it's the SHA256 hash (Base64 encoded)
             Assert.Equal(44, storedToken.Length);
         }
@@ -138,21 +138,21 @@ namespace Ideahub.Tests
                 .Options;
 
             using var context = new api.Data.IdeahubDbContext(options);
-            
+
             //Using a real UserManager acting as a simulator being mocked 
             var userStore = new Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore<IdeahubUser>(context);
             var userManager = new UserManager<IdeahubUser>(
-                userStore, null!, new PasswordHasher<IdeahubUser>(), 
+                userStore, null!, new PasswordHasher<IdeahubUser>(),
                 null!, null!, null!, null!, null!, null!);
 
             string userId = "user-to-logout";
-            var user = new IdeahubUser 
-            { 
-                Id = userId, 
+            var user = new IdeahubUser
+            {
+                Id = userId,
                 UserName = "logoutuser",
                 Email = "logout@test.com"
             };
-            
+
             // Add tokens to the user
             user.RefreshTokens.Add(new RefreshToken { Token = "token1", TokenId = Guid.NewGuid().ToString(), HasExpired = false });
             user.RefreshTokens.Add(new RefreshToken { Token = "token2", TokenId = Guid.NewGuid().ToString(), HasExpired = false });
@@ -168,7 +168,7 @@ namespace Ideahub.Tests
             // Assert
             var updatedUser = await context.Users.Include(u => u.RefreshTokens).FirstAsync(u => u.Id == userId);
             Assert.All(updatedUser.RefreshTokens, t => Assert.True(t.HasExpired));
-            
+
             // Clean up for other tests
             context.Database.EnsureDeleted();
         }

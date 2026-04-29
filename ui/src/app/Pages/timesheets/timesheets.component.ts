@@ -4,7 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { TimesheetService } from '../../Services/timesheet.service';
-import { TimesheetDto, RelevantTask, BlockerSeverity } from '../../Interfaces/Timesheet/timesheet-interface';
+import {
+  TimesheetDto,
+  RelevantTask,
+  BlockerSeverity,
+} from '../../Interfaces/Timesheet/timesheet-interface';
 import { ToastService } from '../../Services/toast.service';
 import { MediaComponent } from '../media/media.component';
 import { MediaService } from '../../Services/media.service';
@@ -29,9 +33,18 @@ interface TimesheetRow {
 @Component({
   selector: 'app-timesheets',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MediaComponent, MatMenuModule, MatButtonModule, ModalComponent, ButtonsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MediaComponent,
+    MatMenuModule,
+    MatButtonModule,
+    ModalComponent,
+    ButtonsComponent,
+  ],
   templateUrl: './timesheets.component.html',
-  styleUrl: './timesheets.component.scss'
+  styleUrl: './timesheets.component.scss',
 })
 export class TimesheetsComponent implements OnInit {
   private timesheetService = inject(TimesheetService);
@@ -40,16 +53,16 @@ export class TimesheetsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
 
-  @Input() isChildView: boolean = false;
+  @Input() isChildView = false;
   @Input() parentProjectId: number | null = null;
 
-  projectId: number = 0;
-  currentUserId: string = '';
-  isEditing: boolean = false;
+  projectId = 0;
+  currentUserId = '';
+  isEditing = false;
   editingLogId: number | null = null;
-  showDeleteModal: boolean = false;
+  showDeleteModal = false;
   logToDeleteId: number | null = null;
-  workDate: string = ''; // Initialized in ngOnInit
+  workDate = ''; // Initialized in ngOnInit
   availableTasks: RelevantTask[] = [];
   rows: TimesheetRow[] = [];
   recentLogs: TimesheetDto[] = [];
@@ -57,11 +70,11 @@ export class TimesheetsComponent implements OnInit {
   activeMediaTimesheetId: number | null = null;
 
   // Filtering State
-  filterUserId: string = '';
-  filterStartDate: string = '';
-  filterEndDate: string = '';
-  filterSeverity: string = '';
-  projectMembers: { id: string, name: string }[] = [];
+  filterUserId = '';
+  filterStartDate = '';
+  filterEndDate = '';
+  filterSeverity = '';
+  projectMembers: { id: string; name: string }[] = [];
 
   private formatDateToLocalISO(date: Date): string {
     const year = date.getFullYear();
@@ -76,7 +89,7 @@ export class TimesheetsComponent implements OnInit {
   }
 
   get filteredLogs(): TimesheetDto[] {
-    return this.recentLogs.filter(log => {
+    return this.recentLogs.filter((log) => {
       // User Filter
       if (this.filterUserId && log.userId !== this.filterUserId) return false;
 
@@ -101,7 +114,8 @@ export class TimesheetsComponent implements OnInit {
       // Severity Filter
       if (this.filterSeverity) {
         if (!log.hasBlocker) return false;
-        if (this.getSeverityLabel(log.blockerSeverity) !== this.filterSeverity) return false;
+        if (this.getSeverityLabel(log.blockerSeverity) !== this.filterSeverity)
+          return false;
       }
 
       return true;
@@ -126,8 +140,9 @@ export class TimesheetsComponent implements OnInit {
     if (this.isChildView && this.parentProjectId) {
       this.projectId = this.parentProjectId;
     } else {
-      const pId = this.route.snapshot.paramMap.get('projectId')
-        || this.route.parent?.snapshot.paramMap.get('projectId');
+      const pId =
+        this.route.snapshot.paramMap.get('projectId') ||
+        this.route.parent?.snapshot.paramMap.get('projectId');
       if (pId) {
         this.projectId = +pId;
       }
@@ -150,7 +165,7 @@ export class TimesheetsComponent implements OnInit {
         if (res.success && res.data) {
           this.availableTasks = res.data;
         }
-      }
+      },
     });
   }
 
@@ -164,7 +179,7 @@ export class TimesheetsComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -174,7 +189,7 @@ export class TimesheetsComponent implements OnInit {
         if (res.success && res.data) {
           this.projectMembers = res.data;
         }
-      }
+      },
     });
   }
 
@@ -187,7 +202,7 @@ export class TimesheetsComponent implements OnInit {
       hasBlocker: false,
       blockerDescription: '',
       blockerSeverity: BlockerSeverity.Low,
-      tempFiles: []
+      tempFiles: [],
     });
   }
 
@@ -197,10 +212,11 @@ export class TimesheetsComponent implements OnInit {
     }
   }
 
-  onFileSelected(event: any, index: number): void {
-    const files = event.target.files;
-    if (files.length > 0) {
-      this.rows[index].tempFiles.push(...Array.from(files) as File[]);
+  onFileSelected(event: Event, index: number): void {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+    if (files && files.length > 0) {
+      this.rows[index].tempFiles.push(...(Array.from(files) as File[]));
     }
   }
 
@@ -217,10 +233,15 @@ export class TimesheetsComponent implements OnInit {
   }
 
   async submitLogs(): Promise<void> {
-    const validRows = this.rows.filter(row => row.taskId !== 0 && row.hoursSpent > 0);
+    const validRows = this.rows.filter(
+      (row) => row.taskId !== 0 && row.hoursSpent > 0,
+    );
 
     if (validRows.length === 0) {
-      this.toastService.show('Please fill in at least one task with hours', 'warning');
+      this.toastService.show(
+        'Please fill in at least one task with hours',
+        'warning',
+      );
       return;
     }
 
@@ -238,16 +259,27 @@ export class TimesheetsComponent implements OnInit {
           comments: row.comments,
           hasBlocker: row.hasBlocker,
           blockerDescription: row.blockerDescription,
-          blockerSeverity: row.blockerSeverity
+          blockerSeverity: row.blockerSeverity,
         };
 
-        const res = await firstValueFrom(this.timesheetService.updateLog(this.editingLogId, updateDto));
+        const res = await firstValueFrom(
+          this.timesheetService.updateLog(this.editingLogId, updateDto),
+        );
         if (res.success) {
           if (row.hasBlocker && row.tempFiles.length > 0) {
             for (const file of row.tempFiles) {
               const mediaType = this.mediaService.detectMediaType(file);
               await firstValueFrom(
-                this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, this.editingLogId as number)
+                this.mediaService.uploadMedia(
+                  file,
+                  mediaType,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  this.editingLogId as number,
+                ),
               );
             }
           }
@@ -257,7 +289,7 @@ export class TimesheetsComponent implements OnInit {
         }
       } else {
         // Existing Bulk Log Logic
-        const logsToSend: TimesheetDto[] = validRows.map(row => ({
+        const logsToSend: TimesheetDto[] = validRows.map((row) => ({
           taskId: row.taskId,
           workDate: this.parseLocalISOToDate(this.workDate),
           description: row.description,
@@ -265,10 +297,12 @@ export class TimesheetsComponent implements OnInit {
           comments: row.comments,
           hasBlocker: row.hasBlocker,
           blockerDescription: row.blockerDescription,
-          blockerSeverity: row.blockerSeverity
+          blockerSeverity: row.blockerSeverity,
         }));
 
-        const res = await firstValueFrom(this.timesheetService.bulkLogWork(this.projectId, logsToSend));
+        const res = await firstValueFrom(
+          this.timesheetService.bulkLogWork(this.projectId, logsToSend),
+        );
 
         if (res.success && res.data && res.data.createdIds) {
           const createdIds: number[] = res.data.createdIds;
@@ -281,7 +315,18 @@ export class TimesheetsComponent implements OnInit {
             if (row.hasBlocker && row.tempFiles.length > 0 && timesheetId) {
               for (const file of row.tempFiles) {
                 const mediaType = this.mediaService.detectMediaType(file);
-                await firstValueFrom(this.mediaService.uploadMedia(file, mediaType, undefined, undefined, undefined, undefined, undefined, timesheetId));
+                await firstValueFrom(
+                  this.mediaService.uploadMedia(
+                    file,
+                    mediaType,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    timesheetId,
+                  ),
+                );
               }
             }
           }
@@ -292,7 +337,7 @@ export class TimesheetsComponent implements OnInit {
           this.loadRecentLogs();
         }
       }
-    } catch (error) {
+    } catch {
       this.toastService.show('Failed to submit timesheet', 'error');
     } finally {
       this.isLoading = false;
@@ -307,16 +352,18 @@ export class TimesheetsComponent implements OnInit {
     this.workDate = this.formatDateToLocalISO(new Date(log.workDate));
 
     // Clear and set rows to the single log being edited
-    this.rows = [{
-      taskId: log.taskId || 0,
-      description: log.description,
-      hoursSpent: log.hoursSpent,
-      comments: log.comments || '',
-      hasBlocker: log.hasBlocker,
-      blockerDescription: log.blockerDescription || '',
-      blockerSeverity: log.blockerSeverity || 0,
-      tempFiles: []
-    }];
+    this.rows = [
+      {
+        taskId: log.taskId || 0,
+        description: log.description,
+        hoursSpent: log.hoursSpent,
+        comments: log.comments || '',
+        hasBlocker: log.hasBlocker,
+        blockerDescription: log.blockerDescription || '',
+        blockerSeverity: log.blockerSeverity || 0,
+        tempFiles: [],
+      },
+    ];
   }
 
   cancelEdit(): void {
@@ -335,13 +382,15 @@ export class TimesheetsComponent implements OnInit {
     if (!this.logToDeleteId) return;
 
     try {
-      const res = await firstValueFrom(this.timesheetService.deleteLog(this.logToDeleteId));
+      const res = await firstValueFrom(
+        this.timesheetService.deleteLog(this.logToDeleteId),
+      );
       if (res.success) {
         this.toastService.show('Log deleted successfully', 'success');
         this.loadRecentLogs();
         this.closeDeleteModal();
       }
-    } catch (error) {
+    } catch {
       this.toastService.show('Failed to delete log', 'error');
     }
   }
@@ -359,17 +408,22 @@ export class TimesheetsComponent implements OnInit {
     return 'Low';
   }
 
-  getSeverityStyle(severity: number | string | undefined | null): { [key: string]: string } {
+  getSeverityStyle(
+    severity: number | string | undefined | null,
+  ): Record<string, string> {
     const sev = severity ?? 0;
     const sevStr = typeof sev === 'string' ? sev.toLowerCase() : '';
-    if (sevStr === 'high' || sev === 2) return { 'background-color': '#fff1f2', 'color': '#9f1239' };
-    if (sevStr === 'medium' || sev === 1) return { 'background-color': '#fffbeb', 'color': '#92400e' };
-    return { 'background-color': '#ecfdf5', 'color': '#065f46' };
+    if (sevStr === 'high' || sev === 2)
+      return { 'background-color': '#fff1f2', color: '#9f1239' };
+    if (sevStr === 'medium' || sev === 1)
+      return { 'background-color': '#fffbeb', color: '#92400e' };
+    return { 'background-color': '#ecfdf5', color: '#065f46' };
   }
 
   toggleMediaPopup(event: Event, timesheetId: number | undefined): void {
     event.stopPropagation();
     if (!timesheetId) return;
-    this.activeMediaTimesheetId = this.activeMediaTimesheetId === timesheetId ? null : timesheetId;
+    this.activeMediaTimesheetId =
+      this.activeMediaTimesheetId === timesheetId ? null : timesheetId;
   }
 }

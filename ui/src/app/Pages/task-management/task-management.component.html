@@ -2,225 +2,390 @@
   <header class="page-header">
     <div>
       <h1 class="page-title">Task Management</h1>
-      <p class="page-subtitle">Orchestrate team activities, monitor progress and manage workloads</p>
+      <p class="page-subtitle">
+        Orchestrate team activities, monitor progress and manage workloads
+      </p>
     </div>
   </header>
 
-  <div class="project-tabs">
-    <div class="tab-item" [class.active]="activeMainTab === 'tasks'" (click)="setMainTab('tasks')">
+  <div class="project-tabs" role="tablist">
+    <div
+      class="tab-item"
+      [class.active]="activeMainTab === 'tasks'"
+      (click)="setMainTab('tasks')"
+      (keydown.enter)="setMainTab('tasks')"
+      tabindex="0"
+      role="tab"
+      [attr.aria-selected]="activeMainTab === 'tasks'"
+    >
       <mat-icon>assignment</mat-icon>
       <span>Task Board</span>
     </div>
-    <div class="tab-item" [class.active]="activeMainTab === 'timesheets'" (click)="setMainTab('timesheets')">
+    <div
+      class="tab-item"
+      [class.active]="activeMainTab === 'timesheets'"
+      (click)="setMainTab('timesheets')"
+      (keydown.enter)="setMainTab('timesheets')"
+      tabindex="0"
+      role="tab"
+      [attr.aria-selected]="activeMainTab === 'timesheets'"
+    >
       <mat-icon>access_time</mat-icon>
       <span>Project Timesheets</span>
     </div>
   </div>
 
   <div class="content-area">
-    <ng-container *ngIf="activeMainTab === 'tasks'">
+    @if (activeMainTab === "tasks") {
       <!-- SECTION 1: CREATE NEW TASK -->
-      <section class="creation-section" *ngIf="canCreateTask">
-        <div class="card creation-card">
-          <div class="card-header">
-            <h3>Create New Task</h3>
-          </div>
-
-          <div class="card-body">
-            <!-- Row 1: Title and Dates -->
-            <div class="form-row title-row">
-              <div class="form-group title-group">
-                <label>Task Title</label>
-                <input type="text" [(ngModel)]="newTask.title" placeholder="e.g. Create New Workflow">
-              </div>
-              <div class="form-group date-group">
-                <label>Start Date</label>
-                <input type="date" [(ngModel)]="newTask.startDate">
-              </div>
-              <div class="form-group date-group">
-                <label>End Date</label>
-                <input type="date" [(ngModel)]="newTask.endDate">
-              </div>
+      @if (canCreateTask) {
+        <section class="creation-section">
+          <div class="card creation-card">
+            <div class="card-header">
+              <h3>Create New Task</h3>
             </div>
 
-            <!-- Row 2: Description (Left) and Meta (Right) -->
-            <div class="form-row details-row">
-              <div class="form-group description-group">
-                <label>Description</label>
-                <textarea [(ngModel)]="newTask.description"
-                  placeholder="e.g. Create workflow to outline daily processes"></textarea>
+            <div class="card-body">
+              <!-- Row 1: Title and Dates -->
+              <div class="form-row title-row">
+                <div class="form-group title-group">
+                  <label for="taskTitle">Task Title</label>
+                  <input
+                    id="taskTitle"
+                    type="text"
+                    [(ngModel)]="newTask.title"
+                    placeholder="e.g. Create New Workflow"
+                  />
+                </div>
+                <div class="form-group date-group">
+                  <label for="taskStartDate">Start Date</label>
+                  <input
+                    id="taskStartDate"
+                    type="date"
+                    [(ngModel)]="newTask.startDate"
+                  />
+                </div>
+                <div class="form-group date-group">
+                  <label for="taskEndDate">End Date</label>
+                  <input
+                    id="taskEndDate"
+                    type="date"
+                    [(ngModel)]="newTask.endDate"
+                  />
+                </div>
               </div>
 
-              <div class="meta-column">
-                <div class="form-group assignees-group">
-                  <label>Assignees</label>
-                  <div class="assignee-selector">
-                    <div class="selected-assignees" *ngIf="newTask.taskAssignees.length > 0">
-                      <span *ngFor="let id of newTask.taskAssignees" class="user-chip">
-                        {{ getUserName(id) }}
-                        <button (click)="toggleAssignee(id)" class="remove-chip">&times;</button>
-                      </span>
-                    </div>
-                    <div class="dropdown-wrapper">
-                      <button class="add-assignee-btn" (click)="toggleUserDropdown()">
-                        <mat-icon>person_add</mat-icon>
-                        Add Assignees
-                      </button>
-                      <div class="user-dropdown card" *ngIf="showUserDropdown">
-                        <div class="user-option" *ngFor="let user of availableUsers" (click)="toggleAssignee(user.id)">
-                          <span class="checkbox" [class.selected]="isAssigneeSelected(user.id)"></span>
-                          {{ user.fullName || user.email }}
+              <!-- Row 2: Description (Left) and Meta (Right) -->
+              <div class="form-row details-row">
+                <div class="form-group description-group">
+                  <label for="taskDescription">Description</label>
+                  <textarea
+                    id="taskDescription"
+                    [(ngModel)]="newTask.description"
+                    placeholder="e.g. Create workflow to outline daily processes"
+                  ></textarea>
+                </div>
+
+                <div class="meta-column">
+                  <div class="form-group assignees-group">
+                    <span class="label-heading">Assignees</span>
+                    <div class="assignee-selector">
+                      @if (newTask.taskAssignees.length > 0) {
+                        <div class="selected-assignees">
+                          @for (id of newTask.taskAssignees; track id) {
+                            <span class="user-chip">
+                              {{ getUserName(id) }}
+                              <button
+                                (click)="toggleAssignee(id)"
+                                class="remove-chip"
+                                aria-label="Remove assignee"
+                              >
+                                &times;
+                              </button>
+                            </span>
+                          }
                         </div>
+                      }
+                      <div class="dropdown-wrapper">
+                        <button
+                          class="add-assignee-btn"
+                          (click)="toggleUserDropdown()"
+                          aria-haspopup="listbox"
+                          [attr.aria-expanded]="showUserDropdown"
+                        >
+                          <mat-icon>person_add</mat-icon>
+                          Add Assignees
+                        </button>
+                        @if (showUserDropdown) {
+                          <div class="user-dropdown card" role="listbox">
+                            @for (user of availableUsers; track user.id) {
+                              <div
+                                class="user-option"
+                                (click)="toggleAssignee(user.id)"
+                                (keydown.enter)="toggleAssignee(user.id)"
+                                tabindex="0"
+                                role="option"
+                                [attr.aria-selected]="
+                                  isAssigneeSelected(user.id)
+                                "
+                              >
+                                <span
+                                  class="checkbox"
+                                  [class.selected]="isAssigneeSelected(user.id)"
+                                ></span>
+                                {{ user.fullName || user.email }}
+                              </div>
+                            }
+                          </div>
+                        }
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div class="form-group labels-group">
-                  <label>Labels</label>
-                  <div class="labels-input-wrapper">
-                    <div class="label-chips" *ngIf="taskLabels.length > 0">
-                      <span *ngFor="let label of taskLabels" class="label-chip">
-                        {{ label }}
-                        <button (click)="removeLabel(label)" class="remove-chip">&times;</button>
-                      </span>
+                  <div class="form-group labels-group">
+                    <label for="taskLabelInput">Labels</label>
+                    <div class="labels-input-wrapper">
+                      @if (taskLabels.length > 0) {
+                        <div class="label-chips">
+                          @for (label of taskLabels; track label) {
+                            <span class="label-chip">
+                              {{ label }}
+                              <button
+                                (click)="removeLabel(label)"
+                                class="remove-chip"
+                                aria-label="Remove label"
+                              >
+                                &times;
+                              </button>
+                            </span>
+                          }
+                        </div>
+                      }
+                      <input
+                        id="taskLabelInput"
+                        type="text"
+                        [(ngModel)]="labelInput"
+                        (keydown.enter)="addLabel($event)"
+                        placeholder="e.g. 'Workflows', 'Admin' "
+                      />
                     </div>
-                    <input type="text" [(ngModel)]="labelInput" (keydown.enter)="addLabel($event)"
-                      placeholder="e.g. 'Workflows', 'Admin' ">
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="card-footer">
-            <div class="footer-left">
-              <input type="file" #fileInput hidden multiple (change)="onFilesSelected($event)">
-              <app-buttons [buttonStyleClass]="'btn-promote'" (click)="fileInput.click()">
-                <mat-icon>attach_file</mat-icon>
-                Media Upload
-              </app-buttons>
-              <app-buttons [buttonText]="'Create Task'" [buttonStyleClass]="'btn-promote'" (click)="createTask()"
-                [isLoading]="isCreating">
-              </app-buttons>
-              <div class="selected-files-list" *ngIf="selectedFiles.length > 0">
-                <div *ngFor="let file of selectedFiles; let i = index" class="file-preview-chip">
-                  <mat-icon [title]="file.name">insert_drive_file</mat-icon>
-                  <span class="file-name">{{ file.name }}</span>
-                  <button (click)="removeFile(i)" class="remove-chip">&times;</button>
-                </div>
+            <div class="card-footer">
+              <div class="footer-left">
+                <input
+                  type="file"
+                  id="taskFileInput"
+                  #fileInput
+                  hidden
+                  multiple
+                  (change)="onFilesSelected($event)"
+                />
+                <app-buttons
+                  [buttonStyleClass]="'btn-promote'"
+                  (click)="fileInput.click()"
+                >
+                  <mat-icon>attach_file</mat-icon>
+                  Media Upload
+                </app-buttons>
+                <app-buttons
+                  [buttonText]="'Create Task'"
+                  [buttonStyleClass]="'btn-promote'"
+                  (click)="createTask()"
+                  [isLoading]="isCreating"
+                >
+                </app-buttons>
+                @if (selectedFiles.length > 0) {
+                  <div class="selected-files-list">
+                    @for (file of selectedFiles; track $index) {
+                      <div class="file-preview-chip">
+                        <mat-icon [title]="file.name"
+                          >insert_drive_file</mat-icon
+                        >
+                        <span class="file-name">{{ file.name }}</span>
+                        <button
+                          (click)="removeFile($index)"
+                          class="remove-chip"
+                          aria-label="Remove file"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      }
 
       <div class="main-split">
         <!-- SECTION 2: ACTIVE TASKS -->
         <section class="active-tasks-section">
           <div class="section-header">
-            <h2>Active Tasks <span class="header-count">{{ tasks.length }}</span></h2>
+            <h2>
+              Active Tasks <span class="header-count">{{ tasks.length }}</span>
+            </h2>
             <div class="header-actions">
-              <select class="sort-select" [(ngModel)]="sortOption" (change)="sortTasks()">
+              <select
+                class="sort-select"
+                [(ngModel)]="sortOption"
+                (change)="sortTasks()"
+              >
                 <option value="taskNumber">Sort by Task Number</option>
                 <option value="dueDate">Sort by Due Date</option>
               </select>
             </div>
           </div>
 
-          <div *ngIf="isLoading" class="loading-state">
-            <p>Loading tasks...</p>
-          </div>
-
-          <div *ngIf="!isLoading && tasks.length === 0" class="empty-state">
-            <p>No tasks found for this project.</p>
-          </div>
-
-          <div class="active-tasks-wrapper" *ngIf="!isLoading && tasks.length > 0">
-            <button class="carousel-btn prev" *ngIf="tasks.length > 4" [disabled]="carouselIndex === 0"
-              (click)="prevTasks()">
-              <mat-icon>chevron_left</mat-icon>
-            </button>
-
-            <div class="tasks-grid">
-              <div *ngFor="let task of getVisibleTasks()" class="task-card card"
-                [class.selected]="selectedTask?.id === task.id" (click)="selectTask(task)">
-
-                <div class="card-top">
-                  <span class="id-pill">T{{ task.id }}</span>
-                  <div class="labels-pills">
-                    <span *ngFor="let label of getLabels(task.labels)" class="label-chip theme-chip">
-                      {{ label }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="card-info">
-                  <h3>{{ task.title }}</h3>
-                  <p class="description">{{ task.description }}</p>
-                </div>
-
-                <div class="progress-section">
-                  <div class="progress-label-row">
-                    <span>Progress</span>
-                    <span>{{ calculateProgress(task) }}%</span>
-                  </div>
-                  <div class="progress-bar-container">
-                    <div class="progress-fill" [ngClass]="getProgressColor(calculateProgress(task))"
-                      [style.width.%]="calculateProgress(task)">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="card-meta">
-                  <div class="assignee-main">
-                    <div class="assignee-icon-circle"
-                      [title]="task.taskAssignees.length > 0 ? getUserName(task.taskAssignees[0]) : 'Unassigned'">
-                      <mat-icon>person</mat-icon>
-                    </div>
-                  </div>
-                  <div class="meta-right">
-                    <div class="meta-item">
-                      <mat-icon>assignment</mat-icon>
-                      {{ getCompletedSubtasks(task) }}/{{ task.subTasks.length }}
-                    </div>
-                    <div class="meta-item">
-                      <mat-icon>attach_file</mat-icon>
-                      {{ task.mediaCount }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="card-divider"></div>
-
-                <div class="card-footer-row">
-                  <div class="card-due-date">
-                    <mat-icon>calendar_today</mat-icon>
-                    <span>Due {{ task.endDate | date:'mediumDate' }}</span>
-                  </div>
-                  <div class="card-actions">
-                    <button *ngIf="canManageTask(task)" class="create-subtask-btn" title="Add subtask"
-                      (click)="openSubTaskModal(task.id); $event.stopPropagation()">
-                      <mat-icon>add_circle_outline</mat-icon>
-                    </button>
-                    <button *ngIf="canManageTask(task)" class="icon-action-btn edit-btn" title="Edit task"
-                      (click)="openEditTask(task, $event)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button *ngIf="canManageTask(task)" class="icon-action-btn delete-btn" title="Delete task"
-                      (click)="confirmDeleteTask(task, $event)">
-                      <mat-icon>delete_outline</mat-icon>
-                    </button>
-                  </div>
-                </div>
-              </div>
+          @if (isLoading) {
+            <div class="loading-state">
+              <p>Loading tasks...</p>
             </div>
+          }
 
-            <button class="carousel-btn next" *ngIf="tasks.length > 4" [disabled]="carouselIndex + 4 >= tasks.length"
-              (click)="nextTasks()">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
+          @if (!isLoading && tasks.length === 0) {
+            <div class="empty-state">
+              <p>No tasks found for this project.</p>
+            </div>
+          }
+
+          @if (!isLoading && tasks.length > 0) {
+            <div class="active-tasks-wrapper">
+              @if (tasks.length > 4) {
+                <button
+                  class="carousel-btn prev"
+                  [disabled]="carouselIndex === 0"
+                  (click)="prevTasks()"
+                  aria-label="Previous tasks"
+                >
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+              }
+
+              <div class="tasks-grid">
+                @for (task of getVisibleTasks(); track task.id) {
+                  <div
+                    class="task-card card"
+                    [class.selected]="selectedTask?.id === task.id"
+                    (click)="selectTask(task)"
+                    (keydown.enter)="selectTask(task)"
+                    tabindex="0"
+                    role="button"
+                    aria-label="View task details"
+                  >
+                    <div class="card-top">
+                      <span class="id-pill">T{{ task.id }}</span>
+                      <div class="labels-pills">
+                        @for (label of getLabels(task.labels); track label) {
+                          <span class="label-chip theme-chip">
+                            {{ label }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="card-info">
+                      <h3>{{ task.title }}</h3>
+                      <p class="description">{{ task.description }}</p>
+                    </div>
+
+                    <div class="progress-section">
+                      <div class="progress-label-row">
+                        <span>Progress</span>
+                        <span>{{ calculateProgress(task) }}%</span>
+                      </div>
+                      <div class="progress-bar-container">
+                        <div
+                          class="progress-fill"
+                          [ngClass]="getProgressColor(calculateProgress(task))"
+                          [style.width.%]="calculateProgress(task)"
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div class="card-meta">
+                      <div class="assignee-main">
+                        <div
+                          class="assignee-icon-circle"
+                          [title]="
+                            task.taskAssignees.length > 0
+                              ? getUserName(task.taskAssignees[0])
+                              : 'Unassigned'
+                          "
+                        >
+                          <mat-icon>person</mat-icon>
+                        </div>
+                      </div>
+                      <div class="meta-right">
+                        <div class="meta-item">
+                          <mat-icon>assignment</mat-icon>
+                          {{ getCompletedSubtasks(task) }}/{{
+                            task.subTasks.length
+                          }}
+                        </div>
+                        <div class="meta-item">
+                          <mat-icon>attach_file</mat-icon>
+                          {{ task.mediaCount }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card-divider"></div>
+
+                    <div class="card-footer-row">
+                      <div class="card-due-date">
+                        <mat-icon>calendar_today</mat-icon>
+                        <span>Due {{ task.endDate | date: "mediumDate" }}</span>
+                      </div>
+                      <div class="card-actions">
+                        @if (canManageTask(task)) {
+                          <button
+                            class="create-subtask-btn"
+                            title="Add subtask"
+                            (click)="
+                              openSubTaskModal(task.id);
+                              $event.stopPropagation()
+                            "
+                          >
+                            <mat-icon>add_circle_outline</mat-icon>
+                          </button>
+                          <button
+                            class="icon-action-btn edit-btn"
+                            title="Edit task"
+                            (click)="openEditTask(task, $event)"
+                          >
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button
+                            class="icon-action-btn delete-btn"
+                            title="Delete task"
+                            (click)="confirmDeleteTask(task, $event)"
+                          >
+                            <mat-icon>delete_outline</mat-icon>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              @if (tasks.length > 4) {
+                <button
+                  class="carousel-btn next"
+                  [disabled]="carouselIndex + 4 >= tasks.length"
+                  (click)="nextTasks()"
+                >
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              }
+            </div>
+          }
         </section>
 
         <!-- SECTION 3: TASK INSPECTION -->
@@ -230,474 +395,1006 @@
           </div>
 
           <div class="inspection-wrapper">
-            <div *ngIf="!selectedTask" class="placeholder-content">
-              <mat-icon>task</mat-icon>
-              <p>Select a task to view its details, subtasks, and files.</p>
-            </div>
+            @if (!selectedTask) {
+              <div class="placeholder-content">
+                <mat-icon>task</mat-icon>
+                <p>Select a task to view its details, subtasks, and files.</p>
+              </div>
+            }
 
-            <div *ngIf="selectedTask" class="inspection-details">
-              <div class="inspection-header card">
-                <div class="header-top">
-                  <div class="header-left">
-                    <span class="id-pill purple">T{{ selectedTask.id }}</span>
-                    <h3>{{ selectedTask.title }}</h3>
+            @if (selectedTask; as project) {
+              <div class="inspection-details">
+                <div class="inspection-header card">
+                  <div class="header-top">
+                    <div class="header-left">
+                      <span class="id-pill purple">T{{ project.id }}</span>
+                      <h3>{{ project.title }}</h3>
+                    </div>
                   </div>
-                </div>
 
-                <div class="header-progress">
-                  <div class="progress-info">
-                    <span class="progress-label">Task Progress ({{ getCompletedSubtasks(selectedTask) }}/{{
-                      selectedTask.subTasks.length }} subtasks)</span>
-                    <span class="progress-percent">{{ calculateProgress(selectedTask) }}%</span>
-                  </div>
-                  <div class="progress-bar-container large">
-                    <div class="progress-fill" [ngClass]="getProgressColor(calculateProgress(selectedTask))"
-                      [style.width.%]="calculateProgress(selectedTask)">
+                  <div class="header-progress">
+                    <div class="progress-info">
+                      <span class="progress-label"
+                        >Task Progress ({{ getCompletedSubtasks(project) }}/{{
+                          project.subTasks.length
+                        }}
+                        subtasks)</span
+                      >
+                      <span class="progress-percent"
+                        >{{ calculateProgress(project) }}%</span
+                      >
+                    </div>
+                    <div class="progress-bar-container large">
+                      <div
+                        class="progress-fill"
+                        [ngClass]="getProgressColor(calculateProgress(project))"
+                        [style.width.%]="calculateProgress(project)"
+                      ></div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="inspection-body">
-                <div class="inspection-layout-grid">
-                  <!-- Left Column: Create Subtask Form -->
-                  <div class="inspection-column creation-column card" *ngIf="canManageTask(selectedTask)">
-                    <h4>Create Subtask</h4>
-                    <div class="inline-creation-form">
-                      <!-- ... form content ... -->
-                      <div class="form-group">
-                        <label>Title</label>
-                        <input type="text" [(ngModel)]="newSubTask.title" placeholder="e.g. Draft proposal">
-                      </div>
-                      <div class="form-row">
-                        <div class="form-group flex-1">
-                          <label>Start</label>
-                          <input type="date" [(ngModel)]="newSubTask.startDate">
-                        </div>
-                        <div class="form-group flex-1">
-                          <label>End</label>
-                          <input type="date" [(ngModel)]="newSubTask.endDate">
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label>Description</label>
-                        <textarea [(ngModel)]="newSubTask.description" placeholder="Optional details..."></textarea>
-                      </div>
-                      <div class="form-group">
-                        <label>Assignees</label>
-                        <div class="assignee-selector inline">
-                          <div class="selected-assignees">
-                            <span *ngFor="let userId of newSubTask.subTaskAssignees" class="user-chip theme-chip">
-                              {{ getUserName(userId) }}
-                              <button class="remove-chip" (click)="toggleSubTaskAssignee(userId)">&times;</button>
-                            </span>
-                            <div class="dropdown-wrapper">
-                              <button class="add-assignee-btn"
-                                (click)="showInlineSubTaskUserDropdown = !showInlineSubTaskUserDropdown">
-                                <mat-icon>person_add</mat-icon>
-                                <span>Add</span>
-                              </button>
-                              <div class="user-dropdown card" *ngIf="showInlineSubTaskUserDropdown">
-                                <div *ngFor="let user of availableUsers" class="user-option"
-                                  (click)="toggleSubTaskAssignee(user.id)">
-                                  <div class="checkbox" [class.selected]="isSubTaskAssigneeSelected(user.id)">
+                <div class="inspection-body">
+                  <div class="inspection-layout-grid">
+                    <!-- Left Column: Create Subtask Form -->
+                    @if (canManageTask(project)) {
+                      <div class="inspection-column creation-column card">
+                        <h4>Create Subtask</h4>
+                        <div class="inline-creation-form">
+                          <div class="form-group">
+                            <label for="subtaskTitle">Title</label>
+                            <input
+                              id="subtaskTitle"
+                              type="text"
+                              [(ngModel)]="newSubTask.title"
+                              placeholder="e.g. Draft proposal"
+                            />
+                          </div>
+                          <div class="form-row">
+                            <div class="form-group flex-1">
+                              <label for="subtaskStartDate">Start</label>
+                              <input
+                                id="subtaskStartDate"
+                                type="date"
+                                [(ngModel)]="newSubTask.startDate"
+                              />
+                            </div>
+                            <div class="form-group flex-1">
+                              <label for="subtaskEndDate">End</label>
+                              <input
+                                id="subtaskEndDate"
+                                type="date"
+                                [(ngModel)]="newSubTask.endDate"
+                              />
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="subtaskDescription">Description</label>
+                            <textarea
+                              id="subtaskDescription"
+                              [(ngModel)]="newSubTask.description"
+                              placeholder="Optional details..."
+                            ></textarea>
+                          </div>
+                          <div class="form-group">
+                            <span class="label-heading">Assignees</span>
+                            <div class="assignee-selector inline">
+                              <div class="selected-assignees">
+                                @for (
+                                  userId of newSubTask.subTaskAssignees;
+                                  track userId
+                                ) {
+                                  <span class="user-chip theme-chip">
+                                    {{ getUserName(userId) }}
+                                    <button
+                                      class="remove-chip"
+                                      (click)="toggleSubTaskAssignee(userId)"
+                                      aria-label="Remove assignee"
+                                    >
+                                      &times;
+                                    </button>
+                                  </span>
+                                }
+                                <div class="dropdown-wrapper">
+                                  <button
+                                    class="add-assignee-btn"
+                                    (click)="
+                                      showInlineSubTaskUserDropdown =
+                                        !showInlineSubTaskUserDropdown
+                                    "
+                                    aria-haspopup="listbox"
+                                    [attr.aria-expanded]="
+                                      showInlineSubTaskUserDropdown
+                                    "
+                                  >
+                                    <mat-icon>person_add</mat-icon>
+                                    <span>Add</span>
+                                  </button>
+                                  @if (showInlineSubTaskUserDropdown) {
+                                    <div
+                                      class="user-dropdown card"
+                                      role="listbox"
+                                    >
+                                      @for (
+                                        user of availableUsers;
+                                        track user.id
+                                      ) {
+                                        <div
+                                          class="user-option"
+                                          (click)="
+                                            toggleSubTaskAssignee(user.id)
+                                          "
+                                          (keydown.enter)="
+                                            toggleSubTaskAssignee(user.id)
+                                          "
+                                          tabindex="0"
+                                          role="option"
+                                          [attr.aria-selected]="
+                                            isSubTaskAssigneeSelected(user.id)
+                                          "
+                                        >
+                                          <div
+                                            class="checkbox"
+                                            [class.selected]="
+                                              isSubTaskAssigneeSelected(user.id)
+                                            "
+                                          ></div>
+                                          {{ user.fullName || user.email }}
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="scaled-buttons-wrapper">
+                            <div class="form-group media-group">
+                              <div class="footer-left">
+                                <input
+                                  type="file"
+                                  id="inlineSubTaskFileInput"
+                                  #subTaskFileInput
+                                  hidden
+                                  multiple
+                                  (change)="onSubTaskFilesSelected($event)"
+                                />
+                                <app-buttons
+                                  [buttonStyleClass]="'btn-promote'"
+                                  (click)="subTaskFileInput.click()"
+                                >
+                                  <mat-icon>attach_file</mat-icon>
+                                  Media Upload
+                                </app-buttons>
+                                @if (selectedSubTaskFiles.length > 0) {
+                                  <div class="selected-files-list">
+                                    @for (
+                                      file of selectedSubTaskFiles;
+                                      track $index
+                                    ) {
+                                      <div class="file-preview-chip">
+                                        <mat-icon [title]="file.name"
+                                          >insert_drive_file</mat-icon
+                                        >
+                                        <span class="file-name">{{
+                                          file.name
+                                        }}</span>
+                                        <button
+                                          (click)="removeSubTaskFile($index)"
+                                          class="remove-chip"
+                                          aria-label="Remove subtask file"
+                                        >
+                                          &times;
+                                        </button>
+                                      </div>
+                                    }
                                   </div>
-                                  {{ user.fullName || user.email }}
-                                </div>
+                                }
                               </div>
                             </div>
+                            <app-buttons
+                              [buttonText]="'Add Subtask'"
+                              [buttonStyleClass]="'btn-promote'"
+                              (click)="
+                                targetTaskId = project.id; createSubTask()
+                              "
+                              [isLoading]="isCreatingSubTask"
+                            >
+                              @if (!isCreatingSubTask) {
+                                <mat-icon>add</mat-icon>
+                              }
+                            </app-buttons>
                           </div>
                         </div>
-                        <div class="scaled-buttons-wrapper">
-                          <div class="form-group media-group">
-                            <div class="footer-left">
-                              <input type="file" #subTaskFileInput hidden multiple
-                                (change)="onSubTaskFilesSelected($event)">
-                              <app-buttons [buttonStyleClass]="'btn-promote'" (click)="subTaskFileInput.click()">
-                                <mat-icon>attach_file</mat-icon>
-                                Media Upload
-                              </app-buttons>
-                              <div class="selected-files-list" *ngIf="selectedSubTaskFiles.length > 0">
-                                <div *ngFor="let file of selectedSubTaskFiles; let i = index" class="file-preview-chip">
-                                  <mat-icon [title]="file.name">insert_drive_file</mat-icon>
-                                  <span class="file-name">{{ file.name }}</span>
-                                  <button (click)="removeSubTaskFile(i)" class="remove-chip">&times;</button>
-                                </div>
-                              </div>
-                            </div>
+                      </div>
+                    }
+
+                    <div class="inspection-column list-column card">
+                      <div class="inspection-tabs">
+                        <div class="tab-header" role="tablist">
+                          <div
+                            class="tab-item"
+                            [class.active]="activeInspectionTab === 'subtasks'"
+                            (click)="activeInspectionTab = 'subtasks'"
+                            (keydown.enter)="activeInspectionTab = 'subtasks'"
+                            tabindex="0"
+                            role="tab"
+                            [attr.aria-selected]="
+                              activeInspectionTab === 'subtasks'
+                            "
+                          >
+                            <mat-icon>assignment</mat-icon>
+                            <span
+                              >Subtasks ({{ project.subTasks.length }})</span
+                            >
                           </div>
-                          <app-buttons [buttonText]="'Add Subtask'" [buttonStyleClass]="'btn-promote'"
-                            (click)="targetTaskId = selectedTask.id; createSubTask()" [isLoading]="isCreatingSubTask">
-                            <mat-icon *ngIf="!isCreatingSubTask">add</mat-icon>
-                          </app-buttons>
+                          <div
+                            class="tab-item"
+                            [class.active]="activeInspectionTab === 'media'"
+                            (click)="activeInspectionTab = 'media'"
+                            (keydown.enter)="activeInspectionTab = 'media'"
+                            tabindex="0"
+                            role="tab"
+                            [attr.aria-selected]="
+                              activeInspectionTab === 'media'
+                            "
+                          >
+                            <mat-icon>attach_file</mat-icon>
+                            <span>Media ({{ selectedTaskMediaCount }})</span>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
 
-                  <!-- Right Column: Subtasks/Timesheets Tabs -->
-                  <div class="inspection-column list-column card">
-                    <div class="inspection-tabs">
-                      <div class="tab-header">
-                        <div class="tab-item" [class.active]="activeInspectionTab === 'subtasks'" (click)="activeInspectionTab = 'subtasks'">
-                          <mat-icon>assignment</mat-icon>
-                          <span>Subtasks ({{ selectedTask.subTasks.length }})</span>
-                        </div>
-                        <div class="tab-item" [class.active]="activeInspectionTab === 'media'" (click)="activeInspectionTab = 'media'">
-                          <mat-icon>attach_file</mat-icon>
-                          <span>Media ({{ selectedTaskMediaCount }})</span>
-                        </div>
-                      </div>
+                        <div class="tab-content">
+                          @if (activeInspectionTab === "subtasks") {
+                            <div class="subtask-list">
+                              <ng-template
+                                #subTaskTemplate
+                                let-parentId="parentId"
+                                let-level="level"
+                              >
+                                @for (
+                                  st of getSubTasksByParent(parentId);
+                                  track st.id
+                                ) {
+                                  <div
+                                    class="subtask-node"
+                                    [style.padding-left.px]="level * 20"
+                                  >
+                                    <div
+                                      class="subtask-item interactive"
+                                      (click)="toggleSubTaskStatus(st)"
+                                      (keydown.enter)="toggleSubTaskStatus(st)"
+                                      tabindex="0"
+                                      role="button"
+                                    >
+                                      <div
+                                        class="st-checkbox"
+                                        [class.completed]="st.isCompleted"
+                                      >
+                                        @if (st.isCompleted) {
+                                          <mat-icon>check</mat-icon>
+                                        }
+                                      </div>
+                                      <div class="subtask-info">
+                                        <span
+                                          class="st-title"
+                                          [class.completed]="st.isCompleted"
+                                          >{{ st.title }}</span
+                                        >
+                                        <span class="st-description">{{
+                                          st.description
+                                        }}</span>
+                                        @if (st.endDate) {
+                                          <span class="st-date"
+                                            >Due
+                                            {{
+                                              st.endDate | date: "shortDate"
+                                            }}</span
+                                          >
+                                        }
+                                      </div>
+                                      <div
+                                        class="st-actions"
+                                        style="margin-left: auto"
+                                      >
+                                        @if (canManageSubTask(st, project)) {
+                                          <button
+                                            class="create-subtask-btn"
+                                            title="Add nested subtask"
+                                            (click)="
+                                              openSubTaskModal(
+                                                project.id,
+                                                st.id
+                                              );
+                                              $event.stopPropagation()
+                                            "
+                                          >
+                                            <mat-icon
+                                              >add_circle_outline</mat-icon
+                                            >
+                                          </button>
+                                          <button
+                                            class="icon-action-btn edit-btn"
+                                            title="Edit subtask"
+                                            (click)="
+                                              openEditSubTask(st, $event)
+                                            "
+                                          >
+                                            <mat-icon>edit</mat-icon>
+                                          </button>
+                                          <button
+                                            class="icon-action-btn delete-btn"
+                                            title="Delete subtask"
+                                            (click)="
+                                              confirmDeleteSubTask(st, $event)
+                                            "
+                                          >
+                                            <mat-icon>delete_outline</mat-icon>
+                                          </button>
+                                        }
+                                      </div>
+                                    </div>
+                                    <!-- Recursive call for children -->
+                                    <ng-container
+                                      *ngTemplateOutlet="
+                                        subTaskTemplate;
+                                        context: {
+                                          parentId: st.id,
+                                          level: level + 1,
+                                        }
+                                      "
+                                    ></ng-container>
+                                  </div>
+                                }
+                              </ng-template>
 
-                      <div class="tab-content">
-                        <div *ngIf="activeInspectionTab === 'subtasks'" class="subtask-list">
-                          <ng-template #subTaskTemplate let-parentId="parentId" let-level="level">
-                            <div *ngFor="let st of getSubTasksByParent(parentId)" class="subtask-node"
-                              [style.padding-left.px]="level * 20">
-                              <div class="subtask-item interactive" (click)="toggleSubTaskStatus(st)">
-                                <div class="st-checkbox" [class.completed]="st.isCompleted">
-                                  <mat-icon *ngIf="st.isCompleted">check</mat-icon>
-                                </div>
-                                <div class="subtask-info">
-                                  <span class="st-title" [class.completed]="st.isCompleted">{{ st.title }}</span>
-                                  <span class="st-description">{{ st.description }}</span>
-                                  <span class="st-date" *ngIf="st.endDate">Due {{ st.endDate | date:'shortDate'
-                                    }}</span>
-                                </div>
-                                <div class="st-actions" style="margin-left: auto;">
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="create-subtask-btn"
-                                    title="Add nested subtask"
-                                    (click)="openSubTaskModal(selectedTask.id, st.id); $event.stopPropagation()">
-                                    <mat-icon>add_circle_outline</mat-icon>
-                                  </button>
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn edit-btn"
-                                    title="Edit subtask" (click)="openEditSubTask(st, $event)">
-                                    <mat-icon>edit</mat-icon>
-                                  </button>
-                                  <button *ngIf="canManageSubTask(st, selectedTask)" class="icon-action-btn delete-btn"
-                                    title="Delete subtask" (click)="confirmDeleteSubTask(st, $event)">
-                                    <mat-icon>delete_outline</mat-icon>
-                                  </button>
-                                </div>
-                              </div>
-                              <!-- Recursive call for children -->
                               <ng-container
-                                *ngTemplateOutlet="subTaskTemplate; context: { parentId: st.id, level: level + 1 }"></ng-container>
+                                *ngTemplateOutlet="
+                                  subTaskTemplate;
+                                  context: { parentId: null, level: 0 }
+                                "
+                              ></ng-container>
+
+                              @if (project.subTasks.length === 0) {
+                                <div class="empty-tab-state">
+                                  <p>No subtasks yet.</p>
+                                </div>
+                              }
                             </div>
-                          </ng-template>
+                          }
 
-                          <ng-container
-                            *ngTemplateOutlet="subTaskTemplate; context: { parentId: null, level: 0 }"></ng-container>
-
-                          <div *ngIf="selectedTask.subTasks.length === 0" class="empty-tab-state">
-                            <p>No subtasks yet.</p>
-                          </div>
-                        </div>
-
-                        <div *ngIf="activeInspectionTab === 'media'" class="media-list">
-                          <app-media [projectTaskId]="selectedTask.id" [compactMode]="true" [verticalLayout]="true"
-                            [fullFileName]="true"></app-media>
+                          @if (activeInspectionTab === "media") {
+                            <div class="media-list">
+                              <app-media
+                                [projectTaskId]="project.id"
+                                [compactMode]="true"
+                                [verticalLayout]="true"
+                                [fullFileName]="true"
+                              ></app-media>
+                            </div>
+                          }
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            }
           </div>
         </section>
       </div>
-    </ng-container>
+    }
 
     <!-- TAB SWITCHING INDICATOR -->
-    <div class="tab-switch-loader" *ngIf="isTabSwitching">
-      <div class="tab-switch-spinner"></div>
-      <p>Switching view...</p>
-    </div>
+    @if (isTabSwitching) {
+      <div class="tab-switch-loader">
+        <div class="tab-switch-spinner"></div>
+        <p>Switching view...</p>
+      </div>
+    }
 
-    <ng-container *ngIf="activeMainTab === 'timesheets' && !isTabSwitching">
-      <app-timesheets [isChildView]="true" [parentProjectId]="projectId"></app-timesheets>
-    </ng-container>
+    @if (activeMainTab === "timesheets" && !isTabSwitching) {
+      <app-timesheets
+        [isChildView]="true"
+        [parentProjectId]="projectId"
+      ></app-timesheets>
+    }
 
     <!-- SUBTASK CREATION MODAL -->
-    <div class="modal-overlay" *ngIf="isSubTaskModalOpen" (click)="closeSubTaskModal()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Create New Subtask</h3>
-          <button class="close-modal-btn" (click)="closeSubTaskModal()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Subtask Title</label>
-            <input type="text" [(ngModel)]="newSubTask.title" placeholder="e.g. Research data sources">
+    @if (isSubTaskModalOpen) {
+      <div
+        class="modal-overlay"
+        (click)="closeSubTaskModal()"
+        (keydown.escape)="closeSubTaskModal()"
+        tabindex="0"
+        role="button"
+        aria-label="Close modal overlay"
+      >
+        <div
+          class="modal-card"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3>Create New Subtask</h3>
+            <button
+              class="close-modal-btn"
+              (click)="closeSubTaskModal()"
+              aria-label="Close modal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
 
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>Start Date</label>
-              <input type="date" [(ngModel)]="newSubTask.startDate">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="modalSubtaskTitle">Subtask Title</label>
+              <input
+                id="modalSubtaskTitle"
+                type="text"
+                [(ngModel)]="newSubTask.title"
+                placeholder="e.g. Research data sources"
+              />
             </div>
-            <div class="form-group flex-1">
-              <label>End Date</label>
-              <input type="date" [(ngModel)]="newSubTask.endDate">
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="modalSubtaskStartDate">Start Date</label>
+                <input
+                  id="modalSubtaskStartDate"
+                  type="date"
+                  [(ngModel)]="newSubTask.startDate"
+                />
+              </div>
+              <div class="form-group flex-1">
+                <label for="modalSubtaskEndDate">End Date</label>
+                <input
+                  id="modalSubtaskEndDate"
+                  type="date"
+                  [(ngModel)]="newSubTask.endDate"
+                />
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Description</label>
-            <textarea [(ngModel)]="newSubTask.description"
-              placeholder="Provide context about this subtask..."></textarea>
-          </div>
+            <div class="form-group">
+              <label for="modalSubtaskDescription">Description</label>
+              <textarea
+                id="modalSubtaskDescription"
+                [(ngModel)]="newSubTask.description"
+                placeholder="Provide context about this subtask..."
+              ></textarea>
+            </div>
 
-          <div class="form-group">
-            <label>Assignees</label>
-            <div class="assignee-selector">
-              <div class="selected-assignees">
-                <span *ngFor="let userId of newSubTask.subTaskAssignees" class="user-chip theme-chip">
-                  {{ getUserName(userId) }}
-                  <button class="remove-chip" (click)="toggleSubTaskAssignee(userId)">&times;</button>
-                </span>
-                <div class="dropdown-wrapper">
-                  <button class="add-assignee-btn" (click)="showSubTaskUserDropdown = !showSubTaskUserDropdown">
-                    <mat-icon>person_add</mat-icon>
-                    <span>Add</span>
-                  </button>
-                  <div class="user-dropdown card" *ngIf="showSubTaskUserDropdown">
-                    <div *ngFor="let user of availableUsers" class="user-option"
-                      (click)="toggleSubTaskAssignee(user.id)">
-                      <div class="checkbox" [class.selected]="isSubTaskAssigneeSelected(user.id)"></div>
-                      {{ user.fullName || user.email }}
-                    </div>
+            <div class="form-group">
+              <span class="label-heading">Assignees</span>
+              <div class="assignee-selector">
+                <div class="selected-assignees">
+                  @for (userId of newSubTask.subTaskAssignees; track userId) {
+                    <span class="user-chip theme-chip">
+                      {{ getUserName(userId) }}
+                      <button
+                        class="remove-chip"
+                        (click)="toggleSubTaskAssignee(userId)"
+                        aria-label="Remove assignee"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  }
+                  <div class="dropdown-wrapper">
+                    <button
+                      class="add-assignee-btn"
+                      (click)="
+                        showSubTaskUserDropdown = !showSubTaskUserDropdown
+                      "
+                      aria-haspopup="listbox"
+                      [attr.aria-expanded]="showSubTaskUserDropdown"
+                    >
+                      <mat-icon>person_add</mat-icon>
+                      <span>Add</span>
+                    </button>
+                    @if (showSubTaskUserDropdown) {
+                      <div class="user-dropdown card" role="listbox">
+                        @for (user of availableUsers; track user.id) {
+                          <div
+                            class="user-option"
+                            (click)="toggleSubTaskAssignee(user.id)"
+                            (keydown.enter)="toggleSubTaskAssignee(user.id)"
+                            tabindex="0"
+                            role="option"
+                            [attr.aria-selected]="
+                              isSubTaskAssigneeSelected(user.id)
+                            "
+                          >
+                            <div
+                              class="checkbox"
+                              [class.selected]="
+                                isSubTaskAssigneeSelected(user.id)
+                              "
+                            ></div>
+                            {{ user.fullName || user.email }}
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="form-group media-group" style="margin-top: 1rem;">
-            <label>Media Upload</label>
-            <div class="footer-left" style="margin-bottom: 0;">
-              <input type="file" #modalSubTaskFileInput hidden multiple (change)="onSubTaskFilesSelected($event)">
-              <app-buttons [buttonStyleClass]="'btn-promote'" (click)="modalSubTaskFileInput.click()">
-                <mat-icon>attach_file</mat-icon>
-                Attach Media
-              </app-buttons>
-              <div class="selected-files-list" *ngIf="selectedSubTaskFiles.length > 0">
-                <div *ngFor="let file of selectedSubTaskFiles; let i = index" class="file-preview-chip">
-                  <mat-icon [title]="file.name">insert_drive_file</mat-icon>
-                  <span class="file-name">{{ file.name }}</span>
-                  <button (click)="removeSubTaskFile(i)" class="remove-chip">&times;</button>
-                </div>
+            <div class="form-group media-group" style="margin-top: 1rem">
+              <span class="label-heading">Media Upload</span>
+              <div class="footer-left" style="margin-bottom: 0">
+                <input
+                  type="file"
+                  id="modalSubTaskFileInput"
+                  #modalSubTaskFileInput
+                  hidden
+                  multiple
+                  (change)="onSubTaskFilesSelected($event)"
+                />
+                <app-buttons
+                  [buttonStyleClass]="'btn-promote'"
+                  (click)="modalSubTaskFileInput.click()"
+                >
+                  <mat-icon>attach_file</mat-icon>
+                  Attach Media
+                </app-buttons>
+                @if (selectedSubTaskFiles.length > 0) {
+                  <div class="selected-files-list">
+                    @for (file of selectedSubTaskFiles; track $index) {
+                      <div class="file-preview-chip">
+                        <mat-icon [title]="file.name"
+                          >insert_drive_file</mat-icon
+                        >
+                        <span class="file-name">{{ file.name }}</span>
+                        <button
+                          (click)="removeSubTaskFile($index)"
+                          class="remove-chip"
+                          aria-label="Remove subtask file"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeSubTaskModal()">Cancel</button>
-          <app-buttons [buttonText]="isCreatingSubTask ? 'Creating...' : 'Create Subtask'"
-            [buttonStyleClass]="'btn-promote'" (click)="createSubTask()" [isLoading]="isCreatingSubTask"
-            [disabled]="isCreatingSubTask">
-            <mat-icon *ngIf="!isCreatingSubTask">add</mat-icon>
-          </app-buttons>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeSubTaskModal()">
+              Cancel
+            </button>
+            <app-buttons
+              [buttonText]="
+                isCreatingSubTask ? 'Creating...' : 'Create Subtask'
+              "
+              [buttonStyleClass]="'btn-promote'"
+              (click)="createSubTask()"
+              [isLoading]="isCreatingSubTask"
+              [disabled]="isCreatingSubTask"
+            >
+              @if (!isCreatingSubTask) {
+                <mat-icon>add</mat-icon>
+              }
+            </app-buttons>
+          </div>
         </div>
       </div>
-    </div>
+    }
 
     <!-- EDIT TASK MODAL -->
-    <div class="modal-overlay" *ngIf="isEditTaskModalOpen" (click)="closeEditTaskModal()">
-      <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Edit Task</h3>
-          <button class="close-modal-btn" (click)="closeEditTaskModal()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Task Title *</label>
-            <input type="text" [(ngModel)]="editTask.title" placeholder="e.g. Create New Workflow">
+    @if (isEditTaskModalOpen) {
+      <div
+        class="modal-overlay"
+        (click)="closeEditTaskModal()"
+        (keydown.escape)="closeEditTaskModal()"
+        tabindex="0"
+        role="button"
+        aria-label="Close modal overlay"
+      >
+        <div
+          class="modal-card modal-wide"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3>Edit Task</h3>
+            <button
+              class="close-modal-btn"
+              (click)="closeEditTaskModal()"
+              aria-label="Close modal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>Start Date *</label>
-              <input type="date" [(ngModel)]="editTask.startDate">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editTaskTitle">Task Title *</label>
+              <input
+                id="editTaskTitle"
+                type="text"
+                [(ngModel)]="editTask.title"
+                placeholder="e.g. Create New Workflow"
+              />
             </div>
-            <div class="form-group flex-1">
-              <label>End Date *</label>
-              <input type="date" [(ngModel)]="editTask.endDate">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <textarea [(ngModel)]="editTask.description" placeholder="Task description"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Labels</label>
-            <div class="labels-input-wrapper">
-              <div class="label-chips" *ngIf="editTaskLabels.length > 0">
-                <span *ngFor="let label of editTaskLabels" class="label-chip">
-                  {{ label }}
-                  <button (click)="removeEditLabel(label)" class="remove-chip">&times;</button>
-                </span>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="editTaskStartDate">Start Date *</label>
+                <input
+                  id="editTaskStartDate"
+                  type="date"
+                  [(ngModel)]="editTask.startDate"
+                />
               </div>
-              <input type="text" [(ngModel)]="editLabelInput" (keydown.enter)="addEditLabel($event)"
-                placeholder="Type and press Enter">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Assignees</label>
-            <div class="assignee-selector">
-              <div class="selected-assignees" *ngIf="editTaskAssigneeIds.length > 0">
-                <span *ngFor="let id of editTaskAssigneeIds" class="user-chip">
-                  {{ getUserName(id) }}
-                  <button (click)="toggleEditTaskAssignee(id)" class="remove-chip">&times;</button>
-                </span>
+              <div class="form-group flex-1">
+                <label for="editTaskEndDate">End Date *</label>
+                <input
+                  id="editTaskEndDate"
+                  type="date"
+                  [(ngModel)]="editTask.endDate"
+                />
               </div>
-              <div class="dropdown-wrapper">
-                <button class="add-assignee-btn" (click)="showEditUserDropdown = !showEditUserDropdown">
-                  <mat-icon>person_add</mat-icon>
-                  Add Assignees
-                </button>
-                <div class="user-dropdown card" *ngIf="showEditUserDropdown">
-                  <div class="user-option" *ngFor="let user of availableUsers"
-                    (click)="toggleEditTaskAssignee(user.id)">
-                    <span class="checkbox" [class.selected]="isEditTaskAssigneeSelected(user.id)"></span>
-                    {{ user.fullName || user.email }}
+            </div>
+            <div class="form-group">
+              <label for="editTaskDescription">Description</label>
+              <textarea
+                id="editTaskDescription"
+                [(ngModel)]="editTask.description"
+                placeholder="Task description"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="editTaskLabelInput">Labels</label>
+              <div class="labels-input-wrapper">
+                @if (editTaskLabels.length > 0) {
+                  <div class="label-chips">
+                    @for (label of editTaskLabels; track label) {
+                      <span class="label-chip">
+                        {{ label }}
+                        <button
+                          (click)="removeEditLabel(label)"
+                          class="remove-chip"
+                          aria-label="Remove label"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    }
                   </div>
+                }
+                <input
+                  id="editTaskLabelInput"
+                  type="text"
+                  [(ngModel)]="editLabelInput"
+                  (keydown.enter)="addEditLabel($event)"
+                  placeholder="Type and press Enter"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <span class="label-heading">Assignees</span>
+              <div class="assignee-selector">
+                @if (editTaskAssigneeIds.length > 0) {
+                  <div class="selected-assignees">
+                    @for (id of editTaskAssigneeIds; track id) {
+                      <span class="user-chip">
+                        {{ getUserName(id) }}
+                        <button
+                          (click)="toggleEditTaskAssignee(id)"
+                          class="remove-chip"
+                          aria-label="Remove assignee"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    }
+                  </div>
+                }
+                <div class="dropdown-wrapper">
+                  <button
+                    class="add-assignee-btn"
+                    (click)="showEditUserDropdown = !showEditUserDropdown"
+                    aria-haspopup="listbox"
+                    [attr.aria-expanded]="showEditUserDropdown"
+                  >
+                    <mat-icon>person_add</mat-icon>
+                    Add Assignees
+                  </button>
+                  @if (showEditUserDropdown) {
+                    <div class="user-dropdown card" role="listbox">
+                      @for (user of availableUsers; track user.id) {
+                        <div
+                          class="user-option"
+                          (click)="toggleEditTaskAssignee(user.id)"
+                          (keydown.enter)="toggleEditTaskAssignee(user.id)"
+                          tabindex="0"
+                          role="option"
+                          [attr.aria-selected]="
+                            isEditTaskAssigneeSelected(user.id)
+                          "
+                        >
+                          <span
+                            class="checkbox"
+                            [class.selected]="
+                              isEditTaskAssigneeSelected(user.id)
+                            "
+                          ></span>
+                          {{ user.fullName || user.email }}
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditTaskModal()">Cancel</button>
-          <app-buttons [buttonText]="isUpdatingTask ? 'Saving...' : 'Save Changes'" [buttonStyleClass]="'btn-promote'"
-            (click)="saveTaskEdit()" [isLoading]="isUpdatingTask" [disabled]="isUpdatingTask">
-            <mat-icon *ngIf="!isUpdatingTask">save</mat-icon>
-          </app-buttons>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeEditTaskModal()">
+              Cancel
+            </button>
+            <app-buttons
+              [buttonText]="isUpdatingTask ? 'Saving...' : 'Save Changes'"
+              [buttonStyleClass]="'btn-promote'"
+              (click)="saveTaskEdit()"
+              [isLoading]="isUpdatingTask"
+              [disabled]="isUpdatingTask"
+            >
+              @if (!isUpdatingTask) {
+                <mat-icon>save</mat-icon>
+              }
+            </app-buttons>
+          </div>
         </div>
       </div>
-    </div>
+    }
 
     <!-- EDIT SUBTASK MODAL -->
-    <div class="modal-overlay" *ngIf="isEditSubTaskModalOpen" (click)="closeEditSubTaskModal()">
-      <div class="modal-card modal-wide" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Edit Subtask</h3>
-          <button class="close-modal-btn" (click)="closeEditSubTaskModal()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Subtask Title *</label>
-            <input type="text" [(ngModel)]="editSubTask.title" placeholder="e.g. Research data sources">
+    @if (isEditSubTaskModalOpen) {
+      <div
+        class="modal-overlay"
+        (click)="closeEditSubTaskModal()"
+        (keydown.escape)="closeEditSubTaskModal()"
+        tabindex="0"
+        role="button"
+        aria-label="Close modal overlay"
+      >
+        <div
+          class="modal-card modal-wide"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3>Edit Subtask</h3>
+            <button
+              class="close-modal-btn"
+              (click)="closeEditSubTaskModal()"
+              aria-label="Close modal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>Start Date *</label>
-              <input type="date" [(ngModel)]="editSubTask.startDate">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editSubtaskTitle">Subtask Title *</label>
+              <input
+                id="editSubtaskTitle"
+                type="text"
+                [(ngModel)]="editSubTask.title"
+                placeholder="e.g. Research data sources"
+              />
             </div>
-            <div class="form-group flex-1">
-              <label>End Date *</label>
-              <input type="date" [(ngModel)]="editSubTask.endDate">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="editSubtaskStartDate">Start Date *</label>
+                <input
+                  id="editSubtaskStartDate"
+                  type="date"
+                  [(ngModel)]="editSubTask.startDate"
+                />
+              </div>
+              <div class="form-group flex-1">
+                <label for="editSubtaskEndDate">End Date *</label>
+                <input
+                  id="editSubtaskEndDate"
+                  type="date"
+                  [(ngModel)]="editSubTask.endDate"
+                />
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <textarea [(ngModel)]="editSubTask.description"
-              placeholder="Provide context about this subtask..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Assignees</label>
-            <div class="assignee-selector">
-              <div class="selected-assignees">
-                <span *ngFor="let userId of editSubTaskAssigneeIds" class="user-chip theme-chip">
-                  {{ getUserName(userId) }}
-                  <button class="remove-chip" (click)="toggleEditSubTaskAssignee(userId)">&times;</button>
-                </span>
-                <div class="dropdown-wrapper">
-                  <button class="add-assignee-btn" (click)="showEditSubTaskUserDropdown = !showEditSubTaskUserDropdown">
-                    <mat-icon>person_add</mat-icon>
-                    <span>Add</span>
-                  </button>
-                  <div class="user-dropdown card" *ngIf="showEditSubTaskUserDropdown">
-                    <div *ngFor="let user of availableUsers" class="user-option"
-                      (click)="toggleEditSubTaskAssignee(user.id)">
-                      <div class="checkbox" [class.selected]="isEditSubTaskAssigneeSelected(user.id)"></div>
-                      {{ user.fullName || user.email }}
-                    </div>
+            <div class="form-group">
+              <label for="editSubtaskDescription">Description</label>
+              <textarea
+                id="editSubtaskDescription"
+                [(ngModel)]="editSubTask.description"
+                placeholder="Provide context about this subtask..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <span class="label-heading">Assignees</span>
+              <div class="assignee-selector">
+                <div class="selected-assignees">
+                  @for (userId of editSubTaskAssigneeIds; track userId) {
+                    <span class="user-chip theme-chip">
+                      {{ getUserName(userId) }}
+                      <button
+                        class="remove-chip"
+                        (click)="toggleEditSubTaskAssignee(userId)"
+                        aria-label="Remove assignee"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  }
+                  <div class="dropdown-wrapper">
+                    <button
+                      class="add-assignee-btn"
+                      (click)="
+                        showEditSubTaskUserDropdown =
+                          !showEditSubTaskUserDropdown
+                      "
+                      aria-haspopup="listbox"
+                      [attr.aria-expanded]="showEditSubTaskUserDropdown"
+                    >
+                      <mat-icon>person_add</mat-icon>
+                      <span>Add</span>
+                    </button>
+                    @if (showEditSubTaskUserDropdown) {
+                      <div class="user-dropdown card" role="listbox">
+                        @for (user of availableUsers; track user.id) {
+                          <div
+                            class="user-option"
+                            (click)="toggleEditSubTaskAssignee(user.id)"
+                            (keydown.enter)="toggleEditSubTaskAssignee(user.id)"
+                            tabindex="0"
+                            role="option"
+                            [attr.aria-selected]="
+                              isEditSubTaskAssigneeSelected(user.id)
+                            "
+                          >
+                            <div
+                              class="checkbox"
+                              [class.selected]="
+                                isEditSubTaskAssigneeSelected(user.id)
+                              "
+                            ></div>
+                            {{ user.fullName || user.email }}
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeEditSubTaskModal()">Cancel</button>
-          <app-buttons [buttonText]="isUpdatingSubTask ? 'Saving...' : 'Save Changes'"
-            [buttonStyleClass]="'btn-promote'" (click)="saveSubTaskEdit()" [isLoading]="isUpdatingSubTask"
-            [disabled]="isUpdatingSubTask">
-            <mat-icon *ngIf="!isUpdatingSubTask">save</mat-icon>
-          </app-buttons>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="closeEditSubTaskModal()">
+              Cancel
+            </button>
+            <app-buttons
+              [buttonText]="isUpdatingSubTask ? 'Saving...' : 'Save Changes'"
+              [buttonStyleClass]="'btn-promote'"
+              (click)="saveSubTaskEdit()"
+              [isLoading]="isUpdatingSubTask"
+              [disabled]="isUpdatingSubTask"
+            >
+              @if (!isUpdatingSubTask) {
+                <mat-icon>save</mat-icon>
+              }
+            </app-buttons>
+          </div>
         </div>
       </div>
-    </div>
+    }
 
     <!-- DELETE TASK CONFIRMATION -->
-    <div class="modal-overlay" *ngIf="isPendingDeleteTask" (click)="cancelDeleteTask()">
-      <div class="modal-card confirm-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Delete Task</h3>
-          <button class="close-modal-btn" (click)="cancelDeleteTask()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="confirm-content">
-            <mat-icon class="confirm-icon danger">warning</mat-icon>
-            <p>Are you sure you want to delete <strong>"{{ pendingDeleteTaskTitle }}"</strong>? This action
-              cannot
-              be
-              undone.</p>
+    @if (isPendingDeleteTask) {
+      <div
+        class="modal-overlay"
+        (click)="cancelDeleteTask()"
+        (keydown.escape)="cancelDeleteTask()"
+        tabindex="0"
+        role="button"
+        aria-label="Close modal overlay"
+      >
+        <div
+          class="modal-card confirm-modal"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3>Delete Task</h3>
+            <button
+              class="close-modal-btn"
+              (click)="cancelDeleteTask()"
+              aria-label="Close modal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="confirm-content">
+              <mat-icon class="confirm-icon danger">warning</mat-icon>
+              <p>
+                Are you sure you want to delete
+                <strong>"{{ pendingDeleteTaskTitle }}"</strong>? This action
+                cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelDeleteTask()">
+              Cancel
+            </button>
+            <button
+              class="btn-danger"
+              (click)="executeDeleteTask()"
+              [disabled]="isDeletingTask"
+            >
+              {{ isDeletingTask ? "Deleting..." : "Delete Task" }}
+            </button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="cancelDeleteTask()">Cancel</button>
-          <button class="btn-danger" (click)="executeDeleteTask()" [disabled]="isDeletingTask">
-            {{ isDeletingTask ? 'Deleting...' : 'Delete Task' }}
-          </button>
-        </div>
       </div>
-    </div>
+    }
 
     <!-- DELETE SUBTASK CONFIRMATION -->
-    <div class="modal-overlay" *ngIf="isPendingDeleteSubTask" (click)="cancelDeleteSubTask()">
-      <div class="modal-card confirm-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Delete Subtask</h3>
-          <button class="close-modal-btn" (click)="cancelDeleteSubTask()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="confirm-content">
-            <mat-icon class="confirm-icon danger">warning</mat-icon>
-            <p>Are you sure you want to delete <strong>"{{ pendingDeleteSubTaskTitle }}"</strong>? This cannot
-              be
-              undone.
-            </p>
+    @if (isPendingDeleteSubTask) {
+      <div
+        class="modal-overlay"
+        (click)="cancelDeleteSubTask()"
+        (keydown.escape)="cancelDeleteSubTask()"
+        tabindex="0"
+        role="button"
+        aria-label="Close modal overlay"
+      >
+        <div
+          class="modal-card confirm-modal"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3>Delete Subtask</h3>
+            <button
+              class="close-modal-btn"
+              (click)="cancelDeleteSubTask()"
+              aria-label="Close modal"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="confirm-content">
+              <mat-icon class="confirm-icon danger">warning</mat-icon>
+              <p>
+                Are you sure you want to delete
+                <strong>"{{ pendingDeleteSubTaskTitle }}"</strong>? This cannot
+                be undone.
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelDeleteSubTask()">
+              Cancel
+            </button>
+            <button
+              class="btn-danger"
+              (click)="executeDeleteSubTask()"
+              [disabled]="isDeletingSubTask"
+            >
+              {{ isDeletingSubTask ? "Deleting..." : "Delete Subtask" }}
+            </button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="cancelDeleteSubTask()">Cancel</button>
-          <button class="btn-danger" (click)="executeDeleteSubTask()" [disabled]="isDeletingSubTask">
-            {{ isDeletingSubTask ? 'Deleting...' : 'Delete Subtask' }}
-          </button>
-        </div>
       </div>
-    </div>
+    }
+  </div>
+</div>

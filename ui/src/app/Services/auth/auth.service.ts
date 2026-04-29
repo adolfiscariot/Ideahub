@@ -1,5 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  throwError,
+  of,
+  Subscription,
+  timer,
+} from 'rxjs';
 import { catchError, tap, finalize, filter, take, map } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Registration } from '../../Interfaces/Registration/registration-interface';
@@ -9,6 +16,7 @@ import { ForgotPassword } from '../../Interfaces/Auth/forgot-password-interface'
 import { ResetPassword } from '../../Interfaces/Auth/reset-password-interface';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment.prod';
+import { AuthData, CurrentUser } from '../../Interfaces/Auth/auth-interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -21,72 +29,120 @@ export class AuthService {
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();
 
+  private _passwordSetupRequired = new BehaviorSubject<boolean>(false);
+  passwordSetupRequired$: Observable<boolean> =
+    this._passwordSetupRequired.asObservable();
+
   private isRefreshing = false;
-  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  private refreshTokenSubject: BehaviorSubject<string | null> =
+    new BehaviorSubject<string | null>(null);
+  private refreshSubscription?: Subscription;
 
   private http = inject(HttpClient);
 
   constructor() {
     const token = localStorage.getItem('accessToken');
     this._isLoggedIn.next(!!token);
-  }
 
-  register(registrationData: Registration): Observable<any> {
+    const psr = localStorage.getItem('passwordSetupRequired');
+    this._passwordSetupRequired.next(psr === 'true');
 
-    return this.http.post(`${this.authUrl}/register`, registrationData).pipe(
-      tap((response) => {
-        // console.log(
-        //   `${registrationData.email} has registered successfully: `,
-        //   response
-        // );
-      }),
-      catchError((e) => {
-        const errorMessage = e.error?.message || e.message || 'Registration failed';
-        throw new Error(errorMessage);
-      })
-    );
-  }
-
-  login(loginData: Login): Observable<any> {
-
-    return this.http.post<ApiResponse>(`${this.authUrl}/login`, loginData, { withCredentials: true }).pipe(
-      tap((response) => {
-        if (response.status && response.data?.accessToken) {
-
-          localStorage.setItem('accessToken', response.data.accessToken);
-          // Refresh token is now in a Secure, HttpOnly cookie managed by the browser
-          this._isLoggedIn.next(true);
-        } else {
-          throw new Error(response.message || 'Login failed');
+    if (token) {
+      this.setupRefreshTimer();
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const currentToken = localStorage.getItem('accessToken');
+        if (currentToken) {
+          this.setupRefreshTimer();
         }
-      }),
-      catchError((e) => {
-        const errorMessage = e.error?.message || e.message || 'Login failed';
-        throw new Error(errorMessage);
-      })
-    );
+      }
+    });
   }
 
-  logout(): Observable<any> {
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
+    return {
+      success: response.status || response.success || false,
+      message: response.message || '',
+      data: response.data,
+    };
+  }
 
-    // 1. Check if token is invalid/expired before sending request
-    if (!this.isTokenValid()) {
+  setAuthData(data: AuthData): void {
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      this._isLoggedIn.next(true);
+
+      if (data.passwordSetupRequired !== undefined) {
+        localStorage.setItem(
+          'passwordSetupRequired',
+          data.passwordSetupRequired.toString(),
+        );
+        this._passwordSetupRequired.next(data.passwordSetupRequired);
+      }
+
+      this.setupRefreshTimer();
+    }
+  }
+
+  register(registrationData: Registration): Observable<ApiResponse<void>> {
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/register`, registrationData)
+      .pipe(
+        map((response) => this.convertResponse<void>(response)),
+        catchError((e) => {
+          const errorMessage =
+            e.error?.message || e.message || 'Registration failed';
+          throw new Error(errorMessage);
+        }),
+      );
+  }
+
+  login(loginData: Login): Observable<ApiResponse<AuthData>> {
+    return this.http
+      .post<
+        ApiResponse<AuthData>
+      >(`${this.authUrl}/login`, loginData, { withCredentials: true })
+      .pipe(
+        map((response) => this.convertResponse<AuthData>(response)),
+        tap((response) => {
+          if (response.success && response.data?.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+            this._isLoggedIn.next(true);
+            this.setupRefreshTimer();
+          } else {
+            throw new Error(response.message || 'Login failed');
+          }
+        }),
+        catchError((e) => {
+          const errorMessage = e.error?.message || e.message || 'Login failed';
+          throw new Error(errorMessage);
+        }),
+      );
+  }
+
+  logout(): Observable<ApiResponse<void> | boolean> {
+    // Check local token status
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
       this.logoutLocal();
-      return of(true); // Return instant success
+      return of(true);
     }
 
     // 2. Attempt server-side logout
-    return this.http.post<ApiResponse>(`${this.authUrl}/logout`, {}, { withCredentials: true }).pipe(
-      tap(() => {
-      }),
-      catchError((error: HttpErrorResponse) => {
-        return throwError(() => error);
-      }),
-      // 3. Always clean up locally, regardless of server response
-      finalize(() => {
-        this.logoutLocal();
-      })
-    );
+    return this.http
+      .post<
+        ApiResponse<void>
+      >(`${this.authUrl}/logout`, {}, { withCredentials: true })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error);
+        }),
+        // 3. Always clean up locally, regardless of server response
+        finalize(() => {
+          this.logoutLocal();
+        }),
+      );
   }
 
   /**
@@ -99,12 +155,11 @@ export class AuthService {
    * Refreshes the JWT access token using the refresh token (from cookie).
    * Handles concurrent refreshes by queuing subsequent requests.
    */
-  refreshToken(): Observable<any> {
+  refreshToken(): Observable<string> {
     if (this.isRefreshing) {
-      // If a refresh is already in progress, wait for it to complete
       return this.refreshTokenSubject.pipe(
-        filter(token => token != null),
-        take(1)
+        filter((token) => token != null),
+        take(1),
       );
     }
 
@@ -120,28 +175,36 @@ export class AuthService {
 
     const payload = { accessToken, refreshToken: 'cookie' };
 
-    return this.http.post<any>(`${this.authUrl}/refresh-token`, payload, { withCredentials: true }).pipe(
-      map((response) => {
-        const newAccessToken = response.accessToken || response.AccessToken;
-        if (newAccessToken) {
-          localStorage.setItem('accessToken', newAccessToken);
-          this._isLoggedIn.next(true);
-          this.refreshTokenSubject.next(newAccessToken);
-          return newAccessToken;
-        } else {
-          this.logoutLocal();
-          throw new Error('No access token in response');
-        }
-      }),
-      catchError((error) => {
-        this.refreshTokenSubject.next(null); //Signal failure without breaking subject
-        this.logoutLocal();
-        return throwError(() => error);
-      }),
-      finalize(() => {
-        this.isRefreshing = false;
+    return this.http
+      .post<ApiResponse<AuthData>>(`${this.authUrl}/refresh-token`, payload, {
+        withCredentials: true,
       })
-    );
+      .pipe(
+        map((response) => this.convertResponse<AuthData>(response)),
+        map((response) => {
+          const newAccessToken = response.data?.accessToken;
+          if (response.success && newAccessToken) {
+            localStorage.setItem('accessToken', newAccessToken);
+            this._isLoggedIn.next(true);
+            this.refreshTokenSubject.next(newAccessToken);
+            this.setupRefreshTimer();
+            return newAccessToken;
+          } else {
+            throw new Error(response.message || 'No access token in response');
+          }
+        }),
+        catchError((error) => {
+          // Surface the failure to any queued concurrent callers so they don't hang.
+          this.refreshTokenSubject.error(error);
+          // Reset the subject for future refresh attempts.
+          this.refreshTokenSubject = new BehaviorSubject<string | null>(null);
+          this.logoutLocal();
+          return throwError(() => error);
+        }),
+        finalize(() => {
+          this.isRefreshing = false;
+        }),
+      );
   }
 
   /**
@@ -149,12 +212,64 @@ export class AuthService {
    * Public to allow Interceptor to trigger logout on critical failures (e.g. failed refresh).
    */
   public logoutLocal() {
+    this.clearRefreshTimer();
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('refreshTokenExpiry');
+    localStorage.removeItem('passwordSetupRequired');
     this._isLoggedIn.next(false);
+    this._passwordSetupRequired.next(false);
     // Note: HttpOnly cookie can only be cleared by the server during /logout
     this.router.navigate(['/login']);
+  }
+
+  /**
+   * Schedules an automatic token refresh before the current one expires.
+   */
+  private setupRefreshTimer() {
+    this.clearRefreshTimer();
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return;
+
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload.exp) return;
+
+      const expiresAt = payload.exp * 1000;
+      // Refresh 2 minutes before expiry
+      const REFRESH_BUFFER_MS = 2 * 60 * 1000;
+      const timeout = expiresAt - Date.now() - REFRESH_BUFFER_MS;
+
+      if (timeout > 0) {
+        this.refreshSubscription = timer(timeout).subscribe(() => {
+          this.refreshToken().subscribe({
+            error: () => this.logoutLocal(),
+          });
+        });
+      } else {
+        if (!this.isRefreshing) {
+          this.refreshToken().subscribe({
+            error: () => this.logoutLocal(),
+          });
+        }
+      }
+    } catch {
+      // If parsing fails, we don't schedule a refresh
+    }
+  }
+
+  /**
+   * Clears any active background refresh timer.
+   */
+  private clearRefreshTimer() {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = undefined;
+    }
   }
 
   // ===== PERMISSION CHECKING METHODS =====
@@ -181,7 +296,7 @@ export class AuthService {
 
       const expiry = payload.exp * 1000;
       return Date.now() < expiry;
-    } catch (e) {
+    } catch {
       return false; // Invalid token format
     }
   }
@@ -193,7 +308,7 @@ export class AuthService {
   }
 
   // Get current user
-  getCurrentUser(): any {
+  getCurrentUser(): CurrentUser | null {
     const token = localStorage.getItem('accessToken');
     if (!token) return null;
 
@@ -203,21 +318,27 @@ export class AuthService {
       const userId =
         payload.sub ||
         payload.nameid ||
-        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+        payload[
+        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+        ];
 
       return {
         id: userId,
         email:
           payload.email ||
-          payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+          payload[
+          'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
+          ],
         roles: (() => {
-          const r = payload.role ||
-            payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+          const r =
+            payload.role ||
+            payload[
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+            ] ||
             [];
           return Array.isArray(r) ? r : [r];
-        })()
+        })(),
       };
-
     } catch {
       return null;
     }
@@ -234,9 +355,9 @@ export class AuthService {
   hasRole(roleName: string): boolean {
     const roles = this.getCurrentUserRoles();
     // Check both exact match and case-insensitive
-    return roles.some(role =>
-      role === roleName ||
-      role.toLowerCase() === roleName.toLowerCase()
+    return roles.some(
+      (role) =>
+        role === roleName || role.toLowerCase() === roleName.toLowerCase(),
     );
   }
 
@@ -262,7 +383,7 @@ export class AuthService {
 
   // Check if user has any of the given roles
   hasAnyRole(roleNames: string[]): boolean {
-    return roleNames.some(roleName => this.hasRole(roleName));
+    return roleNames.some((roleName) => this.hasRole(roleName));
   }
 
   // Get current user ID
@@ -282,24 +403,48 @@ export class AuthService {
     return user?.email || '';
   }
 
-  forgotPassword(payload: ForgotPassword): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.authUrl}/forgot-password`,
-      payload
-    );
+  forgotPassword(payload: ForgotPassword): Observable<ApiResponse<void>> {
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/forgot-password`, payload)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
-  validateResetCode(code: string): Observable<any> {
-    return this.http.post<any>(
-      `${this.authUrl}/validate-reset-code`,
-      { code }
-    );
+  validateResetCode(code: string): Observable<ApiResponse<void>> {
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/validate-reset-code`, { code })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
-  resetPassword(payload: ResetPassword): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.authUrl}/reset-password`,
-      payload
-    );
+  resetPassword(payload: ResetPassword): Observable<ApiResponse<void>> {
+    return this.http
+      .post<ApiResponse<void>>(`${this.authUrl}/reset-password`, payload)
+      .pipe(map((response) => this.convertResponse<void>(response)));
+  }
+
+  setInitialPassword(password: string): Observable<ApiResponse<void>> {
+    return this.http
+      .post<
+        ApiResponse<void>
+      >(`${this.authUrl}/set-initial-password`, { newPassword: password, confirmPassword: password })
+      .pipe(
+        map((response) => this.convertResponse<void>(response)),
+        tap((response) => {
+          if (response.success) {
+            localStorage.removeItem('passwordSetupRequired');
+            this._passwordSetupRequired.next(false);
+          }
+        }),
+        catchError((e) => {
+          const apiError = e.error as ApiResponse<void>;
+          let errorMessage =
+            apiError?.message || e.message || 'Failed to set password';
+
+          if (apiError?.errors && apiError.errors.length > 0) {
+            errorMessage = apiError.errors[0];
+          }
+
+          throw new Error(errorMessage);
+        }),
+      );
   }
 }

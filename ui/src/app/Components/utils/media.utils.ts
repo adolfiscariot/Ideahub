@@ -1,4 +1,4 @@
-import { MediaType } from '../../Interfaces/Media/media-interface'
+import { MediaType } from '../../Interfaces/Media/media-interface';
 
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
@@ -28,7 +28,7 @@ export function detectMediaType(file: File): MediaType {
 export function processSelectedFiles(
   event: Event,
   existingFiles: File[],
-  maxSizeMB = 20
+  maxSizeMB = 20,
 ): { files: File[]; errors: string[] } {
   const input = event.target as HTMLInputElement;
   if (!input.files) return { files: existingFiles, errors: [] };
@@ -36,9 +36,7 @@ export function processSelectedFiles(
   const errors: string[] = [];
   const updatedFiles = [...existingFiles];
 
-  for (let i = 0; i < input.files.length; i++) {
-    const file = input.files[i];
-
+  for (const file of Array.from(input.files)) {
     if (file.size > maxSizeMB * 1024 * 1024) {
       errors.push(`${file.name} exceeds ${maxSizeMB}MB limit`);
       continue;

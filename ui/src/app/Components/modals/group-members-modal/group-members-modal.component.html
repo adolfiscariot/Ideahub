@@ -10,39 +10,57 @@
   </div>
 
   <div class="modal-content">
-    <div *ngIf="isLoading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading members...</p>
-    </div>
-
-    <div *ngIf="!isLoading && members.length === 0" class="no-members">
-      <p>No members found in this group.</p>
-    </div>
-
-    <div *ngIf="!isLoading && members.length > 0" class="members-list">
-      <!-- LOOK HERE: We're now using 'member' variable, not 'data.group' -->
-      <div *ngFor="let member of members" class="member-item">
-        <div class="member-avatar">
-          {{ getInitials(member.displayName || member.userName || member.name || member.email) }}
-        </div>
-        <div class="member-info">
-          <div class="member-name">
-            <!-- Show the ACTUAL member's name -->
-            {{ member.displayName || member.userName || member.name || 'Unknown User' }}
-
-            <!-- Show creator badge only if this member created the group -->
-           <!-- <span *ngIf="member.email === data.group.email|| member.userId === data.group.createdByUserId"
-              class="creator-badge"> (Owner)</span> -->
-          </div>
-          <!-- Transfer Ownership Action -->
-          <div class="member-actions"
-            *ngIf="isOwner && member.id !== data.group.createdByUserId && member.userId !== data.group.createdByUserId">
-            <button class="transfer-btn" (click)="transferOwnership(member)" title="Transfer Ownership">
-              <mat-icon>swap_horiz</mat-icon>
-            </button>
-          </div>
-        </div>
+    @if (isLoading) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading members...</p>
       </div>
-    </div>
+    } @else if (members.length === 0) {
+      <div class="no-members">
+        <p>No members found in this group.</p>
+      </div>
+    } @else {
+      <div class="members-list">
+        @for (member of members; track member.userId) {
+          <div class="member-item">
+            <div class="member-avatar">
+              {{
+                getInitials(
+                  member.displayName ||
+                    member.userName ||
+                    member.name ||
+                    member.email
+                )
+              }}
+            </div>
+            <div class="member-info">
+              <div class="member-name">
+                {{
+                  member.displayName ||
+                    member.userName ||
+                    member.name ||
+                    "Unknown User"
+                }}
+              </div>
+              @if (
+                isOwner &&
+                member.id !== data.group.createdByUserId &&
+                member.userId !== data.group.createdByUserId
+              ) {
+                <div class="member-actions">
+                  <button
+                    class="transfer-btn"
+                    (click)="transferOwnership(member)"
+                    title="Transfer Ownership"
+                  >
+                    <mat-icon>swap_horiz</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 </div>

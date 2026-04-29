@@ -85,7 +85,7 @@ public class MediaController : ControllerBase
                 FilePath = savedFilePath,
                 MediaType = mediaDto.MediaType,
                 UserId = userId,
-                IdeaId = ideaId,       
+                IdeaId = ideaId,
                 CommentId = commentId,
                 ProjectId = projectId,
                 ProjectTaskId = projectTaskId,
@@ -136,14 +136,14 @@ public class MediaController : ControllerBase
         if (ideaId.HasValue) query = query.Where(m => m.IdeaId == ideaId.Value);
         if (commentId.HasValue) query = query.Where(m => m.CommentId == commentId.Value);
         if (projectId.HasValue) query = query.Where(m => m.ProjectId == projectId.Value);
-        
+
         // Ensure the sub task belongs to the correct project task
         if (projectTaskId.HasValue && subTaskId.HasValue)
         {
-            query = query.Where(m => 
-                m.SubTaskId == subTaskId.Value && 
-                _context.SubTasks.Any(st => 
-                    st.Id == subTaskId.Value && 
+            query = query.Where(m =>
+                m.SubTaskId == subTaskId.Value &&
+                _context.SubTasks.Any(st =>
+                    st.Id == subTaskId.Value &&
                     st.ProjectTaskId == projectTaskId.Value
                 )
             );
@@ -151,7 +151,7 @@ public class MediaController : ControllerBase
         else if (projectTaskId.HasValue)
         {
             query = query.Where(m =>
-                m.ProjectTaskId == projectTaskId.Value || 
+                m.ProjectTaskId == projectTaskId.Value ||
                 (m.SubTaskId.HasValue &&
                     _context.SubTasks.Any(st =>
                         st.Id == m.SubTaskId.Value &&
@@ -191,7 +191,7 @@ public class MediaController : ControllerBase
             // only uploader has permission to delete
             if (media.UserId != userId)
                 return Unauthorized(ApiResponse.Fail("Not authorized to delete this media"));
-                
+
 
             // Also delete the file from disk/cloud
             var fileDeleted = await _mediaService.DeleteFileAsync(media.FilePath);
@@ -200,7 +200,7 @@ public class MediaController : ControllerBase
 
             _context.Media.Remove(media);
             await _context.SaveChangesAsync();
-            
+
             return Ok(ApiResponse.Ok("Media deleted successfully"));
         }
         catch (Exception e)
@@ -281,7 +281,7 @@ public class MediaController : ControllerBase
             var canAccessTask = (projectTask.Project?.OverseenByUserId == userId) ||
                                 (projectTask.TaskAssignees?.Any(ta => ta.UserId == userId) ?? false) ||
                                 (projectTask.SubTasks?.Any(st => st.SubTaskAssignees?.Any(sta => sta.UserId == userId) ?? false) ?? false);
-            
+
             if (canAccessTask) return true;
 
             // Group Member
@@ -332,17 +332,17 @@ public class MediaController : ControllerBase
 
         // 3. Group Membership check
         var timesheetGroupId = timesheet.Task?.Project?.GroupId ?? 0;
-        var isMember = await _context.UserGroups.AnyAsync(ug => 
-            ug.GroupId == timesheetGroupId && 
+        var isMember = await _context.UserGroups.AnyAsync(ug =>
+            ug.GroupId == timesheetGroupId &&
             ug.UserId == userId);
         if (isMember) return true;
 
         // 4. Task/SubTask Assignee check
         // Check if user is assigned to the specific task or any subtask within the project
         var isAssignee = await _context.ProjectTasks
-            .AnyAsync(t => 
-                t.ProjectId == (timesheet.Task!.ProjectId) && 
-                !t.IsDeleted && 
+            .AnyAsync(t =>
+                t.ProjectId == (timesheet.Task!.ProjectId) &&
+                !t.IsDeleted &&
                 (
                     (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) ||
                     (t.SubTasks ?? new List<SubTask>()).Any(st => (st.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId))

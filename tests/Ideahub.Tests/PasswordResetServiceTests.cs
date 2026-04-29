@@ -46,11 +46,11 @@ namespace Ideahub.Tests
             // Arrange
             string userId = "user1";
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
-            
+
             // Actually add to mock DB so the Query Filter doesn't hide results
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
 
             // Act
@@ -71,7 +71,7 @@ namespace Ideahub.Tests
             // Arrange
             string userId = "user1";
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
-            
+
             _context.Users.Add(user);
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
 
@@ -100,14 +100,14 @@ namespace Ideahub.Tests
             // Arrange
             string userId = "user1";
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
-            
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
-            
+
             var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
-            
+
             _mockUserManager.Setup(m => m.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("token");
             _mockUserManager.Setup(m => m.ResetPasswordAsync(user, "token", "NewPass123!"))
                 .ReturnsAsync(IdentityResult.Success);
@@ -130,12 +130,12 @@ namespace Ideahub.Tests
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
 
             // Generate a real code/hash pair using the service
             var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
-            
+
             // Manually expire the record in the database
             var record = await _context.PasswordResets.FirstAsync();
             record.ExpiresAt = DateTime.UtcNow.AddMinutes(-5);
@@ -155,14 +155,14 @@ namespace Ideahub.Tests
             // Arrange
             string userId = "user1";
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
-            
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
-            
+
             var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
-            
+
             var identityError = new IdentityErrorDescriber().PasswordTooShort(8);
             _mockUserManager.Setup(m => m.GeneratePasswordResetTokenAsync(user)).ReturnsAsync("token");
             _mockUserManager.Setup(m => m.ResetPasswordAsync(user, "token", "123"))
@@ -184,12 +184,12 @@ namespace Ideahub.Tests
             var user = new IdeahubUser { Id = userId, UserName = "test", Email = "test@test.com", DisplayName = "Test" };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            
+
             _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
 
             // Generate a real code/hash pair using the service
             var (code, _) = await _service.GeneratePasswordResetCodeAsync(userId);
-            
+
             // Manually mark the record as USED in the database
             var record = await _context.PasswordResets.FirstAsync();
             record.Used = true;

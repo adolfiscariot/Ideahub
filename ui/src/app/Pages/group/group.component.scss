@@ -21,7 +21,10 @@
 }
 
 .group-info-modal {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: #2d3748;
   line-height: 1.6;
   font-size: 14px;
@@ -255,11 +258,8 @@
 /* ============================= */
 
 .paginator-wrapper {
-
   display: flex;
   justify-content: center;
-
-
 }
 
 :host ::ng-deep .mat-mdc-paginator {
@@ -272,7 +272,6 @@
 :host ::ng-deep .mat-mdc-paginator-range-label {
   font-size: 13px;
   color: #4a5568;
-
 }
 
 :host ::ng-deep .mat-mdc-icon-button {
@@ -291,7 +290,6 @@
 :host ::ng-deep .mat-mdc-paginator-page-size {
   display: none;
 }
-
 
 /* Buttons */
 .create-group-header-btn,
@@ -335,8 +333,6 @@
 
 /* Detail block styling */
 .detail-row {
-
-
   border-radius: 8px;
   padding: 14px 16px;
   display: flex;
@@ -522,7 +518,6 @@
   /* description can expand downward */
 }
 
-
 /* Header */
 .group-header {
   display: flex;
@@ -531,7 +526,6 @@
   margin-bottom: 12px;
   min-height: 60px;
 }
-
 
 /* Description */
 .group-description {
@@ -547,7 +541,6 @@
 .group-bottom {
   margin-top: auto;
 }
-
 
 /* Actions */
 .group-actions {
@@ -574,7 +567,6 @@
   text-overflow: ellipsis;
   word-break: break-word;
 }
-
 
 /* Stats */
 .group-stats {
@@ -762,7 +754,6 @@
   background: rgba(244, 67, 54, 0.1);
 }
 
-
 /* Modal */
 .create-group-modal-overlay {
   position: fixed;
@@ -856,7 +847,7 @@ form {
 
 /* Clear float */
 .form-group::after {
-  content: '';
+  content: "";
   display: table;
   clear: both;
 }
@@ -980,8 +971,6 @@ textarea.form-control {
   resize: vertical;
   display: block;
 }
-
-
 
 .btn-secondary {
   background: white;

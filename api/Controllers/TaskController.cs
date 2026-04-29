@@ -35,7 +35,7 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var project = await _context.Projects.FindAsync(projectId);
 
-            if (project == null) 
+            if (project == null)
             {
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
@@ -67,7 +67,7 @@ public class TaskController : ControllerBase
 
             // Assign task assignees
             task.TaskAssignees = taskDto.TaskAssignees
-                .Select(assigneeId => new TaskAssignee 
+                .Select(assigneeId => new TaskAssignee
                 {
                     UserId = assigneeId,
                     ProjectTask = task
@@ -120,7 +120,7 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.TaskAssignees)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
 
-            if (project == null) 
+            if (project == null)
             {
                 return NotFound(ApiResponse.Fail("Project not found"));
             }
@@ -178,7 +178,7 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).Include(t => t.TaskAssignees).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) 
+            if (task == null)
             {
                 return NotFound(ApiResponse.Fail("Task not found"));
             }
@@ -251,7 +251,7 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).Include(t => t.TaskAssignees).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) 
+            if (task == null)
             {
                 return NotFound(ApiResponse.Fail("Task not found"));
             }
@@ -286,7 +286,7 @@ public class TaskController : ControllerBase
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var task = await _context.ProjectTasks.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == taskId);
 
-            if (task == null) 
+            if (task == null)
             {
                 return NotFound(ApiResponse.Fail("Parent task not found"));
             }
@@ -323,10 +323,11 @@ public class TaskController : ControllerBase
             };
 
             subTask.SubTaskAssignees = subTaskDto.SubTaskAssignees
-                .Select(userId => new SubTaskAssignee { 
+                .Select(userId => new SubTaskAssignee
+                {
                     UserId = userId,
                     SubTask = subTask
-                    })
+                })
                 .ToList();
 
             _context.SubTasks.Add(subTask);
@@ -366,13 +367,13 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.Project)
                 .FirstOrDefaultAsync(st => st.Id == subTaskId);
 
-            if (subTask == null) 
+            if (subTask == null)
             {
                 return NotFound(ApiResponse.Fail("Sub-task not found"));
             }
 
-            if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
-                !(subTask.ProjectTask.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) && 
+            if (subTask.ProjectTask.Project.OverseenByUserId != userId &&
+                !(subTask.ProjectTask.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId) &&
                 !(subTask.SubTaskAssignees ?? new List<SubTaskAssignee>()).Any(sta => sta.UserId == userId))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to update this sub-task."));
@@ -443,12 +444,12 @@ public class TaskController : ControllerBase
                     .ThenInclude(t => t.TaskAssignees)
                 .FirstOrDefaultAsync(st => st.Id == subTaskId);
 
-            if (subTask == null) 
+            if (subTask == null)
             {
                 return NotFound(ApiResponse.Fail("Sub-task not found"));
             }
 
-            if (subTask.ProjectTask.Project.OverseenByUserId != userId && 
+            if (subTask.ProjectTask.Project.OverseenByUserId != userId &&
                 !(subTask.ProjectTask.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId))
             {
                 return StatusCode(403, ApiResponse.Fail("Not authorized to delete this sub-task."));

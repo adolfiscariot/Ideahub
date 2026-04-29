@@ -153,7 +153,7 @@ namespace Ideahub.Tests
             await SeedBasicData();
             var otherUser = new IdeahubUser { Id = "other-person", UserName = "other", Email = "other@test.com", DisplayName = "Other User" };
             _context.Users.Add(otherUser);
-            
+
             var vote = new Vote { Id = 600, UserId = "other-person", IdeaId = 1, IsDeleted = false };
             _context.Votes.Add(vote);
             await _context.SaveChangesAsync();
@@ -167,7 +167,7 @@ namespace Ideahub.Tests
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
         }
-        
+
 
         #endregion
 
@@ -188,7 +188,7 @@ namespace Ideahub.Tests
             var okResult = Assert.IsType<OkObjectResult>(result);
             var response = Assert.IsType<ApiResponse>(okResult.Value);
             Assert.Equal("Re-voting successful", response.Message);
-            
+
             var vote = await _context.Votes.FirstOrDefaultAsync(v => v.UserId == _testUserId && v.IdeaId == 1);
             Assert.NotNull(vote);
             Assert.False(vote.IsDeleted);

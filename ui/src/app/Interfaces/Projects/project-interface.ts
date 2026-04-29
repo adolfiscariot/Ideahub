@@ -1,17 +1,28 @@
+export enum ProjectStatus {
+  Planning = 0,
+  Active = 1,
+  Completed = 2,
+  Shelved = 3,
+  Cancelled = 4,
+}
+
 export interface Project {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  status: string;
-  createdByUserId: string;
-  overseenByUserId: string;
-  overseenByUserName?: string;
-  ideaId: string;
-  ideaName?: string;
-  groupId: string;
+  status: ProjectStatus;
+  createdAt: string;
+  updatedAt?: string;
+  endedAt?: string;
+  createdByUserId?: string;
+  overseenBy: string;
+  overseenById: string;
+  overseenByUserId?: string;
   groupName?: string;
-  createdAt: Date;
-  updatedAt?: Date;
+  ideaTitle?: string;
+  ideaId?: string;
+  groupId?: string;
+  progress: number;
 }
 
 export interface CreateProjectRequest {
@@ -24,19 +35,14 @@ export interface UpdateProjectRequest {
   title?: string;
   description?: string;
   overseenByUserEmail?: string;
-  status?: string;
+  status?: string | ProjectStatus;
+  endedAt?: string | null;
 }
 
-export interface ProjectDetails {
-  title: string;
-  description: string;
-  status: string;
-  overseenByUserName: string;
-  ideaName?: string;
-  groupName?: string;
-}
+export type ProjectDetails = Project;
 
 export interface ProjectSummary {
+  id: number;
   title: string;
   description: string;
   overseenByUserName: string;
@@ -45,8 +51,16 @@ export interface ProjectSummary {
   groupName: string;
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
+export interface ProjectBackendDto {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  endedAt?: string;
+  overseenByUserName: string;
+  overseenByUserId: string;
+  groupName: string;
+  ideaName: string;
+  progress?: number;
 }

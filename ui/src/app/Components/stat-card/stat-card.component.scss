@@ -1,75 +1,75 @@
 .stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    background: #f8f9fa;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    transition: transform 0.2s;
+    justify-content: center;
+    margin-left: auto;
+  }
 
-    &:hover {
-        transform: translateY(-3px);
-    }
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+  }
 
-    .stat-icon {
-        font-size: 1.5rem;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: auto;
-    }
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.2;
+  }
 
-    .stat-info {
-        display: flex;
-        flex-direction: column;
-    }
+  .stat-label {
+    color: #000;
+    font-size: 1rem;
+    /* Set to 1rem for consistent sizing */
+    font-weight: 600;
+  }
 
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #2c3e50;
-        line-height: 1.2;
-    }
+  &.total {
+    border-left: 4px solid #3498db;
+  }
 
-    .stat-label {
-        color: #000;
-        font-size: 1rem;
-        /* Set to 1rem for consistent sizing */
-        font-weight: 600;
-    }
+  &.open {
+    border-left: 4px solid #2ecc71;
+  }
 
-    &.total {
-        border-left: 4px solid #3498db;
-    }
+  &.promoted {
+    border-left: 4px solid #9b59b6;
+    /* Changed to Greyish Blue */
+  }
 
-    &.open {
-        border-left: 4px solid #2ecc71;
-    }
+  &.closed {
+    border-left: 4px solid #95a5a6;
+  }
 
-    &.promoted {
-        border-left: 4px solid #9b59b6;
-        /* Changed to Greyish Blue */
-    }
+  &.created {
+    border-left: 4px solid #f39c12;
+  }
 
-    &.closed {
-        border-left: 4px solid #95a5a6;
-    }
+  &.votes {
+    border-left: 4px solid #e74c3c;
+  }
 
-    &.created {
-        border-left: 4px solid #f39c12;
-    }
+  &.projects {
+    border-left: 4px solid #34495e;
+  }
 
-    &.votes {
-        border-left: 4px solid #e74c3c;
-    }
-
-    &.projects {
-        border-left: 4px solid #34495e;
-    }
-
-    &.groups {
-        border-left: 4px solid #1abc9c;
-    }
+  &.groups {
+    border-left: 4px solid #1abc9c;
+  }
 }

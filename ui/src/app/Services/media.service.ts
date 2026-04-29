@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Media, MediaType, ApiResponse } from '../Interfaces/Media/media-interface';
+import { Media, MediaType } from '../Interfaces/Media/media-interface';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { environment } from '../../environments/environment.prod';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MediaService {
   private apiUrl = `${environment.apiUrl}/media`;
 
   constructor(private http: HttpClient) { }
 
-  private convertResponse<T>(response: any): ApiResponse<T> {
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {
-      success: response.status || false,
+      success: response.status || response.success || false,
       message: response.message || '',
-      data: response.data
+      data: response.data,
     };
   }
 
@@ -26,7 +27,7 @@ export class MediaService {
     if (file.size > maxSize) {
       return {
         valid: false,
-        message: `File size exceeds 20MB limit`
+        message: `File size exceeds 20MB limit`,
       };
     }
     return { valid: true };
@@ -36,7 +37,9 @@ export class MediaService {
     const fileName = file.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
 
-    if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)) {
+    if (
+      ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'].includes(extension)
+    ) {
       return MediaType.Image;
     }
     if (['.mp4', '.mov', '.avi', '.wmv'].includes(extension)) {
@@ -48,12 +51,12 @@ export class MediaService {
   uploadMedia(
     file: File,
     mediaType: MediaType,
-    ideaId?: number,
-    commentId?: number,
+    ideaId?: string | number,
+    commentId?: string | number,
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
-    timesheetId?: number
+    timesheetId?: number,
   ): Observable<ApiResponse<Media>> {
     const formData = new FormData();
     formData.append('File', file);
@@ -63,37 +66,44 @@ export class MediaService {
     if (ideaId) params = params.set('ideaId', ideaId.toString());
     if (commentId) params = params.set('commentId', commentId.toString());
     if (projectId) params = params.set('projectId', projectId.toString());
-    if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
+    if (projectTaskId)
+      params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.post<any>(`${this.apiUrl}/upload-media`, formData, { params })
-      .pipe(map(response => this.convertResponse<Media>(response)));
+    return this.http
+      .post<
+        ApiResponse<Media>
+      >(`${this.apiUrl}/upload-media`, formData, { params })
+      .pipe(map((response) => this.convertResponse<Media>(response)));
   }
 
   viewMedia(
-    ideaId?: number,
-    commentId?: number,
+    ideaId?: string | number,
+    commentId?: string | number,
     projectId?: number,
     projectTaskId?: number,
     subTaskId?: number,
-    timesheetId?: number
+    timesheetId?: number,
   ): Observable<ApiResponse<Media[]>> {
     let params = new HttpParams();
 
     if (ideaId) params = params.set('ideaId', ideaId.toString());
     if (commentId) params = params.set('commentId', commentId.toString());
     if (projectId) params = params.set('projectId', projectId.toString());
-    if (projectTaskId) params = params.set('projectTaskId', projectTaskId.toString());
+    if (projectTaskId)
+      params = params.set('projectTaskId', projectTaskId.toString());
     if (subTaskId) params = params.set('subTaskId', subTaskId.toString());
     if (timesheetId) params = params.set('timesheetId', timesheetId.toString());
 
-    return this.http.get<any>(`${this.apiUrl}/view-media`, { params })
-      .pipe(map(response => this.convertResponse<Media[]>(response)));
+    return this.http
+      .get<ApiResponse<Media[]>>(`${this.apiUrl}/view-media`, { params })
+      .pipe(map((response) => this.convertResponse<Media[]>(response)));
   }
 
-  deleteMedia(mediaId: number): Observable<ApiResponse<any>> {
-    return this.http.delete<any>(`${this.apiUrl}/${mediaId}`)
-      .pipe(map(response => this.convertResponse<any>(response)));
+  deleteMedia(mediaId: number): Observable<ApiResponse<void>> {
+    return this.http
+      .delete<ApiResponse<void>>(`${this.apiUrl}/${mediaId}`)
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 }

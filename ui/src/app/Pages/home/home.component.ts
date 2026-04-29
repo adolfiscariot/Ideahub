@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { AnalyticsService } from '../../Services/analytics.service';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,15 @@ import { ProjectService } from '../../Services/project.service';
 import { Router } from '@angular/router';
 import { ButtonsComponent } from '../../Components/buttons/buttons.component';
 import { ToastService } from '../../Services/toast.service';
-import { PromotedIdea, IdeaStats, GroupEngagement, PersonalStats, MostVotedIdea, TopContributor } from '../../Models/analytics.models';
+import {
+  PromotedIdea,
+  IdeaStats,
+  GroupEngagement,
+  PersonalStats,
+  MostVotedIdea,
+  TopContributor,
+} from '../../Models/analytics.models';
+import { Project } from '../../Interfaces/Projects/project-interface';
 
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -24,7 +32,7 @@ import {
   heroHandThumbUp,
   heroBriefcase,
   heroUserGroup,
-  heroStar
+  heroStar,
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -35,26 +43,33 @@ import {
     StatCardComponent,
     DashboardCardComponent,
     ModalComponent,
-    ButtonsComponent
+    ButtonsComponent,
   ],
-  viewProviders: [provideIcons({
-    heroChartBar,
-    heroLockOpen,
-    heroRocketLaunch,
-    heroLockClosed,
-    heroFire,
-    heroTrophy,
-    heroBuildingOffice2,
-    heroLightBulb,
-    heroHandThumbUp,
-    heroBriefcase,
-    heroUserGroup,
-    heroStar
-  })],
+  viewProviders: [
+    provideIcons({
+      heroChartBar,
+      heroLockOpen,
+      heroRocketLaunch,
+      heroLockClosed,
+      heroFire,
+      heroTrophy,
+      heroBuildingOffice2,
+      heroLightBulb,
+      heroHandThumbUp,
+      heroBriefcase,
+      heroUserGroup,
+      heroStar,
+    }),
+  ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
+  private analyticsService = inject(AnalyticsService);
+  private projectService = inject(ProjectService);
+  private router = inject(Router);
+  private toastService = inject(ToastService);
+
   mostVotedIdeas: MostVotedIdea[] = [];
   topContributors: TopContributor[] = [];
   promotedIdeas: PromotedIdea[] = [];
@@ -66,17 +81,9 @@ export class HomeComponent implements OnInit {
   isProjectModalOpen = false;
   selectedProjectId: number | null = null;
   selectedGroupId: string | null = null;
-  currentProject: any = null;
+  currentProject: Project | null = null;
 
-
-  constructor(
-    private analyticsService: AnalyticsService,
-    private projectService: ProjectService,
-    private router: Router,
-    private toastService: ToastService
-  ) { }
-
-  ngOnInit(): void {
+  ngOnInit() {
     this.fetchAnalytics();
     const hasSeenWelcome = localStorage.getItem('seenWelcomeGuide');
 
@@ -87,9 +94,9 @@ export class HomeComponent implements OnInit {
 
   closeWelcomeInfo() {
     this.showWelcomeInfoModal = false;
-
     localStorage.setItem('seenWelcomeGuide', 'true');
   }
+
   displayWelcomeInfo() {
     this.showWelcomeInfoModal = true;
   }
@@ -101,28 +108,35 @@ export class HomeComponent implements OnInit {
       promoted: this.analyticsService.getPromotedIdeas(),
       stats: this.analyticsService.getIdeaStatistics(),
       engagement: this.analyticsService.getGroupEngagement(),
-      personal: this.analyticsService.getPersonalStats()
+      personal: this.analyticsService.getPersonalStats(),
     }).subscribe({
       next: (results) => {
-        if (results.mostVoted.status) this.mostVotedIdeas = results.mostVoted.data;
-        if (results.topContributors.status) this.topContributors = results.topContributors.data;
-        if (results.promoted.status) this.promotedIdeas = results.promoted.data;
-        if (results.stats.status) this.ideaStats = results.stats.data;
-        if (results.engagement.status) this.groupEngagement = results.engagement.data;
-        if (results.personal.status) this.personalStats = results.personal.data;
+        if (results.mostVoted.success || results.mostVoted.status)
+          this.mostVotedIdeas = results.mostVoted.data ?? [];
+        if (results.topContributors.success || results.topContributors.status)
+          this.topContributors = results.topContributors.data ?? [];
+        if (results.promoted.success || results.promoted.status)
+          this.promotedIdeas = results.promoted.data ?? [];
+        if (results.stats.success || results.stats.status)
+          this.ideaStats = results.stats.data ?? null;
+        if (results.engagement.success || results.engagement.status)
+          this.groupEngagement = results.engagement.data ?? [];
+        if (results.personal.success || results.personal.status)
+          this.personalStats = results.personal.data ?? null;
       },
-      // error: (err) => console.error('Error fetching analytics', err)
     });
   }
 
   onIdeaClick(idea: MostVotedIdea) {
     if (idea.isMember) {
       this.router.navigate(['/groups', idea.groupId.toString(), 'ideas'], {
-        queryParams: { ideaId: idea.id }
+        queryParams: { ideaId: idea.id },
       });
     } else {
       this.toastService.show('Join this group to view its ideas', 'info');
-      this.router.navigate(['/groups'], { queryParams: { joinGroupId: idea.groupId } })
+      this.router.navigate(['/groups'], {
+        queryParams: { joinGroupId: idea.groupId },
+      });
     }
   }
 
@@ -130,8 +144,13 @@ export class HomeComponent implements OnInit {
     if (group.isMember) {
       this.router.navigate(['/groups', group.id.toString(), 'ideas']);
     } else {
-      this.toastService.show(`Join Group to join ${group.name} to access its ideas`, 'info');
-      this.router.navigate(['/groups'], { queryParams: { joinGroupId: group.id } });
+      this.toastService.show(
+        `Join Group to join ${group.name} to access its ideas`,
+        'info',
+      );
+      this.router.navigate(['/groups'], {
+        queryParams: { joinGroupId: group.id },
+      });
     }
   }
 
@@ -139,7 +158,7 @@ export class HomeComponent implements OnInit {
     if (!idea.projectId) return;
 
     this.router.navigate(['/projects'], {
-      queryParams: { openProject: idea.projectId }
+      queryParams: { openProject: idea.projectId },
     });
   }
 }

@@ -8,13 +8,13 @@ import { RouterModule } from '@angular/router';
   selector: 'app-sidebar',
   imports: [MatIconModule, MatButtonModule, NgClass, RouterModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
-  isSidebarExpanded: boolean = false;
+  isSidebarExpanded = false;
 
   toggleSidebar() {
     this.isSidebarExpanded = !this.isSidebarExpanded;
-    console.log("The state is: %s", this.isSidebarExpanded);
+    console.log('The state is: %s', this.isSidebarExpanded);
   }
 }

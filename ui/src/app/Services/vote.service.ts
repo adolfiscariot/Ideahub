@@ -7,55 +7,52 @@ import {
   UnvoteRequest,
   SeeVotesRequest,
   VoteDetails,
-  ApiResponse
 } from '../Interfaces/Ideas/idea-interfaces';
+import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { environment } from '../../environments/environment.prod';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VoteService {
   private apiUrl = `${environment.apiUrl}/vote`;
 
   constructor(private http: HttpClient) { }
 
-  private convertResponse<T>(response: any): ApiResponse<T> {
+  private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {
-      success: response.status || false,
+      success: response.status || response.success || false,
       message: response.message || '',
       data: response.data,
     };
   }
 
   // POST cast vote for idea
-  castVote(request: VoteRequest): Observable<ApiResponse<any>> {
+  castVote(request: VoteRequest): Observable<ApiResponse<void>> {
     const params = new HttpParams()
       .set('groupId', request.groupId)
       .set('ideaId', request.ideaId);
 
-    return this.http.post<any>(`${this.apiUrl}/cast-vote`, {}, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.apiUrl}/cast-vote`, {}, { params })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
-
 
   // POST remove vote (unvote)
-  unvote(request: UnvoteRequest): Observable<ApiResponse<any>> {
-    const params = new HttpParams()
-      .set('voteId', request.voteId);
+  unvote(request: UnvoteRequest): Observable<ApiResponse<void>> {
+    const params = new HttpParams().set('voteId', request.voteId);
 
-    return this.http.post<any>(`${this.apiUrl}/unvote`, {}, { params }).pipe(
-      map(response => this.convertResponse<any>(response))
-    );
+    return this.http
+      .post<ApiResponse<void>>(`${this.apiUrl}/unvote`, {}, { params })
+      .pipe(map((response) => this.convertResponse<void>(response)));
   }
 
-  // GET see votes for an idea (Group Admin only) 
+  // GET see votes for an idea (Group Admin only)
   seeVotes(request: SeeVotesRequest): Observable<ApiResponse<VoteDetails[]>> {
-    const params = new HttpParams()
-      .set('ideaId', request.ideaId);
+    const params = new HttpParams().set('ideaId', request.ideaId);
 
-    return this.http.get<any>(`${this.apiUrl}/see-votes`, { params }).pipe(
-      map(response => this.convertResponse<VoteDetails[]>(response))
-    );
+    return this.http
+      .get<ApiResponse<VoteDetails[]>>(`${this.apiUrl}/see-votes`, { params })
+      .pipe(map((response) => this.convertResponse<VoteDetails[]>(response)));
   }
 }

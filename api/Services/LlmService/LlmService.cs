@@ -41,8 +41,8 @@ public class LlmService : ILlmService
             var promptPath = Path.Combine(_env.ContentRootPath, "Services", "LlmService", "Prompts", "SystemPrompt.txt");
             if (!File.Exists(promptPath))
             {
-                 _logger.LogError("LlmService: SystemPrompt.txt NOT FOUND at {Path}", promptPath);
-                 return (0, "AI Evaluation failed: System prompt file missing.");
+                _logger.LogError("LlmService: SystemPrompt.txt NOT FOUND at {Path}", promptPath);
+                return (0, "AI Evaluation failed: System prompt file missing.");
             }
 
             var systemPrompt = await File.ReadAllTextAsync(promptPath);
@@ -79,7 +79,7 @@ public class LlmService : ILlmService
 
             // Call the Gemini API
             _logger.LogInformation("LlmService: Sending request to Gemini API...");
-            
+
             using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
             request.Content = JsonContent.Create(requestBody);
             request.Headers.Add("x-goog-api-key", _settings.ApiKey);
@@ -87,7 +87,7 @@ public class LlmService : ILlmService
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromSeconds(30));
             var response = await _httpClient.SendAsync(request, cts.Token);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();

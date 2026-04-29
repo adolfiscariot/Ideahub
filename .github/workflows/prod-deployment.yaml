@@ -1,0 +1,172 @@
+name: Deploy to Production (EC2)
+
+# Triggered automatically by deploy-staging.yml after team approval.
+# Can also be triggered manually for hotfixes — supply the SHA and image ref.
+on:
+  repository_dispatch:
+    types: [deploy-prod]
+
+  workflow_dispatch:
+    inputs:
+      sha_short:
+        description: "Short commit SHA to deploy (e.g. 3f8c9a2)"
+        required: true
+      image_ref:
+        description: "Full image ref (e.g. ghcr.io/org/ideahub:3f8c9a2)"
+        required: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/ideahub
+
+jobs:
+  # ============================================================
+  # 1. PRE-DEPLOY SANITY CHECKS
+  # ============================================================
+  pre-deploy-checks:
+    name: Pre-Deploy Sanity Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve inputs (dispatch vs manual)
+        id: inputs
+        run: |
+          SHA="${{ github.event.client_payload.sha_short || inputs.sha_short }}"
+          IMAGE="${{ github.event.client_payload.image_ref || inputs.image_ref }}"
+          echo "sha_short=$SHA" >> $GITHUB_OUTPUT
+          echo "image_ref=$IMAGE" >> $GITHUB_OUTPUT
+          echo "Deploying SHA=$SHA  Image=$IMAGE"
+
+      - name: Verify required secrets exist
+        run: |
+          MISSING=""
+          [ -z "${{ secrets.EC2_HOST }}" ]     && MISSING="$MISSING EC2_HOST"
+          [ -z "${{ secrets.EC2_USER }}" ]     && MISSING="$MISSING EC2_USER"
+          [ -z "${{ secrets.EC2_SSH_KEY }}" ]  && MISSING="$MISSING EC2_SSH_KEY"
+          [ -z "${{ secrets.GHCR_TOKEN }}" ]   && MISSING="$MISSING GHCR_TOKEN"
+
+          if [ -n "$MISSING" ]; then
+            echo "Missing required secrets:$MISSING"
+            exit 1
+          fi
+          echo "All required secrets present"
+
+      - name: Confirm image exists in registry
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker manifest inspect ${{ steps.inputs.outputs.image_ref }}
+          echo "Image confirmed: ${{ steps.inputs.outputs.image_ref }}"
+
+    outputs:
+      sha_short: ${{ steps.inputs.outputs.sha_short }}
+      image_ref: ${{ steps.inputs.outputs.image_ref }}
+
+  # ============================================================
+  # 2. CREATE GITHUB RELEASE
+  # ============================================================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.pre-deploy-checks.outputs.sha_short }}"
+          name: "Release ${{ needs.pre-deploy-checks.outputs.sha_short }}"
+          body: |
+            ## Production Deployment
+
+            **SHA:** `${{ needs.pre-deploy-checks.outputs.sha_short }}`
+            **Image:** `${{ needs.pre-deploy-checks.outputs.image_ref }}`
+
+            Deployed by: @${{ github.actor }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================
+  # 3. DEPLOY TO PRODUCTION
+  #    - EC2 already has ~/Ideahub/ with docker-compose.yml and .env
+  #    - No git pull needed — image is pulled from GHCR
+  #    - No --build flag — image was already built by the runner
+  # ============================================================
+  deploy-prod:
+    name: Deploy to Production EC2
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, create-release]
+    environment: production
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}    # ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}      # full contents of your .pem file
+          port: 22
+          script: |
+            IMAGE_REF="${{ needs.pre-deploy-checks.outputs.image_ref }}"
+            SHA="${{ needs.pre-deploy-checks.outputs.sha_short }}"
+
+            echo "Logging into GHCR..."
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "Pulling image: $IMAGE_REF"
+            docker pull "$IMAGE_REF"
+
+            echo "Saving rollback reference..."
+            CURRENT_IMAGE=$(docker inspect ideahub-backend --format='{{.Config.Image}}' 2>/dev/null || echo "none")
+            echo "$CURRENT_IMAGE" > ~/Ideahub/rollback_image.txt
+            echo "Rollback image saved: $CURRENT_IMAGE"
+
+            echo "Deploying with Docker Compose..."
+            cd ~/Ideahub
+            IMAGE_REF=$IMAGE_REF docker compose up -d
+            # .env is already in ~/Ideahub/ so Compose picks it up automatically
+            # No --build flag — image is pre-built and pulled from GHCR
+
+            echo "Production deployment complete — SHA: $SHA  Image: $IMAGE_REF"
+
+  # ============================================================
+  # 4. POST-DEPLOY HEALTH CHECK
+  # ============================================================
+  post-deploy-verify:
+    name: Post-Deploy Verification
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, deploy-prod]
+
+    steps:
+      - name: Health check against EC2
+        run: |
+          echo "Running health check..."
+          curl --fail --retry 5 --retry-delay 5 \
+            http://${{ secrets.EC2_HOST }}:5065/health \
+            && echo "Health check passed" \
+            || (echo "Health check failed" && exit 1)
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Production deployment successful!"
+          echo "Image: ${{ needs.pre-deploy-checks.outputs.image_ref }}"
+          # Uncomment to post to Slack:
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+          #   -H 'Content-type: application/json' \
+          #   --data '{"text":"Deployed ${{ needs.pre-deploy-checks.outputs.image_ref }} to production"}'
+
+      - name: Rollback instructions on failure
+        if: failure()
+        run: |
+          echo "Post-deploy verification FAILED"
+          echo ""
+          echo "==== ROLLBACK INSTRUCTIONS ===="
+          echo "SSH into EC2 and run:"
+          echo "  cd ~/Ideahub"
+          echo "  ROLLBACK=\$(cat rollback_image.txt)"
+          echo "  IMAGE_REF=\$ROLLBACK docker compose up -d"
+          echo "================================"

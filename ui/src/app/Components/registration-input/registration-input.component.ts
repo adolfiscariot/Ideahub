@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ToastService } from '../../Services/toast.service';
 import { ButtonsComponent } from '../buttons/buttons.component';
 import { AuthService } from '../../Services/auth/auth.service';
@@ -18,7 +18,10 @@ const PASSWORD_REQUIREMENTS = [
   { text: 'At least 1 number', test: (v: string) => /[0-9]/.test(v) },
   { text: 'At least 1 lowercase letter', test: (v: string) => /[a-z]/.test(v) },
   { text: 'At least 1 uppercase letter', test: (v: string) => /[A-Z]/.test(v) },
-  { text: 'At least 1 special character', test: (v: string) => /[^A-Za-z0-9]/.test(v) },
+  {
+    text: 'At least 1 special character',
+    test: (v: string) => /[^A-Za-z0-9]/.test(v),
+  },
 ];
 
 @Component({
@@ -28,7 +31,7 @@ const PASSWORD_REQUIREMENTS = [
   templateUrl: './registration-input.component.html',
   styleUrl: './registration-input.component.scss',
 })
-export class RegistrationInputComponent implements OnInit {
+export class RegistrationInputComponent {
   authService = inject(AuthService);
   router = inject(Router);
   toastService = inject(ToastService);
@@ -39,7 +42,7 @@ export class RegistrationInputComponent implements OnInit {
   passwordValue = '';
   infoHovered = false;
   showPassword = false;
-  passwordChecks = PASSWORD_REQUIREMENTS.map(r => ({
+  passwordChecks = PASSWORD_REQUIREMENTS.map((r) => ({
     text: r.text,
     met: false,
   }));
@@ -59,7 +62,7 @@ export class RegistrationInputComponent implements OnInit {
           Validators.required,
           Validators.minLength(8),
           Validators.pattern(
-            '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ !@#$%^&*()_+\\-=\\[\\]{}|\\;:\'",.<>\\/?]).{8,}$'
+            '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[ !@#$%^&*()_+\\-=\\[\\]{}|\\;:\'",.<>\\/?]).{8,}$',
           ),
         ],
         nonNullable: true,
@@ -69,36 +72,35 @@ export class RegistrationInputComponent implements OnInit {
         nonNullable: true,
       }),
     },
-    { validators: confirmPasswordValidator }
+    { validators: confirmPasswordValidator },
   );
-
-  ngOnInit(): void {}
 
   onPasswordInput() {
     const pwd = this.registrationForm.get('password')?.value || '';
     this.passwordValue = pwd;
 
-    this.passwordChecks = PASSWORD_REQUIREMENTS.map(r => ({
+    this.passwordChecks = PASSWORD_REQUIREMENTS.map((r) => ({
       text: r.text,
       met: r.test(pwd),
     }));
   }
 
-  get allPasswordMet(): boolean {
-  return this.passwordChecks.every(r => r.met);
-}
-
-togglePasswordVisibility() {
-  this.showPassword = !this.showPassword;
-  const passwordInput = document.getElementById('password-input') as HTMLInputElement;
-  if (passwordInput) {
-    passwordInput.type = this.showPassword ? 'text' : 'password';
+  get allPasswordMet() {
+    return this.passwordChecks.every((r) => r.met);
   }
-}
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+    const passwordInput = document.getElementById(
+      'password-input',
+    ) as HTMLInputElement;
+    if (passwordInput) {
+      passwordInput.type = this.showPassword ? 'text' : 'password';
+    }
+  }
 
   get passwordStrength(): number {
-    return this.passwordChecks.filter(r => r.met).length;
+    return this.passwordChecks.filter((r) => r.met).length;
   }
 
   onSubmit(event: Event) {
@@ -118,7 +120,7 @@ togglePasswordVisibility() {
           this.isLoading = false;
           this.toastService.show(
             `Registration failed. ${error.message || 'Unknown error'}`,
-            'error'
+            'error',
           );
         },
       });

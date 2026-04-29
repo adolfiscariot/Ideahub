@@ -1,9 +1,11 @@
 <div class="card" [ngClass]="variant">
-    <div class="card-header">
-        <span>{{title}}</span>
-        <span class="icon" *ngIf="icon"><ng-icon [name]="icon"></ng-icon></span>
-    </div>
-    <div class="card-content">
-        <ng-content></ng-content>
-    </div>
+  <div class="card-header">
+    <span>{{ title }}</span>
+    @if (icon) {
+      <span class="icon"><ng-icon [name]="icon"></ng-icon></span>
+    }
+  </div>
+  <div class="card-content">
+    <ng-content></ng-content>
+  </div>
 </div>

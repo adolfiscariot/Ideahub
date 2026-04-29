@@ -12,15 +12,12 @@ import { heroBell } from '@ng-icons/heroicons/outline';
 import { provideIcons } from '@ng-icons/core';
 
 export const appConfig: ApplicationConfig = {
-  providers:
-    [
-      provideZoneChangeDetection({ eventCoalescing: true }),
-      provideRouter(routes),
-      provideAnimations(),
-      provideHttpClient(
-        withInterceptors([authInterceptor])
-      ),
-      provideRouter(routes),
-      provideIcons({ heroBell })
-    ]
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideAnimations(),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideRouter(routes),
+    provideIcons({ heroBell }),
+  ],
 };

@@ -223,7 +223,7 @@ public class ProjectController : ControllerBase
             // check if user has access: (Overseer or Task/SubTask Assignee)
             var isOverseer = project.OverseenByUserId == userId;
             var isGroupMember = await _context.UserGroups.AnyAsync(ug => ug.GroupId == project.GroupId && ug.UserId == userId);
-            
+
             bool isAssignee = false;
             if (!isOverseer)
             {
@@ -232,7 +232,7 @@ public class ProjectController : ControllerBase
                     .Include(t => t.TaskAssignees)
                     .Where(t => t.ProjectId == projectId && !t.IsDeleted)
                     .ToListAsync();
-                
+
                 isAssignee = tasks.Any(t => (t.TaskAssignees ?? new List<TaskAssignee>()).Any(ta => ta.UserId == userId));
 
                 // If still not found, check subtasks
@@ -240,9 +240,9 @@ public class ProjectController : ControllerBase
                 {
                     isAssignee = await _context.SubTaskAssignees
                         .AnyAsync(sta => sta.UserId == userId &&
-                                sta.SubTask.ProjectTask.ProjectId == projectId &&
-                                !sta.SubTask.ProjectTask.IsDeleted &&
-                                !sta.SubTask.IsDeleted);
+                                sta.SubTask!.ProjectTask!.ProjectId == projectId &&
+                                !sta.SubTask!.ProjectTask!.IsDeleted &&
+                                !sta.SubTask!.IsDeleted);
                 }
             }
 
@@ -252,7 +252,7 @@ public class ProjectController : ControllerBase
                 return StatusCode(403, ApiResponse.Fail("You do not have permission to access this project workspace."));
             }
 
-            var projectData = new 
+            var projectData = new
             {
                 project.Id,
                 project.Title,
@@ -297,8 +297,8 @@ public class ProjectController : ControllerBase
                 .Include(p => p.Idea)
                 .Include(p => p.Tasks)
                     .ThenInclude(t => t.SubTasks)
-                .Where(p => 
-                    !p.IsDeleted && 
+                .Where(p =>
+                    !p.IsDeleted &&
                     (p.Group.IsPublic || p.Group.UserGroups.Any(ug => ug.UserId == userId)))
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
@@ -429,7 +429,7 @@ public class ProjectController : ControllerBase
             }
 
             //make changes to project
-            string newOverseerDisplayName =  null!;
+            string newOverseerDisplayName = null!;
             if (!string.IsNullOrWhiteSpace(projectUpdateDto.Title))
             {
                 project.Title = projectUpdateDto.Title;
@@ -467,7 +467,7 @@ public class ProjectController : ControllerBase
                     _logger.LogWarning("Update Project: Unable to parse the updated status for project {projectTitle}", project.Title);
                     return BadRequest(ApiResponse.Fail("Unable to parse updated status"));
                 }
-                }
+            }
 
             if (projectUpdateDto.EndedAt is not null)
             {
@@ -558,7 +558,7 @@ public class ProjectController : ControllerBase
         foreach (var task in activeTasks)
         {
             var activeSubTasks = task.SubTasks?.ToList() ?? new List<SubTask>();
-            
+
             if (activeSubTasks.Count > 0)
             {
                 int completedSubTasks = activeSubTasks.Count(st => st.IsCompleted);

@@ -1,3 +1,5 @@
+import { Media } from '../Media/media-interface';
+
 export interface Idea {
   id: string;
   Title: string;
@@ -46,6 +48,7 @@ export interface Idea {
   notes?: string;
   score?: number;
   aiReasoning?: string;
+  currentStage?: ScoringStage | number | string;
 }
 
 export interface CreateIdeaRequest {
@@ -59,12 +62,6 @@ export interface CreateIdeaRequest {
   TechnologyInvolved?: string;
   Notes?: string;
   groupId: string;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data?: T;
 }
 
 export interface VoteRequest {
@@ -96,6 +93,7 @@ export interface PromoteRequest {
 }
 
 export interface IdeaUpdate {
+  id?: string;
   Title?: string;
   ProposedSolution?: string;
   ProblemStatement?: string;
@@ -107,6 +105,19 @@ export interface IdeaUpdate {
   TechnologyInvolved?: string;
   Notes?: string;
   Score?: number;
+
+  // backend mapping
+  title?: string;
+  proposedSolution?: string;
+  problemStatement?: string;
+  status?: string;
+  strategicAlignment?: string;
+  useCase?: string;
+  innovationCategory?: string;
+  subCategory?: string;
+  technologyInvolved?: string;
+  notes?: string;
+  score?: number;
 }
 
 export interface VoteResponse {
@@ -117,17 +128,17 @@ export interface VoteResponse {
 }
 
 export interface createComment {
-  content: string,
+  content: string;
 }
 
 export interface viewComment {
-  id: number,
-  content: string,
-  createdAt: string,
-  userId?: string,
-  ideaId?: number,
-  mediaCount?: number,
-  mediaItems?: any[];
+  id: number;
+  content: string;
+  createdAt: string;
+  userId?: string;
+  ideaId?: number;
+  mediaCount?: number;
+  mediaItems?: Media[];
 }
 
 export enum ImpactScope {
@@ -141,7 +152,7 @@ export enum RiskLevel {
   Unknown = 'Unknown',
   Low = 'Low',
   Medium = 'Medium',
-  High = 'High'
+  High = 'High',
 }
 
 export enum EvaluationStatus {
@@ -157,7 +168,7 @@ export enum ResponsibleDepartment {
   IT = 'IT',
   Operations = 'Operations',
   MarketingAndSales = 'MarketingAndSales',
-  StrategyAndCompliance = 'StrategyAndCompliance'
+  StrategyAndCompliance = 'StrategyAndCompliance',
 }
 
 export enum ActionStep {
@@ -166,21 +177,21 @@ export enum ActionStep {
   StakeholderReview = 'StakeholderReview',
   PilotLaunch = 'PilotLaunch',
   MarketFeasibilityStudy = 'MarketFeasibilityStudy',
-  RolloutPlanning = 'RolloutPlanning'
+  RolloutPlanning = 'RolloutPlanning',
 }
 
 export enum BusinessCaseResult {
   Unknown = 'Unknown',
   InProgress = 'InProgress',
   PilotStage = 'PilotStage',
-  AwaitingResults = 'AwaitingResults'
+  AwaitingResults = 'AwaitingResults',
 }
 
 export enum Verdict {
   Unknown = 'Unknown',
   Approved = 'Approved',
   AwaitingReview = 'AwaitingReview',
-  Park = 'Park'
+  Park = 'Park',
 }
 
 export enum ScoringStage {
@@ -188,7 +199,7 @@ export enum ScoringStage {
   BusinessCase = 'BusinessCase',
   ScoringDimensions = 'ScoringDimensions',
   Accepted = 'Accepted',
-  Rejected = 'Rejected'
+  Rejected = 'Rejected',
 }
 
 // Phase 3 Scoring Enums
