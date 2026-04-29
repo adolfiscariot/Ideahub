@@ -17,7 +17,7 @@ import { environment } from '../../environments/environment.prod';
   providedIn: 'root',
 })
 export class ProjectService {
-  private apiUrl = `${environment.apiUrl}/group`;
+  private apiUrl = `${environment.apiUrl}/project`;
 
   private http = inject(HttpClient);
 

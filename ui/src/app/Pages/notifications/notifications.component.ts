@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
-import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces'
+import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces';
 
 @Component({
   selector: 'app-notifications',
