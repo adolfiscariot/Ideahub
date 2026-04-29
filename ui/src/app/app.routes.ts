@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './Guards/auth.guard';
+import { AuthGuard } from '@auth0/auth0-angular'; // Using the official Auth0 Guard
 import { LandingGuard } from './Guards/landing.guard';
 import { CommitteeGuard } from './Guards/committee.guard';
 
