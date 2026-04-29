@@ -41,8 +41,8 @@ public class IdeaController : ControllerBase
             _logger.LogInformation("Creating new idea...");
 
             //Fetch user info
-            var userEmail = User.FindFirstValue("https://ideahub.api/email") 
-                           ?? User.FindFirstValue(ClaimTypes.Email) 
+            var userEmail = User.FindFirstValue("https://ideahub.api/email")
+                           ?? User.FindFirstValue(ClaimTypes.Email)
                            ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))

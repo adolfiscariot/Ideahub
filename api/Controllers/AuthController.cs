@@ -42,8 +42,8 @@ public class AuthController : ControllerBase
             return Unauthorized(ApiResponse.Fail("No email claim found in token"));
         }
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => 
-            (u.Email != null && u.Email.ToLower() == email.ToLower()) || 
+        var user = await _context.Users.FirstOrDefaultAsync(u =>
+            (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
             (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
 
         if (user == null)
