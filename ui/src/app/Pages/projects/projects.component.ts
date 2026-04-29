@@ -146,7 +146,9 @@ export class ProjectsComponent implements OnInit {
   private toastService = inject(ToastService);
 
   ngOnInit(): void {
-    this.currentUserId = this.authService.getUserId();
+    this.authService.getUserId().subscribe((id: string) => {
+      this.currentUserId = id;
+    });
 
     this.route.queryParams.subscribe((params: Params) => {
       const projectId = params['openProject'];

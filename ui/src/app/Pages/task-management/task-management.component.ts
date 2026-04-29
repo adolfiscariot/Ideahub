@@ -56,6 +56,7 @@ export class TaskManagementComponent implements OnInit {
 
   projectId = 0;
   projectOverseerId = '';
+  currentUserId = '';
   tasks: TaskDetails[] = [];
   isLoading = false;
 
@@ -133,6 +134,10 @@ export class TaskManagementComponent implements OnInit {
   isTabSwitching = false;
 
   ngOnInit(): void {
+    this.authService.getUserId().subscribe((id: string) => {
+      this.currentUserId = id;
+    });
+
     this.route.params.subscribe((params) => {
       this.projectId = +params['projectId'];
       if (this.projectId) {
@@ -191,14 +196,13 @@ export class TaskManagementComponent implements OnInit {
   }
 
   get canCreateTask(): boolean {
-    return this.authService.getUserId() === this.projectOverseerId;
+    return this.currentUserId === this.projectOverseerId;
   }
 
   canManageTask(task: TaskDetails): boolean {
-    const userId = this.authService.getUserId();
     return (
-      userId === this.projectOverseerId ||
-      (task.taskAssignees && task.taskAssignees.includes(userId))
+      this.currentUserId === this.projectOverseerId ||
+      (task.taskAssignees && task.taskAssignees.includes(this.currentUserId))
     );
   }
 
@@ -206,12 +210,11 @@ export class TaskManagementComponent implements OnInit {
     st: SubTaskDetails,
     task: TaskDetails | null = null,
   ): boolean {
-    const userId = this.authService.getUserId();
     // Allow if Overseer
-    if (userId === this.projectOverseerId) return true;
+    if (this.currentUserId === this.projectOverseerId) return true;
 
     // Allow if SubTask Assignee
-    if (st.subTaskAssignees && st.subTaskAssignees.includes(userId))
+    if (st.subTaskAssignees && st.subTaskAssignees.includes(this.currentUserId))
       return true;
 
     // Allow if Task Assignee (parent of the subtask)
@@ -219,7 +222,7 @@ export class TaskManagementComponent implements OnInit {
     if (
       effectiveTask &&
       effectiveTask.taskAssignees &&
-      effectiveTask.taskAssignees.includes(userId)
+      effectiveTask.taskAssignees.includes(this.currentUserId)
     )
       return true;
 

@@ -1,11 +1,15 @@
-import { Component } from '@angular/core';
-import { RegistrationInputComponent } from '../../Components/registration-input/registration-input.component';
+import { Component, OnInit, inject } from '@angular/core';
+import { AuthService } from '../../Services/auth/auth.service';
 
 @Component({
   selector: 'app-register',
-  imports: [RegistrationInputComponent],
   standalone: true,
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.scss',
+  template: '<p>Redirecting to signup...</p>',
 })
-export class RegisterComponent {}
+export class RegisterComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
+  ngOnInit(): void {
+    this.authService.signUp();
+  }
+}
