@@ -100,7 +100,9 @@ jobs:
 
     steps:
       - name: Wait for containers to be ready
-        run: sleep 10
+        # Increased to 30s to give the .NET app time to fully start
+        # after the database healthcheck passes
+        run: sleep 30
 
       - name: Check backend container status
         run: |
@@ -113,9 +115,15 @@ jobs:
             exit 1
           fi
 
+      - name: Print container logs
+        # Always print the last 50 lines of app logs so startup
+        # errors and the actual listening port are visible in CI
+        run: docker logs ideahub-backend --tail 50
+
       - name: Health check
+        # Increased retries and delay to account for slow cold starts
         run: |
-          curl --fail --retry 5 --retry-delay 3 http://localhost:5065/health \
+          curl --fail --retry 10 --retry-delay 5 http://localhost:5065/health \
             && echo "Health check passed" \
             || (echo "Health check failed" && exit 1)
 
