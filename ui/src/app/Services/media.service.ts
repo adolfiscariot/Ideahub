@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Media, MediaType } from '../Interfaces/Media/media-interface';
@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment.prod';
 export class MediaService {
   private apiUrl = `${environment.apiUrl}/media`;
 
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
     return {

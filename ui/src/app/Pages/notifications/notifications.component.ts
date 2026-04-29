@@ -1,16 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { GroupsService } from '../../Services/groups.service';
+import { GroupMembershipRequest } from '../../Interfaces/Groups/groups-interfaces'
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
   imports: [],
   templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss']
+  styleUrls: ['./notifications.component.scss'],
 })
 export class NotificationsComponent {
-
-  requests: string[] = [];
+  requests: GroupMembershipRequest[] = [];
   loading = false;
   errorMessage = '';
 
@@ -26,22 +26,21 @@ export class NotificationsComponent {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = "Could not load requests";
+        this.errorMessage = 'Could not load requests';
         this.loading = false;
-      }
+      },
     });
   }
-
 
   acceptRequest(groupId: string, userId: string): void {
     this.groupsService.acceptRequest(groupId, userId).subscribe({
       next: () => {
         // Remove UI instantly
-        this.requests = this.requests.filter(r => r !== userId);
+        this.requests = this.requests.filter((r) => r.userId !== userId);
       },
       error: () => {
-        alert("Failed to accept request");
-      }
+        alert('Failed to accept request');
+      },
     });
   }
 
@@ -49,11 +48,11 @@ export class NotificationsComponent {
     this.groupsService.rejectRequest(groupId, userId).subscribe({
       next: () => {
         // Remove UI instantly
-        this.requests = this.requests.filter(r => r !== userId);
+        this.requests = this.requests.filter((r) => r.userId !== userId);
       },
       error: () => {
-        alert("Failed to reject request");
-      }
+        alert('Failed to reject request');
+      },
     });
   }
 }

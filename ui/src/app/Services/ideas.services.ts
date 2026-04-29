@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
@@ -20,7 +20,8 @@ import { environment } from '../../environments/environment.prod';
 export class IdeasService {
   private apiUrl = `${environment.apiUrl}/idea`;
 
-  constructor(private http: HttpClient, private voteService: VoteService) { }
+  private http = inject(HttpClient);
+  private voteService = inject(VoteService);
 
   // Helper method to convert backend response
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

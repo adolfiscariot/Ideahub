@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import {
-  viewComment, createComment
+  viewComment,
+  createComment,
 } from '../Interfaces/Ideas/idea-interfaces';
 import { environment } from '../../environments/environment.prod';
 
@@ -13,7 +14,7 @@ import { environment } from '../../environments/environment.prod';
 export class CommentsService {
   private apiUrl = `${environment.apiUrl}/comment`;
 
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

@@ -17,7 +17,7 @@ import { environment } from '../../environments/environment.prod';
 export class GroupsService {
   private apiUrl = `${environment.apiUrl}/group`;
 
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

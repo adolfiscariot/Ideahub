@@ -184,11 +184,11 @@ builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 //2.9 Link the SendGridSettings class to the "SendGrid" user secrets
 //builder.Services.Configure<SendGridSettings>(
-    //builder.Configuration.GetSection("SendGridSettings"));
+//builder.Configuration.GetSection("SendGridSettings"));
 
 builder.Services.Configure<SendGridSettings>(options =>
 {
-    options.SenderEmail = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL") ?? "adept.ideahub@gmail.com" ;
+    options.SenderEmail = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL") ?? "adept.ideahub@gmail.com";
     options.SenderName = Environment.GetEnvironmentVariable("SENDGRID_SENDER_NAME") ?? "Ideahub";
     options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY")!;
 

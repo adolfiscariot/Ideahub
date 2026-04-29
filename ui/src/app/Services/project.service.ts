@@ -19,7 +19,7 @@ import { environment } from '../../environments/environment.prod';
 export class ProjectService {
   private apiUrl = `${environment.apiUrl}/group`;
 
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
   // Helper method to convert backend response
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
