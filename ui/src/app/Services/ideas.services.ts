@@ -20,7 +20,9 @@ import { inject } from '@angular/core';
 })
 export class IdeasService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/idea`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/idea`;
+  }
   private http = inject(HttpClient);
   private voteService = inject(VoteService);
 

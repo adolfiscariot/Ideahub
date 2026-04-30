@@ -31,7 +31,9 @@ export interface CommentNotification {
 })
 export class NotificationService {
   private appConfig = inject(AppConfigService);
-  private get baseUrl() { return `${this.appConfig.apiUrl}/notification`; }
+  private get baseUrl() {
+    return `${this.appConfig.apiUrl}/notification`;
+  }
 
   private _unreadCount = new BehaviorSubject<number>(0);
   unreadCount$ = this._unreadCount.asObservable();

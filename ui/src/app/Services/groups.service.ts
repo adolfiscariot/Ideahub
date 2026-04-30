@@ -16,7 +16,9 @@ import {
 })
 export class GroupsService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/group`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/group`;
+  }
 
   private http = inject(HttpClient);
 

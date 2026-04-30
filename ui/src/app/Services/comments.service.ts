@@ -14,7 +14,9 @@ import { inject } from '@angular/core';
 })
 export class CommentsService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/comment`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/comment`;
+  }
   private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface

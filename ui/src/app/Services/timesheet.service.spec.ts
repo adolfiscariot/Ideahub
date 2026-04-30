@@ -34,7 +34,13 @@ describe('TimesheetService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [TimesheetService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        TimesheetService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(TimesheetService);
     http_mock = TestBed.inject(HttpTestingController);

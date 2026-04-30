@@ -11,7 +11,9 @@ import { UserRecord } from '../Interfaces/Users/user-interface';
 export class CommitteeMembersService {
   private appConfig = inject(AppConfigService);
   private http = inject(HttpClient);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/Committee`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/Committee`;
+  }
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

@@ -42,7 +42,13 @@ describe('CommentsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [CommentsService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        CommentsService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(CommentsService);
     httpMock = TestBed.inject(HttpTestingController);

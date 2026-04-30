@@ -17,7 +17,9 @@ import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 })
 export class TaskService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/task`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/task`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

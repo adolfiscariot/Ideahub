@@ -23,7 +23,13 @@ describe('VoteService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [VoteService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        VoteService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(VoteService);
     http_mock = TestBed.inject(HttpTestingController);

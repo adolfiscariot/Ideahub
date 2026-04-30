@@ -15,7 +15,9 @@ import {
 })
 export class TimesheetService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/timesheet`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/timesheet`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

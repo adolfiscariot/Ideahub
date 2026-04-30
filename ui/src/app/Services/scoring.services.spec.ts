@@ -71,7 +71,13 @@ describe('ScoringService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ScoringService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        ScoringService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(ScoringService);
     http_mock = TestBed.inject(HttpTestingController);

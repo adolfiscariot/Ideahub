@@ -60,7 +60,13 @@ describe('GroupsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [GroupsService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        GroupsService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(GroupsService);
     http_mock = TestBed.inject(HttpTestingController);

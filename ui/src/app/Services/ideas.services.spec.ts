@@ -58,7 +58,14 @@ describe('IdeasService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [IdeasService, { provide: VoteService, useValue: spy }, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
+      providers: [
+        IdeasService,
+        { provide: VoteService, useValue: spy },
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(IdeasService);
     http_mock = TestBed.inject(HttpTestingController);

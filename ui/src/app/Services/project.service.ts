@@ -18,7 +18,9 @@ import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 })
 export class ProjectService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/project`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/project`;
+  }
   private http = inject(HttpClient);
 
   // Helper method to convert backend response

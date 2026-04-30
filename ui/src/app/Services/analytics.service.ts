@@ -17,7 +17,9 @@ import {
 })
 export class AnalyticsService {
   private appConfig = inject(AppConfigService);
-  private get baseUrl() { return `${this.appConfig.apiUrl}/analytics`; }
+  private get baseUrl() {
+    return `${this.appConfig.apiUrl}/analytics`;
+  }
 
   private http = inject(HttpClient);
 

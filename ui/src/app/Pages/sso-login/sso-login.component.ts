@@ -5,7 +5,6 @@ import { HttpClient } from '@angular/common/http';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { AuthService } from '../../Services/auth/auth.service';
 import { AuthData } from '../../Interfaces/Auth/auth-interfaces';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sso-login',

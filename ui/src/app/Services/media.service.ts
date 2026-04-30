@@ -11,7 +11,9 @@ import { inject } from '@angular/core';
 })
 export class MediaService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/media`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/media`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

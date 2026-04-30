@@ -17,7 +17,9 @@ import { inject } from '@angular/core';
 })
 export class VoteService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/vote`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/vote`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

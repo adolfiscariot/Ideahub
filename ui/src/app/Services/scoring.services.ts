@@ -13,7 +13,9 @@ import {
 })
 export class ScoringService {
   private appConfig = inject(AppConfigService);
-  private get apiUrl() { return `${this.appConfig.apiUrl}/scoring`; }
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/scoring`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
