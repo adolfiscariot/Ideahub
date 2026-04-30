@@ -105,8 +105,29 @@ builder.Services.AddAuthentication(options =>
                         (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
                         (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
 
-                var path = context.HttpContext.Request.Path;
-                if (path.StartsWithSegments("/api/hubs/notifications"))
+                    if (user == null)
+                    {
+                        logger.LogInformation("JIT Provisioning user: {Email}", email);
+
+                        var displayName = email.Split('@')[0];
+                        if (displayName.Length > 64) displayName = displayName[..64];
+
+                        user = new IdeahubUser
+                        {
+                            UserName = email,
+                            Email = email,
+                            EmailConfirmed = true,
+                            DisplayName = displayName
+                        };
+
+                        var result = await userManager.CreateAsync(user);
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
+                        }
+                    }
+                }
+                catch (Exception ex)
                 {
                     // handle duplicate errors
                     if (!ex.Message.Contains("23505"))
@@ -340,7 +361,7 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
+app.MapHub<api.Hubs.NotificationHub>("/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
 //5. Run the App
