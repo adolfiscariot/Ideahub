@@ -2,7 +2,7 @@
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY ui/package*.json ./
-RUN npm ci
+RUN npm install
 COPY ui/ ./
 ARG FRONTEND_CONFIG=production
 RUN npm run build -- --configuration=${FRONTEND_CONFIG}
@@ -22,8 +22,9 @@ WORKDIR /app
 COPY --from=backend-build /app .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-RUN useradd --create-home --uid 10001 ideahubuser \
-    && chown -R ideahubuser:ideahubuser /app /entrypoint.sh
+RUN groupadd -g 10001 ideahubgroup && \
+    useradd -r -u 10001 -g ideahubgroup ideahubuser && \
+    chown -R ideahubuser:ideahubgroup /app /entrypoint.sh
 EXPOSE 5065
 USER ideahubuser
 ENTRYPOINT ["/entrypoint.sh"]
