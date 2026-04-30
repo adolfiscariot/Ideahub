@@ -22,5 +22,8 @@ WORKDIR /app
 COPY --from=backend-build /app .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+RUN useradd --create-home --uid 10001 ideahubuser \
+    && chown -R ideahubuser:ideahubuser /app /entrypoint.sh
 EXPOSE 5065
+USER ideahubuser
 ENTRYPOINT ["/entrypoint.sh"]

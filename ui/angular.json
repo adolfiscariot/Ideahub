@@ -102,7 +102,7 @@
               "buildTarget": "Ideahub:build:production"
             },
             "staging": {
-              "buildTarget": "Ideahub:build:production"
+              "buildTarget": "Ideahub:build:staging"
             },
             "development": {
               "buildTarget": "Ideahub:build:development"
