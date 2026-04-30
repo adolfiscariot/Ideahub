@@ -59,7 +59,7 @@ node_modules
 
 # Docker
 docker-compose.override.yml
-.env
+.env*
 
 # Secrets
 api/appsettings.json

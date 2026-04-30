@@ -3,16 +3,16 @@ services:
     image: postgres:15
     container_name: ideahub-db
     environment:
-      POSTGRES_USER: ideahub_user
-      POSTGRES_PASSWORD: ideahub_password
-      POSTGRES_DB: ideahub_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5433:5432"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db"] # Checks if the DB is accepting connections
+      test: [ "CMD-SHELL", "pg_isready -U {DB_USER} -d {DB_NAME}" ] # Checks if the DB is accepting connections
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,14 +23,23 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        FRONTEND_CONFIG: ${FRONTEND_CONFIG:-production}
     container_name: ideahub-backend
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      ConnectionStrings__IdeahubString: Host=ideahub-db;Port=5433;Database=ideahub_db;Username=ideahub_user;Password=ideahub_password
-      PUBLIC_BASE_URL: https://f5e76c2bc97d.ngrok-free.app
-
+      HOMEPAGE_URL: "${DOMAIN_URL}/home"
+      SENDGRID_SENDER_NAME: ${SENDGRID_SENDER_NAME}
+      SENDGRID_SENDER_EMAIL: ${SENDGRID_SENDER_EMAIL}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SUPERADMIN__EMAIL: ${SUPERADMIN_EMAIL}
+      JWT__KEY: ${JWT_KEY}
+      JWT__ISSUER: ${DOMAIN_URL}
+      JWT__AUDIENCE: ${DOMAIN_URL}
+      GEMINISETTINGS__APIKEY: ${GEMINI_API_KEY}
+      CONNECTIONSTRINGS__IDEAHUBSTRING: "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
     ports:
       - "5065:5065"
     depends_on:
