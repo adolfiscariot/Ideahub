@@ -1102,6 +1102,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           id: this.groupId,
           name: this.groupName,
           memberCount: this.membersCount,
+          createdByUserId: this.groupCreatorId,
         },
       },
       panelClass: 'custom-modal',
