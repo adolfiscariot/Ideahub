@@ -4,8 +4,13 @@ on:
   push:
     branches: [ "main" ]
   schedule:
-    - cron: "0 12 * * 3" # Every Wednesday at 12:00 UTC
+    - cron: "0 12 * * 3" 
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version for production"
+        required: true
+        default: "v1.0.0"
 
 env:
   REGISTRY: ghcr.io
@@ -100,8 +105,8 @@ jobs:
 
     steps:
       - name: Wait for containers to be ready
-        # Increased to 30s to give the .NET app time to fully start
-        # after the database healthcheck passes
+        # 30s gives the database time to pass its healthcheck and
+        # the .NET app time to fully initialise before curl hits it
         run: sleep 30
 
       - name: Check backend container status
@@ -116,12 +121,11 @@ jobs:
           fi
 
       - name: Print container logs
-        # Always print the last 50 lines of app logs so startup
-        # errors and the actual listening port are visible in CI
-        run: docker logs ideahub-backend --tail 50
+        # Print last 70 lines so startup errors and listening port
+        # are always visible in the Actions run
+        run: docker logs ideahub-backend --tail 70
 
       - name: Health check
-        # Increased retries and delay to account for slow cold starts
         run: |
           curl --fail --retry 10 --retry-delay 5 http://localhost:5065/health \
             && echo "Health check passed" \
@@ -129,8 +133,14 @@ jobs:
 
   # ============================================================
   # 4. MANUAL APPROVAL GATE
-  #    Back on the cloud runner — only needs GitHub API access
-  #    to fire the repository_dispatch event to prod.
+  #    The workflow pauses here. GitHub emails all required
+  #    reviewers configured on the staging-approval Environment.
+  #    Nothing proceeds until a reviewer clicks Approve in the
+  #    GitHub Actions UI.
+  #
+  #    To set this up:
+  #    Repo > Settings > Environments > staging-approval
+  #    > Protection rules > Required reviewers > add your team
   # ============================================================
   await-approval:
     name: Await Team Approval
@@ -144,6 +154,7 @@ jobs:
           echo "Staging approved. Triggering prod deployment..."
           echo "SHA: ${{ needs.build-and-push.outputs.sha_short }}"
           echo "Image: ${{ needs.build-and-push.outputs.image_ref }}"
+          echo "Version: ${{ inputs.version || 'not specified — push or schedule trigger' }}"
 
       - name: Trigger production deployment
         uses: peter-evans/repository-dispatch@v3
@@ -153,5 +164,6 @@ jobs:
           client-payload: |
             {
               "sha_short": "${{ needs.build-and-push.outputs.sha_short }}",
-              "image_ref": "${{ needs.build-and-push.outputs.image_ref }}"
+              "image_ref": "${{ needs.build-and-push.outputs.image_ref }}",
+              "version": "${{ inputs.version }}"
             }
