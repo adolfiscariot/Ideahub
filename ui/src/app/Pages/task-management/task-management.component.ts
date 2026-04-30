@@ -196,7 +196,9 @@ export class TaskManagementComponent implements OnInit {
   }
 
   get canCreateTask(): boolean {
-    return !!this.currentUserId && this.currentUserId === this.projectOverseerId;
+    return (
+      !!this.currentUserId && this.currentUserId === this.projectOverseerId
+    );
   }
 
   canManageTask(task: TaskDetails): boolean {

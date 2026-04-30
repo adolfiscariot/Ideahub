@@ -5,9 +5,13 @@ import { AuthService } from '../../Services/auth/auth.service';
   selector: 'app-registration-input',
   standalone: true,
   template: `
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+    <div
+      style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;"
+    >
       <div style="text-align: center;">
-        <p style="font-size: 1.2rem; color: #666;">Redirecting to registration...</p>
+        <p style="font-size: 1.2rem; color: #666;">
+          Redirecting to registration...
+        </p>
       </div>
     </div>
   `,

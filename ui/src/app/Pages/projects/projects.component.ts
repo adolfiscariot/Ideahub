@@ -194,7 +194,7 @@ export class ProjectsComponent implements OnInit {
 
         const mediaRequests = this.projects.map((project) =>
           this.mediaService.viewMedia(undefined, undefined, project.id).pipe(
-            catchError(() => of({ data: [] })) // Don't let one media failure kill the whole list
+            catchError(() => of({ data: [] })), // Don't let one media failure kill the whole list
           ),
         );
         return forkJoin(mediaRequests);

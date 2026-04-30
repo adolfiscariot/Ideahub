@@ -195,9 +195,12 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get current user ID from auth service (asynchronously)
-    this.authService.getUserId().pipe(takeUntil(this.destroy$)).subscribe((id: string) => {
-      this.currentUserId = id;
-    });
+    this.authService
+      .getUserId()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id: string) => {
+        this.currentUserId = id;
+      });
     this.checkCommitteeMembership();
 
     this.shareIdeaForm = this.fb.group({
