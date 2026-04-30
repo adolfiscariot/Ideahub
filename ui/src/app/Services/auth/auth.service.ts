@@ -15,6 +15,7 @@ import {
   ProfileResponse,
 } from '../../Interfaces/Auth/auth-interfaces';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class AuthService {
   private readonly auth0 = inject(Auth0Service);
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5065/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   /**
    * Public observables for application state
@@ -111,8 +112,11 @@ export class AuthService {
             }
             return null;
           }),
-          catchError(() => of(null)),
           shareReplay(1),
+          catchError(() => {
+            this.localUserCache$ = null; // Clear cache on error so we can retry
+            return of(null);
+          }),
         );
 
         return this.localUserCache$;

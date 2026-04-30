@@ -196,12 +196,12 @@ export class TaskManagementComponent implements OnInit {
   }
 
   get canCreateTask(): boolean {
-    return this.currentUserId === this.projectOverseerId;
+    return !!this.currentUserId && this.currentUserId === this.projectOverseerId;
   }
 
   canManageTask(task: TaskDetails): boolean {
     return (
-      this.currentUserId === this.projectOverseerId ||
+      (!!this.currentUserId && this.currentUserId === this.projectOverseerId) ||
       (task.taskAssignees && task.taskAssignees.includes(this.currentUserId))
     );
   }
@@ -211,7 +211,8 @@ export class TaskManagementComponent implements OnInit {
     task: TaskDetails | null = null,
   ): boolean {
     // Allow if Overseer
-    if (this.currentUserId === this.projectOverseerId) return true;
+    if (!!this.currentUserId && this.currentUserId === this.projectOverseerId)
+      return true;
 
     // Allow if SubTask Assignee
     if (st.subTaskAssignees && st.subTaskAssignees.includes(this.currentUserId))
