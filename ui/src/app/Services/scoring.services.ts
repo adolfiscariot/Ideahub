@@ -1,3 +1,4 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
@@ -6,13 +7,13 @@ import {
   BusinessCaseDto,
   ScoringDimensionsDto,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScoringService {
-  private readonly apiUrl = `${environment.apiUrl}/scoring`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() { return `${this.appConfig.apiUrl}/scoring`; }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

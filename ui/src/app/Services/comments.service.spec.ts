@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -10,7 +11,6 @@ import {
   viewComment,
   createComment,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -23,7 +23,7 @@ describe('CommentsService', () => {
   let service: CommentsService;
   let httpMock: HttpTestingController;
 
-  const apiUrl = `${environment.apiUrl}/comment`;
+  const apiUrl = `${'http://localhost:5065/api'}/comment`;
 
   // Shared test data
 
@@ -42,7 +42,7 @@ describe('CommentsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [CommentsService],
+      providers: [CommentsService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
     });
     service = TestBed.inject(CommentsService);
     httpMock = TestBed.inject(HttpTestingController);

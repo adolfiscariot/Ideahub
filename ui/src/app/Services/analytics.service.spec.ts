@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -14,7 +15,6 @@ import {
   GroupEngagement,
   PersonalStats,
 } from '../Models/analytics.models';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -27,12 +27,12 @@ describe('AnalyticsService', () => {
   let service: AnalyticsService;
   let httpMock: HttpTestingController;
 
-  const baseUrl = `${environment.apiUrl}/analytics`;
+  const baseUrl = `${'http://localhost:5065/api'}/analytics`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [AnalyticsService],
+      providers: [AnalyticsService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
     });
     service = TestBed.inject(AnalyticsService);
     httpMock = TestBed.inject(HttpTestingController);

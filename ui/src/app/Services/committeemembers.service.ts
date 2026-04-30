@@ -1,7 +1,7 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { UserRecord } from '../Interfaces/Users/user-interface';
 
@@ -9,8 +9,9 @@ import { UserRecord } from '../Interfaces/Users/user-interface';
   providedIn: 'root',
 })
 export class CommitteeMembersService {
+  private appConfig = inject(AppConfigService);
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/Committee`;
+  private get apiUrl() { return `${this.appConfig.apiUrl}/Committee`; }
 
   // Helper method to convert backend response to our interface
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

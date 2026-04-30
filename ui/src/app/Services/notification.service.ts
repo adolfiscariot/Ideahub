@@ -1,3 +1,4 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -8,7 +9,6 @@ import {
   tap,
   map,
 } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 
 export interface CommentNotification {
@@ -30,7 +30,8 @@ export interface CommentNotification {
   providedIn: 'root',
 })
 export class NotificationService {
-  private readonly baseUrl = `${environment.apiUrl}/notification`;
+  private appConfig = inject(AppConfigService);
+  private get baseUrl() { return `${this.appConfig.apiUrl}/notification`; }
 
   private _unreadCount = new BehaviorSubject<number>(0);
   unreadCount$ = this._unreadCount.asObservable();

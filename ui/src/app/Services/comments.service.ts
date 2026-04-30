@@ -1,3 +1,4 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
@@ -7,13 +8,13 @@ import {
   createComment,
 } from '../Interfaces/Ideas/idea-interfaces';
 import { inject } from '@angular/core';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CommentsService {
-  private readonly apiUrl = `${environment.apiUrl}/comment`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() { return `${this.appConfig.apiUrl}/comment`; }
   private http = inject(HttpClient);
 
   // Helper method to convert backend response to our interface

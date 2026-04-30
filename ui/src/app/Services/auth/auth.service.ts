@@ -1,3 +1,4 @@
+import { AppConfigService } from '../../core/services/app-config.service';
 import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
@@ -22,9 +23,10 @@ import { AuthData, CurrentUser } from '../../Interfaces/Auth/auth-interfaces';
   providedIn: 'root',
 })
 export class AuthService {
+  private appConfig = inject(AppConfigService);
   router = inject(Router);
 
-  private readonly authUrl = `${environment.apiUrl}/auth`;
+  private get authUrl() { return `${this.appConfig.apiUrl}/auth`; }
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();

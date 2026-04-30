@@ -1,13 +1,14 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SignalrService {
+  private appConfig = inject(AppConfigService);
   private hubConnection: signalR.HubConnection | undefined;
   public notificationSubject = new BehaviorSubject<string | null>(null);
 
@@ -19,7 +20,7 @@ export class SignalrService {
       this.hubConnection = undefined;
     }
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.apiUrl + '/hubs/notifications', {
+      .withUrl(this.appConfig.apiUrl + '/hubs/notifications', {
         accessTokenFactory: () => localStorage.getItem('accessToken') || '',
       })
       .withAutomaticReconnect()

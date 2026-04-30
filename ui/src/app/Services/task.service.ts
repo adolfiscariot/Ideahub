@@ -1,7 +1,7 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
 import {
   TaskDetails,
   TaskDto,
@@ -16,7 +16,8 @@ import { ApiResponse } from '../Interfaces/Api-Response/api-response';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly apiUrl = `${environment.apiUrl}/task`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() { return `${this.appConfig.apiUrl}/task`; }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

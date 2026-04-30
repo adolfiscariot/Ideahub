@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -10,13 +11,12 @@ import {
   TimesheetDto,
   RelevantTask,
 } from '../Interfaces/Timesheet/timesheet-interface';
-import { environment } from '../../environments/environment';
 
 describe('TimesheetService', () => {
   let service: TimesheetService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/timesheet`;
+  const api_url = `${'http://localhost:5065/api'}/timesheet`;
 
   // Shared test data
   const mock_log: TimesheetDto = {
@@ -34,7 +34,7 @@ describe('TimesheetService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [TimesheetService],
+      providers: [TimesheetService, { provide: AppConfigService, useValue: { apiUrl: 'http://localhost:5065/api' } }],
     });
     service = TestBed.inject(TimesheetService);
     http_mock = TestBed.inject(HttpTestingController);
