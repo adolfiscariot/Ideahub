@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -29,13 +30,12 @@ import {
   SustainabilityScore,
   ConfidenceScore,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment';
 
 describe('ScoringService', () => {
   let service: ScoringService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/scoring`;
+  const api_url = `${'http://localhost:5065/api'}/scoring`;
 
   // Shared test data
   const mock_business_case: BusinessCaseDto = {
@@ -71,7 +71,13 @@ describe('ScoringService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ScoringService],
+      providers: [
+        ScoringService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(ScoringService);
     http_mock = TestBed.inject(HttpTestingController);

@@ -1,7 +1,8 @@
 name: Deploy to Production (EC2)
 
 # Triggered automatically by deploy-staging.yml after team approval.
-# Can also be triggered manually for hotfixes — supply the SHA and image ref.
+# Can also be triggered manually for hotfixes — supply the SHA, image ref,
+# and version number.
 on:
   repository_dispatch:
     types: [deploy-prod]
@@ -13,6 +14,9 @@ on:
         required: true
       image_ref:
         description: "Full image ref (e.g. ghcr.io/org/ideahub:3f8c9a2)"
+        required: true
+      version:
+        description: "Release version (e.g. v1.2.0)"
         required: true
 
 env:
@@ -33,9 +37,11 @@ jobs:
         run: |
           SHA="${{ github.event.client_payload.sha_short || inputs.sha_short }}"
           IMAGE="${{ github.event.client_payload.image_ref || inputs.image_ref }}"
+          VERSION="${{ github.event.client_payload.version || inputs.version }}"
           echo "sha_short=$SHA" >> $GITHUB_OUTPUT
           echo "image_ref=$IMAGE" >> $GITHUB_OUTPUT
-          echo "Deploying SHA=$SHA  Image=$IMAGE"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Deploying SHA=$SHA  Image=$IMAGE  Version=$VERSION"
 
       - name: Verify required secrets exist
         run: |
@@ -60,9 +66,11 @@ jobs:
     outputs:
       sha_short: ${{ steps.inputs.outputs.sha_short }}
       image_ref: ${{ steps.inputs.outputs.image_ref }}
+      version:   ${{ steps.inputs.outputs.version }}
 
   # ============================================================
   # 2. CREATE GITHUB RELEASE
+  #    Tagged with the version supplied at trigger time e.g. v1.2.0
   # ============================================================
   create-release:
     name: Create GitHub Release
@@ -75,11 +83,12 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v${{ needs.pre-deploy-checks.outputs.sha_short }}"
-          name: "Release ${{ needs.pre-deploy-checks.outputs.sha_short }}"
+          tag_name: "${{ needs.pre-deploy-checks.outputs.version }}"
+          name: "Release ${{ needs.pre-deploy-checks.outputs.version }}"
           body: |
             ## Production Deployment
 
+            **Version:** `${{ needs.pre-deploy-checks.outputs.version }}`
             **SHA:** `${{ needs.pre-deploy-checks.outputs.sha_short }}`
             **Image:** `${{ needs.pre-deploy-checks.outputs.image_ref }}`
 
@@ -112,6 +121,7 @@ jobs:
           script: |
             IMAGE_REF="${{ needs.pre-deploy-checks.outputs.image_ref }}"
             SHA="${{ needs.pre-deploy-checks.outputs.sha_short }}"
+            VERSION="${{ needs.pre-deploy-checks.outputs.version }}"
 
             echo "Logging into GHCR..."
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -130,7 +140,7 @@ jobs:
             # .env is already in ~/Ideahub/ so Compose picks it up automatically
             # No --build flag — image is pre-built and pulled from GHCR
 
-            echo "Production deployment complete — SHA: $SHA  Image: $IMAGE_REF"
+            echo "Production deployment complete — Version: $VERSION  SHA: $SHA  Image: $IMAGE_REF"
 
   # ============================================================
   # 4. POST-DEPLOY HEALTH CHECK
@@ -153,11 +163,12 @@ jobs:
         if: success()
         run: |
           echo "Production deployment successful!"
+          echo "Version: ${{ needs.pre-deploy-checks.outputs.version }}"
           echo "Image: ${{ needs.pre-deploy-checks.outputs.image_ref }}"
           # Uncomment to post to Slack:
           # curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
           #   -H 'Content-type: application/json' \
-          #   --data '{"text":"Deployed ${{ needs.pre-deploy-checks.outputs.image_ref }} to production"}'
+          #   --data '{"text":"Deployed ${{ needs.pre-deploy-checks.outputs.version }} to production"}'
 
       - name: Rollback instructions on failure
         if: failure()

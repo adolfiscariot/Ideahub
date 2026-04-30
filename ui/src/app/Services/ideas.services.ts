@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { AppConfigService } from '../core/services/app-config.service';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
@@ -12,14 +13,16 @@ import {
 } from '../Interfaces/Ideas/idea-interfaces';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { VoteService } from './vote.service';
-import { environment } from '../../environments/environment';
+import { inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IdeasService {
-  private apiUrl = `${environment.apiUrl}/idea`;
-
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/idea`;
+  }
   private http = inject(HttpClient);
   private voteService = inject(VoteService);
 

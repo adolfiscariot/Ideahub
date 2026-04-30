@@ -1,10 +1,10 @@
+import { AppConfigService } from '../../core/services/app-config.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { AuthService } from '../../Services/auth/auth.service';
 import { AuthData } from '../../Interfaces/Auth/auth-interfaces';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sso-login',
@@ -36,6 +36,7 @@ export class SsoLoginComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private appConfig = inject(AppConfigService);
 
   protected errorMsg = '';
 
@@ -51,7 +52,7 @@ export class SsoLoginComponent implements OnInit {
     // Clear the token from the URL and browser history immediately
     history.replaceState({}, '', window.location.pathname);
 
-    const ssoUrl = `${environment.apiUrl}/auth/sso-login`;
+    const ssoUrl = `${this.appConfig.apiUrl}/auth/sso-login`;
 
     this.http
       .post<ApiResponse<AuthData>>(ssoUrl, { token }, { withCredentials: true })

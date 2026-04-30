@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -9,7 +10,6 @@ import {
   CommentNotification,
 } from './notification.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -22,7 +22,7 @@ describe('NotificationService', () => {
   let service: NotificationService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/notification`;
+  const api_url = `${'http://localhost:5065/api'}/notification`;
 
   // Shared test data
   const mock_notification: CommentNotification = {
@@ -43,7 +43,13 @@ describe('NotificationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [NotificationService],
+      providers: [
+        NotificationService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(NotificationService);
     http_mock = TestBed.inject(HttpTestingController);

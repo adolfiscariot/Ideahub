@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -12,18 +13,23 @@ import {
   SeeVotesRequest,
   VoteDetails,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment';
 
 describe('VoteService', () => {
   let service: VoteService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/vote`;
+  const api_url = `${'http://localhost:5065/api'}/vote`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [VoteService],
+      providers: [
+        VoteService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(VoteService);
     http_mock = TestBed.inject(HttpTestingController);

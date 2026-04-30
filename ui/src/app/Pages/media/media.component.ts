@@ -1,3 +1,4 @@
+import { AppConfigService } from '../../core/services/app-config.service';
 import {
   Component,
   Input,
@@ -10,7 +11,6 @@ import { MediaService } from '../../Services/media.service';
 import { MediaType, Media } from '../../Interfaces/Media/media-interface';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment.prod';
 
 @Component({
   selector: 'app-media',
@@ -37,6 +37,7 @@ export class MediaComponent implements OnInit, OnChanges {
   MediaType = MediaType;
 
   private mediaService = inject(MediaService);
+  private appConfig = inject(AppConfigService);
 
   ngOnInit(): void {
     this.loadMedia();
@@ -92,7 +93,7 @@ export class MediaComponent implements OnInit, OnChanges {
 
   getMediaUrl(filePath: string): string {
     const cleanFileName = filePath.replace(/^media\//, '');
-    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const baseUrl = this.appConfig.apiUrl.replace(/\/api$/, '');
     return `${baseUrl}/uploads/${cleanFileName}`;
   }
 

@@ -12,7 +12,7 @@ services:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db" ] # Checks if the DB is accepting connections
+      test: [ "CMD-SHELL", "pg_isready -U {DB_USER} -d {DB_NAME}" ] # Checks if the DB is accepting connections
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,9 +23,11 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        FRONTEND_CONFIG: ${FRONTEND_CONFIG:-production}
     container_name: ideahub-backend
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
       HOMEPAGE_URL: "${DOMAIN_URL}/home"
@@ -38,7 +40,6 @@ services:
       JWT__AUDIENCE: ${DOMAIN_URL}
       GEMINISETTINGS__APIKEY: ${GEMINI_API_KEY}
       CONNECTIONSTRINGS__IDEAHUBSTRING: "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}"
-
     ports:
       - "5065:5065"
     depends_on:

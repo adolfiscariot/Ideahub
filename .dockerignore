@@ -1,0 +1,26 @@
+# Docker Ignore File
+# Ignore node_modules
+ui/node_modules
+node_modules
+
+# Ignore build artifacts
+ui/dist
+api/bin
+api/obj
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Ignore environment files (Docker handles these via --env-file)
+.env*
+
+# Ignore OS files
+.DS_Store
+Thumbs.db

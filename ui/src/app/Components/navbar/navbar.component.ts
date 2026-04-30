@@ -40,10 +40,12 @@ export class NavbarComponent implements OnInit {
     this.notificationService.unreadCount$,
   ]).pipe(map(([requests, comments]) => requests + comments));
   ngOnInit() {
-    // Fetch unread comment count on startup
-    if (this.authService.isLoggedIn()) {
-      this.notificationService.fetchUnreadCount();
-    }
+    this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.notificationService.fetchUnreadCount();
+        this.membershipNotificationsService.refreshPendingRequests();
+      }
+    });
   }
 
   // Re-sync count whenever the tab regains focus (catches missed SignalR events)
@@ -51,6 +53,7 @@ export class NavbarComponent implements OnInit {
   onWindowFocus() {
     if (this.authService.isLoggedIn()) {
       this.notificationService.fetchUnreadCount();
+      this.membershipNotificationsService.refreshPendingRequests();
     }
   }
 

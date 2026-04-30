@@ -13,6 +13,10 @@ export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> => {
+  if (req.url.includes('/assets/config.json')) {
+    return next(req);
+  }
+
   const accessToken = localStorage.getItem('accessToken');
   const authService = inject(AuthService);
 
