@@ -33,34 +33,10 @@ public class GroupController : ControllerBase
         var email = User.FindFirstValue("https://ideahub.api/email")
                     ?? User.FindFirstValue(ClaimTypes.Email)
                     ?? User.FindFirstValue("email");
+
         if (string.IsNullOrWhiteSpace(email)) return null;
 
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user != null) return user;
-
-        // Provision on first contact
-        var displayName = email.Split('@')[0];
-        if (displayName.Length > 64) displayName = displayName[..64];
-
-        user = new IdeahubUser
-        {
-            UserName = email,
-            Email = email,
-            EmailConfirmed = true,
-            DisplayName = displayName
-        };
-
-        var result = await _userManager.CreateAsync(user);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("JIT provisioning failed for {Email}: {Errors}", email, errors);
-            return null;
-        }
-
-        await _userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
-        _logger.LogInformation("JIT provisioned new user: {Email}", email);
-        return user;
+        return await _userManager.FindByEmailAsync(email);
     }
 
     //Create A Group

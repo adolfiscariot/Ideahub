@@ -129,10 +129,14 @@ builder.Services.AddAuthentication(options =>
                 }
                 catch (Exception ex)
                 {
-                    // handle duplicate errors
-                    if (!ex.Message.Contains("23505"))
+                    // handle duplicate errors (Postgres 23505)
+                    if (ex.Message.Contains("23505")) 
                     {
                         logger.LogWarning("JIT Provisioning handled a concurrent request for {Email}", email);
+                    }
+                    else
+                    {
+                        logger.LogError(ex, "JIT Provisioning failed for {Email} with an unexpected error", email);
                     }
                 }
                 finally
