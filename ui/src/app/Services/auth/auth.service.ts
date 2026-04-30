@@ -1,3 +1,4 @@
+import { AppConfigService } from '../../core/services/app-config.service';
 import { inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
@@ -15,16 +16,18 @@ import { ApiResponse } from '../../Interfaces/Api-Response/api-response';
 import { ForgotPassword } from '../../Interfaces/Auth/forgot-password-interface';
 import { ResetPassword } from '../../Interfaces/Auth/reset-password-interface';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import { AuthData, CurrentUser } from '../../Interfaces/Auth/auth-interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private appConfig = inject(AppConfigService);
   router = inject(Router);
 
-  private readonly authUrl = `${environment.apiUrl}/auth`;
+  private get authUrl() {
+    return `${this.appConfig.apiUrl}/auth`;
+  }
 
   private _isLoggedIn = new BehaviorSubject<boolean>(false);
   isLoggedIn$: Observable<boolean> = this._isLoggedIn.asObservable();

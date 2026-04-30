@@ -1,3 +1,4 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -10,13 +11,15 @@ import {
 } from '../Interfaces/Ideas/idea-interfaces';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { inject } from '@angular/core';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VoteService {
-  private readonly apiUrl = `${environment.apiUrl}/vote`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/vote`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {
