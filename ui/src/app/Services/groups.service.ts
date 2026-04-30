@@ -1,3 +1,4 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
@@ -9,13 +10,15 @@ import {
   AddGroup,
   JoinGroupResponse,
 } from '../Interfaces/Groups/groups-interfaces';
-import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GroupsService {
-  private readonly apiUrl = `${environment.apiUrl}/group`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/group`;
+  }
 
   private http = inject(HttpClient);
 

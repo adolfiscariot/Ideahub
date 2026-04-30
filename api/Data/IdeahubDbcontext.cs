@@ -819,7 +819,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser>
         builder.Entity<SubTask>(st =>
         {
             st.HasKey(st => st.Id);
-            st.HasQueryFilter(st => !st.ProjectTask.IsDeleted && !st.ProjectTask.Project.IsDeleted);
+            st.HasQueryFilter(st => !st.IsDeleted && !st.ProjectTask.IsDeleted && !st.ProjectTask.Project.IsDeleted);
 
             st.Property(st => st.Title)
                 .IsRequired()
@@ -844,6 +844,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser>
         builder.Entity<TaskAssignee>(ta =>
         {
             ta.HasKey(ta => ta.Id);
+            ta.HasQueryFilter(ta => !ta.ProjectTask!.IsDeleted && !ta.ProjectTask.Project.IsDeleted);
 
             // Relationships
             ta.HasOne(ta => ta.ProjectTask)
@@ -865,6 +866,7 @@ public class IdeahubDbContext : IdentityDbContext<IdeahubUser>
         builder.Entity<SubTaskAssignee>(sta =>
         {
             sta.HasKey(sta => sta.Id);
+            sta.HasQueryFilter(sta => !sta.SubTask!.IsDeleted && !sta.SubTask.ProjectTask.IsDeleted && !sta.SubTask.ProjectTask.Project.IsDeleted);
 
             // Relationships
             sta.HasOne(sta => sta.SubTask)

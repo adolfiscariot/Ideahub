@@ -13,11 +13,11 @@ export class MembershipNotificationsService {
 
   private groupsService = inject(GroupsService);
 
-  constructor() {
-    this.refreshPendingRequests();
-  }
-
   refreshPendingRequests() {
+    if (!localStorage.getItem('accessToken')) {
+      this.pendingRequestsSubject.next(0);
+      return;
+    }
     this.groupsService.viewGlobalRequests().subscribe({
       next: (res: ApiResponse<GroupMembershipRequest[]>) => {
         const count = res.data?.length ?? 0;

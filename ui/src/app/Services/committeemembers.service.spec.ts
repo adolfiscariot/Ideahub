@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -7,7 +8,6 @@ import {
 import { CommitteeMembersService } from './committeemembers.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { UserRecord } from '../Interfaces/Users/user-interface';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -20,7 +20,7 @@ describe('CommitteeMembersService', () => {
   let service: CommitteeMembersService;
   let httpMock: HttpTestingController;
 
-  const apiUrl = `${environment.apiUrl}/Committee`;
+  const apiUrl = `${'http://localhost:5065/api'}/Committee`;
 
   // Shared test data
 
@@ -43,7 +43,13 @@ describe('CommitteeMembersService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [CommitteeMembersService],
+      providers: [
+        CommitteeMembersService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(CommitteeMembersService);
     httpMock = TestBed.inject(HttpTestingController);

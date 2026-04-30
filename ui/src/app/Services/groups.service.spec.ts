@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -13,7 +14,6 @@ import {
   AddGroup,
   JoinGroupResponse,
 } from '../Interfaces/Groups/groups-interfaces';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -26,7 +26,7 @@ describe('GroupsService', () => {
   let service: GroupsService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/group`;
+  const api_url = `${'http://localhost:5065/api'}/group`;
 
   // Shared test data
   const mock_group: Group = {
@@ -60,7 +60,13 @@ describe('GroupsService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [GroupsService],
+      providers: [
+        GroupsService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(GroupsService);
     http_mock = TestBed.inject(HttpTestingController);

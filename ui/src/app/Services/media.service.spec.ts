@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -7,7 +8,6 @@ import {
 import { MediaService } from './media.service';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import { Media, MediaType } from '../Interfaces/Media/media-interface';
-import { environment } from '../../environments/environment';
 
 interface RawMockResponse<T> {
   success?: boolean;
@@ -20,12 +20,18 @@ describe('MediaService', () => {
   let service: MediaService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/media`;
+  const api_url = `${'http://localhost:5065/api'}/media`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [MediaService],
+      providers: [
+        MediaService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(MediaService);
     http_mock = TestBed.inject(HttpTestingController);

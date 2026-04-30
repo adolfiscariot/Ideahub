@@ -1,8 +1,8 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
-import { environment } from '../../environments/environment';
 import {
   MostVotedIdea,
   TopContributor,
@@ -16,7 +16,10 @@ import {
   providedIn: 'root',
 })
 export class AnalyticsService {
-  private readonly baseUrl = `${environment.apiUrl}/analytics`;
+  private appConfig = inject(AppConfigService);
+  private get baseUrl() {
+    return `${this.appConfig.apiUrl}/analytics`;
+  }
 
   private http = inject(HttpClient);
 

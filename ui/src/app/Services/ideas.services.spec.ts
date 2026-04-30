@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -14,7 +15,6 @@ import {
   PromoteRequest,
   VoteDetails,
 } from '../Interfaces/Ideas/idea-interfaces';
-import { environment } from '../../environments/environment';
 import { of } from 'rxjs';
 
 interface RawMockResponse<T> {
@@ -29,7 +29,7 @@ describe('IdeasService', () => {
   let http_mock: HttpTestingController;
   let vote_service_spy: jasmine.SpyObj<VoteService>;
 
-  const api_url = `${environment.apiUrl}/idea`;
+  const api_url = `${'http://localhost:5065/api'}/idea`;
 
   // Shared test data
   const mock_idea: Idea = {
@@ -58,7 +58,14 @@ describe('IdeasService', () => {
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [IdeasService, { provide: VoteService, useValue: spy }],
+      providers: [
+        IdeasService,
+        { provide: VoteService, useValue: spy },
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(IdeasService);
     http_mock = TestBed.inject(HttpTestingController);

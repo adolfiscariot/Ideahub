@@ -1,7 +1,7 @@
+import { AppConfigService } from '../core/services/app-config.service';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { ApiResponse } from '../Interfaces/Api-Response/api-response';
 import {
   TimesheetDto,
@@ -14,7 +14,10 @@ import {
   providedIn: 'root',
 })
 export class TimesheetService {
-  private readonly apiUrl = `${environment.apiUrl}/timesheet`;
+  private appConfig = inject(AppConfigService);
+  private get apiUrl() {
+    return `${this.appConfig.apiUrl}/timesheet`;
+  }
   private http = inject(HttpClient);
 
   private convertResponse<T>(response: ApiResponse<T>): ApiResponse<T> {

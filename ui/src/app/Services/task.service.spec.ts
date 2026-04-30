@@ -1,5 +1,6 @@
 /// <reference types="jasmine" />
 import { TestBed } from '@angular/core/testing';
+import { AppConfigService } from '../core/services/app-config.service';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -12,13 +13,12 @@ import {
   SubTaskDetails,
   SubTaskDto,
 } from '../Interfaces/Tasks/task-interface';
-import { environment } from '../../environments/environment';
 
 describe('TaskService', () => {
   let service: TaskService;
   let http_mock: HttpTestingController;
 
-  const api_url = `${environment.apiUrl}/task`;
+  const api_url = `${'http://localhost:5065/api'}/task`;
 
   // Shared test data
   const mock_task: TaskDetails = {
@@ -50,7 +50,13 @@ describe('TaskService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [TaskService],
+      providers: [
+        TaskService,
+        {
+          provide: AppConfigService,
+          useValue: { apiUrl: 'http://localhost:5065/api' },
+        },
+      ],
     });
     service = TestBed.inject(TaskService);
     http_mock = TestBed.inject(HttpTestingController);
