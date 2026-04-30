@@ -148,7 +148,20 @@ builder.Services.AddAuthorization(options =>
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()
-    ?? throw new Exception("AllowedOrigins required");
+    ?? new string[0];
+
+// Add DOMAIN_URL to allowed origins
+var domainUrl = builder.Configuration["DOMAIN_URL"];
+if (!string.IsNullOrEmpty(domainUrl))
+{
+    allowedOrigins = allowedOrigins.Append(domainUrl).ToArray();
+}
+
+if (allowedOrigins.Length == 0)
+{
+    // Fallback for safety
+    allowedOrigins = new[] { "https://ideahub.adept-techno.co.ke" };
+}
 
 builder.Services.AddCors(options =>
 {
