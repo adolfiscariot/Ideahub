@@ -145,17 +145,15 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
-
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()
-    ?? throw new Exception("AllowedOrigins required but not found in appsettings.json");
+    ?? throw new Exception("AllowedOrigins required");
 
-//2.6 CORS Service
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AllowedOrigins, policy =>
-        policy.WithOrigins("https://ideahub.adept-techno.co.ke")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
@@ -322,10 +320,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
-app.MapFallbackToFile("index.html");
-
-// Standard health check for deployment workflows
 app.MapHealthChecks("/health");
+app.MapFallbackToFile("index.html");
 
 // Dynamic configuration endpoint for the frontend
 app.MapGet("/api/config", (IConfiguration config) =>
