@@ -195,7 +195,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Get current user ID from auth service (asynchronously)
-    this.authService.getUserId().subscribe((id: string) => {
+    this.authService.getUserId().pipe(takeUntil(this.destroy$)).subscribe((id: string) => {
       this.currentUserId = id;
     });
     this.checkCommitteeMembership();
@@ -1985,23 +1985,35 @@ export class IdeasComponent implements OnInit, OnDestroy {
   }
 
   checkCommitteeMembership(): void {
-    this.authService.getCurrentUser().subscribe((user) => {
-      const userEmail = user?.email;
-      if (!userEmail) return;
-
-      this.committeeService.getCommitteeMembers().subscribe({
-        next: (response) => {
-          if (response.success && Array.isArray(response.data)) {
-            this.isCommitteeMember = response.data.some(
-              (member) =>
-                member.email?.toLowerCase() === userEmail.toLowerCase(),
-            );
-          }
-        },
-        error: () => {
+    this.isCommitteeMember = false;
+    this.authService
+      .getCurrentUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        const userEmail = user?.email;
+        if (!userEmail) {
           this.isCommitteeMember = false;
-        },
+          return;
+        }
+
+        this.committeeService
+          .getCommitteeMembers()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success && Array.isArray(response.data)) {
+                this.isCommitteeMember = response.data.some(
+                  (member) =>
+                    member.email?.toLowerCase() === userEmail.toLowerCase(),
+                );
+              } else {
+                this.isCommitteeMember = false;
+              }
+            },
+            error: () => {
+              this.isCommitteeMember = false;
+            },
+          });
       });
-    });
   }
 }
