@@ -1,18 +1,18 @@
 services:
   ideahub-db:
     image: postgres:15
-    container_name: ${DB_HOST}
+    container_name: ideahub-db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:${DB_PORT}"
+      - "5433:5432"
     volumes:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db"] # Checks if the DB is accepting connections
+      test: [ "CMD-SHELL", "pg_isready -U ideahub_user -d ideahub_db" ] # Checks if the DB is accepting connections
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,10 +27,9 @@ services:
         FRONTEND_CONFIG: ${FRONTEND_CONFIG:-production}
     container_name: ideahub-backend
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: http://+:5065
       ASPNETCORE_HTTPS_PORTS: 7204
-      API_URL: "${API_URL}"
       HOMEPAGE_URL: "${DOMAIN_URL}/home"
       SENDGRID_SENDER_NAME: ${SENDGRID_SENDER_NAME}
       SENDGRID_SENDER_EMAIL: ${SENDGRID_SENDER_EMAIL}
