@@ -12,7 +12,7 @@ services:
       - ideahub_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U {DB_USER} -d {DB_NAME}" ] # Checks if the DB is accepting connections
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ] # Checks if the DB is accepting connections
       interval: 5s
       timeout: 5s
       retries: 5
