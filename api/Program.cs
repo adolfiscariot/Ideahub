@@ -214,6 +214,9 @@ builder.Services.AddScoped<IScoringService, ScoringService>();
 builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("GeminiSettings"));
 builder.Services.AddHttpClient<ILlmService, LlmService>();
 
+// Health Checks
+builder.Services.AddHealthChecks();
+
 // convert enum to string
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -320,6 +323,9 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
 app.MapFallbackToFile("index.html");
+
+// Standard health check for deployment workflows
+app.MapHealthChecks("/health");
 
 // Dynamic configuration endpoint for the frontend
 app.MapGet("/api/config", (IConfiguration config) =>
