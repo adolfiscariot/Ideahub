@@ -28,14 +28,12 @@ export class SignalrService {
 
     // Re-register listener every time the connection comes back up
     this.hubConnection.onreconnected(() => {
-      console.log('SignalR reconnected — re-registering listener');
       this.registerNotificationListener();
     });
 
     this.hubConnection
       .start()
       .then(() => {
-        console.log('SignalR Connection started');
         this.registerNotificationListener();
       })
       .catch((err) => console.log('Error while starting connection: ' + err));
@@ -45,7 +43,6 @@ export class SignalrService {
     // Guard: remove any existing handler before re-registering to avoid stacking
     this.hubConnection?.off('ReceiveNotification');
     this.hubConnection?.on('ReceiveNotification', (message: string) => {
-      console.log('Notification received:', message);
       this.notificationSubject.next(message);
       this.notificationService.fetchUnreadCount();
     });

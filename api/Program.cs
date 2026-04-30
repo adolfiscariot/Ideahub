@@ -93,7 +93,7 @@ builder.Services.AddAuthentication(options =>
             {
 
                 var path = context.HttpContext.Request.Path;
-                if (path.StartsWithSegments("/hubs/notifications"))
+                if (path.StartsWithSegments("/api/hubs/notifications"))
                 {
                     var accessToken = context.Request.Query["access_token"];
                     if (!string.IsNullOrEmpty(accessToken))
@@ -309,7 +309,7 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<api.Hubs.NotificationHub>("/hubs/notifications");
+app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
 //5. Run the App
