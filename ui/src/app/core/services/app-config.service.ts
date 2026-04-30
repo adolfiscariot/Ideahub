@@ -10,7 +10,7 @@ export class AppConfigService {
 
   load(): Promise<void> {
     return firstValueFrom(
-      this.http.get<{ apiUrl: string }>('/assets/config.json'),
+      this.http.get<{ apiUrl: string }>('/api/config'),
     ).then((cfg) => {
       this.config = cfg;
     });

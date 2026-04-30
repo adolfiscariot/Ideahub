@@ -321,6 +321,13 @@ app.MapControllers();
 app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
+// Dynamic configuration endpoint for the frontend
+app.MapGet("/api/config", (IConfiguration config) =>
+{
+    var apiUrl = config["API_URL"] ?? "http://localhost:5065/api";
+    return Results.Ok(new { apiUrl });
+});
+
 //5. Run the App
 app.Run();
 
