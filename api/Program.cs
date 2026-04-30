@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Authentication;
 
 //Cors allowed origins
 var AllowedOrigins = "AllowedOrigins";
@@ -51,67 +52,115 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 //2.4 Authentication Service
-var JwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new Exception("JWT Key Not Found!");
-
-//Convert key from hex string to byte array
-var key = JwtHexToBytes.FromHexToBytes(JwtKey);
-
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+// Shared semaphore to prevent concurrent JIT provisioning TO prevent race condition
+var provisioningLock = new SemaphoreSlim(1, 1);
 
 builder.Services.AddAuthentication(options =>
 {
-    //Use Jwt as default token for authentication & challenges
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}/";
+    options.Audience = builder.Configuration["Auth0:Audience"];
+
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.RequireHttpsMetadata = false; //SHOULD BE REMOVED EVENTUALLY
-        options.TokenValidationParameters = new TokenValidationParameters
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        // Map the role claim type for compatibility
+        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
         {
-            //Validate token issuer, audience and signature
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            var dbContext = context.HttpContext.RequestServices.GetRequiredService<IdeahubDbContext>();
+            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<IdeahubUser>>();
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            var email = context.Principal?.FindFirstValue("https://ideahub.api/email")
+                        ?? context.Principal?.FindFirstValue(ClaimTypes.Email)
+                        ?? context.Principal?.FindFirstValue("email");
 
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            if (string.IsNullOrEmpty(email)) return;
 
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero,
+            // 1. Quick check without lock
+            var userExists = await dbContext.Users.AnyAsync(u =>
+                (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
+                (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
 
-            //Map the role claim type
-            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        };
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
+            if (!userExists)
             {
-
-                var path = context.HttpContext.Request.Path;
-                if (path.StartsWithSegments("/api/hubs/notifications"))
+                await provisioningLock.WaitAsync();
+                try
                 {
-                    var accessToken = context.Request.Query["access_token"];
-                    if (!string.IsNullOrEmpty(accessToken))
+                    // 2. Re-check inside lock
+                    var user = await dbContext.Users.FirstOrDefaultAsync(u =>
+                        (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
+                        (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
+
+                    if (user == null)
                     {
-                        context.Token = accessToken;
+                        logger.LogInformation("JIT Provisioning user: {Email}", email);
+
+                        var displayName = email.Split('@')[0];
+                        if (displayName.Length > 64) displayName = displayName[..64];
+
+                        user = new IdeahubUser
+                        {
+                            UserName = email,
+                            Email = email,
+                            EmailConfirmed = true,
+                            DisplayName = displayName
+                        };
+
+                        var result = await userManager.CreateAsync(user);
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, RoleConstants.RegularUser);
+                        }
                     }
                 }
-
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine($"Auth failed: {ctx.Exception}");
-                return Task.CompletedTask;
+                catch (Exception ex)
+                {
+                    // handle duplicate errors
+                    if (!ex.Message.Contains("23505"))
+                    {
+                        logger.LogWarning("JIT Provisioning handled a concurrent request for {Email}", email);
+                    }
+                }
+                finally
+                {
+                    provisioningLock.Release();
+                }
             }
-        };
-
-    });
+        },
+        OnMessageReceived = context =>
+        {
+            var path = context.HttpContext.Request.Path;
+            if (path.StartsWithSegments("/hubs/notifications"))
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    context.Token = accessToken;
+                }
+            }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = ctx =>
+        {
+            Console.WriteLine($"Auth failed: {ctx.Exception}");
+            return Task.CompletedTask;
+        }
+    };
+});
 
 //2.5 Authorization Service
 builder.Services.AddAuthorization(options =>
@@ -188,6 +237,9 @@ builder.Services.Configure<SendGridSettings>(
 
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+// 2.11 Claims Transformation for Auth0 -> Local ID mapping
+builder.Services.AddTransient<IClaimsTransformation, UserSyncClaimsTransformation>();
 
 // MediaFile Service
 builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
@@ -309,10 +361,64 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<api.Hubs.NotificationHub>("/api/hubs/notifications");
+app.MapHub<api.Hubs.NotificationHub>("/hubs/notifications");
 app.MapFallbackToFile("index.html");
 
 //5. Run the App
 app.Run();
+
+public class UserSyncClaimsTransformation : IClaimsTransformation
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public UserSyncClaimsTransformation(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+    {
+        // Don't transform if already transformed or not authenticated
+        if (principal.HasClaim(c => c.Type == "local_id_applied") || !principal.Identity?.IsAuthenticated == true)
+        {
+            return principal;
+        }
+
+        using var scope = _serviceProvider.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdeahubUser>>();
+
+        var email = principal.FindFirstValue("https://ideahub.api/email")
+                    ?? principal.FindFirstValue(ClaimTypes.Email)
+                    ?? principal.FindFirstValue("email");
+        if (string.IsNullOrEmpty(email)) return principal;
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user != null)
+        {
+            var identity = (ClaimsIdentity)principal.Identity!;
+
+            // Remove the Auth0 'sub' claim from NameIdentifier so the local GUID takes over
+            var subClaim = identity.FindFirst(ClaimTypes.NameIdentifier);
+            if (subClaim != null) identity.RemoveClaim(subClaim);
+
+            // Add the local database ID as the NameIdentifier
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
+
+            // Add roles
+            var roles = await userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                if (!principal.IsInRole(role))
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                }
+            }
+
+            identity.AddClaim(new Claim("local_id_applied", "true"));
+        }
+
+        return principal;
+    }
+}
 
 

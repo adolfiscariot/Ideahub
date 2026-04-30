@@ -29,6 +29,37 @@ public class AuthController : ControllerBase
         return Ok("pong");
     }
 
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var email = User.FindFirstValue("https://ideahub.api/email")
+                    ?? User.FindFirstValue(ClaimTypes.Email)
+                    ?? User.FindFirstValue("email");
+
+        if (string.IsNullOrEmpty(email))
+        {
+            return Unauthorized(ApiResponse.Fail("No email claim found in token"));
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u =>
+            (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
+            (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
+
+        if (user == null)
+        {
+            return NotFound(ApiResponse.Fail("User profile not found in local database"));
+        }
+
+        return Ok(ApiResponse.Ok("User profile retrieved successfully", new
+        {
+            id = user.Id,
+            email = user.Email,
+            displayName = user.DisplayName,
+            roles = await _userManager.GetRolesAsync(user)
+        }));
+    }
+
     private readonly UserManager<IdeahubUser> _userManager;
     private readonly SignInManager<IdeahubUser> _signInManager;
     private readonly ILogger<AuthController> _logger;
