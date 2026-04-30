@@ -29,12 +29,19 @@ jobs:
     outputs:
       sha_short: ${{ steps.meta.outputs.sha_short }}
       image_ref: ${{ steps.meta.outputs.image_ref }}
+      pkg_version: ${{ steps.pkg.outputs.version }}
 
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
         with:
           ref: main
+
+      - name: Extract version from package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./ui/package.json').version")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
 
       - name: Compute short SHA
         id: meta
@@ -166,5 +173,5 @@ jobs:
             {
               "sha_short": "${{ needs.build-and-push.outputs.sha_short }}",
               "image_ref": "${{ needs.build-and-push.outputs.image_ref }}",
-              "version": "${{ inputs.version }}"
+              "version": "${{ inputs.version || needs.build-and-push.outputs.pkg_version }}"
             }

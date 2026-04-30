@@ -66,7 +66,7 @@ jobs:
     outputs:
       sha_short: ${{ steps.inputs.outputs.sha_short }}
       image_ref: ${{ steps.inputs.outputs.image_ref }}
-      version:   ${{ steps.inputs.outputs.version }}
+      version: ${{ steps.inputs.outputs.version }}
 
   # ============================================================
   # 2. CREATE GITHUB RELEASE
@@ -115,8 +115,8 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}    # ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}      # full contents of your .pem file
+          username: ${{ secrets.EC2_USER }} # ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }} # full contents of your .pem file
           port: 22
           script: |
             IMAGE_REF="${{ needs.pre-deploy-checks.outputs.image_ref }}"
