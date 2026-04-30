@@ -1,4 +1,4 @@
-// src/environments/environment.prod.ts
+// environment.prod.ts
 export const environment = {
   production: true,
   apiUrl: '', //replace by AppConfigService

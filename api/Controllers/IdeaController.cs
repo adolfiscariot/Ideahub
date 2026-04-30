@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/idea")]
 [Authorize]
 public class IdeaController : ControllerBase
 {

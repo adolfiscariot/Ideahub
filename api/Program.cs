@@ -155,7 +155,7 @@ var allowedOrigins = builder.Configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AllowedOrigins, policy =>
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins("https://ideahub.adept-techno.co.ke")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
@@ -183,8 +183,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddScoped<api.Helpers.IEmailSender, EmailSender>();
 
 //2.9 Link the SendGridSettings class to the "SendGrid" user secrets
-builder.Services.Configure<SendGridSettings>(
-    builder.Configuration.GetSection("SendGridSettings"));
+//builder.Services.Configure<SendGridSettings>(
+//builder.Configuration.GetSection("SendGridSettings"));
+
+builder.Services.Configure<SendGridSettings>(options =>
+{
+    options.SenderEmail = Environment.GetEnvironmentVariable("SENDGRID_SENDER_EMAIL") ?? "adept.ideahub@gmail.com";
+    options.SenderName = Environment.GetEnvironmentVariable("SENDGRID_SENDER_NAME") ?? "Ideahub";
+    options.ApiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY")!;
+
+});
 
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -229,11 +237,11 @@ app.UseStaticFiles(new StaticFileOptions
 
 // APPLY EF MIGRATIONS HERE
 using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<IdeahubDbContext>();
+var services = scope.ServiceProvider;
 
+var db = services.GetRequiredService<IdeahubDbContext>();
 
 var retries = 10;
-
 while (retries > 0)
 {
     try
@@ -268,6 +276,7 @@ var roles = new[]
     RoleConstants.RegularUser,
     RoleConstants.CommitteeMember
 };
+
 foreach (var role in roles)
 {
     if (!await roleManager.RoleExistsAsync(role))

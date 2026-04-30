@@ -318,14 +318,16 @@
 /* Grid container */
 [modal-body] .group-details-content {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns */
+  grid-template-columns: 1fr 1fr;
+  /* 2 columns */
   gap: 20px;
   padding: 10px 5px;
 }
 
 /* Make the first item (Description) span full width */
 [modal-body] .group-details-content .detail-row:first-child {
-  grid-column: 1 / -1; /* spans both columns */
+  grid-column: 1 / -1;
+  /* spans both columns */
   background: #fafafa;
 }
 
@@ -401,9 +403,12 @@
 }
 
 .auto-expand {
-  overflow-y: auto; /* allow scrolling */
-  resize: none; /* prevent manual drag */
-  max-height: 500px; /* stop growing after this */
+  overflow-y: auto;
+  /* allow scrolling */
+  resize: none;
+  /* prevent manual drag */
+  max-height: 500px;
+  /* stop growing after this */
 }
 
 .create-group-header-btn:hover,
@@ -509,7 +514,8 @@
 .group-top {
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* description can expand downward */
+  flex-grow: 1;
+  /* description can expand downward */
 }
 
 /* Header */
@@ -524,7 +530,8 @@
 /* Description */
 .group-description {
   margin-top: 8px;
-  max-height: 80px; /* prevents pushing stats down */
+  max-height: 80px;
+  /* prevents pushing stats down */
   overflow: hidden;
   line-height: 1.4;
   font-size: 14px;
@@ -553,7 +560,8 @@
   margin-bottom: -25px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* limit to 2 lines */
+  -webkit-line-clamp: 2;
+  /* limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -570,6 +578,7 @@
   border-bottom: 1px solid #eee;
   align-items: center;
 }
+
 .stat {
   display: flex;
   align-items: center;

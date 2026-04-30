@@ -1,10 +1,11 @@
 name: Deploy to Staging
-
+# Triggers every Wednesday at 12:00 UTC, or manually.
+# Assumes PRs have already been merged into main before this runs.
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: "0 12 * * 3" 
+    - cron: "0 12 * * 3"
   workflow_dispatch:
     inputs:
       version:
