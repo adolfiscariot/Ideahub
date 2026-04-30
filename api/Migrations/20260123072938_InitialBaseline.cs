@@ -6,21 +6,21 @@
 
 //namespace Ideahub.Migrations
 //{
-    ///// <inheritdoc />
-    //public partial class InitialBaseline : Migration
-    //{
-        ///// <inheritdoc />
-        //protected override void Up(MigrationBuilder migrationBuilder)
-        //{
+///// <inheritdoc />
+//public partial class InitialBaseline : Migration
+//{
+///// <inheritdoc />
+//protected override void Up(MigrationBuilder migrationBuilder)
+//{
 
-        //}
+//}
 
-        ///// <inheritdoc />
-        //protected override void Down(MigrationBuilder migrationBuilder)
-        //{
+///// <inheritdoc />
+//protected override void Down(MigrationBuilder migrationBuilder)
+//{
 
-        //}
-    //}
+//}
+//}
 //}
 
 using System;
