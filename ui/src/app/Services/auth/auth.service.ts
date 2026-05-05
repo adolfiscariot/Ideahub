@@ -1,4 +1,3 @@
-// import { AppConfigService } from '../../core/services/app-config.service';
 import { inject, Injectable } from '@angular/core';
 import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
 import {
@@ -15,7 +14,7 @@ import {
   ProfileResponse,
 } from '../../Interfaces/Auth/auth-interfaces';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { AppConfigService } from '../../core/services/app-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +22,11 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private readonly auth0 = inject(Auth0Service);
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly appConfig = inject(AppConfigService);
+
+  private get apiUrl(): string {
+    return `${this.appConfig.apiUrl}/auth`;
+  }
 
   /**
    * Public observables for application state

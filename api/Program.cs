@@ -54,8 +54,6 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
 //2.4 Authentication Service
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-// Shared semaphore to prevent concurrent JIT provisioning TO prevent race condition
-var provisioningLock = new SemaphoreSlim(1, 1);
 
 // Shared semaphore to prevent concurrent JIT provisioning TO prevent race condition
 var provisioningLock = new SemaphoreSlim(1, 1);
@@ -90,13 +88,16 @@ builder.Services.AddAuthentication(options =>
             var email = context.Principal?.FindFirstValue("https://ideahub.api/email")
                         ?? context.Principal?.FindFirstValue(ClaimTypes.Email)
                         ?? context.Principal?.FindFirstValue("email");
-            
-            if (string.IsNullOrEmpty(email)) return;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                context.Fail("Email claim is required for local user provisioning.");
+                return;
+            }
 
             // 1. Quick check without lock
-            var userExists = await dbContext.Users.AnyAsync(u => 
-                (u.Email != null && u.Email.ToLower() == email.ToLower()) || 
-                (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
+            var userExists = await dbContext.Users.AnyAsync(u =>
+                u.Email != null && u.Email.ToLower() == email.ToLower());
 
             if (!userExists)
             {
@@ -104,8 +105,8 @@ builder.Services.AddAuthentication(options =>
                 try 
                 {
                     // 2. Re-check inside lock
-                    var user = await dbContext.Users.FirstOrDefaultAsync(u => 
-                        (u.Email != null && u.Email.ToLower() == email.ToLower()) || 
+                    var user = await dbContext.Users.FirstOrDefaultAsync(u =>
+                        (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
                         (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
 
                     if (user == null)
@@ -132,10 +133,14 @@ builder.Services.AddAuthentication(options =>
                 }
                 catch (Exception ex)
                 {
-                    // handle duplicate errors
-                    if (!ex.Message.Contains("23505")) 
+                    // handle duplicate errors (Postgres 23505)
+                    if (ex.Message.Contains("23505"))
                     {
                         logger.LogWarning("JIT Provisioning handled a concurrent request for {Email}", email);
+                    }
+                    else
+                    {
+                        logger.LogError(ex, "JIT Provisioning failed for {Email} with an unexpected error", email);
                     }
                 }
                 finally
@@ -147,7 +152,7 @@ builder.Services.AddAuthentication(options =>
         OnMessageReceived = context =>
         {
             var path = context.HttpContext.Request.Path;
-            if (path.StartsWithSegments("/hubs/notifications"))
+            if (path.StartsWithSegments("/api/hubs/notifications"))
             {
                 var accessToken = context.Request.Query["access_token"];
                 if (!string.IsNullOrEmpty(accessToken))
@@ -429,7 +434,9 @@ public class UserSyncClaimsTransformation : IClaimsTransformation
                     ?? principal.FindFirstValue("email");
         if (string.IsNullOrEmpty(email)) return principal;
 
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await userManager.Users.FirstOrDefaultAsync(u =>
+            (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
+            (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
         if (user != null)
         {
             var identity = (ClaimsIdentity)principal.Identity!;
