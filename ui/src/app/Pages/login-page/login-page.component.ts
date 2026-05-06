@@ -1,10 +1,15 @@
-import { Component } from '@angular/core';
-import { LoginInputComponent } from '../../Components/login-input/login-input.component';
+import { Component, OnInit, inject } from '@angular/core';
+import { AuthService } from '../../Services/auth/auth.service';
 
 @Component({
   selector: 'app-login-page',
-  imports: [LoginInputComponent],
-  templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss',
+  standalone: true,
+  template: '<p>Redirecting to login...</p>',
 })
-export class LoginPageComponent {}
+export class LoginPageComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
+  ngOnInit(): void {
+    this.authService.login();
+  }
+}

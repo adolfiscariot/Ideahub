@@ -155,7 +155,9 @@ export class TimesheetsComponent implements OnInit {
       this.loadProjectTeam();
     }
 
-    this.currentUserId = this.authService.getCurrentUserId();
+    this.authService.getUserId().subscribe((id: string) => {
+      this.currentUserId = id;
+    });
     this.addRow(); // Start with one empty row
   }
 

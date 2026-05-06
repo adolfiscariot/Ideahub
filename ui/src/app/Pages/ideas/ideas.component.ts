@@ -194,8 +194,13 @@ export class IdeasComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
 
   ngOnInit(): void {
-    // Get current user ID from auth service
-    this.currentUserId = this.authService.getCurrentUserId();
+    // Get current user ID from auth service (asynchronously)
+    this.authService
+      .getUserId()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((id: string) => {
+        this.currentUserId = id;
+      });
     this.checkCommitteeMembership();
 
     this.shareIdeaForm = this.fb.group({
@@ -1100,6 +1105,7 @@ export class IdeasComponent implements OnInit, OnDestroy {
           id: this.groupId,
           name: this.groupName,
           memberCount: this.membersCount,
+          createdByUserId: this.groupCreatorId,
         },
       },
       panelClass: 'custom-modal',
@@ -1982,20 +1988,35 @@ export class IdeasComponent implements OnInit, OnDestroy {
   }
 
   checkCommitteeMembership(): void {
-    const userEmail = this.authService.getEmail();
-    if (!userEmail) return;
-
-    this.committeeService.getCommitteeMembers().subscribe({
-      next: (response) => {
-        if (response.success && Array.isArray(response.data)) {
-          this.isCommitteeMember = response.data.some(
-            (member) => member.email?.toLowerCase() === userEmail.toLowerCase(),
-          );
+    this.isCommitteeMember = false;
+    this.authService
+      .getCurrentUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        const userEmail = user?.email;
+        if (!userEmail) {
+          this.isCommitteeMember = false;
+          return;
         }
-      },
-      error: () => {
-        this.isCommitteeMember = false;
-      },
-    });
+
+        this.committeeService
+          .getCommitteeMembers()
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success && Array.isArray(response.data)) {
+                this.isCommitteeMember = response.data.some(
+                  (member) =>
+                    member.email?.toLowerCase() === userEmail.toLowerCase(),
+                );
+              } else {
+                this.isCommitteeMember = false;
+              }
+            },
+            error: () => {
+              this.isCommitteeMember = false;
+            },
+          });
+      });
   }
 }

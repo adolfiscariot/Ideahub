@@ -123,9 +123,11 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.deleteConfirmControl = this.fb.control('') as FormControl;
   }
 
-  ngOnInit() {
-    // Get current user ID first
-    this.currentUserId = this.authService.getCurrentUserId();
+  ngOnInit(): void {
+    // Get current user ID first (asynchronously)
+    this.authService.getUserId().subscribe((id: string) => {
+      this.currentUserId = id;
+    });
     this.loadGroups();
 
     const hideInfo = localStorage.getItem('hideGroupInfo') === 'true';

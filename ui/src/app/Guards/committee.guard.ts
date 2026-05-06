@@ -1,14 +1,21 @@
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { Router, CanActivateFn, UrlTree } from '@angular/router';
 import { AuthService } from '../Services/auth/auth.service';
+import { Observable, map } from 'rxjs';
 
-export const CommitteeGuard: CanActivateFn = () => {
+export const CommitteeGuard: CanActivateFn = (): Observable<
+  boolean | UrlTree
+> => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isCommitteeMember()) {
-    return true;
-  }
+  return authService.isCommitteeMember().pipe(
+    map((isMember: boolean) => {
+      if (isMember) {
+        return true;
+      }
 
-  return router.createUrlTree(['/groups']);
+      return router.createUrlTree(['/groups']);
+    }),
+  );
 };

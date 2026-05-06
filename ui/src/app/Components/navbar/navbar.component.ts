@@ -9,7 +9,7 @@ import { NotificationService } from '../../Services/notification.service';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, take } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -27,50 +27,58 @@ import { combineLatest, map } from 'rxjs';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit {
-  date = new Date().getFullYear();
-  authService = inject(AuthService);
-  membershipNotificationsService = inject(MembershipNotificationsService); // group requests count
-  notificationService = inject(NotificationService); // comment notifications count
+  private readonly authService = inject(AuthService);
+  private readonly membershipNotificationsService = inject(
+    MembershipNotificationsService,
+  );
+  private readonly notificationService = inject(NotificationService);
 
-  loggedInStatus = this.authService.isLoggedIn$;
+  public readonly loggedInStatus$ = this.authService.isLoggedIn$;
 
   // Combined badge: group requests + unread comment notifications
-  totalBadge$ = combineLatest([
+  public readonly totalBadge$ = combineLatest([
     this.membershipNotificationsService.pendingRequests$,
     this.notificationService.unreadCount$,
   ]).pipe(map(([requests, comments]) => requests + comments));
-  ngOnInit() {
-    this.authService.isLoggedIn$.subscribe((isLoggedIn) => {
+
+  ngOnInit(): void {
+    // Fetch unread comment count on startup
+    this.loggedInStatus$.pipe(take(1)).subscribe((isLoggedIn: boolean) => {
       if (isLoggedIn) {
         this.notificationService.fetchUnreadCount();
-        this.membershipNotificationsService.refreshPendingRequests();
       }
     });
   }
 
   // Re-sync count whenever the tab regains focus (catches missed SignalR events)
   @HostListener('window:focus')
-  onWindowFocus() {
-    if (this.authService.isLoggedIn()) {
-      this.notificationService.fetchUnreadCount();
-      this.membershipNotificationsService.refreshPendingRequests();
-    }
-  }
-
-  onLogout() {
-    this.authService.logout().subscribe({
-      // next: (response) => console.log(`Logout successful. ${response.message}`),
-      // error: (error) => console.error(`Logout failed: ${error.message}`)
+  onWindowFocus(): void {
+    this.loggedInStatus$.pipe(take(1)).subscribe((isLoggedIn: boolean) => {
+      if (isLoggedIn) {
+        this.notificationService.fetchUnreadCount();
+      }
     });
   }
 
-  isMobileMenuOpen = false;
+  public onLogin(): void {
+    this.authService.login();
+  }
 
-  toggleMobileMenu() {
+  public onSignUp(): void {
+    this.authService.signUp();
+  }
+
+  public onLogout(): void {
+    this.authService.logout();
+  }
+
+  public isMobileMenuOpen = false;
+
+  public toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
 
-  closeMobileMenu() {
+  public closeMobileMenu(): void {
     this.isMobileMenuOpen = false;
   }
 }

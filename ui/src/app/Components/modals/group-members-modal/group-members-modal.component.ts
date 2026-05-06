@@ -38,20 +38,16 @@ export class GroupMembersModalComponent implements OnInit {
     this.loadMembers();
   }
 
-  checkOwnership() {
-    this.currentUserEmail = this.authService.getEmail() || '';
-    // Assuming backend data.group has createdByUserId or createdByUser.email.
-    // We might need to check against userId or email depending on what data we have.
-    // Ideally we check ID. But let's check what we have.
+  checkOwnership(): void {
+    this.authService.getCurrentUser().subscribe((user) => {
+      this.currentUserEmail = user?.email ?? '';
+    });
 
-    // For now, let's try to determine if current user is owner.
-    // We can use AuthService to get current user ID/Email.
-    // IMPORTANT: The group object might need to have 'createdByUserId' passed in.
-
-    const currentUserId = this.authService.getUserId();
-    if (this.data.group.createdByUserId === currentUserId) {
-      this.isOwner = true;
-    }
+    this.authService.getUserId().subscribe((currentUserId: string) => {
+      if (this.data.group.createdByUserId === currentUserId) {
+        this.isOwner = true;
+      }
+    });
   }
 
   loadMembers() {

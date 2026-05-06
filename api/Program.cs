@@ -54,6 +54,7 @@ builder.Services.AddIdentity<IdeahubUser, IdentityRole>(options =>
 //2.4 Authentication Service
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
+
 // Shared semaphore to prevent concurrent JIT provisioning TO prevent race condition
 var provisioningLock = new SemaphoreSlim(1, 1);
 
@@ -88,17 +89,20 @@ builder.Services.AddAuthentication(options =>
                         ?? context.Principal?.FindFirstValue(ClaimTypes.Email)
                         ?? context.Principal?.FindFirstValue("email");
 
-            if (string.IsNullOrEmpty(email)) return;
+            if (string.IsNullOrEmpty(email))
+            {
+                context.Fail("Email claim is required for local user provisioning.");
+                return;
+            }
 
             // 1. Quick check without lock
             var userExists = await dbContext.Users.AnyAsync(u =>
-                (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
-                (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
+                u.Email != null && u.Email.ToLower() == email.ToLower());
 
             if (!userExists)
             {
                 await provisioningLock.WaitAsync();
-                try
+                try 
                 {
                     // 2. Re-check inside lock
                     var user = await dbContext.Users.FirstOrDefaultAsync(u =>
@@ -108,7 +112,7 @@ builder.Services.AddAuthentication(options =>
                     if (user == null)
                     {
                         logger.LogInformation("JIT Provisioning user: {Email}", email);
-
+                        
                         var displayName = email.Split('@')[0];
                         if (displayName.Length > 64) displayName = displayName[..64];
 
@@ -148,7 +152,7 @@ builder.Services.AddAuthentication(options =>
         OnMessageReceived = context =>
         {
             var path = context.HttpContext.Request.Path;
-            if (path.StartsWithSegments("/hubs/notifications"))
+            if (path.StartsWithSegments("/api/hubs/notifications"))
             {
                 var accessToken = context.Request.Query["access_token"];
                 if (!string.IsNullOrEmpty(accessToken))
@@ -260,6 +264,9 @@ builder.Services.Configure<SendGridSettings>(options =>
 
 //2.10 IToken Service
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+// 2.11 Claims Transformation for Auth0 -> Local ID mapping
+builder.Services.AddTransient<IClaimsTransformation, UserSyncClaimsTransformation>();
 
 // 2.11 Claims Transformation for Auth0 -> Local ID mapping
 builder.Services.AddTransient<IClaimsTransformation, UserSyncClaimsTransformation>();
@@ -421,24 +428,26 @@ public class UserSyncClaimsTransformation : IClaimsTransformation
 
         using var scope = _serviceProvider.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdeahubUser>>();
-
+        
         var email = principal.FindFirstValue("https://ideahub.api/email")
-                    ?? principal.FindFirstValue(ClaimTypes.Email)
+                    ?? principal.FindFirstValue(ClaimTypes.Email) 
                     ?? principal.FindFirstValue("email");
         if (string.IsNullOrEmpty(email)) return principal;
 
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await userManager.Users.FirstOrDefaultAsync(u =>
+            (u.Email != null && u.Email.ToLower() == email.ToLower()) ||
+            (u.UserName != null && u.UserName.ToLower() == email.ToLower()));
         if (user != null)
         {
             var identity = (ClaimsIdentity)principal.Identity!;
-
+            
             // Remove the Auth0 'sub' claim from NameIdentifier so the local GUID takes over
             var subClaim = identity.FindFirst(ClaimTypes.NameIdentifier);
             if (subClaim != null) identity.RemoveClaim(subClaim);
 
             // Add the local database ID as the NameIdentifier
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id));
-
+            
             // Add roles
             var roles = await userManager.GetRolesAsync(user);
             foreach (var role in roles)
