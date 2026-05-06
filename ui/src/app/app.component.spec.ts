@@ -17,7 +17,7 @@ describe('AppComponent', () => {
         provideIcons({}),
         provideAuth0({
           domain: 'test.auth0.com',
-          clientId: 'test-client-id'
+          clientId: 'test-client-id',
         }),
       ],
     }).compileComponents();

@@ -15,8 +15,8 @@ describe('AuthService', () => {
         provideHttpClientTesting(),
         provideAuth0({
           domain: 'test.auth0.com',
-          clientId: 'test-client-id'
-        })
+          clientId: 'test-client-id',
+        }),
       ],
     });
     service = TestBed.inject(AuthService);
