@@ -268,9 +268,6 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 // 2.11 Claims Transformation for Auth0 -> Local ID mapping
 builder.Services.AddTransient<IClaimsTransformation, UserSyncClaimsTransformation>();
 
-// 2.11 Claims Transformation for Auth0 -> Local ID mapping
-builder.Services.AddTransient<IClaimsTransformation, UserSyncClaimsTransformation>();
-
 // MediaFile Service
 builder.Services.AddScoped<IMediaFileService, LocalMediaFileService>();
 
