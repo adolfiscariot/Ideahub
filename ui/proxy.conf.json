@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "http://localhost:5065",
+    "secure": false,
+    "changeOrigin": true,
+    "//": "the above handles CORS - by making the backend think that the request is coming from itself and not the frontend"
+  }
+}

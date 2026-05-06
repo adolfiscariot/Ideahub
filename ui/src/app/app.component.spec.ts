@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
+import { provideAuth0 } from '@auth0/auth0-angular';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
@@ -14,6 +15,10 @@ describe('AppComponent', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         provideIcons({}),
+        provideAuth0({
+          domain: 'test.auth0.com',
+          clientId: 'test-client-id',
+        }),
       ],
     }).compileComponents();
   });

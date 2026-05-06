@@ -28,25 +28,33 @@ public class GroupController : ControllerBase
         _userManager = userManager;
     }
 
+    private async Task<IdeahubUser?> ResolveLocalUserAsync()
+    {
+        var email = User.FindFirstValue("https://ideahub.api/email")
+                    ?? User.FindFirstValue(ClaimTypes.Email)
+                    ?? User.FindFirstValue("email");
+
+        if (string.IsNullOrWhiteSpace(email)) return null;
+
+        return await _userManager.FindByEmailAsync(email);
+    }
+
     //Create A Group
     [HttpPost("create-group")]
     public async Task<IActionResult> CreateGroup(GroupDto groupDto)
     {
         _logger.LogInformation("Group creation starting ...");
 
-        //Fetch user from database
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            _logger.LogError("Group creation failed. User ID not found.");
-            return BadRequest(ApiResponse.Fail("Group creation failed. User ID Not Found"));
-        }
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await ResolveLocalUserAsync();
         if (user is null)
         {
-            _logger.LogError("Group creation failed. User not found");
-            return BadRequest(ApiResponse.Fail("Group creation failed. User Not Found"));
+            _logger.LogError("Group creation failed. Could not resolve local user.");
+            return Unauthorized(ApiResponse.Fail("User not authenticated or could not be provisioned"));
         }
+
+        var userId = user.Id;
+        var userEmail = user.Email ?? "Email unknown";
+
         //Create the group
         var group = new Group
         {
@@ -55,9 +63,6 @@ public class GroupController : ControllerBase
             IsPublic = groupDto.IsPublic,
             CreatedByUserId = userId
         };
-
-        //Find user email
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email unknown";
 
         //Store the group in database
         _context.Groups.Add(group);
@@ -99,7 +104,7 @@ public class GroupController : ControllerBase
     {
         //Fetch user info
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
 
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -186,14 +191,15 @@ public class GroupController : ControllerBase
     [HttpPost("join-group")]
     public async Task<IActionResult> JoinGroup(int groupId)
     {
-        // Get user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId))
+        var user = await ResolveLocalUserAsync();
+        if (user is null)
         {
-            _logger.LogError("User not authenticated to join group");
+            _logger.LogError("User not authenticated to join group - could not resolve local user");
             return Unauthorized(ApiResponse.Fail("User not authenticated to join group"));
         }
+
+        var userId = user.Id;
+        var userEmail = user.Email;
 
         // Get group info
         var group = await _context.Groups.FindAsync(groupId);
@@ -272,7 +278,7 @@ public class GroupController : ControllerBase
     public async Task<IActionResult> LeaveGroup(int groupId)
     {
         //Get user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -489,7 +495,7 @@ public class GroupController : ControllerBase
         if (isAMember)
         {
             _logger.LogError("User {userEmail} is already a member of group: {groupName}",
-                User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+                User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
             return BadRequest(ApiResponse.Fail("User is already a member of the group"));
         }
 
@@ -498,7 +504,7 @@ public class GroupController : ControllerBase
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("User {userEmail} accepted to group: {groupName}",
-            User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+            User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
         return Ok(ApiResponse.Ok("User accepted to group"));
     }
 
@@ -554,7 +560,7 @@ public class GroupController : ControllerBase
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("User {userEmail} request rejected from group: {groupName}",
-            User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
+            User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found", group.Name);
         return Ok(ApiResponse.Ok("User request rejected"));
     }
 

@@ -27,7 +27,7 @@ public class VoteController : ControllerBase
     [HttpPost("cast-vote")]
     public async Task<IActionResult> CastVote(int groupId, int ideaId)
     {
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         try
         {
             //fetch user info
@@ -140,7 +140,7 @@ public class VoteController : ControllerBase
     [HttpPost("unvote")]
     public async Task<IActionResult> Unvote(int voteId)
     {
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         try
         {
             //fetch user info
@@ -192,7 +192,7 @@ public class VoteController : ControllerBase
     public async Task<IActionResult> SeeVotes(int ideaId)
     {
         //fetch user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         try
         {
             //fetch user info

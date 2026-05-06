@@ -41,7 +41,9 @@ public class IdeaController : ControllerBase
             _logger.LogInformation("Creating new idea...");
 
             //Fetch user info
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email")
+                           ?? User.FindFirstValue(ClaimTypes.Email)
+                           ?? "Email not found";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -245,7 +247,7 @@ public class IdeaController : ControllerBase
     public async Task<IActionResult> ViewIdeas(int groupId, string? type, string? domain, string? impact)
     {
         //Fetch user
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -317,7 +319,7 @@ public class IdeaController : ControllerBase
     public async Task<IActionResult> OpenIdea(int groupId, int ideaId)
     {
         //Fetch user
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -382,7 +384,7 @@ public class IdeaController : ControllerBase
     public async Task<IActionResult> UpdateIdea(int ideaId, IdeaUpdateDto ideaUpdateDto)
     {
         //Fetch user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -493,7 +495,7 @@ public class IdeaController : ControllerBase
     public async Task<IActionResult> PromoteIdea(int groupId, int ideaId)
     {
         //Fetch user info
-        var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+        var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrWhiteSpace(userId))
@@ -559,7 +561,7 @@ public class IdeaController : ControllerBase
         {
             //Fetch user info
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
+            var userEmail = User.FindFirstValue("https://ideahub.api/email") ?? User.FindFirstValue(ClaimTypes.Email) ?? "Email not found";
 
             if (string.IsNullOrWhiteSpace(userId))
             {

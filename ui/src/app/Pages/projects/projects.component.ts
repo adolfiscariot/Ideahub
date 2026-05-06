@@ -33,6 +33,7 @@ import {
   forkJoin,
   Observable,
   EMPTY,
+  of,
   catchError,
   map,
   tap,
@@ -146,7 +147,9 @@ export class ProjectsComponent implements OnInit {
   private toastService = inject(ToastService);
 
   ngOnInit(): void {
-    this.currentUserId = this.authService.getUserId();
+    this.authService.getUserId().subscribe((id: string) => {
+      this.currentUserId = id;
+    });
 
     this.route.queryParams.subscribe((params: Params) => {
       const projectId = params['openProject'];
@@ -187,18 +190,26 @@ export class ProjectsComponent implements OnInit {
     return this.projectService.getMyProjects().pipe(
       switchMap((projectsData) => {
         this.projects = projectsData as ProjectWithMedia[];
+        if (this.projects.length === 0) return of([]);
+
         const mediaRequests = this.projects.map((project) =>
-          this.mediaService.viewMedia(undefined, undefined, project.id),
+          this.mediaService.viewMedia(undefined, undefined, project.id).pipe(
+            catchError(() => of({ data: [] })), // Don't let one media failure kill the whole list
+          ),
         );
         return forkJoin(mediaRequests);
       }),
       tap((mediaResults) => {
-        this.projects.forEach((project, idx) => {
-          project.media = mediaResults[idx].data || [];
-        });
+        if (mediaResults && mediaResults.length > 0) {
+          this.projects.forEach((project, idx) => {
+            project.media = mediaResults[idx]?.data || [];
+          });
+        }
       }),
-      map(() => void 0), // Return void
-      catchError(() => {
+      map(() => void 0),
+      catchError((err) => {
+        // Only show the toast if the ACTUAL project list fails to load
+        console.error('Project loading error:', err);
         this.toastService.show('Failed to load projects', 'error');
         return EMPTY;
       }),
