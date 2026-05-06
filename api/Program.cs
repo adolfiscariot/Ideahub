@@ -418,7 +418,7 @@ public class UserSyncClaimsTransformation : IClaimsTransformation
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         // Don't transform if already transformed or not authenticated
-        if (principal.HasClaim(c => c.Type == "local_id_applied") || !principal.Identity?.IsAuthenticated == true)
+        if (principal.HasClaim(c => c.Type == "local_id_applied") || principal.Identity?.IsAuthenticated != true)
         {
             return principal;
         }
